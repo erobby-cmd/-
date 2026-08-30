@@ -3905,16 +3905,15 @@ function driveSave(){
 }
 function stamp(){try{return new Date().toISOString().slice(0,10)}catch(_){return "backup"}}
 function backup(){
- if(!(window.claude&&window.claude.use)){toast("שמירה למחשב לא זמינה כאן",true);return}
- window.claude.use("downloads").then(function(dl){
-  if(!dl){toast("שמירה למחשב לא זמינה בתצוגה הזו",true);return null}
-  return dl.save({filename:"marhav-eilat-scene-log-"+stamp()+".json",
-   data:JSON.stringify({v:2,saved:stamp(),store:STORE},null,1)});
- }).then(function(r){if(r)toast("נשמר למחשב")})
- .catch(function(e){
-  var c=e&&e.code;
-  toast(c==="declined"?"הביטול נקלט":c==="too_large"?"הקובץ גדול מדי":"השמירה למחשב נכשלה",true);
- });
+ try{
+  var blob=new Blob([JSON.stringify({v:2,saved:stamp(),store:STORE},null,1)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="marhav-eilat-"+stamp()+".json";
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);a.parentNode&&a.parentNode.removeChild(a)},2000);
+  toast("קובץ הגיבוי ירד");
+ }catch(_){toast("ההורדה נכשלה",true)}
 }
 function restore(){
  var inp=document.createElement("input");
