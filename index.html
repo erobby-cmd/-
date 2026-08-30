@@ -1,0 +1,4153 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0C6B75">
+<title>יומן סצנות מרחב אילת</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
+<style id="app-style">
+:root{
+  --bg:#E7E9EB; --surface:#FFFFFF; --surface-2:#F1F3F4;
+  --ink:#13171C; --ink-2:#4E5763; --ink-3:#79838F;
+  --line:#D2D7DB; --line-2:#BFC6CC;
+  --accent:#0C6B75; --accent-ink:#FFFFFF;
+  --shot:#1E7A4E; --shot-soft:#D9EDE2;
+  --partial:#9A6206; --partial-soft:#F3E6CE;
+  --todo:#A8305C; --todo-soft:#F7DCE7; --pinkbg:#FCE9F0;
+  --dropped:#8B3A3A; --dropped-soft:#EEDCDC;
+  --shadow:0 1px 2px rgba(19,23,28,.06),0 8px 24px rgba(19,23,28,.05);
+  --reddot:#E11D48;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1115; --surface:#171B21; --surface-2:#1D232A;
+    --ink:#E7EBEF; --ink-2:#98A2AD; --ink-3:#727C88;
+    --line:#282F38; --line-2:#39424D;
+    --accent:#38B0BB; --accent-ink:#06181B;
+    --shot:#4CC08D; --shot-soft:#123328;
+    --partial:#DEA246; --partial-soft:#33270F;
+    --todo:#EC96B6; --todo-soft:#3A1E29; --pinkbg:#2C1720;
+    --dropped:#CE8181; --dropped-soft:#331B1B;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+    --reddot:#FF5C7A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1115; --surface:#171B21; --surface-2:#1D232A;
+  --ink:#E7EBEF; --ink-2:#98A2AD; --ink-3:#727C88;
+  --line:#282F38; --line-2:#39424D;
+  --accent:#38B0BB; --accent-ink:#06181B;
+  --shot:#4CC08D; --shot-soft:#123328;
+  --partial:#DEA246; --partial-soft:#33270F;
+  --todo:#EC96B6; --todo-soft:#3A1E29; --pinkbg:#2C1720;
+  --dropped:#CE8181; --dropped-soft:#331B1B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+    --reddot:#FF5C7A;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 110px}
+.mast{border-bottom:1px solid var(--line);background:var(--surface)}
+.mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0}
+.eyebrow{font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;letter-spacing:.16em;color:var(--accent);margin:0 0 8px}
+h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin:10px 0 0;max-width:62ch;font-size:15.5px}
+.stats{display:flex;flex-wrap:wrap;margin:26px 0 0;border-top:1px solid var(--line)}
+.stat{flex:1 1 104px;padding:14px 16px 16px;border-inline-start:1px solid var(--line)}
+.stat:first-child{border-inline-start:0;padding-inline-start:0}
+.stat b{display:block;font-family:"Heebo",sans-serif;font-weight:700;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--ink-3);font-family:"Heebo",sans-serif;letter-spacing:.04em}
+.stat.s-shot b{color:var(--shot)}.stat.s-partial b{color:var(--partial)}
+.stat.s-todo b{color:var(--todo)}.stat.s-min b{color:var(--accent)}
+.gauge{height:6px;display:flex;border-radius:999px;overflow:hidden;margin:18px 0 10px;background:var(--surface-2)}
+.gauge i{display:block;height:100%}
+.tinyedit{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.07em;background:transparent;border:1px solid var(--line-2);color:var(--ink-3);border-radius:5px;padding:2px 8px;cursor:pointer;vertical-align:middle;margin-inline-start:9px;transition:.15s}
+.tinyedit:hover{color:var(--accent);border-color:var(--accent)}
+.metaform{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:17px 19px 19px;margin:18px 0 4px;display:grid;gap:12px;max-width:660px}
+.epform{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:13px 14px 15px;display:grid;gap:10px;margin-bottom:6px}
+.method{margin:0 0 22px;font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-3);letter-spacing:.02em}
+.bar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1100px;margin:0 auto;padding:11px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sep{width:1px;height:22px;background:var(--line-2);margin:0 4px}
+.chip{font-family:"Heebo",sans-serif;font-size:13px;font-weight:500;padding:6px 13px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .n{opacity:.6;margin-inline-start:5px;font-variant-numeric:tabular-nums}
+.spacer{flex:1}
+.btn{font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:500;padding:7px 15px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--line-2)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--ink-3)}
+.btn.danger{background:transparent;color:var(--dropped);border-color:var(--dropped)}
+.btn.off{opacity:.4;cursor:not-allowed}
+.ubtn{display:inline-flex;align-items:center;gap:8px;font-family:"Heebo",sans-serif;font-size:13px;font-weight:600;padding:6px 13px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink);cursor:pointer;white-space:nowrap;transition:.15s}
+.ubtn:hover{border-color:var(--accent)}
+.ubtn i{width:10px;height:10px;border-radius:50%;display:block;flex:none;background:var(--uc,var(--ink-3))}
+.ubtn small{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:500;color:var(--ink-3)}
+.upanel{position:fixed;inset:0;background:rgba(8,11,15,.6);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:60px 16px;overflow:auto}
+.upanel .ubox{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:520px;width:100%;box-shadow:0 22px 64px rgba(0,0,0,.45);overflow:hidden}
+.upanel .uhead{padding:16px 22px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.upanel .uhead h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:20px;margin:0;font-weight:700}
+.upanel .uhead p{margin:5px 0 0;font-size:13.5px;color:var(--ink-2)}
+.ulist{display:flex;flex-direction:column;padding:10px}
+.urow{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:9px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:start;font-family:"Assistant",sans-serif;transition:.13s;width:100%}
+.urow:hover{background:var(--surface-2);border-color:var(--line)}
+.urow[aria-current="true"]{border-color:var(--accent);background:var(--surface-2)}
+.urow i{width:12px;height:12px;border-radius:50%;flex:none;background:var(--uc,var(--ink-3))}
+.urow b{font-family:"Heebo",sans-serif;font-size:14.5px;font-weight:700;color:var(--ink)}
+.urow span{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);margin-inline-start:auto;font-variant-numeric:tabular-nums}
+.urow .tagi{margin-inline-start:0}
+.ufoot{padding:12px 16px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.newu{display:flex;gap:8px;padding:0 16px 16px;align-items:center}
+.newu input{flex:1;font-family:"Assistant",sans-serif;font-size:14px;padding:8px 11px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface);color:var(--ink)}
+.viewing{background:var(--partial-soft);color:var(--partial);border-bottom:1px solid var(--line);font-family:"Heebo",sans-serif;font-size:13px;padding:9px 20px;text-align:center}
+.savebadge{display:inline-flex;align-items:center;gap:7px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.savebadge i{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:none;display:block}
+.savebadge.s-ok{color:var(--shot);border-color:var(--shot)}
+.savebadge.s-ok i{background:var(--shot)}
+.savebadge.s-saving{color:var(--partial);border-color:var(--partial)}
+.savebadge.s-saving i{background:var(--partial);animation:pulsedot 1s ease-in-out infinite}
+.savebadge.s-dirty{color:var(--partial);border-color:var(--partial)}
+.savebadge.s-dirty i{background:var(--partial)}
+.savebadge.s-err{color:var(--dropped);border-color:var(--dropped)}
+.savebadge.s-err i{background:var(--dropped)}
+@keyframes pulsedot{50%{opacity:.25}}
+.btn .n{font-variant-numeric:tabular-nums;opacity:.6;font-size:11px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grp{margin:52px 0 0}
+.grp-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.grp-h h2{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:24px;margin:0;letter-spacing:-.005em}
+.grp-h .role{font-size:14.5px;color:var(--ink-2)}
+.grp-h .meta{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;margin-inline-start:auto}
+.story{margin:14px 0 0;font-size:16.5px;line-height:1.66;color:var(--ink);max-width:68ch}
+.story .lab{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--accent);display:block;margin-bottom:5px}
+.grp-note{margin:12px 0 0;font-size:14.5px;color:var(--ink-2);max-width:70ch}
+.cpanel{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));margin-top:16px;border:1px solid var(--line);border-radius:11px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow)}
+.cpanel>div{padding:13px 17px 15px;border-inline-start:1px solid var(--line)}
+.cpanel>div:first-child{border-inline-start:0}
+@media (max-width:700px){.cpanel>div{border-inline-start:0;border-top:1px solid var(--line)}.cpanel>div:first-child{border-top:0}}
+.cpanel h5{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--ink-3);margin:0 0 5px}
+.cpanel .want h5{color:var(--accent)}
+.cpanel .wound h5{color:var(--dropped)}
+.cpanel .gap h5{color:var(--partial)}
+.cpanel p{margin:0;font-size:14px;color:var(--ink-2)}
+.cpanel ul{margin:0;padding-inline-start:16px}
+.cpanel li{font-size:13.5px;color:var(--ink-2);margin-bottom:2px}
+.sub-h{display:flex;align-items:center;gap:10px;margin:26px 0 0}
+.sub-h span{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.13em;white-space:nowrap}
+.sub-h i{flex:1;height:1px;background:var(--line-2);display:block}
+.sub-h.k-shot span{color:var(--shot)}
+.sub-h.k-partial span{color:var(--partial)}
+.sub-h.k-todo span{color:var(--todo)}
+.sub-h.k-dropped span{color:var(--dropped)}
+.empty{margin-top:14px;padding:22px;border:1px dashed var(--line-2);border-radius:10px;color:var(--ink-3);font-size:14.5px}
+.scenes{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.scene{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.scene::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:var(--todo)}
+.scene[data-s="shot"]::before{background:var(--shot)}
+.scene[data-s="partial"]::before{background:var(--partial)}
+.scene[data-s="dropped"]::before{background:var(--dropped)}
+.scene[data-s="dropped"]{opacity:.6}
+.s-head{display:flex;gap:14px;align-items:flex-start;padding:16px 22px 14px}
+.code{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);padding-top:5px;font-variant-numeric:tabular-nums}
+.s-title{flex:1;min-width:0}
+.s-title h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:19px;margin:0;line-height:1.3;text-wrap:balance}
+.tag{display:inline-block;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px;margin-inline-start:8px;vertical-align:middle}
+.people{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.person{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);padding:2px 9px;border-radius:999px}
+.person.unit{color:var(--accent);border-color:var(--accent);background:transparent}
+.pill{font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;padding:4px 12px;border-radius:999px;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:.15s}
+.pill:hover{filter:brightness(.96)}
+.pill[data-s="shot"]{background:var(--shot-soft);color:var(--shot);border-color:var(--shot)}
+.pill[data-s="partial"]{background:var(--partial-soft);color:var(--partial);border-color:var(--partial)}
+.pill[data-s="todo"]{background:var(--todo-soft);color:var(--todo);border-color:var(--todo)}
+.pill[data-s="dropped"]{background:var(--dropped-soft);color:var(--dropped);border-color:var(--dropped)}
+.mins{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+@media (max-width:660px){.cols{grid-template-columns:1fr}}
+.col{padding:14px 22px 16px}
+.col+.col{border-inline-start:1px solid var(--line)}
+@media (max-width:660px){.col+.col{border-inline-start:0;border-top:1px solid var(--line)}}
+.col h4{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.1em;margin:0 0 8px;color:var(--ink-3)}
+.col.have h4{color:var(--shot)}
+.col.need h4{color:var(--partial)}
+.col ul{margin:0;padding-inline-start:17px}
+.col li{font-size:14.5px;color:var(--ink-2);margin-bottom:3px}
+.col .none{font-size:14px;color:var(--ink-3);font-style:italic;margin:0}
+.note{padding:12px 22px 15px;border-top:1px solid var(--line);background:var(--surface-2);font-size:14.5px;color:var(--ink-2)}
+.note b{font-family:"Heebo",sans-serif;font-size:11.5px;letter-spacing:.1em;color:var(--ink-3);display:block;margin-bottom:3px;font-weight:700}
+.s-foot{display:flex;gap:8px;align-items:center;padding:10px 22px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.smove{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:500;background:var(--surface-2);border:1px solid var(--line-2);border-radius:7px;padding:6px 9px;color:var(--ink-2);cursor:pointer}
+.smove:hover{border-color:var(--accent);color:var(--accent)}
+section.grp.dropok{outline:3px dashed var(--accent);outline-offset:10px;border-radius:6px}
+.scenes.dropbucket{background:var(--accent-soft,rgba(12,107,117,.09));border-radius:10px;outline:2px dashed var(--accent);outline-offset:5px}
+.scene{cursor:grab;-webkit-user-select:none;user-select:none}
+.pnote{-webkit-user-select:none;user-select:none}
+.scene .form,.scene .form *{-webkit-user-select:auto;user-select:auto;cursor:auto}
+.grip{font-family:"Heebo",sans-serif;font-size:15px;line-height:1;color:var(--ink-3);padding:4px 2px 0;cursor:grab;letter-spacing:-1px}
+.grip:hover{color:var(--accent)}
+.movebar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mlab{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3)}
+.scene:active{cursor:grabbing}
+.scene.dragging{opacity:.3}
+.draghint{font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3);margin:14px 0 0}
+.form{padding:18px 22px 20px;background:var(--surface-2);border-top:1px solid var(--line);display:grid;gap:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:660px){.row{grid-template-columns:1fr}}
+.f label{display:block;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin-bottom:4px}
+.f input,.f select,.f textarea{width:100%;font-family:"Assistant",sans-serif;font-size:14.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:8px 11px}
+.f textarea{min-height:78px;resize:vertical;line-height:1.5}
+.hint{font-size:12px;color:var(--ink-3);margin:4px 0 0}
+.views{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+.views button{font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:500;padding:8px 17px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;border-inline-start:1px solid var(--line-2);transition:.15s}
+.views button:first-child{border-inline-start:0}
+.views button:hover{color:var(--ink)}
+.views button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.epn{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--accent);display:block;margin-bottom:3px}
+.epbar{height:5px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin:9px 0 0}
+.epbar i{display:block;height:100%;background:var(--accent)}
+.ghost{margin-top:13px;padding:15px 13px;border:1.5px dashed #D9799C;border-radius:4px;color:var(--ink-3);font-family:"Heebo",sans-serif;font-size:12.5px;text-align:center}
+.ins{height:5px;background:var(--accent);border-radius:3px;margin:-4px 0}
+.nedit{margin-top:9px;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;background:rgba(0,0,0,.07);border:0;border-radius:4px;padding:3px 9px;color:inherit;cursor:pointer;opacity:.65}
+.nedit:hover{opacity:1;background:rgba(0,0,0,.13)}
+.modes{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;margin-top:16px}
+.modes button{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:500;padding:6px 14px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;border-inline-start:1px solid var(--line-2)}
+.modes button:first-child{border-inline-start:0}
+.modes button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.board.listmode,.board.tlmode{display:block;overflow:visible;padding-bottom:0}
+.epband{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:26px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.epband h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:20px;margin:0}
+.epband .epn{display:inline;margin:0 0 0 4px}
+.epband .sub{font-size:14px;color:var(--ink-2);margin:0}
+.epband .bm{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.notes.listwrap{gap:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);min-height:44px}
+.pnote.rowmode{display:grid;grid-template-columns:162px 56px minmax(0,1fr) 76px auto;align-items:center;gap:14px;
+ transform:none!important;border-radius:0;box-shadow:none;padding:9px 14px;border-top:1px solid rgba(0,0,0,.09)}
+.pnote.rowmode:first-child{border-top:0}
+.pnote.rowmode:hover{transform:none!important;filter:brightness(1.03)}
+.pnote.rowmode .nchar{margin:0;border-radius:5px;padding:5px 10px;font-size:12.5px}
+.pnote.rowmode .nchar small{display:none}
+.pnote.rowmode .c{display:flex;flex-direction:column;gap:2px;font-size:10.5px}
+.pnote.rowmode h4{margin:0;font-size:16px}
+.pnote.rowmode p{display:none}
+.pnote.rowmode .st{margin:0;justify-self:start;white-space:nowrap}
+.pnote.rowmode.n-shot .st{opacity:.55}
+.pnote.rowmode .nfoot{margin:0;justify-content:flex-end}
+@media (max-width:760px){.pnote.rowmode{grid-template-columns:1fr;gap:7px}}
+.notes.tlbar{flex-direction:row;gap:3px;margin-top:12px;min-height:76px;align-items:stretch}
+.pnote.segmode{flex:1 1 0;min-width:0;transform:none!important;border-radius:5px;padding:7px 6px 12px;
+ background:var(--cc);color:#fff;box-shadow:none;position:relative;overflow:hidden;display:block}
+.pnote.segmode:hover{transform:none!important;filter:brightness(1.15)}
+.pnote.segmode,.pnote.segmode.n-todo,.pnote.segmode.n-partial,.pnote.segmode.n-shot{background:var(--cc);color:#fff;box-shadow:none}
+.pnote.segmode.n-todo{opacity:.55}
+.pnote.segmode.n-partial{opacity:.8}
+.pnote.segmode::after{content:"";position:absolute;inset-inline:0;bottom:0;height:6px;background:#BEDFC4}
+.pnote.segmode.n-todo::after{background:#F3C4D4}
+.pnote.segmode.n-partial::after{background:#E0A33C}
+.pnote.segmode .nchar,.pnote.segmode p,.pnote.segmode .nfoot,.pnote.segmode .st{display:none}
+.pnote.segmode .c{font-size:9.5px;opacity:.75;display:block}
+.pnote.segmode .c span:last-child{display:none}
+.pnote.segmode h4{font-size:11px;line-height:1.2;margin:3px 0 0;font-family:"Heebo",sans-serif;font-weight:600;
+ display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tlgap{flex:1 1 0;border:1.5px dashed var(--line-2);border-radius:5px;min-width:0}
+.tlbar .ins{width:5px;height:auto;margin:0;flex:0 0 5px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:26px 0 0;font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2)}
+.legend i{display:inline-block;width:13px;height:13px;border-radius:3px;margin-inline-end:7px;vertical-align:-2px}
+.wrap.boardmode{max-width:1560px}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
+.board>.bcol{scroll-snap-align:start}
+.board::-webkit-scrollbar{height:10px}
+.board::-webkit-scrollbar-track{background:var(--surface-2);border-radius:99px}
+.board::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:99px}
+.board::-webkit-scrollbar-thumb:hover{background:var(--ink-3)}
+.bcol h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:18px;margin:0 0 3px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.bcol .bm{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);display:block;margin:6px 0 0;font-variant-numeric:tabular-nums}
+.notes{display:flex;flex-direction:column;gap:13px;margin-top:14px;min-height:70px}
+.pnote{position:relative;background:#BEDFC4;cursor:grab;color:#1B2A20;border-radius:3px;padding:11px 13px 13px;cursor:pointer;
+ box-shadow:0 1px 1px rgba(0,0,0,.14),0 6px 14px rgba(0,0,0,.13);transform:rotate(-.5deg);transition:transform .15s}
+.pnote:nth-child(even){transform:rotate(.6deg)}
+.pnote:nth-child(3n){transform:rotate(-.2deg)}
+.pnote:hover{transform:rotate(0) scale(1.02)}
+.pnote.dragging{opacity:.3}
+.pnote:active{cursor:grabbing}
+.pnote.n-todo{background:#F3C4D4;color:#2C1A22}
+.pnote.n-partial{background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C,0 1px 1px rgba(0,0,0,.14),0 6px 14px rgba(0,0,0,.13)}
+.pnote.n-dropped{background:#D8D8D8;color:#333;opacity:.7}
+.pnote .c{display:flex;justify-content:space-between;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.07em;opacity:.62;font-variant-numeric:tabular-nums}
+.pnote h4{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:15.5px;line-height:1.28;margin:5px 0 0;text-wrap:balance}
+.pnote p{margin:6px 0 0;font-size:12.8px;line-height:1.45;opacity:.82}
+.pnote .st{display:inline-block;margin-top:8px;font-family:"Heebo",sans-serif;font-size:10px;font-weight:700;letter-spacing:.09em;border:1px solid currentColor;border-radius:3px;padding:1px 6px;opacity:.7}
+.tscroll{overflow-x:auto;margin-top:18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+table.arc{border-collapse:collapse;width:100%;min-width:1040px}
+.arc th,.arc td{vertical-align:top;padding:11px 12px;border-inline-start:1px solid var(--line);border-top:1px solid var(--line);text-align:start}
+.arc thead th{border-top:0;background:var(--surface-2);font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink)}
+.arc th.c0{position:sticky;inset-inline-start:0;background:var(--surface);z-index:2;min-width:158px;border-inline-start:0}
+.arc thead th.c0{background:var(--surface-2);z-index:3}
+.arc th.c0 b{display:block;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:17px;font-weight:700;line-height:1.2}
+.arc th.c0 em{display:block;font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3);font-weight:400;font-style:normal;margin-top:3px}
+.arc td{min-width:186px}
+.arc td.void{background-image:repeating-linear-gradient(45deg,transparent,transparent 7px,var(--surface-2) 7px,var(--surface-2) 14px)}
+.mchip{display:block;width:100%;text-align:start;font-family:"Assistant",sans-serif;font-size:12.6px;line-height:1.32;padding:7px 9px;border-radius:5px;margin-bottom:6px;background:#BEDFC4;color:#1B2A20;border:0;cursor:pointer;transition:.12s}
+.mchip{cursor:grab;position:relative}
+.mchip:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.mchip:active{cursor:grabbing}
+.mchip.dragging{opacity:.3}
+.arc td.dropcell{outline:3px dashed var(--accent);outline-offset:-3px;box-shadow:inset 0 0 0 999px rgba(12,107,117,.10)}
+.arc td{transition:box-shadow .1s}
+.mchip:last-child{margin-bottom:0}
+.mchip.m-todo{background:#F3C4D4;color:#2C1A22}
+.mchip.m-partial{background:#BEDFC4;color:#1B2A20;box-shadow:inset 0 0 0 2px #D9799C}
+.mchip.m-dropped{background:#D6D6D6;color:#444}
+.mchip em{font-family:"Heebo",sans-serif;font-size:9.8px;letter-spacing:.07em;opacity:.62;display:block;font-style:normal;font-weight:700}
+.arc td.tot{text-align:center;min-width:82px}
+.arc td.tot b{font-family:"Heebo",sans-serif;font-size:21px;font-variant-numeric:tabular-nums;display:block;line-height:1.2}
+.arc td.tot em{font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3);font-style:normal}
+.arc tbody tr:hover td,.arc tbody tr:hover th.c0{background-color:var(--surface-2)}
+.cpanel .gap{background:var(--pinkbg)}
+.arc td.k-yes{background-color:#DCEFE0}
+.arc td.k-plan{background-color:#F8EEDA}
+.arc td.k-no{background-color:#FBDCE7}
+:root:not([data-theme="light"]) .arc td.k-yes,:root[data-theme="dark"] .arc td.k-yes{background-color:#12301F}
+:root:not([data-theme="light"]) .arc td.k-plan,:root[data-theme="dark"] .arc td.k-plan{background-color:#2E250F}
+:root:not([data-theme="light"]) .arc td.k-no,:root[data-theme="dark"] .arc td.k-no{background-color:#341A25}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .arc td.k-yes{background-color:#12301F}
+ :root:not([data-theme="light"]) .arc td.k-plan{background-color:#2E250F}
+ :root:not([data-theme="light"]) .arc td.k-no{background-color:#341A25}}
+.kmark{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;display:block;margin-bottom:4px}
+.k-yes .kmark{color:var(--shot)} .k-plan .kmark{color:var(--partial)} .k-no .kmark{color:var(--todo)}
+.kcode{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;line-height:1.5}
+.score{font-family:"Heebo",sans-serif;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;display:block;line-height:1.2}
+.upill{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;display:inline-block}
+.upill.full{background:var(--shot-soft);color:var(--shot)}
+.upill.partial{background:var(--partial-soft);color:var(--partial)}
+.upill.none{background:var(--todo-soft);color:var(--todo)}
+.needlist{margin:6px 0 0;padding-inline-start:16px}
+.needlist li{font-size:13px;color:var(--todo);margin-bottom:2px}
+.tagbox{display:flex;flex-wrap:wrap;gap:7px}
+.tagbox label{display:flex;align-items:center;gap:5px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-2);border-radius:6px;padding:5px 10px;cursor:pointer;margin:0;letter-spacing:0}
+.tagbox input{width:auto;margin:0}
+.ask{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px 20px;margin-top:18px;box-shadow:var(--shadow);display:grid;gap:12px;max-width:820px}
+.ask .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:660px){.ask .row2{grid-template-columns:1fr}}
+.ask textarea{min-height:64px}
+.prompt{font-family:"Heebo",sans-serif;font-size:13px;line-height:1.6;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:11px 13px;color:var(--ink-2);white-space:pre-wrap;word-break:break-word}
+.ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:13px;margin-top:16px}
+.idea{background:var(--surface);border:1px solid var(--line);border-radius:11px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.idea .ihead{padding:9px 14px 8px;font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:700;color:#fff}
+.idea .ihead small{display:block;font-size:10.5px;font-weight:500;opacity:.8;margin-top:1px}
+.idea .ibody{padding:13px 15px 14px;flex:1}
+.idea h4{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:17px;margin:0;line-height:1.28;text-wrap:balance}
+.idea p{margin:8px 0 0;font-size:13.8px;color:var(--ink-2);line-height:1.5}
+.idea .ifoot{display:flex;gap:7px;align-items:center;padding:10px 15px 13px;border-top:1px solid var(--line);flex-wrap:wrap}
+.idea .tagi{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:2px 7px}
+.idea .mine{color:var(--partial);border-color:var(--partial)}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px;margin-top:18px}
+.unit{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:15px 17px 16px;box-shadow:var(--shadow)}
+.unit-h{display:flex;align-items:center;gap:9px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--todo);opacity:.55}
+.unit[data-c="full"] .dot{background:var(--shot);opacity:1}
+.unit[data-c="partial"] .dot{background:var(--partial);opacity:1}
+.unit h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:17px;margin:0;flex:1}
+.unit .cnt{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.unit p{margin:9px 0 0;font-size:14px;color:var(--ink-2)}
+.unit .lab{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);margin:11px 0 4px}
+.unit ul{margin:0;padding-inline-start:16px}
+.unit li{font-size:13.5px;color:var(--ink-2);margin-bottom:2px}
+.modal{position:fixed;inset:0;background:rgba(8,11,15,.6);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:38px 16px;overflow:auto}
+.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:740px;width:100%;box-shadow:0 22px 64px rgba(0,0,0,.45);overflow:hidden}
+.modal .mhead{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--surface-2);font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;letter-spacing:.11em;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center}
+.modal .mhead button{background:transparent;border:0;color:var(--ink-3);font-size:20px;line-height:1;cursor:pointer;padding:0 4px}
+.modal .mhead button:hover{color:var(--ink)}
+.cardshort{padding:0 22px 15px;font-size:15px;line-height:1.55;color:var(--ink-2)}
+.grpform{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:17px 19px 19px;margin-top:16px;display:grid;gap:12px}
+.nchar{margin:-11px -13px 10px;padding:8px 13px 7px;font-family:"Heebo",sans-serif;font-size:15px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:3px 3px 0 0;line-height:1.2}
+.nchar small{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:500;opacity:.78;display:block;margin-top:1px;letter-spacing:.04em}
+.cdot{display:inline-block;width:14px;height:14px;border-radius:4px;margin-inline-end:9px;vertical-align:-1px}
+.grp-h h2 .cdot{width:16px;height:16px}
+.arc th.c0{border-inline-end:0}
+.arc tbody th.c0{border-inline-start:5px solid var(--ccol,transparent)}
+.arc th.c0 b{color:var(--ccol,inherit)}
+.addslot{height:15px;margin:-7px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:5px;color:var(--ink-3);font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;opacity:.3;transition:.13s;border:1px dashed var(--line-2)}
+.addslot:hover{opacity:1;height:26px;margin:0;background:var(--accent);color:#fff;border-color:var(--accent)}
+.newnote{background:var(--surface);border:2px solid var(--accent);border-radius:6px;padding:11px 12px 12px;display:grid;gap:8px;box-shadow:var(--shadow)}
+.newnote input,.newnote select{width:100%;font-family:"Assistant",sans-serif;font-size:13.5px;padding:7px 9px;border:1px solid var(--line-2);border-radius:5px;background:var(--surface);color:var(--ink)}
+.nbtns{display:flex;gap:6px;flex-wrap:wrap}
+.nbtns button{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;border:0;border-radius:5px;padding:7px 11px;cursor:pointer}
+.nbtns .bshot{background:#BEDFC4;color:#1B2A20}
+.nbtns .btodo{background:#F3C4D4;color:#2C1A22}
+.nbtns .bcan{background:transparent;color:var(--ink-3);border:1px solid var(--line-2)}
+.reddot{position:absolute;top:7px;inset-inline-end:7px;width:13px;height:13px;border-radius:50%;
+ background:var(--reddot);box-shadow:0 0 0 2.5px #fff,0 1px 4px rgba(0,0,0,.45);z-index:5;display:block}
+.reddot.half{background:transparent;border:4px solid var(--reddot);box-shadow:0 0 0 2.5px #fff,0 1px 4px rgba(0,0,0,.3)}
+.pnote.rowmode .reddot{top:50%;transform:translateY(-50%);inset-inline-end:11px}
+.pnote.segmode .reddot{top:4px;inset-inline-end:4px;width:11px;height:11px;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.mchip .reddot{top:5px;inset-inline-end:5px;width:11px;height:11px;box-shadow:0 0 0 2px rgba(255,255,255,.9)}
+.scene .reddot{position:static;flex:none;width:13px;height:13px;margin-top:6px;box-shadow:0 0 0 2px var(--surface)}
+.dot-key{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--reddot);vertical-align:-2px;margin-inline-end:7px;box-shadow:0 0 0 2px #fff}
+.nfoot{display:flex;gap:6px;align-items:center;margin-top:9px;flex-wrap:wrap}
+.nedit.ndel{color:#8B2440}
+.nmove{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.05em;background:rgba(0,0,0,.07);border:0;border-radius:4px;padding:3px 7px;color:inherit;cursor:pointer;margin-inline-start:auto}
+.nmove:hover{background:rgba(0,0,0,.14)}
+.nask{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;opacity:.8;margin-inline-end:2px}
+.toast{position:fixed;inset-block-end:22px;inset-inline-start:22px;z-index:60;background:var(--ink);color:var(--bg);font-family:"Heebo",sans-serif;font-size:13.5px;padding:10px 18px;border-radius:9px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+.toast.bad{background:var(--dropped);color:#fff}
+.ro{max-width:1100px;margin:0 auto;padding:10px 20px;font-family:"Heebo",sans-serif;font-size:13px;color:var(--partial);background:var(--partial-soft);border-bottom:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script id="scene-data" type="application/json">
+{
+"users": [
+{
+"k": "robi",
+"name": "רובי",
+"color": "#0C6B75"
+},
+{
+"k": "omri",
+"name": "עמרי",
+"color": "#8A5A12"
+},
+{
+"k": "gila",
+"name": "גילה",
+"color": "#7A2E8F"
+}
+],
+"base": {
+"scenes": [
+{
+"id": "G-01",
+"title": "תומר במחסום הכניסה לאילת",
+"char": "tomer",
+"unit": "border",
+"status": "shot",
+"min": 2,
+"ep": 1,
+"people": [
+"תומר האילתי"
+],
+"have": [],
+"need": [
+"לברר אם זה כבר צולם",
+"תומר במשמרת במחסום",
+"מי נכנס לעיר ומי נעצר",
+"למה דווקא הוא, בן העיר, עומד בשער שלה"
+],
+"short": "תומר, אילתי ולוחם מג״ב, עומד במחסום בכניסה לעיר. הפתיחה של הפרק הראשון.",
+"note": "סימנתי ורוד כי לא ידוע אם צולם. אם זה בקופסה, זו הפתיחה של הסדרה כולה ולא רק של הפרק. אילתי שעומד בשער של העיר שלו ובודק מי נכנס אליה, זה כל הנושא של פרק 1 בתמונה אחת בלי מילה. שתי שאלות פתוחות: האם צולם, והאם תומר הוא בן הזוג של נועה מ-N-01 או אדם אחר.",
+"tags": [
+"field"
+],
+"ord": 0
+},
+{
+"id": "A-10",
+"title": "מעבר הירדנים והפיזור לבתי המלון",
+"char": "kalfon",
+"unit": "border",
+"status": "shot",
+"min": 2,
+"people": [
+"עובדים ירדנים"
+],
+"have": [
+"המעבר בגבול, בוקר",
+"הפיזור של העובדים לבתי המלון בעיר"
+],
+"need": [],
+"note": "התמונה שמסבירה את אילת בלי מילה אחת. אלפיים וחמש מאות אנשים שנכנסים לעבוד בעיר ויוצאים בערב. חומר פתיחה מצוין וגם חומר מעבר בין עולמות.",
+"ep": 1,
+"ord": 1,
+"tags": [
+"field"
+]
+},
+{
+"id": "G-02",
+"title": "תומר בסיור בשיטור הימי",
+"char": "tomer",
+"unit": "sea",
+"status": "shot",
+"min": 2,
+"ep": 1,
+"ord": 2,
+"people": [
+"תומר האילתי"
+],
+"tags": [
+"field"
+],
+"have": [
+"תומר בסיור ימי",
+"ספינה, ים, שגרת משמרת"
+],
+"need": [],
+"short": "תומר בסיור עם השיטור הימי. ספינה, ים, ושמירה על העיר מהצד שלא רואים מהטיילת.",
+"note": "היחידה שהסדרה הבטיחה ולא הראתה, ועכשיו יש לה פנים. הים באילת הוא גם הפרסומת של העיר וגם הפרצה הכי גדולה בגבול שלה, ותומר עומד בדיוק על התפר. חותך מצוין מיד אחרי המחסום."
+},
+{
+"id": "A-05",
+"title": "האכלת הנחשים בבית",
+"char": "kalfon",
+"unit": "personal",
+"status": "shot",
+"min": 2,
+"people": [
+"אלון חלפון"
+],
+"have": [
+"האכלה, טיפול, כלובים",
+"הצד הפרטי של האיש"
+],
+"need": [],
+"note": "אם יש כאן קלוז אפ על האצבע החסרה, זו התמונה של הסדרה.",
+"ep": 1,
+"ord": 3,
+"tags": [
+"home"
+]
+},
+{
+"id": "A-01",
+"title": "אני השריף של אילת",
+"char": "kalfon",
+"unit": "command",
+"status": "shot",
+"min": 2,
+"ep": 1,
+"people": [
+"אלון חלפון"
+],
+"have": [
+"המשפט עצמו, ההגדרה העצמית",
+"חלפון על התפקיד ועל היחס שלו לעיר"
+],
+"need": [
+"חלפון רץ בבוקר בעיר",
+"כניסה לתחנה, פנים התחנה בשעת בוקר",
+"תמונות עיר לפתיח"
+],
+"short": "",
+"note": "מועמד ראשון לפתיח הסדרה. עומד או נופל על התמונות שמסביב לו.",
+"tags": [
+"interview"
+],
+"ord": 4
+},
+{
+"id": "A-06",
+"title": "האכלת הנחשים במשרד",
+"char": "kalfon",
+"unit": "command",
+"status": "shot",
+"min": 2,
+"people": [
+"אלון חלפון"
+],
+"have": [
+"נחש במשרד המפקד",
+"תגובות של אנשים סביב"
+],
+"need": [],
+"note": "מצחיק ומוזר. חומר מעולה לחיתוך בין סצנות כבדות.",
+"ep": 1,
+"ord": 5,
+"tags": []
+},
+{
+"id": "A-04",
+"title": "פגישת תדריך עם הצבא",
+"char": "kalfon",
+"unit": "border",
+"status": "shot",
+"min": 2,
+"people": [
+"אלון חלפון",
+"קצינים"
+],
+"have": [
+"ישיבת תיאום, שפה מקצועית",
+"חלפון מול הצבא, יחסי כוחות בחדר"
+],
+"need": [],
+"note": "סצנת חדר טובה. חפש בה משפט אחד שמחזיק פרק.",
+"ep": 1,
+"ord": 6,
+"tags": [
+"field"
+]
+},
+{
+"id": "E-05",
+"title": "אפרת מוכרת אייטם לעיתונאי",
+"char": "efrat",
+"unit": "spokes",
+"status": "shot",
+"min": 2,
+"people": [
+"אפרת",
+"עיתונאי"
+],
+"have": [
+"שיחת מכירה אמיתית",
+"האירועים המשטרתיים כסחורה"
+],
+"need": [],
+"note": "משלימה את E-01. שם היא מלמדת, כאן היא עושה.",
+"ep": 1,
+"ord": 7,
+"tags": []
+},
+{
+"id": "E-03",
+"title": "מצגת המשימות באילת",
+"char": "efrat",
+"unit": "spokes",
+"status": "shot",
+"min": 2,
+"people": [
+"אפרת"
+],
+"have": [
+"אפרת מציגה את מפת המשימות של המרחב"
+],
+"need": [],
+"note": "החומר האינפורמטיבי של הסדרה. פרק אותה לרסיסים ופזר על פני הפרקים.",
+"ep": 1,
+"ord": 8,
+"tags": []
+},
+{
+"id": "E-01",
+"title": "אפרת מדריכה את החיילת החדשה",
+"char": "efrat",
+"unit": "spokes",
+"status": "shot",
+"min": 2,
+"people": [
+"אפרת",
+"החיילת הדוברת"
+],
+"have": [
+"אפרת מלמדת איך למכור אייטמים למקומונים",
+"העברת מקצוע, מורה ותלמידה"
+],
+"need": [],
+"note": "מסבירה את כל התפקיד בלי שאף אחד מסביר אותו. פתיח מצוין לפרק שלה.",
+"ep": 1,
+"ord": 9,
+"tags": [
+"relation"
+]
+},
+{
+"id": "D-07",
+"title": "עידו עוצר רוכב קורקינט בטיילת",
+"char": "ido",
+"unit": "patrol",
+"status": "shot",
+"min": 2,
+"ep": 1,
+"people": [
+"עידו"
+],
+"have": [],
+"need": [],
+"short": "עידו עוצר רוכב קורקינט בטיילת.",
+"note": "קטן ויומיומי, ובדיוק בגלל זה חשוב. רוב העבודה של שוטר סיור באילת נראית ככה, וזה מה שמכין את הצופה לרגע שבו זה כן מתפוצץ.",
+"tags": [
+"field"
+],
+"ord": 10
+},
+{
+"id": "D-06",
+"title": "עידו בחדר מעצר",
+"char": "ido",
+"unit": "patrol",
+"status": "shot",
+"min": 2,
+"ep": 1,
+"ord": 11,
+"people": [
+"עידו",
+"עצור"
+],
+"have": [
+"חדר מעצר",
+"צעקות",
+"עידו מול העצור"
+],
+"need": [],
+"short": "עידו בחדר מעצר. צעקות, ורגע שבו הכול נשבר לרסיסים.",
+"note": "האירוע היחיד שיש לעידו בשטח משלו, ולכן הוא חשוב. שאלה פתוחה: אם הצעקות הן של נער, זה יושב מצוין בפרק הילדים. אם זה מבוגר, המקום שלו הוא פרק 1.",
+"tags": [
+"field"
+]
+},
+{
+"id": "A-07",
+"title": "חלפון וריקי, ההסתגלות לאילת",
+"char": "kalfon",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"people": [
+"אלון חלפון",
+"ריקי חלפון"
+],
+"have": [],
+"need": [
+"סצנה מצולמת של השניים יחד",
+"בית, ארוחה, ערב, משהו יומיומי",
+"ריקי מדברת בקול שלה"
+],
+"note": "לא צולם בכלל. מה שיש הוא רק סיפור המעבר מפי חלפון בתוך הראיון. ריקי עדיין לא נשמעת בסדרה, ובלי הסצנה הזו היא נשארת דמות שמדברים עליה.",
+"ep": 1,
+"ord": 12,
+"tags": [
+"home",
+"relation"
+]
+},
+{
+"id": "A-03",
+"title": "סיור בגבול הירדני",
+"char": "kalfon",
+"unit": "border",
+"status": "shot",
+"min": 2,
+"people": [
+"אלון חלפון"
+],
+"have": [
+"חלפון בסיור לאורך הגדר",
+"נוף, מרחב, שקט לפני משהו"
+],
+"need": [],
+"note": "החומר הכי קולנועי שיש כרגע. מועמד לפתיח פרק הגבולות.",
+"ep": 1,
+"ord": 13,
+"tags": [
+"field"
+]
+},
+{
+"id": "A-02",
+"title": "המתח הביטחוני, חדירה לאילת",
+"char": "kalfon",
+"unit": "border",
+"status": "partial",
+"min": 2,
+"people": [
+"אלון חלפון"
+],
+"have": [
+"חלפון מסביר את איום החדירה לעיר",
+"תפיסת הגבולות, הים, הפערים"
+],
+"need": [
+"חומר שטח מהים",
+"נמל התעופה רמון",
+"התרגיל הביטחוני"
+],
+"note": "קיבל רגליים בזכות סיור הגבול והתדריך. הים עדיין חסר לגמרי.",
+"ep": 1,
+"ord": 14,
+"tags": [
+"interview"
+]
+},
+{
+"id": "A-08",
+"title": "התרגיל הביטחוני באילת",
+"char": "kalfon",
+"unit": "border",
+"status": "todo",
+"min": 2,
+"people": [
+"אלון חלפון",
+"כוחות המרחב"
+],
+"have": [],
+"need": [
+"תיאום מועד התרגיל",
+"ליווי חלפון לאורך התרגיל",
+"חדר מצב, כוחות בשטח",
+"תחקיר אחרי התרגיל"
+],
+"note": "האקשן היחיד שמונח על השולחן. אם נופל, פרק הביטחון בלי שיא.",
+"ep": 1,
+"ord": 15,
+"tags": [
+"field"
+]
+},
+{
+"id": "A-09",
+"title": "חלפון מול הנתונים",
+"char": "kalfon",
+"unit": "command",
+"status": "todo",
+"min": 2,
+"mine": true,
+"people": [
+"אלון חלפון",
+"קציני מטה"
+],
+"have": [],
+"need": [
+"ישיבת מצב שבועית בתחנה",
+"הרגע שבו מציגים לו מספרי פשיעה",
+"תגובה בזמן אמת, לא בראיון"
+],
+"note": "הצעה שלי. חלפון הוא הדמות היחידה שאין לה עדיין רגע של אובדן שליטה. בלי זה הוא פוסטר ולא דמות.",
+"ep": 1,
+"ord": 16,
+"tags": [
+"break"
+]
+},
+{
+"id": "A-11",
+"title": "חלפון רץ בבוקר בעיר",
+"char": "kalfon",
+"unit": "command",
+"status": "todo",
+"min": 2,
+"ep": 1,
+"ord": 17,
+"people": [],
+"have": [],
+"need": [],
+"short": "הוא אומר בראיון שהוא רץ כדי להרגיש את העיר. זו התמונה שהראיון מבטיח ולא מספק. גם הרגע היחיד שבו הוא לבד ולא מפקד על אף אחד.",
+"note": "נכנס מבנק הרעיונות.",
+"tags": [],
+"mine": true
+},
+{
+"id": "E-04",
+"title": "אפרת וחלפון על בתי המשפט",
+"char": "efrat",
+"unit": "command",
+"status": "shot",
+"min": 2,
+"people": [
+"אפרת",
+"אלון חלפון"
+],
+"have": [
+"שניהם מאוכזבים ממערכת המשפט",
+"שיחה פתוחה בין שתי הדמויות"
+],
+"need": [],
+"note": "הסצנה היחידה שמחברת בין שתי הדמויות הבכירות. שמור עליה, היא מחזיקה מבנה.",
+"ep": 2,
+"ord": 0,
+"tags": [
+"relation"
+]
+},
+{
+"id": "D-01",
+"title": "עידו, משה נבון ואבי אנוס על בעיית הנוער",
+"char": "ido",
+"unit": "youth",
+"status": "shot",
+"min": 2,
+"people": [
+"עידו",
+"משה נבון",
+"אבי אנוס"
+],
+"have": [
+"שיחה על מה קורה לנוער באילת",
+"שלוש נקודות מבט על אותה בעיה"
+],
+"need": [],
+"note": "סצנת ההסבר של עולם הנוער. חזקה כל עוד היא לא הופכת לפאנל. חתוך אותה לתוך D-02.",
+"ep": 2,
+"ord": 1,
+"tags": [
+"relation"
+]
+},
+{
+"id": "B-14",
+"title": "דולב רודף אחרי קורקינטים מנסה לתפוס סוחרי סמים ללא הצלחה",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"ep": 2,
+"people": [
+"דולב חזן",
+"נועם"
+],
+"have": [],
+"need": [],
+"short": "דולב רודף אחרי קורקינטים ומנסה לתפוס סוחרי סמים, בלי הצלחה.",
+"note": "כישלון מצולם, וזה זהב. סדרה שמראה רק מעצרים מוצלחים היא סרטון תדמית. הרדיפה הזו מסבירה למה B-13 שווה משהו.",
+"tags": [
+"field"
+],
+"ord": 2
+},
+{
+"id": "B-09",
+"title": "נסיעות ומארבים, בנק חומר",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"people": [
+"דולב חזן"
+],
+"have": [
+"הרבה נסיעות ברכב",
+"מארבים, המתנות, זמן מת"
+],
+"need": [],
+"note": "לא סצנה אחת אלא בנק. זה החומר שמחבר בין האירועים ונותן לסדרה קצב ונשימה. שווה לעבור עליו ולסמן שלוש או ארבע שיחות רכב שעומדות בפני עצמן, שם בדרך כלל מסתתר מה שהבלשים באמת חושבים.",
+"ep": 2,
+"ord": 3,
+"tags": []
+},
+{
+"id": "B-13",
+"title": "דולב ונועם עוצרים סוחר סמים קטן",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"ep": 2,
+"people": [
+"דולב חזן",
+"נועם"
+],
+"have": [],
+"need": [],
+"short": "דולב ונועם עוצרים סוחר סמים קטן.",
+"note": "מעצר שמצליח, אחרי שני כישלונות. שים לב שנועם נכנס כאן לתמונה ואין עליו עדיין שום דבר. אם הוא חוזר, הוא דמות.",
+"tags": [
+"field"
+],
+"ord": 4
+},
+{
+"id": "M-01",
+"title": "עצירת נער עם סכין של מחלקת נוער",
+"char": "moshe",
+"unit": "youth",
+"status": "shot",
+"min": 2,
+"ep": 2,
+"people": [
+"משה נבון",
+"הנער"
+],
+"have": [
+"עצירה אמיתית בשטח",
+"נער, סכין, רגע שיכול היה להיגמר אחרת"
+],
+"need": [],
+"short": "משה נבון עוצר נער עם סכין. עצירה אמיתית, רגע שיכול היה להיגמר אחרת.",
+"note": "הראיה של כל מה שנאמר ב-D-01. אחד משני האירועים החזקים בכל החומר, לצד השחיין.",
+"tags": [
+"field"
+],
+"ord": 5
+},
+{
+"id": "M-02",
+"title": "הילד שאמא שלו לא באה",
+"char": "moshe",
+"unit": "youth",
+"status": "shot",
+"min": 2,
+"ep": 2,
+"ord": 6,
+"people": [
+"משה נבון",
+"הנער"
+],
+"have": [
+"הנער בתחנה אחרי העצירה",
+"אמא שלו מסרבת להגיע לקחת אותו",
+"משה נבון נשאר מולו"
+],
+"need": [],
+"short": "הנער יושב בתחנה ואמא שלו לא מוכנה לבוא. משה נבון נשאר איתו.",
+"note": "זו הסצנה, לא הסכין. ילד שהמערכת תפסה אותו ואין מי שיבוא לקחת אותו הביתה. אם פרק הילדים נפתח או נסגר במשהו אחד, זה כאן. שים לב לזכויות של קטין, זה יצטרך טיפול משפטי לפני שידור.",
+"tags": [
+"field",
+"break"
+]
+},
+{
+"id": "I-08",
+"title": "מומי מהשווארמה והנער שאיים",
+"char": "itamar",
+"unit": "youth",
+"status": "shot",
+"min": 2,
+"ep": 2,
+"ord": 7,
+"people": [
+"איתמר",
+"מומי",
+"הנער"
+],
+"tags": [
+"field"
+],
+"have": [
+"נער איים על העובדים של מומי מהשווארמה",
+"איתמר מגיע לאירוע",
+"מומי מספר מה קרה"
+],
+"need": [],
+"short": "נער מאיים על העובדים במסעדה של מומי. איתמר מגיע לטפל.",
+"note": "אירוע שטח שמחבר את איתמר ישירות לעולם הנוער. גם נותן לפרק הילדים סצנה שלא מגיעה מעידו או ממשה נבון, וזה חשוב כי אחרת כל הפרק נשען על שני שוטרים ואיש חינוך אחד."
+},
+{
+"id": "D-03",
+"title": "סמים, אלכוהול ומועדונים",
+"char": "ido",
+"unit": "youth",
+"status": "shot",
+"min": 2,
+"people": [
+"עידו"
+],
+"have": [
+"בעיית הסמים אצל הילדים",
+"המועדונים של אילת",
+"אלכוהול"
+],
+"need": [],
+"note": "החומר שמסביר למה אילת שונה. עיר תיירות שהילדים שלה גדלים בתוך חיי לילה של מבוגרים.",
+"ep": 2,
+"ord": 8,
+"tags": []
+},
+{
+"id": "D-04",
+"title": "אבי אנוס במרכז לנוער",
+"char": "avi",
+"unit": "youth",
+"status": "todo",
+"min": 2,
+"people": [
+"אבי אנוס",
+"בני נוער"
+],
+"have": [],
+"need": [
+"אבי אנוס בעבודה במרכז",
+"בני נוער אמיתיים במקום",
+"מה הוא עושה שהמשטרה לא יכולה"
+],
+"note": "אבי מדבר ב-D-01 אבל לא נראה עובד. בלי המרכז הוא דעה בשיחה, לא דמות. זו הסצנה שהופכת אותו לצד השני של עידו.",
+"ep": 2,
+"ord": 9,
+"short": "אבי אנוס בעבודה במרכז לנוער, מול בני נוער אמיתיים. מה שהוא עושה והמשטרה לא יכולה.",
+"tags": [
+"field"
+]
+},
+{
+"id": "B-01",
+"title": "דוד כסאות, המארב שנשרף",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"people": [
+"דולב חזן"
+],
+"have": [
+"הבלשים יושבים על פורץ דירות",
+"המארב נשרף, הם מסגירים את עצמם"
+],
+"need": [],
+"note": "כישלון מצולם, וזה בדיוק למה זה זהב. סדרה שמראה רק מעצרים מוצלחים היא סרטון תדמית.",
+"ep": 2,
+"ord": 10,
+"tags": [
+"field",
+"break"
+]
+},
+{
+"id": "B-08",
+"title": "דולב ואשתו בבית",
+"char": "detectives",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"mine": true,
+"people": [
+"דולב חזן",
+"אשתו"
+],
+"have": [],
+"need": [
+"ערב רגיל אחרי משמרת",
+"השניים יחד, בלי ראיון",
+"מה לא נאמר ביניהם"
+],
+"note": "הצעה שלי, והיא הזוג של B-12. הראיון מספר את הפחד, הסצנה מראה איך חיים איתו. אחד בלי השני זה חצי.",
+"ep": 2,
+"ord": 11,
+"tags": [
+"home",
+"relation"
+],
+"short": "ערב בבית אצל דולב ואשתו, אחרי משמרת. מה שלא נאמר."
+},
+{
+"id": "B-06",
+"title": "תפיסת עבריין במלון",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"ep": 3,
+"people": [
+"דולב חזן"
+],
+"have": [
+"מרדף אחרי חשוד באירוע ירי",
+"הוא נתפס במלון באשדוד"
+],
+"need": [],
+"short": "",
+"note": "האירוע שמראה שהמרחב לא נגמר באילת. חומר טוב לפרק שמדבר על גבולות.",
+"tags": [
+"field"
+],
+"ord": 0
+},
+{
+"id": "B-02",
+"title": "אירוע היהלום, תדריך ראשון",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"people": [
+"דולב חזן"
+],
+"have": [
+"תדריך לקראת הפעילות",
+"התוכנית כפי שהיא נשמעת לפני שהיא נכשלת"
+],
+"need": [],
+"note": "חייב להיות חתוך צמוד ל-B-03. הפער בין התדריך למה שקרה הוא כל הסצנה.",
+"ep": 3,
+"ord": 1,
+"tags": []
+},
+{
+"id": "B-10",
+"title": "דולב מתחזה לבלוגר אוכל",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"ep": 3,
+"ord": 2,
+"people": [
+"דולב חזן",
+"רונן הצלם",
+"יעקב"
+],
+"have": [
+"דולב נכנס למסעדה בכיסוי של בלוגר אוכל",
+"רונן הצלם נכנס איתו כחלק מהכיסוי",
+"הוא פוגש את יעקב פנים אל פנים"
+],
+"need": [],
+"short": "דולב נכנס למסעדה מחופש לבלוגר אוכל, רונן הצלם איתו ככיסוי, ופוגש את יעקב מול העיניים.",
+"note": "הסצנה החכמה ביותר בכל החומר. הצוות שלנו הופך לחלק מהכיסוי, המצלמה עצמה היא התחפושת. זה גם רגע שמפר את הכלל של הסדרה, שהמצלמה רק מלווה, ודווקא לכן הוא חייב להיות בפנים. שווה לשקול אותו כפתיח של פרק הבלשים.",
+"tags": [
+"field"
+]
+},
+{
+"id": "B-03",
+"title": "המפגש עם יעקב הסרסור, ומוותרים",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"people": [
+"דולב חזן",
+"יעקב"
+],
+"have": [
+"הבלשים נתקלים ביעקב בשטח",
+"ההחלטה לוותר על הלילה"
+],
+"need": [],
+"note": "רגע ההחלטה. שאל את עצמך אם המצלמה תפסה למה הם ויתרו, או רק שהם ויתרו.",
+"ep": 3,
+"ord": 3,
+"tags": [
+"field",
+"break"
+]
+},
+{
+"id": "T-01",
+"title": "נתי על שיקול הדעת והבת של הסרסור",
+"char": "nati",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"ep": 3,
+"ord": 4,
+"people": [
+"נתי"
+],
+"tags": [
+"interview",
+"break"
+],
+"have": [
+"ראיון עם נתי מהבילוש",
+"הרגע שבו הופעל שיקול דעת",
+"הבת של יעקב"
+],
+"need": [],
+"short": "נתי מספר על הרגע שבו היה צריך להפעיל שיקול דעת מול הבת של הסרסור.",
+"note": "המצפון של פרק 3. כל הפרק הוא ציד, וזו הסצנה היחידה שעוצרת ושואלת מה זה עשה לילדה שלא עשתה כלום. המקום שלה הוא מיד אחרי הפריצה והמעצר ולפני שאפרת מפרסמת, כי הסדר הזה הופך את הפרק ממבצע משטרתי לסיפור מוסרי. שים לב: אם הבת קטינה, זה דורש טיפול משפטי ואתי לפני שידור."
+},
+{
+"id": "B-04",
+"title": "תדריך שני, למחרת",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"people": [
+"דולב חזן"
+],
+"have": [
+"תדריך חוזר יום אחרי הוויתור",
+"אותו חדר, מצב רוח אחר"
+],
+"need": [],
+"note": "החזרה הזו היא המבנה של כל אירוע היהלום. שני תדריכים, כישלון אחד, מעצר אחד.",
+"ep": 3,
+"ord": 5,
+"tags": []
+},
+{
+"id": "B-05",
+"title": "הפריצה לבית יעקב והמעצר",
+"char": "detectives",
+"unit": "detect",
+"status": "shot",
+"min": 2,
+"people": [
+"דולב חזן",
+"יעקב"
+],
+"have": [
+"פריצה לבית ומעצר",
+"איסוף הנשים המעורבות"
+],
+"need": [],
+"note": "שיא אירוע היהלום. שים לב איך מצלמים ומציגים את הנשים, שם נמצאת האחריות של הסדרה.",
+"ep": 3,
+"ord": 6,
+"tags": [
+"field",
+"end"
+]
+},
+{
+"id": "L-01",
+"title": "לורן, הסיפור עם מח״ש",
+"char": "loren",
+"unit": "internal",
+"status": "todo",
+"min": 2,
+"people": [
+"לורן"
+],
+"have": [],
+"need": [
+"ראיון עם לורן, מה קרה ומתי",
+"איפה התיק עומד היום",
+"בירור משפטי מה מותר לשדר",
+"אישור דוברות המשטרה"
+],
+"note": "הקו הכי חזק שעדיין לא צולם בכל הסדרה. שוטר שהמערכת הפנתה אליו את המבט במקום החוצה. גם הכי רגיש: אם התיק פתוח יש מגבלות פרסום, וזה בירור שצריך לעשות לפני שיוצאים לצלם ולא אחרי.",
+"ep": 3,
+"ord": 7,
+"tags": [
+"interview"
+]
+},
+{
+"id": "E-10",
+"title": "אפרת מפרסמת את מעצר הסרסור",
+"char": "efrat",
+"unit": "spokes",
+"status": "todo",
+"min": 2,
+"ep": 3,
+"ord": 8,
+"people": [
+"אפרת",
+"עיתונאים"
+],
+"tags": [
+"relation"
+],
+"have": [],
+"need": [
+"אפרת מנסחת את ההודעה אחרי המעצר",
+"שיחות מול העיתונאים",
+"מה מותר לפרסם ומה לא, מול הפרקליטות",
+"התגובה שחוזרת מהתקשורת"
+],
+"short": "אפרת מוציאה לעיתונות את מעצר הסרסור. הסוף של הציד הופך לידיעה.",
+"note": "הסצנה שסוגרת את השרשרת של פרק 3: דולב תופס, אפרת מפרסמת, ואז שניהם מגלים ב-E-04 שבית המשפט משחרר. שלוש חוליות, סיפור אחד. גם הסצנה היחידה שמחברת את הדוברות לבילוש."
+},
+{
+"id": "B-12",
+"title": "אשתו של דולב, ראיון",
+"char": "detectives",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"ep": 3,
+"ord": 9,
+"people": [
+"אשתו של דולב"
+],
+"tags": [
+"interview",
+"relation"
+],
+"have": [],
+"need": [
+"ראיון עם אשתו של דולב",
+"שתי הפעמים שבהן הוא כמעט מת",
+"מה היא חושבת על המינוי",
+"האם היא אמרה לו לא, ומה הוא ענה"
+],
+"short": "אשתו של דולב מדברת על שתי הפעמים שהוא כמעט מת, ועל הפחד מהמינוי החדש.",
+"note": "הסצנה שהופכת את דולב מתפקיד לאדם. עד עכשיו יש עליו עשר סצנות עבודה ואפס בית. היא זו שמחזיקה את המחיר, והוא זה שממשיך. זה כל פרק 4 בשתי דקות."
+},
+{
+"id": "Y-01",
+"title": "יובל והאישה שאיימה בבית המלון",
+"char": "yuval",
+"unit": "patrol",
+"status": "shot",
+"min": 2,
+"people": [
+"יובל לנקרי"
+],
+"have": [
+"אירוע איומים אמיתי בבית מלון",
+"יובל מפרקת את זה ופותרת"
+],
+"need": [],
+"note": "מקצועיות בלי צעקות. הסצנה שמכניסה אותה לסדרה כדמות ולא כמדים.",
+"ep": 4,
+"ord": 0,
+"tags": [
+"field"
+]
+},
+{
+"id": "I-04",
+"title": "סונול, שיחה על זוגיות",
+"char": "itamar",
+"unit": "personal",
+"status": "shot",
+"min": 2,
+"people": [
+"איתמר",
+"יובל לנקרי",
+"אפרת"
+],
+"have": [
+"שלושתם בתחנת דלק",
+"שיחה על זוגיות ועל להיות לבד"
+],
+"need": [],
+"note": "הסצנה היחידה שמחברת שלוש דמויות בבת אחת. עמוד תווך למבנה.",
+"ep": 4,
+"ord": 1,
+"tags": [
+"relation"
+]
+},
+{
+"id": "N-07",
+"title": "נסיעה עם קלריס, לחפש זוגיות באילת",
+"char": "noa",
+"unit": "patrol",
+"status": "shot",
+"min": 2,
+"people": [
+"נועה",
+"קלריס"
+],
+"have": [
+"השתיים בנסיעה",
+"קלריס מחפשת זוגיות בעיר",
+"ההבנה שהיא תמצא בן זוג רק בתוך המשטרה"
+],
+"need": [],
+"note": "הסצנה הזו יושבת בדיוק על אותו נושא כמו סונול (I-04) ואצל ההורים של יובל (Y-02). שלוש סצנות, שלוש נשים, אותה מסקנה: המשטרה בולעת גם את החיים הפרטיים. זה כבר לא אנקדוטה, זה קו של פרק.",
+"ep": 4,
+"ord": 2,
+"tags": [
+"relation"
+]
+},
+{
+"id": "I-01",
+"title": "שחיין נעלם בים",
+"char": "itamar",
+"unit": "patrol",
+"status": "shot",
+"min": 2,
+"people": [
+"איתמר"
+],
+"have": [
+"אירוע חיפוש אמיתי",
+"המציאה בסופו"
+],
+"need": [],
+"note": "האירוע החזק ביותר שיש בכל החומר. מועמד לפתיח הסדרה, לא רק לפתיח פרק.",
+"ep": 4,
+"ord": 3,
+"tags": [
+"field"
+]
+},
+{
+"id": "I-03",
+"title": "איתמר, ראיון על הגירושים ועל אמא",
+"char": "itamar",
+"unit": "personal",
+"status": "shot",
+"min": 2,
+"people": [
+"איתמר"
+],
+"have": [
+"הגירושים",
+"הפרידה מאמא שלו",
+"הוא בוכה"
+],
+"need": [],
+"note": "הרגע הרגשי הכי חשוף בכל החומר. אל תשרוף אותו מוקדם.",
+"ep": 4,
+"ord": 4,
+"tags": [
+"interview",
+"break"
+]
+},
+{
+"id": "E-02",
+"title": "אפרת, ראיון על הגירושים",
+"char": "efrat",
+"unit": "personal",
+"status": "shot",
+"min": 2,
+"people": [
+"אפרת"
+],
+"have": [
+"חיים אישיים, הגירושים",
+"מצולם במשרד שלה"
+],
+"need": [],
+"note": "היא מדברת על הבית מתוך העבודה. המיקום עושה חצי מהעבודה.",
+"ep": 4,
+"ord": 5,
+"tags": [
+"interview"
+]
+},
+{
+"id": "E-06",
+"title": "אפרת ויהונתן בבית",
+"char": "efrat",
+"unit": "personal",
+"status": "shot",
+"min": 2,
+"people": [
+"אפרת",
+"יהונתן"
+],
+"have": [
+"יהונתן מבקש תשומת לב",
+"היא עסוקה בעבודה ובקריירה"
+],
+"need": [],
+"note": "הלב של הדמות. כל השאר של אפרת מקבל משמעות רק דרך הסצנה הזו.",
+"ep": 4,
+"ord": 6,
+"tags": [
+"home",
+"break"
+]
+},
+{
+"id": "I-05",
+"title": "איתמר משחק עם הילדים",
+"char": "itamar",
+"unit": "personal",
+"status": "shot",
+"min": 2,
+"people": [
+"איתמר",
+"הילדים"
+],
+"have": [
+"איתמר עם הילדים שלו"
+],
+"need": [],
+"note": "התשובה החזותית ל-I-03. ראיון בוכה ואז ילדים צוחקים, זה כבר עריכה.",
+"ep": 4,
+"ord": 7,
+"tags": [
+"home"
+]
+},
+{
+"id": "E-07",
+"title": "ההורים של אפרת מגדלים את יהונתן",
+"char": "efrat",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"people": [
+"אפרת",
+"ההורים",
+"יהונתן"
+],
+"have": [],
+"need": [
+"יום רגיל אצל סבא וסבתא",
+"ההורים מדברים על אפרת ועל העבודה שלה",
+"יהונתן ביניהם, למי הוא קורא כשהוא צריך משהו"
+],
+"note": "הסצנה שהופכת את E-06 ממריבה קטנה למחיר אמיתי. בלי ההורים אין לצופה מושג מי בעצם מגדל את הילד.",
+"ep": 4,
+"ord": 8,
+"tags": [
+"home"
+]
+},
+{
+"id": "Y-02",
+"title": "יובל אצל ההורים",
+"char": "yuval",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"people": [
+"יובל לנקרי",
+"ההורים",
+"בן הזוג"
+],
+"have": [],
+"need": [
+"ארוחה אצל ההורים",
+"ההורים מרוצים מבן הזוג החדש",
+"פתיחת הנושא הישן",
+"הקושי למצוא בן זוג כשאת שוטרת"
+],
+"note": "בלי הסצנה הזו יובל היא שוטרת טובה בלי חיים. איתה יש לה סיפור שמתנגש בעבודה.",
+"ep": 4,
+"ord": 9,
+"tags": [
+"home",
+"relation"
+]
+},
+{
+"id": "E-09",
+"title": "אפרת נקראת מהבית לאירוע",
+"char": "efrat",
+"unit": "spokes",
+"status": "todo",
+"min": 2,
+"mine": true,
+"people": [
+"אפרת",
+"יהונתן"
+],
+"have": [],
+"need": [
+"המתנה לאירוע חריג אמיתי",
+"הטלפון מצלצל בבית",
+"היציאה, יהונתן נשאר מאחור"
+],
+"note": "הצעה שלי. אם היא מצולמת לפני המעבר לבית החדש, ההחלטה של E-08 מקבלת סיבה על המסך במקום הסבר.",
+"ep": 4,
+"ord": 10,
+"tags": [
+"break"
+]
+},
+{
+"id": "E-08",
+"title": "אפרת עוברת לבית חדש",
+"char": "efrat",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"people": [
+"אפרת",
+"יהונתן"
+],
+"have": [],
+"need": [
+"יום המעבר, ארגזים, בית ריק",
+"אפרת אומרת בקול מה היא מחליטה לשנות",
+"הרגע הראשון של יהונתן בבית החדש"
+],
+"note": "נקודת המפנה של אפרת וכנראה של הסדרה כולה. זו הסצנה הכי חשובה שעדיין לא צולמה.",
+"ep": 5,
+"ord": 0,
+"tags": [
+"home",
+"end"
+]
+},
+{
+"id": "I-02",
+"title": "איתמר ונועה ברכב",
+"char": "itamar",
+"unit": "patrol",
+"status": "shot",
+"min": 2,
+"people": [
+"איתמר",
+"נועה"
+],
+"have": [
+"שיחה על חוסר הערכה של אנשים לשוטרים",
+"זמן מת בניידת"
+],
+"need": [],
+"note": "הנושא של הסדרה נאמר כאן בקול, בלי קריין. שמור על זה.",
+"ep": 5,
+"ord": 1,
+"tags": [
+"relation"
+]
+},
+{
+"id": "I-07",
+"title": "הזקנה ומחירי הסיגריות",
+"char": "itamar",
+"unit": "patrol",
+"status": "shot",
+"min": 2,
+"ep": 5,
+"ord": 2,
+"people": [
+"איתמר",
+"אישה מבוגרת"
+],
+"tags": [
+"field"
+],
+"have": [
+"זקנה תוקפת את איתמר על מחירי הסיגריות באילת",
+"איתמר סופג ומחזיק פרצוף"
+],
+"need": [],
+"short": "זקנה תוקפת את איתמר על מחירי הסיגריות באילת. הוא סופג.",
+"note": "מצחיק ומדויק. השוטר הוא הכתובת לכל תסכול בעיר, גם למה שאין לו שום קשר למשטרה. יושבת בדיוק ליד I-02 על חוסר ההערכה, ועושה את הנקודה בלי שאף אחד יצטרך להסביר אותה."
+},
+{
+"id": "N-03",
+"title": "ראיון נועה, למה בכלל להישאר",
+"char": "noa",
+"unit": "patrol",
+"status": "todo",
+"min": 2,
+"people": [
+"נועה"
+],
+"have": [],
+"need": [
+"ראיון פתוח, נועה לבד מול המצלמה",
+"הזעם על היחס של החברה לשוטרים",
+"מה היא מקבלת מהתפקיד ומה הוא לוקח"
+],
+"note": "פתיחת הקשת שלה. חייב להיות מצולם מוקדם בלוח הצילומים, כי כל השאר נמדד ביחס אליו.",
+"ep": 5,
+"ord": 3,
+"tags": [
+"interview"
+]
+},
+{
+"id": "N-06",
+"title": "עוד יחידות על היחס לשוטרים",
+"char": "noa",
+"unit": "patrol",
+"status": "todo",
+"min": 2,
+"people": [
+"שוטרים מיחידות שונות"
+],
+"have": [],
+"need": [
+"תנועה, מוקד, בילוש, שיטור ימי",
+"אותה שאלה לכל אחד: למה אתה נשאר",
+"שיחת חדר אוכל או חדר משמרת, לא ראיונות בודדים"
+],
+"note": "מה שהופך את הדילמה של נועה מסיפור פרטי לנושא של הפרק. שאלה אחת שחוזרת אצל אנשים שונים היא מבנה, לא חזרתיות.",
+"ep": 5,
+"ord": 4,
+"tags": [
+"relation"
+]
+},
+{
+"id": "N-02",
+"title": "נועה על לחיות עם השמירה",
+"char": "noa",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"mine": true,
+"people": [
+"נועה"
+],
+"have": [],
+"need": [
+"נועה מדברת בעצמה, לא רק לצד איתמר",
+"מה זה לחיות עם מישהו שעומד בכניסה לעיר",
+"בית, ערב, החזרה שלו"
+],
+"note": "הצעה שלי. כרגע נועה נשמעת ב-I-02 ונראית ב-N-01, אבל תמיד לצד גבר אחר. סצנה אחת שלה לבד הופכת אותה מדמות משנה לדמות.",
+"ep": 5,
+"ord": 5,
+"tags": [
+"interview"
+]
+},
+{
+"id": "I-06",
+"title": "סיור של איתמר ויובל",
+"char": "itamar",
+"unit": "patrol",
+"status": "todo",
+"min": 2,
+"people": [
+"איתמר",
+"יובל לנקרי"
+],
+"have": [],
+"need": [
+"משמרת שלמה בניידת",
+"קריאה אמיתית בשטח",
+"זמן מת ביניהם, שיחה שלא מתוכננת"
+],
+"note": "החוליה החסרה. שתי הדמויות שדיברו על זוגיות בסונול צריכות משמרת משותפת כדי שהקשר ביניהן יהיה סיפור ולא סצנה.",
+"ep": 5,
+"ord": 6,
+"tags": [
+"field",
+"relation"
+]
+},
+{
+"id": "N-05",
+"title": "ההחלטה של נועה",
+"char": "noa",
+"unit": "patrol",
+"status": "todo",
+"min": 2,
+"people": [
+"נועה"
+],
+"have": [],
+"need": [
+"ליווי עד רגע ההחלטה, לא ראיון עליה",
+"הרגע שבו היא אומרת את זה בקול, למי שזה נוגע",
+"מה קורה למחרת"
+],
+"note": "הסוף של הפרק וכנראה הסוף של הסדרה. אסור שזה יהיה ראיון מסכם. צריך לתפוס את זה קורה, וזה אומר להיות שם לאורך זמן ולא לדעת מראש איך זה ייגמר.",
+"ep": 5,
+"ord": 7,
+"tags": [
+"end"
+]
+},
+{
+"id": "B-11",
+"title": "דולב מתמנה לראש צוות",
+"char": "detectives",
+"unit": "detect",
+"status": "todo",
+"min": 2,
+"ep": 5,
+"ord": 8,
+"people": [
+"דולב חזן",
+"הצוות"
+],
+"tags": [
+"end"
+],
+"have": [],
+"need": [
+"רגע המינוי עצמו",
+"התגובה של הצוות בחדר",
+"דולב אחרי, לבד",
+"הטלפון הביתה"
+],
+"short": "דולב מתמנה לראש צוות בבילוש, אחרי שפעמיים כמעט מת בעבודה.",
+"note": "הסוף שחסר לפרק 3 ולדולב גם יחד. כל הפרק הוא ציד בלי אדם מאחוריו, והמינוי הוא הרגע שבו העבודה גובה מחיר בבית. חייב לשבת בסוף הפרק, ולהיחתך מול הראיון של אשתו בפרק 4."
+},
+{
+"id": "B-07",
+"title": "דוד כסאות, הסוף",
+"char": "detectives",
+"unit": "detect",
+"status": "todo",
+"min": 2,
+"mine": true,
+"people": [
+"דולב חזן"
+],
+"have": [],
+"need": [
+"מה קרה איתו אחרי המארב שנשרף",
+"מעצר, סגירת תיק, או הודאה שהוא ברח"
+],
+"note": "הצעה שלי. B-01 נפתח ולא נסגר. סיפור פתוח בעריכה הוא חוב שהצופה גובה בסוף הפרק.",
+"ep": 5,
+"ord": 9,
+"tags": [
+"end"
+]
+},
+{
+"id": "G-03",
+"title": "תומר על העזיבה של אמא שלו",
+"char": "tomer",
+"unit": "personal",
+"status": "shot",
+"min": 2,
+"ep": 5,
+"ord": 10,
+"people": [
+"תומר האילתי"
+],
+"tags": [
+"interview",
+"break"
+],
+"have": [
+"ראיון עם תומר",
+"אמא שלו עזבה",
+"מה זה עשה לו"
+],
+"need": [],
+"short": "תומר מספר על העזיבה של אמא שלו.",
+"note": "הפצע של תומר, ופתאום כל הדמות מסתדרת. אדם שאמא שלו עזבה, ושבחר להישאר בעיר ולעמוד בשער שלה. פרק 5 שואל למה נשארים, והוא זה שיודע איך נראה מי שהולך."
+},
+{
+"id": "G-04",
+"title": "תומר עם אשתו והילדים בים",
+"char": "tomer",
+"unit": "personal",
+"status": "todo",
+"min": 2,
+"ep": 5,
+"ord": 11,
+"people": [
+"תומר האילתי",
+"אשתו",
+"הילדים"
+],
+"tags": [
+"home",
+"relation"
+],
+"have": [],
+"need": [
+"תומר עם המשפחה בים",
+"יום חופש, בלי מדים",
+"אותו ים שהוא מסייר בו בעבודה"
+],
+"short": "תומר עם אשתו והילדים בים. אותו ים, בלי מדים.",
+"note": "ההשלמה של G-03. הראיון מספר על מי שהלכה, הסצנה מראה את מי שנשאר ובנה בית. אם מצלמים באותו ים של הסיור, יש לך את אותה תמונה פעמיים עם משמעות הפוכה. זו הסצנה שסוגרת את תומר."
+}
+],
+"chars": [
+{
+"k": "kalfon",
+"name": "אלון חלפון",
+"role": "ניצב משנה, מפקד מרחב אילת",
+"min": 31,
+"story": "מפקד שבחר לבוא לאילת ולא נשלח אליה. רץ בעיר בבקרים כדי להרגיש אותה, מגדל נחשים בבית ובמשרד, ואחראי על מרחב שגבולותיו ים, ירדן ומצרים. הסיפור שלו הוא אדם שלקח על עצמו אחריות על מקום שאף אחד לא באמת שולט בו, ומנסה לגרור לשם גם את החיים הפרטיים שלו.",
+"want": "לשלוט במרחב. למנוע את החדירה לפני שהיא קורית.",
+"wound": "עדיין לא ידוע. אין בחומר רגע אחד שבו הוא לא שולט, וזה החור בדמות.",
+"gaps": [
+"ריקי, שעדיין לא צולמה בכלל",
+"התרגיל הביטחוני",
+"רגע של כישלון או אובדן שליטה"
+],
+"color": "#1B4B8F"
+},
+{
+"k": "efrat",
+"name": "אפרת",
+"role": "דוברת המרחב",
+"min": 35,
+"story": "דוברת שמוכרת את המשטרה לתקשורת ומאמינה בסחורה. גרושה, אמא ליהונתן שגדל בפועל אצל ההורים שלה. הסיפור שלה הוא אישה שהקריירה בלעה לה את האמהות, ובאמצע הדרך היא עוברת לבית חדש ומחליטה לקחת אותה בחזרה.",
+"want": "להצליח בתפקיד. שהסיפור של המשטרה יעבור.",
+"wound": "היא לא מגדלת את הבן שלה. ההורים עושים את זה במקומה.",
+"gaps": [
+"ההורים ויהונתן אצלם",
+"המעבר לבית החדש וההחלטה"
+],
+"color": "#8A2D8F"
+},
+{
+"k": "itamar",
+"name": "איתמר",
+"role": "שוטר סיור",
+"min": 28,
+"story": "שוטר סיור שמוציא שחיין מהים ומחזיק אנשים זרים ברגעים הכי גרועים שלהם, בזמן שהחיים שלו התפרקו. גירושים, פרידה מאמא, ובכי מול המצלמה. הסיפור שלו הוא גבר שנותן לכולם ומחפש הערכה שלא חוזרת אליו, לא מהציבור ולא מהבית.",
+"want": "שיעריכו אותו. שיראו מה הוא עושה.",
+"wound": "אובדן. הגירושים והפרידה מאמא שלו, ושניהם קרו לו ולא בגללו.",
+"gaps": [
+"הסיור המשותף עם יובל",
+"עדיין אין סצנה שבה מישהו כן מעריך אותו"
+],
+"color": "#B5541A"
+},
+{
+"k": "yuval",
+"name": "יובל לנקרי",
+"role": "שוטרת",
+"min": 11,
+"story": "שוטרת שנכנסת לחדר עם אישה שמאיימת ויוצאת עם פתרון, בלי לירות ובלי להרים קול. בבית ההורים סוף סוף מרוצים מבן הזוג החדש, ומתחת לזה יושב הנושא הישן והקושי למצוא בן זוג כשאת במשטרה. הסיפור שלה הוא מקצוענית שהמקצוע אוכל לה את החיים הפרטיים.",
+"want": "זוגיות שתחזיק מעמד לצד המדים.",
+"wound": "הנושא הישן שההורים פותחים. עדיין לא יודעים מה הוא.",
+"gaps": [
+"הסצנה אצל ההורים",
+"הסיור עם איתמר",
+"מה בדיוק הנושא הישן"
+],
+"color": "#0E7C6B"
+},
+{
+"k": "ido",
+"name": "עידו",
+"role": "שוטר סיור, נוער",
+"min": 24,
+"story": "שוטר סיור שהחזית שלו היא הילדים של אילת. הוא יושב עם משה נבון ועם אבי אנוס על מה קורה לנוער בעיר, ורואה מקרוב את הסמים, האלכוהול והמועדונים בעיר שכל כולה חיי לילה של מבוגרים. הסיפור שלו הוא שוטר שמבין שהוא לא עוצר פשיעה אלא פוגש ילדים בשלב האחרון שבו עוד אפשר.",
+"want": "להגיע לנער לפני שהוא הופך לתיק.",
+"wound": "לא ידוע. אין בחומר שום דבר על מי הוא כשהוא לא במדים, וזה החור הגדול בדמות.",
+"gaps": [
+"הסצנה עם אבי אנוס על הפחד",
+"החיים הפרטיים שלו, אין עליהם כלום",
+"למה דווקא נוער מעניין אותו",
+"אין ממנו אף אירוע שטח משלו"
+],
+"color": "#A8102E"
+},
+{
+"k": "detectives",
+"name": "דולב חזן",
+"role": "בלש הימ״ר",
+"min": 40,
+"story": "בלש שיושב על פורץ דירות ושורף את המארב, מוותר על סרסור בלילה אחד וחוזר אליו למחרת בבוקר, רודף אחרי יורה עד מלון באשדוד, ונכנס למסעדה מחופש לבלוגר אוכל כשרונן הצלם שלנו משמש לו כיסוי. פעמיים הוא כמעט מת בעבודה הזו. עכשיו הוא מתמנה לראש צוות, ואשתו חוששת שהפעם השלישית לא תיגמר טוב. הסיפור שלו הוא אדם שכל קידום מקרב אותו בדיוק למקום שהבית שלו מפחד ממנו.",
+"want": "לעלות. להוביל את הצוות ולא רק להיות בו.",
+"wound": "פעמיים כמעט מת. הוא ממשיך הלאה, ואשתו נשארת עם הפחד לבד.",
+"gaps": [
+"הראיון עם אשתו",
+"מה בדיוק קרה בשתי הפעמים",
+"הסוף של דוד כסאות"
+],
+"color": "#3F3A78"
+},
+{
+"k": "loren",
+"name": "לורן",
+"role": "בלש בימ״ר, קו מח״ש",
+"min": 12,
+"story": "בלש ביחידה, ויש לו סיפור עם מח״ש. זה כל מה שידוע כרגע, ואין עליו אף פריים. אם הקו הזה נסגר, הסדרה מקבלת את הדבר שאין לה: שוטר שהמערכת חוקרת אותו. כל שאר הדמויות מסתכלות מהמשטרה החוצה, ולורן הוא היחיד שהמבט מופנה אליו פנימה.",
+"want": "לא ידוע. צריך לשאול אותו.",
+"wound": "לא ידוע. צריך לשאול אותו.",
+"gaps": [
+"הכול. אין אף פריים",
+"מה בדיוק קרה ומתי",
+"האם התיק פתוח, ומה מותר לשדר",
+"האם הוא מוכן לדבר במצלמה",
+"איך חלפון והצוות מתייחסים לזה"
+],
+"color": "#6E6212"
+},
+{
+"k": "noa",
+"name": "נועה",
+"role": "שוטרת סיור",
+"min": 32,
+"story": "שוטרת סיור שלא מרוצה במשטרה וזועמת על היחס שהחברה נותנת לשוטרים. בן הזוג שלה לוחם מג״ב שעומד בכניסה לאילת ושומר בפועל על הבית שלהם, ומעליהם מרחף החשש שיקרה כאן מה שקרה בשבעה באוקטובר. הסיפור שלה הוא הדילמה שמחזיקה את כל הסדרה: האם להישאר במשטרה בכלל, והאם לגדל את הילדים דווקא בעיר הזו. אנחנו מלווים אותה עד ההחלטה, ולא יודעים מראש איך היא תיפול.",
+"want": "שיעריכו אותה, ושתהיה לה סיבה טובה להישאר.",
+"wound": "היא נותנת לעיר הזו הכול ומקבלת בחזרה בוז. וגם הבית שלה עומד על גבול.",
+"gaps": [
+"ראיון שבו היא לבד מול המצלמה",
+"הילדים והבית",
+"רגע ההחלטה עצמו, וצריך להיות שם כשהוא קורה",
+"שם בן הזוג ותפקידו המדויק"
+],
+"color": "#0B6E93"
+},
+{
+"k": "avi",
+"name": "אבי אנוס",
+"role": "עבודה עם נוער, לא שוטר",
+"color": "#6B3A2E",
+"min": 2,
+"story": "הדמות האזרחית היחידה בסדרה. הוא יושב בשיחה על בעיית הנוער באילת לצד עידו ומשה נבון ומדבר על הילדים מהצד שהמשטרה לא רואה, אבל עדיין לא צולם בעבודה שלו. מה שיש ממנו הוא דעה. מה שחסר הוא אדם. הסיפור שלו הוא מה שאפשר לעשות בשביל ילד לפני שהוא מגיע לניידת של עידו.",
+"want": "להגיע לילד לפני שהמשטרה מגיעה אליו.",
+"wound": "לא ידוע. עוד לא ישבנו איתו לבד מול מצלמה.",
+"gaps": [
+"המרכז לנוער, אין ממנו אף פריים",
+"מה בדיוק התפקיד שלו ומי מעסיק אותו",
+"ראיון אישי, למה הוא עושה את זה",
+"האם גם משה נבון הוא דמות או דובר חד פעמי"
+]
+},
+{
+"k": "moshe",
+"name": "משה נבון",
+"role": "שוטר, נוער",
+"color": "#146B3A",
+"min": 4,
+"story": "השוטר שעוצר נער עם סכין, ואז יושב מול ילד שאמא שלו לא מוכנה לבוא לקחת אותו. הוא הקצה החד של בעיית הנוער באילת, הנקודה שבה ילד הופך לתיק. הסיפור שלו הוא מה עושה שוטר כשהוא מבין שהמשפחה כבר ויתרה לפניו.",
+"want": "שהילד ייצא מזה בלי תיק פלילי.",
+"wound": "לא ידוע. עוד לא ישבנו איתו לראיון.",
+"gaps": [
+"ראיון אישי, מי הוא ומה התפקיד המדויק",
+"מה קרה לנער עם הסכין אחרי",
+"החיים שלו מחוץ למדים"
+]
+},
+{
+"k": "nati",
+"name": "נתי",
+"role": "בלש בימ״ר",
+"color": "#A81E6B",
+"min": 2,
+"story": "בלש שנותן ראיון על הרגע שבו צריך להפעיל שיקול דעת, ומדבר על הבת של הסרסור. הוא הקול שמכניס לפרק הפשיעה את השאלה שאף אחד אחר לא שואל: מה עושים כשהתיק נכון והמחיר האנושי לא. הסיפור שלו הוא הפער בין מה שמותר לבין מה שנכון.",
+"want": "לסגור את התיק בלי לשבור בן אדם שלא עשה כלום.",
+"wound": "לא ידוע. יש ממנו ראיון אחד ולא ראינו אותו עובד אף פעם.",
+"gaps": [
+"אין ממנו אף פריים בשטח",
+"מה בדיוק קרה עם הבת ומה הוחלט",
+"האם הוא היה בפריצה ב-B-05"
+]
+},
+{
+"k": "tomer",
+"name": "תומר האילתי",
+"role": "שוטר בשיטור הימי, בן העיר",
+"color": "#2F3A4A",
+"min": 2,
+"story": "אילתי ששומר על העיר שלו מכל הכיוונים. הוא עומד במחסום בכניסה אליה, והוא מסייר בים שהיא מוכרת לתיירים והוא הפרצה הכי גדולה בגבול שלה. אמא שלו עזבה, והוא נשאר. הסיפור שלו הוא מי שגדל במקום, ראה מישהי הולכת ממנו, ובחר לעמוד בשער שלו ולהחזיק אותו סגור.",
+"want": "שהעיר שלו תישאר שלו, ושהמשפחה שלו תישאר בה.",
+"wound": "אמא שלו עזבה.",
+"gaps": [
+"הסצנה עם אשתו והילדים בים",
+"האם הוא במג״ב או בשיטור הימי, או בשניהם"
+]
+}
+],
+"units": [
+{
+"k": "command",
+"name": "לשכת המפקד",
+"cover": "full",
+"need": [],
+"note": "מכוסה. חלפון, המשרד, הישיבות, השיחה עם אפרת."
+},
+{
+"k": "spokes",
+"name": "דוברות",
+"cover": "full",
+"need": [],
+"note": "מכוסה במלואה דרך אפרת. שלוש סצנות עבודה."
+},
+{
+"k": "patrol",
+"name": "סיור ותגובה",
+"cover": "full",
+"need": [
+"משמרת לילה בשכונת אורים",
+"סיור משותף איתמר ויובל"
+],
+"note": "נהיה החזק ביותר. שחיין בים, אירוע במלון, ניידת."
+},
+{
+"k": "personal",
+"name": "הבית, מאחורי המדים",
+"cover": "full",
+"need": [
+"ריקי חלפון",
+"ההורים של אפרת",
+"ההורים של יובל"
+],
+"note": "עשיר לכל הדמויות חוץ מחלפון."
+},
+{
+"k": "youth",
+"name": "נוער, סמים ומועדונים",
+"cover": "full",
+"need": [
+"המרכז לנוער",
+"לילה במועדונים של אילת"
+],
+"note": "שלוש סצנות ביד. אחד העולמות הכי בשלים בסדרה."
+},
+{
+"k": "border",
+"name": "גבולות ותיאום עם צה״ל",
+"cover": "full",
+"need": [
+"תרגיל ביטחוני",
+"מג״ב בשטח",
+"הגבול המצרי"
+],
+"note": "סיור בגבול הירדני, תדריך עם הצבא, ומעבר העובדים הירדנים. עומד על הרגליים."
+},
+{
+"k": "sea",
+"name": "שיטור ימי",
+"cover": "partial",
+"need": [
+"לילה בים",
+"מפקד השיטור הימי",
+"אירוע אמיתי בים"
+],
+"note": "נפתח דרך תומר. סיור ימי מצולם, ועכשיו יש ליחידה פנים."
+},
+{
+"k": "detect",
+"name": "בילוש וימ״ר",
+"cover": "full",
+"need": [
+"סגירת סיפור דוד כסאות",
+"חדר חקירות",
+"ראש הימ״ר"
+],
+"note": "שש סצנות ביד, כולל אירוע היהלום המלא. העולם הכי עלילתי בסדרה."
+},
+{
+"k": "comm",
+"name": "שיטור קהילתי",
+"cover": "none",
+"need": [
+"שוטר קהילה בשכונה",
+"מגן שכונה",
+"מפגש עם תושבים"
+],
+"note": "מופיע בהצעת הסדרה, לא צולם."
+},
+{
+"k": "airport",
+"name": "נמל התעופה רמון",
+"cover": "none",
+"need": [
+"אבטחה, נחיתות",
+"הקשר בין הנמל למרחב"
+],
+"note": "נדרש כדי לסגור את סיפור הגבולות."
+},
+{
+"k": "traffic",
+"name": "תנועה",
+"cover": "none",
+"need": [
+"אכיפה בכביש הערבה"
+],
+"note": "לא הכרחי. פותחים רק אם צומחת משם דמות."
+},
+{
+"k": "war",
+"name": "מלחמה ומפונים",
+"cover": "partial",
+"need": [
+"מפונה שנשאר בעיר",
+"שוטר שהיה בדרום ב-7 באוקטובר",
+"ארכיון של אילת בזמן המלחמה"
+],
+"note": "נפתח דרך החבר של נועה. חוט אחד, לא עולם. בהצעה המקורית זה היה פרק שלם."
+},
+{
+"k": "internal",
+"name": "מח״ש ובקרה פנימית",
+"cover": "none",
+"need": [
+"הסיפור של לורן",
+"בירור משפטי מה מותר לשדר",
+"עמדת המפקד"
+],
+"note": "אפס חומר. הקו שהכי יכול להעלות את הסדרה מדרגה, והכי רגיש משפטית."
+}
+],
+"eps": [
+{
+"n": 1,
+"title": "הבית שלנו",
+"sub": "לשמור על העיר מהאורחים שלה"
+},
+{
+"n": 2,
+"title": "הנוער",
+"sub": "נוער, סמים, אלכוהול והרחוב"
+},
+{
+"n": 3,
+"title": "הכל מותר באילת",
+"sub": "זנות, פשיעה, ומה שמספיקים לתפוס"
+},
+{
+"n": 4,
+"title": "זוגיות ומשפחה",
+"sub": "מה המדים לוקחים מהבית"
+},
+{
+"n": 5,
+"title": "להישאר או לעזוב",
+"sub": "למה בכלל נשארים במשטרה ובעיר הזו"
+}
+],
+"meta": {
+"title": "מרחב אילת",
+"eyebrow": "סדרה תיעודית · יומן עבודה · 5 × 30 דקות",
+"sub": "חמישה פרקים של חצי שעה, חמש עשרה סצנות בפרק, שתי דקות לסצנה. הפרקים בנויים לפי תמות ולא לפי דמויות, כך שכל דמות חוזרת לאורך העונה. לכל סצנה: מה יש ביד ומה עוד צריך לצלם."
+},
+"tagdefs": [
+{
+"k": "interview",
+"label": "ראיון אישי"
+},
+{
+"k": "field",
+"label": "אירוע שטח"
+},
+{
+"k": "home",
+"label": "בית וחיים פרטיים"
+},
+{
+"k": "relation",
+"label": "מול דמות אחרת"
+},
+{
+"k": "break",
+"label": "רגע של שבר"
+},
+{
+"k": "end",
+"label": "סוף או הכרעה"
+}
+],
+"ideas": [
+{
+"id": "i2",
+"title": "הלילה שבו משהו משתבש אצל חלפון",
+"char": "kalfon",
+"unit": "command",
+"ep": 1,
+"why": "הדמות היחידה בסדרה בלי רגע של אובדן שליטה. צריך להיות איתו בלילה שהוא לא מתוכנן, ולא לעזוב עד שמשהו נופל.",
+"from": "claude"
+},
+{
+"id": "i3",
+"title": "חלפון וריקי מדברים על מה שהעבודה לקחה",
+"char": "kalfon",
+"unit": "personal",
+"ep": 4,
+"why": "לא סצנת בית נעימה. שיחה אחת אמיתית שבה ריקי אומרת מה זה עלה לה. בלי זה היא תפאורה.",
+"from": "claude"
+},
+{
+"id": "i4",
+"title": "אפרת מול כתבה שיוצאת נגד המשטרה",
+"char": "efrat",
+"unit": "spokes",
+"ep": 3,
+"why": "כל הסדרה היא מוכרת את הסיפור. הפרק שבו הסיפור מוכר אותה הוא הפעם היחידה שנראה מה קורה כשהמכונה נשברת.",
+"from": "claude"
+},
+{
+"id": "i5",
+"title": "מישהו אומר לאיתמר תודה",
+"char": "itamar",
+"unit": "patrol",
+"ep": 5,
+"why": "הוא ונועה מדברים על חוסר הערכה. מצא את המשפחה של השחיין מ-I-01. סצנה אחת של תודה אמיתית סוגרת את כל הקו.",
+"from": "claude"
+},
+{
+"id": "i6",
+"title": "יובל בדרך הביתה אחרי משמרת",
+"char": "yuval",
+"unit": "personal",
+"ep": 4,
+"why": "אין לה ראיון ואין לה רגע פרטי. נסיעה אחת לבד ברכב, בלי לשאול שאלות, תעשה את שניהם.",
+"from": "claude"
+},
+{
+"id": "i7",
+"title": "יובל מלמדת שוטרת חדשה איך לפרק אירוע",
+"char": "yuval",
+"unit": "patrol",
+"ep": 5,
+"why": "היא פירקה את האירוע במלון בלי לצעוק. תן לה להעביר את זה הלאה, כמו שאפרת עושה ב-E-01.",
+"from": "claude"
+},
+{
+"id": "i8",
+"title": "עידו בבית אחרי חדר המעצר",
+"char": "ido",
+"unit": "personal",
+"ep": 2,
+"why": "אין עליו שום חומר פרטי. מה הוא מביא הביתה אחרי שעה של צעקות, וממי הוא מסתיר את זה.",
+"from": "claude"
+},
+{
+"id": "i9",
+"title": "עידו פוגש שוב נער שעצר",
+"char": "ido",
+"unit": "youth",
+"ep": 2,
+"why": "המבחן היחיד האמיתי לשאלה אם משהו מזה עובד. גם אם הנער לא רוצה לדבר, זו סצנה.",
+"from": "claude"
+},
+{
+"id": "i10",
+"title": "דולב בערב שבו התיק נסגר",
+"char": "detectives",
+"unit": "personal",
+"ep": 3,
+"why": "אין עליו אף פריים מחוץ לעבודה. הערב שאחרי מעצר הוא הרגע שבו רואים מה נשאר מהאדם.",
+"from": "claude"
+},
+{
+"id": "i11",
+"title": "דולב וההשלכות של סצנת הבלוגר",
+"char": "detectives",
+"unit": "detect",
+"ep": 3,
+"why": "הצוות שלנו שימש כיסוי למבצע. שיחה אחת על מה זה עשה לו ולנו היא הרגע הכי כן שהסדרה יכולה לייצר על עצמה.",
+"from": "claude"
+},
+{
+"id": "i12",
+"title": "היום שלורן חוזר לעבודה",
+"char": "loren",
+"unit": "internal",
+"ep": 3,
+"why": "לא הראיון. החדר. מי מרים אליו את הראש ומי לא, ומה נאמר בלי מילים.",
+"from": "claude"
+},
+{
+"id": "i13",
+"title": "נועה כותבת מכתב התפטרות ולא שולחת",
+"char": "noa",
+"unit": "patrol",
+"ep": 5,
+"why": "ההחלטה לא נופלת בראיון. היא נופלת ליד שולחן בשתיים בלילה. אם תופסים את זה, יש סוף לסדרה.",
+"from": "claude"
+},
+{
+"id": "i14",
+"title": "נועה ובן הזוג, שניהם במדים באותו ערב",
+"char": "noa",
+"unit": "war",
+"ep": 1,
+"why": "שני אנשים ששומרים על אותה עיר משני צדדים ונפגשים בבית לשעתיים. זו התמונה של הפרק הראשון.",
+"from": "claude"
+},
+{
+"id": "i15",
+"title": "אבי אנוס ומשה נבון על אותו ילד",
+"char": "avi",
+"unit": "youth",
+"ep": 2,
+"why": "לא על בעיית הנוער בכללי. על ילד אחד עם שם. איש חינוך ושוטר שמסתכלים על אותו בן אדם וכל אחד רואה משהו אחר.",
+"from": "claude"
+},
+{
+"id": "i16",
+"title": "האמא שלא באה, אחרי",
+"char": "moshe",
+"unit": "youth",
+"ep": 2,
+"why": "הכי קשה והכי חשוב. למצוא את האמא מ-M-02 ולשמוע אותה. בלי זה הסצנה מרשיעה אישה שלא ניתנה לה זכות דיבור.",
+"from": "claude"
+},
+{
+"id": "i17",
+"title": "לילה בים עם השיטור הימי",
+"char": "kalfon",
+"unit": "sea",
+"ep": 1,
+"why": "היחידה היחידה שהסדרה מבטיחה ולא מראה. ספינה, חושך, זרקור. גם אם לא קורה כלום, זה נראה.",
+"from": "claude"
+},
+{
+"id": "i18",
+"title": "נחיתת לילה בנמל התעופה רמון",
+"char": "kalfon",
+"unit": "airport",
+"ep": 1,
+"why": "נמל בינלאומי בלב מדבר תחת אחריות המרחב. חמש דקות של תמונות שסוגרות את סיפור הגבולות.",
+"from": "claude"
+},
+{
+"id": "i19",
+"title": "מפונה שהגיע באוקטובר ונשאר",
+"char": "noa",
+"unit": "war",
+"ep": 1,
+"why": "עולם שלם שלא נגענו בו. אדם אחד שבא לשבועיים ובנה כאן חיים מספר את כל הפרק הזה.",
+"from": "claude"
+},
+{
+"id": "i20",
+"title": "מגן שכונה, שוטר קהילה בשכונה",
+"char": "ido",
+"unit": "comm",
+"ep": 2,
+"why": "השיטור הקהילתי מופיע בהצעה ולא צולם. שוטר שמכיר את כולם בשם הוא ההפך הגמור מחדר המעצר.",
+"from": "claude"
+}
+],
+"pool": [
+{
+"id": "p1",
+"title": "חלפון בטלפון עם הבית באמצע אירוע",
+"char": "kalfon",
+"unit": "command",
+"ep": 1,
+"why": "האיש ששולט בכל נתפס ברגע שבו הוא לא יכול לענות. חצי משפט לילד וחזרה למכשיר הקשר.",
+"from": "claude"
+},
+{
+"id": "p2",
+"title": "חלפון נוזף בשוטר",
+"char": "kalfon",
+"unit": "command",
+"ep": 1,
+"why": "ראינו אותו מפקד על מצב. לא ראינו אותו מפקד על בן אדם, וזה מקום אחר לגמרי.",
+"from": "claude"
+},
+{
+"id": "p3",
+"title": "חלפון וראש העיר לנקרי",
+"char": "kalfon",
+"unit": "command",
+"ep": 1,
+"why": "שני אנשים שאחראים על אותה עיר משני צדדים. מה שנאמר שם בין השורות הוא הפוליטיקה של אילת.",
+"from": "claude"
+},
+{
+"id": "p4",
+"title": "חלפון בהלוויה או בטקס",
+"char": "kalfon",
+"unit": "command",
+"ep": 5,
+"why": "מפקד במדים ביום שבו אין מה לפקד עליו. שם רואים מה זה באמת לשאת את התפקיד.",
+"from": "claude"
+},
+{
+"id": "p5",
+"title": "אפרת ביום שהאירוע מתפוצץ",
+"char": "efrat",
+"unit": "spokes",
+"ep": 3,
+"why": "ראינו אותה מוכרת סיפורים טובים. צריך לראות אותה ביום שבו הסיפור רע ואי אפשר למכור אותו.",
+"from": "claude"
+},
+{
+"id": "p6",
+"title": "אפרת בשידור חי מול מצלמה",
+"char": "efrat",
+"unit": "spokes",
+"ep": 1,
+"why": "הרגע שבו כל האימון שלה נמדד בשלושים שניות. וגם השנייה שלפני, כשהיא מסדרת את השיער.",
+"from": "claude"
+},
+{
+"id": "p7",
+"title": "אפרת ויהונתן בדרך לבית הספר",
+"char": "efrat",
+"unit": "personal",
+"ep": 4,
+"why": "שבע דקות ברכב זה כל הזמן שיש להם ביום. אם תופסים את זה, לא צריך להסביר כלום.",
+"from": "claude"
+},
+{
+"id": "p8",
+"title": "איתמר מוסר הודעה קשה למשפחה",
+"char": "itamar",
+"unit": "patrol",
+"ep": 5,
+"why": "הדבר הכי כבד שמבקשים משוטר סיור לעשות, ואף אחד לא מדבר עליו. אם זה נופל בזמן הצילומים, אל תפספס.",
+"from": "claude"
+},
+{
+"id": "p9",
+"title": "איתמר לבד לפני משמרת",
+"char": "itamar",
+"unit": "personal",
+"ep": 5,
+"why": "בוקר, מדים, קפה, שקט. שתי דקות שמראות מה עולה להיכנס לזה כל יום מחדש.",
+"from": "claude"
+},
+{
+"id": "p10",
+"title": "איתמר מוסר את הילדים לגרושה",
+"char": "itamar",
+"unit": "personal",
+"ep": 4,
+"why": "הפרידה הכי שגרתית והכי כואבת שיש. הוא בוכה על זה בראיון, וכאן זה קורה בלי מילים.",
+"from": "claude"
+},
+{
+"id": "p11",
+"title": "יובל מתלבשת למשמרת",
+"char": "yuval",
+"unit": "patrol",
+"ep": 1,
+"why": "אישה שהופכת לשוטרת מול המצלמה, חלק אחרי חלק. תמונה שמספרת מה זה עולה.",
+"from": "claude"
+},
+{
+"id": "p12",
+"title": "יובל באירוע אלימות במשפחה",
+"char": "yuval",
+"unit": "patrol",
+"ep": 4,
+"why": "היא פירקה איום במלון בלי לצעוק. אירוע בתוך בית הוא המבחן האמיתי של אותה יכולת.",
+"from": "claude"
+},
+{
+"id": "p13",
+"title": "יובל בטלפון עם ההורים",
+"char": "yuval",
+"unit": "personal",
+"ep": 4,
+"why": "מה שקורה אחרי הארוחה. השיחה שבה נאמר מה שלא נאמר בשולחן.",
+"from": "claude"
+},
+{
+"id": "p14",
+"title": "עידו מול כיתה בבית ספר",
+"char": "ido",
+"unit": "comm",
+"ep": 2,
+"why": "השוטר שעוצר נערים עומד מולם כשהם עדיין לא עשו כלום. שם רואים אם הוא מאמין במה שהוא אומר.",
+"from": "claude"
+},
+{
+"id": "p15",
+"title": "עידו מחזיר נער להורים בלילה",
+"char": "ido",
+"unit": "youth",
+"ep": 2,
+"why": "הדלת נפתחת בשתיים לפנות בוקר. מה שקורה בפתח הזה הוא כל הפרק.",
+"from": "claude"
+},
+{
+"id": "p16",
+"title": "דולב בחדר החקירות",
+"char": "detectives",
+"unit": "detect",
+"ep": 3,
+"why": "עשר סצנות של ציד ואף אחת של מה שקורה כשתופסים. החדר הזה חסר.",
+"from": "claude"
+},
+{
+"id": "p17",
+"title": "דולב מלמד בלש צעיר לשבת על מטרה",
+"char": "detectives",
+"unit": "detect",
+"ep": 3,
+"why": "מקצוע שעובר מאדם לאדם. גם מראה את דולב מהצד שהוא לא רואה בעצמו.",
+"from": "claude"
+},
+{
+"id": "p18",
+"title": "דולב בטלפון עם אשתו מתוך מארב",
+"char": "detectives",
+"unit": "personal",
+"ep": 4,
+"why": "היא מפחדת שהוא ימות והוא עונה לה מתוך המקום שהיא מפחדת ממנו. שתי דקות, כל הקונפליקט.",
+"from": "claude"
+},
+{
+"id": "p19",
+"title": "לורן במטווח או באימון, לבד",
+"char": "loren",
+"unit": "internal",
+"ep": 3,
+"why": "שוטר שנחקר ממשיך להתאמן. הגוף עושה את מה שהוא תמיד עשה בזמן שהכול מתערער.",
+"from": "claude"
+},
+{
+"id": "p20",
+"title": "לורן וחבר מהיחידה על מה שקרה",
+"char": "loren",
+"unit": "internal",
+"ep": 3,
+"why": "לא ראיון. שיחה בין שניים שעבדו יחד, ואחד מהם עכשיו תיק.",
+"from": "claude"
+},
+{
+"id": "p21",
+"title": "נועה מול קצינת בריאות הנפש",
+"char": "noa",
+"unit": "patrol",
+"ep": 5,
+"why": "ההחלטה אם להישאר לא נופלת בוואקום. יש מערכת שאמורה לעזור, וכדאי לראות אם היא עוזרת.",
+"from": "claude"
+},
+{
+"id": "p22",
+"title": "נועה ממלאת דוח על אלימות כלפיה",
+"char": "noa",
+"unit": "patrol",
+"ep": 5,
+"why": "היא זועמת על היחס לשוטרים. הנייר הזה הוא היחס, בשורה ובחתימה.",
+"from": "claude"
+},
+{
+"id": "p23",
+"title": "נועה ובן הזוג מחליטים על העתיד",
+"char": "noa",
+"unit": "personal",
+"ep": 5,
+"why": "שני אנשים במדים ליד שולחן מחליטים אם להמשיך בזה. זה הסוף של הסדרה אם תופסים אותו.",
+"from": "claude"
+},
+{
+"id": "p24",
+"title": "תומר בבית שגדל בו",
+"char": "tomer",
+"unit": "personal",
+"ep": 5,
+"why": "אמא שלו עזבה משם. חדר, רחוב, או רק הדלת. תמונה אחת שאומרת למה הוא נשאר.",
+"from": "claude"
+},
+{
+"id": "p25",
+"title": "תומר עם מישהו מהמשפחה על אמא",
+"char": "tomer",
+"unit": "personal",
+"ep": 5,
+"why": "הראיון הוא הגרסה שלו. עוד קול מהמשפחה הופך אותה לסיפור עם שתי צלעות.",
+"from": "claude"
+},
+{
+"id": "p26",
+"title": "אבי אנוס מלווה נער למשפט",
+"char": "avi",
+"unit": "youth",
+"ep": 2,
+"why": "איש חינוך שיושב בספסל האחורי של אולם. שם רואים מה זה באמת לעמוד לצד ילד.",
+"from": "claude"
+},
+{
+"id": "p27",
+"title": "אבי אנוס מול הורים של נער",
+"char": "avi",
+"unit": "youth",
+"ep": 2,
+"why": "ההורים הם החוליה שאף אחד לא מצלם, והם בדיוק המקום שבו זה נשבר או נתפר.",
+"from": "claude"
+},
+{
+"id": "p28",
+"title": "משה נבון בבית משפט לנוער",
+"char": "moshe",
+"unit": "youth",
+"ep": 2,
+"why": "מה קורה לילד עם הסכין אחרי. הפרק מבטיח את השאלה הזו וחייב לענות עליה.",
+"from": "claude"
+},
+{
+"id": "p29",
+"title": "משה נבון מחפש את האמא",
+"char": "moshe",
+"unit": "youth",
+"ep": 2,
+"why": "הוא נשאר עם הילד כי היא לא באה. הסצנה הבאה היא מה הוא עושה עם זה.",
+"from": "claude"
+},
+{
+"id": "p30",
+"title": "נתי בשטח, מארב או מעצר",
+"char": "nati",
+"unit": "detect",
+"ep": 3,
+"why": "יש ממנו ראיון ואפס עבודה. בלי לראות אותו עושה, שיקול הדעת שלו הוא רק דיבור.",
+"from": "claude"
+},
+{
+"id": "p31",
+"title": "נתי על תיק שלא נסגר",
+"char": "nati",
+"unit": "detect",
+"ep": 3,
+"why": "כל בלש נושא אחד כזה. זו הדרך הקצרה ביותר להיכנס לאדם.",
+"from": "claude"
+},
+{
+"id": "p32",
+"title": "מגן שכונה, מבצע משולב",
+"char": "ido",
+"unit": "comm",
+"ep": 2,
+"why": "משטרה, עירייה ומס הכנסה נכנסים לשכונה יחד. מבצע גדול שמראה שהעניין הוא לא רק אכיפה.",
+"from": "claude"
+},
+{
+"id": "p33",
+"title": "שוטרת קהילה על ספסל בפארק",
+"char": "ido",
+"unit": "comm",
+"ep": 2,
+"why": "ההפך הגמור מחדר המעצר. שוטרת שיושבת ומדברת עם ילדים בלי שקרה כלום.",
+"from": "claude"
+},
+{
+"id": "p34",
+"title": "נחיתת לילה בנמל התעופה רמון",
+"char": "kalfon",
+"unit": "airport",
+"ep": 1,
+"why": "נמל בינלאומי בלב מדבר תחת אחריות המרחב. חמש דקות תמונות שסוגרות את סיפור הגבולות.",
+"from": "claude"
+},
+{
+"id": "p35",
+"title": "אכיפה לילית בכביש הערבה",
+"char": "itamar",
+"unit": "traffic",
+"ep": 1,
+"why": "הכביש היחיד פנימה והחוצה. מי שנוסע בו בלילה הוא או תייר או מישהו שבורח.",
+"from": "claude"
+},
+{
+"id": "p36",
+"title": "מפונה שהגיע באוקטובר ונשאר",
+"char": "noa",
+"unit": "war",
+"ep": 5,
+"why": "עולם שלם שלא נגענו בו. אדם אחד שבא לשבועיים ובנה כאן חיים מספר את כל הפרק.",
+"from": "claude"
+},
+{
+"id": "p37",
+"title": "אילת באוקטובר, ארכיון",
+"char": "kalfon",
+"unit": "war",
+"ep": 1,
+"why": "שישים אלף מפונים בעיר של חמישים ושלושה אלף. בלי הארכיון הזה אין לצופה מושג מה עברה העיר.",
+"from": "claude"
+},
+{
+"id": "p38",
+"title": "עמדת המפקד על התיק של לורן",
+"char": "kalfon",
+"unit": "internal",
+"ep": 3,
+"why": "חלפון מול השאלה הכי לא נוחה שיש למפקד. התשובה שלו תגדיר אותו יותר מכל סיור בגבול.",
+"from": "claude"
+},
+{
+"id": "p39",
+"title": "לילה בים עם השיטור הימי",
+"char": "tomer",
+"unit": "sea",
+"ep": 1,
+"why": "ספינה, חושך, זרקור. גם אם לא קורה כלום, זה נראה, וזה מה שמפריד בין סדרה על אילת לכתבה.",
+"from": "claude"
+},
+{
+"id": "p40",
+"title": "חיפוש או חילוץ בים",
+"char": "tomer",
+"unit": "sea",
+"ep": 1,
+"why": "השחיין נמצא. הפעם הבאה אולי לא. לוותר על הסצנה הזו זה לוותר על המתח של כל עולם הים.",
+"from": "claude"
+},
+{
+"id": "p41",
+"title": "לילה במוקד מאה",
+"char": "noa",
+"unit": "patrol",
+"ep": 1,
+"why": "כל העיר נכנסת דרך אוזניות של שני אנשים בחדר. הדרך הזולה והחזקה ביותר לספר עיר שלמה.",
+"from": "claude"
+},
+{
+"id": "p42",
+"title": "חדר חקירות מלא, מהתחלה עד הסוף",
+"char": "detectives",
+"unit": "detect",
+"ep": 3,
+"why": "לא קטע. חקירה אחת שלמה. אם היא טובה, היא הסצנה שכולם יזכרו מהסדרה.",
+"from": "claude"
+}
+]
+},
+"layers": {}
+}
+</script>
+<script id="app-code">
+(function(){
+var RO=false;
+var TITLE="יומן סצנות מרחב אילת";
+var FONT='<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">';
+var SUB="חמישה פרקים של חצי שעה, חמש עשרה סצנות בפרק, שתי דקות לסצנה. לכל דמות: מה הסיפור שלה, אילו סצנות כבר בקופסה, ומה עוד צריך לצאת ולצלם. החלוקה לפרקים תיקבע כשהחומר ייסגר.";
+var MIN_PER=2,PER_EP=15,EPISODES=5,TARGET=EPISODES*PER_EP;
+var STATUS={shot:{l:"צולם"},partial:{l:"חלקי"},todo:{l:"לצילום"},dropped:{l:"ירד"}};
+var HEAD={shot:"מה כבר בקופסה",partial:"חלקי, חסרה השלמה",todo:"מה חסר לצלם",dropped:"ירד"};
+var ORDER=["shot","partial","todo","dropped"];
+var COVER={full:"מכוסה",partial:"חלקי",none:"לא נוגע"};
+document.documentElement.setAttribute("dir","rtl");
+document.documentElement.setAttribute("lang","he");
+var DEFAULT_USERS=[{k:"robi",name:"רובי",color:"#0C6B75"},{k:"omri",name:"עמרי",color:"#8A5A12"},{k:"gila",name:"גילה",color:"#7A2E8F"}];
+function normStore(o){
+ if(!o) return {users:DEFAULT_USERS.slice(),base:{scenes:[],chars:[],units:[],eps:[]},layers:{}};
+ if(o.scenes) o={users:DEFAULT_USERS.slice(),base:o,layers:{}};
+ if(!o.users||!o.users.length) o.users=DEFAULT_USERS.slice();
+ if(!o.layers) o.layers={};
+ return o;
+}
+var STORE=normStore(JSON.parse(document.getElementById("scene-data").textContent));
+var DATA=STORE.base;
+var MEKEY="marhav-eilat-me-v1";
+function users(){return STORE.users||[]}
+function userOf(k){var u=users().filter(function(x){return x.k===k})[0];return u||null}
+function userName(k){var u=userOf(k);return u?u.name:"המקור המשותף"}
+function userColor(k){var u=userOf(k);return u?(u.color||"#455160"):"#5A6472"}
+function hasLayer(k){return !!(k&&STORE.layers&&STORE.layers[k])}
+function useView(){
+ var v=state.viewUser;
+ DATA=(v&&STORE.layers[v])?STORE.layers[v]:STORE.base;
+}
+function myLayer(){
+ if(!STORE.layers[state.me]) STORE.layers[state.me]=JSON.parse(JSON.stringify(STORE.base));
+ DATA=STORE.layers[state.me];
+ return DATA;
+}
+function canEdit(){return !RO&&state.me&&state.viewUser===state.me}
+function ensureEdit(){
+ if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return false}
+ if(!state.me){state.showUsers=true;render();return false}
+ if(state.viewUser!==state.me){
+  toast("אתה צופה בגרסה של "+userName(state.viewUser)+". חזור לגרסה שלך כדי לערוך",true);return false}
+ myLayer();return true;
+}
+var FORCE_ME="";
+function loadMe(){
+ if(FORCE_ME&&userOf(FORCE_ME)){state.me=FORCE_ME;state.viewUser=FORCE_ME;return}
+ try{var v=localStorage.getItem(MEKEY);if(v&&userOf(v)){state.me=v;state.viewUser=v}}catch(_){}
+}
+function setMe(k){
+ state.me=k;state.viewUser=k;
+ try{localStorage.setItem(MEKEY,k)}catch(_){}
+}
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var api=null;
+
+function M(){
+ DATA.meta=DATA.meta||{};
+ var m=DATA.meta;
+ if(!m.title)m.title="מרחב אילת";
+ if(!m.eyebrow)m.eyebrow="סדרה תיעודית · יומן עבודה";
+ if(!m.sub)m.sub=SUB;
+ return m;
+}
+function fval(scope,n){var f=document.querySelector('[data-form="'+scope+'"] [name="'+n+'"]');return f?f.value:""}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function lines(a){return (a||[]).filter(function(x){return String(x).trim()}).join("\n")}
+function toArr(s){return String(s||"").split("\n").map(function(x){return x.trim()}).filter(Boolean)}
+function slot(ep,beforeId){
+ if(RO) return "";
+ var key=ep+"|"+(beforeId||"end");
+ if(state.newAt===key) return newNote(ep);
+ return '<div class="addslot" data-act="newat" data-k="'+esc(key)+'"></div>';
+}
+function newNote(ep){
+ var h='<div class="newnote" data-form="__new2__">';
+ h+='<input name="title" placeholder="מה קורה בסצנה" autocomplete="off">';
+ h+='<select name="char">'+DATA.chars.map(function(x){return '<option value="'+x.k+'">'+esc(x.name)+'</option>'}).join("")+'</select>';
+ h+='<div class="nbtns"><button class="bshot" data-act="newshot">כבר צולם</button>';
+ h+='<button class="btodo" data-act="newtodo">עוד לא צולם</button>';
+ h+='<button class="bcan" data-act="newcancel">ביטול</button></div>';
+ return h+'</div>';
+}
+function nextId(ck){
+ var mine=DATA.scenes.filter(function(x){return x.char===ck});
+ var pref="X",mm;
+ if(mine.length){mm=String(mine[0].id).match(/^([A-Za-z]+)-/);if(mm)pref=mm[1]}
+ var max=0;
+ DATA.scenes.forEach(function(x){var m2=String(x.id).match(/^([A-Za-z]+)-(\d+)$/);if(m2&&m2[1]===pref)max=Math.max(max,Number(m2[2]))});
+ var n=max+1;return pref+"-"+(n<10?"0"+n:""+n);
+}
+function unitGuess(ck){
+ var cnt={},best=DATA.units[0]?DATA.units[0].k:"";
+ DATA.scenes.filter(function(x){return x.char===ck}).forEach(function(x){cnt[x.unit]=(cnt[x.unit]||0)+1});
+ var mx=0;for(var k in cnt){if(cnt[k]>mx){mx=cnt[k];best=k}}
+ return best;
+}
+function createAt(status){
+ if(!state.newAt)return;
+ var parts=String(state.newAt).split("|");
+ var ep=Number(parts[0]), before=parts[1]==="end"?null:parts[1];
+ var t=fval("__new2__","title").trim()||"סצנה חדשה";
+ var ck=fval("__new2__","char")||DATA.chars[0].k;
+ var id=nextId(ck);
+ DATA.scenes.push({id:id,title:t,char:ck,unit:unitGuess(ck),status:status,min:MIN_PER,
+  ep:ep,ord:999,people:[],have:[],need:[],short:"",note:"",tags:[]});
+ moveScene(id,ep,before);
+ state.newAt=null;render();save();
+ toast(status==="shot"?"נוספה סצנה שצולמה":"נוספה סצנה לצילום");
+}
+function charOf(k){var c=DATA.chars.filter(function(x){return x.k===k})[0];return c||null}
+function charColor(k){var c=charOf(k);return (c&&c.color)?c.color:"#455160"}
+function coverOf(u){
+ var sc=DATA.scenes.filter(function(x){return x.unit===u.k});
+ var sh=sc.filter(function(x){return x.status==="shot"}).length;
+ return sh>=3?"full":sh>=1?"partial":"none";
+}
+function unitName(k){var u=DATA.units.filter(function(x){return x.k===k})[0];return u?u.name:""}
+function counts(){var c={shot:0,partial:0,todo:0,dropped:0,min:0};
+ DATA.scenes.forEach(function(s){c[s.status]=(c[s.status]||0)+1;if(s.status!=="dropped")c.min+=Number(s.min)||0});return c}
+
+function render(){
+ useView();
+ var c=counts(),n=DATA.scenes.length,tot=Math.max(n,TARGET);
+ var h="";
+ h+='<div class="mast"><div class="mast-in">';
+ var mt=M();
+ if(state.editMeta){
+  h+='<div class="metaform" data-form="__meta__">';
+  h+='<div class="f"><label>שורת על</label><input name="eyebrow" value="'+esc(mt.eyebrow)+'"></div>';
+  h+='<div class="f"><label>שם הסדרה</label><input name="title" value="'+esc(mt.title)+'"></div>';
+  h+='<div class="f"><label>תיאור</label><textarea name="sub" style="min-height:70px">'+esc(mt.sub)+'</textarea></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="savemeta">שמור</button>';
+  h+='<button class="btn ghost" data-act="cancelmeta">ביטול</button></div></div>';
+ } else {
+  h+='<p class="eyebrow">'+esc(mt.eyebrow)+(RO?"":'<button class="tinyedit" data-act="editmeta">ערוך כותרת</button>')+'</p>';
+  h+='<h1>'+esc(mt.title)+'</h1><p class="sub">'+esc(mt.sub)+'</p>';
+ }
+ h+='<div class="stats">';
+ h+='<div class="stat"><b>'+n+'</b><span>סצנות ביומן</span></div>';
+ h+='<div class="stat s-shot"><b>'+c.shot+'</b><span>צולם</span></div>';
+ h+='<div class="stat s-partial"><b>'+c.partial+'</b><span>חלקי</span></div>';
+ h+='<div class="stat s-todo"><b>'+c.todo+'</b><span>לצילום</span></div>';
+ h+='<div class="stat s-min"><b>'+Math.max(TARGET-n,0)+'</b><span>חסרות עד '+TARGET+'</span></div>';
+ h+='<div class="stat"><b>'+c.min+'</b><span>דק׳ במצטבר</span></div></div>';
+ h+='<div class="gauge">';
+ ["shot","partial","todo"].forEach(function(k){
+  h+='<i style="width:'+((c[k]||0)/tot*100).toFixed(1)+'%;background:var(--'+k+')"></i>';});
+ h+='</div>';
+ h+='<p class="method">מתודת העבודה: '+EPISODES+' פרקים × '+PER_EP+' סצנות × '+MIN_PER+' דקות לסצנה. סך הכול '+TARGET+' סצנות ו-'+(TARGET*MIN_PER)+' דקות.</p>';
+ h+='</div></div>';
+ if(state.viewUser!==state.me&&!RO) h+='<div class="viewing">אתה צופה בגרסה של '+esc(userName(state.viewUser))+'. השינויים שלך נשמרים רק בגרסה שלך.</div>';
+ if(RO) h+='<div class="ro">עותק צפייה של יומן העבודה, נכון ל'+esc(SNAPDATE)+'. אי אפשר לערוך כאן, וכל שינוי בעמוד המקורי לא מופיע כאן עד שנשלח עותק חדש.</div>';
+ else if(!state.writable) h+='<div class="ro">העמוד במצב קריאה בלבד בתצוגה הזו. שינויים שתעשה כאן לא יישמרו.</div>';
+ h+='<div class="bar"><div class="bar-in">';
+ h+=userBtn()+'<div class="sep"></div>';
+ h+='<div class="views">';
+ h+=vbtn("board","מפת הפרקים")+vbtn("char","לפי דמות")+vbtn("unit","לפי מחלקה")+vbtn("ideas","רעיונות לסצנות");
+ h+='</div>';
+ if(!RO){
+  h+='<div class="sep"></div>';
+  h+='<button class="btn ghost'+(hist.length?"":" off")+'" data-act="undo" title="ביטול הפעולה האחרונה (Ctrl+Z)">↷ בטל'+(hist.length?' <span class="n">'+hist.length+'</span>':'')+'</button>';
+  h+='<button class="btn ghost'+(future.length?"":" off")+'" data-act="redo" title="ביצוע חוזר (Ctrl+Shift+Z)">בצע שוב ↶</button>';
+ }
+ h+='<div class="sep"></div>'+chip("filter","all","הכול",n);
+ ORDER.forEach(function(k){if(k==="dropped"&&!c.dropped)return;h+=chip("filter",k,STATUS[k].l,c[k]||0)});
+ h+='<div class="spacer"></div>';
+ if(!RO){
+  h+=saveBadge();
+  h+='<button class="btn" data-act="saveNow" title="שמירה עכשיו">שמור</button>';
+  h+='<button class="btn ghost" data-act="restore" title="טעינת גיבוי מהמחשב">טען גיבוי</button>';
+  h+='<button class="btn ghost" data-act="backup" title="שמירת עותק של כל היומן למחשב">שמור למחשב</button>';
+   if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button class="btn ghost" data-act="drive" title="שמירת עותק בגוגל דרייב, בתיקייה מרחב אילת">שמור לדרייב</button>';
+  if(state.group==="char") h+='<button class="btn ghost" data-act="addchar">הוסף דמות</button>';
+  if(state.group==="unit") h+='<button class="btn ghost" data-act="addunit">הוסף מחלקה</button>';
+  if(state.group==="ideas") h+='<button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
+  h+='<button class="btn" data-act="add">הוסף סצנה</button>';
+ } else {
+  h+='<span class="savebadge s-ok"><i></i>עותק צפייה · '+esc(SNAPDATE)+'</span>';
+ }
+ h+='</div></div><div class="wrap'+(state.group==="board"?" boardmode":"")+'">';
+ if(state.adding) h+='<div class="scene" data-s="todo" style="margin-top:24px">'+form(null)+'</div>';
+
+ if(state.group==="ideas"){
+  h+=ideasView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
+ if(state.group==="board"){
+  h+=board();
+  h+='</div>';
+  if(state.editing){
+   var es=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
+   if(es){
+    h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+    h+='<div class="mhead"><span>עריכת סצנה '+esc(es.id)+'</span><button data-act="cancel" title="סגור">×</button></div>';
+    h+=form(es)+'</div></div>';
+   }
+  }
+  h+='<div class="toast" id="toast"></div>';
+  paint(h);
+  focusNew();
+  return;
+ }
+
+ if(state.group==="char") h+=arcTable()+fillTable();
+ if(state.group==="unit") h+=unitTable();
+ var groups = state.group==="char"
+  ? DATA.chars.map(function(x){return {name:x.name,role:x.role,obj:x,f:function(s){return s.char===x.k}}})
+  : DATA.units.map(function(x){return {name:x.name,role:COVER[coverOf(x)],note:x.note,uobj:x,f:function(s){return s.unit===x.k}}});
+
+ groups.forEach(function(g){
+  var all=DATA.scenes.filter(g.f);
+  var vis=all.filter(function(s){return state.filter==="all"||s.status===state.filter});
+  if(state.filter!=="all"&&!vis.length) return;
+  var mins=all.reduce(function(a,s){return a+(s.status==="dropped"?0:(Number(s.min)||0))},0);
+  h+='<section class="grp" data-grp="'+(g.obj?"char:"+esc(g.obj.k):(g.uobj?"unit:"+esc(g.uobj.k):""))+'"><div class="grp-h"><h2>';
+  if(g.obj) h+='<span class="cdot" style="background:'+esc(g.obj.color||"#455160")+'"></span>';
+  h+=esc(g.name);
+  if(!RO&&g.obj) h+='<button class="tinyedit" data-act="editchar" data-id="'+esc(g.obj.k)+'">ערוך דמות</button>';
+  if(!RO&&g.uobj) h+='<button class="tinyedit" data-act="editunit" data-id="'+esc(g.uobj.k)+'">ערוך מחלקה</button>';
+  h+='</h2>';
+  if(g.role) h+='<span class="role">'+esc(g.role)+'</span>';
+  h+='<span class="meta">'+all.length+' סצנות · '+mins+' דק׳</span></div>';
+  if(g.obj){
+   if(state.editChar===g.obj.k){ h+=charForm(g.obj); }
+   else{
+    h+='<p class="story"><span class="lab">מה הסיפור</span>'+esc(g.obj.story)+'</p>';
+    h+='<div class="cpanel">';
+    h+='<div class="want"><h5>מה היא רוצה</h5><p>'+esc(g.obj.want)+'</p></div>';
+    h+='<div class="wound"><h5>מה הפצע</h5><p>'+esc(g.obj.wound)+'</p></div>';
+    h+='<div class="gap"><h5>מה חסר לדמות</h5><ul>'+(g.obj.gaps||[]).map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+    h+='</div>';
+   }
+  } else if(g.uobj && state.editUnit===g.uobj.k){ h+=unitForm(g.uobj); }
+  else if(g.note) h+='<p class="grp-note">'+esc(g.note)+'</p>';
+  if(!RO&&(g.obj||g.uobj)) h+='<p class="draghint">גרור סצנה מהידית ⠿ אל כותרת של קבוצה אחרת כדי לשייך אותה מחדש. העמוד גולל לבד כשמתקרבים לקצה. אם נוח לך יותר, השתמש בתפריט <b>העבר אל</b> שבתחתית כל סצנה.</p>';
+  if(!all.length){h+='<div class="empty">אין עדיין שום סצנה כאן. חור פתוח. אפשר לגרור לכאן סצנה קיימת.</div></section>';return}
+  ORDER.forEach(function(k){
+   var b=vis.filter(function(s){return s.status===k});
+   if(!b.length) return;
+   var bm=b.reduce(function(a,s){return a+(Number(s.min)||0)},0);
+   h+='<div class="sub-h k-'+k+'"><span>'+esc(HEAD[k])+' · '+b.length+' · '+bm+' דק׳</span><i></i></div>';
+   h+='<div class="scenes" data-st="'+k+'">';b.forEach(function(s){h+=card(s)});h+='</div>';
+  });
+  h+='</section>';
+ });
+ h+=unitMap();
+ h+='</div><div class="toast" id="toast"></div>';
+ paint(h);
+}
+
+function reddot(st){
+ if(st==="todo") return '<span class="reddot" title="עוד לא צולם"></span>';
+ if(st==="partial") return '<span class="reddot half" title="חלקי, חסרה השלמה"></span>';
+ return "";
+}
+function shortOf(s){
+ if(s.short&&String(s.short).trim()) return s.short;
+ var a = s.status==="todo" ? (s.need||[]) : (s.have||[]);
+ if(!a.length) a = (s.need||[]).concat(s.have||[]);
+ var t=a.slice(0,2).join(". ");
+ if(s.status==="partial"&&(s.need||[]).length) t=(s.have||[])[0]+". חסר: "+s.need[0];
+ return t||"אין עדיין תיאור";
+}
+function board(){
+ var mode=state.boardMode||"notes";
+ var h='<div class="modes">';
+ [["notes","פתקים"],["list","רשימת עריכה"],["timeline","ציר זמן"]].forEach(function(m){
+  h+='<button data-act="bmode" data-k="'+m[0]+'" aria-pressed="'+(mode===m[0])+'">'+esc(m[1])+'</button>';
+ });
+ h+='</div>';
+ h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
+ h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
+ h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
+ h+='<span><i class="dot-key"></i>נקודה אדומה = לא צולם. עיגול חלול = חלקי</span>';
+ h+='<span style="color:var(--ink-3)">'+(mode==="notes"?"גרור פתק כדי לסדר, או בחר פרק בתפריט שעל הפתק":mode==="list"?"סדר הצפייה של הפרק. גרור שורה כדי לשנות את הסדר":"כל סצנה היא שתי דקות. הצבע הוא הדמות, הפס למטה הוא הסטטוס")+'</span></div>';
+
+ if(mode==="notes"){
+  h+='<div class="board">';
+  DATA.eps.forEach(function(e){
+   var all=DATA.scenes.filter(function(x){return x.ep===e.n});
+   var vis=all.filter(function(x){return state.filter==="all"||x.status===state.filter});
+   var sh=all.filter(function(x){return x.status==="shot"}).length;
+   var gapN=Math.max(PER_EP-all.length,0);
+   h+='<div class="bcol" data-ep="'+e.n+'">';
+   if(state.editEp===e.n){ h+=epForm(e); }
+   else{
+    h+='<h3><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+(RO?"":'<button class="tinyedit" data-act="editep" data-id="'+e.n+'">ערוך</button>')+'</h3>';
+    h+='<span class="bm">'+esc(e.sub)+'</span>';
+   }
+   h+='<span class="bm">'+all.length+' מתוך '+PER_EP+' סצנות · '+sh+' צולמו · '+(all.length*MIN_PER)+' דק׳</span>';
+   h+='<div class="epbar"><i style="width:'+Math.min(all.length/PER_EP*100,100).toFixed(1)+'%"></i></div>';
+   h+='<div class="notes" data-ep="'+e.n+'">';
+   h+=slot(e.n, vis.length?vis[0].id:null);
+   vis.forEach(function(x,vi){ h+=note(x,"") ; h+=slot(e.n, vis[vi+1]?vis[vi+1].id:null); });
+   h+='</div>';
+   if(gapN) h+='<div class="ghost">חסרות '+gapN+' סצנות בפרק הזה</div>';
+   h+='</div>';
+  });
+  return h+'</div>';
+ }
+
+ h+='<div class="board '+(mode==="list"?"listmode":"tlmode")+'">';
+ DATA.eps.forEach(function(e){
+  var all=DATA.scenes.filter(function(x){return x.ep===e.n});
+  var vis=all.filter(function(x){return state.filter==="all"||x.status===state.filter});
+  var sh=all.filter(function(x){return x.status==="shot"}).length;
+  var gapN=Math.max(PER_EP-all.length,0);
+  h+='<div class="bcol" data-ep="'+e.n+'"><div class="epband"><h3><span class="epn">פרק '+e.n+' ·</span>'+esc(e.title)+'</h3>';
+  h+='<p class="sub">'+esc(e.sub)+'</p>';
+  h+='<span class="bm">'+all.length+'/'+PER_EP+' · '+sh+' צולמו · '+(all.length*MIN_PER)+' דק׳</span>';
+  h+=(RO?"":'<button class="tinyedit" data-act="editep" data-id="'+e.n+'">ערוך</button>')+'</div>';
+  if(state.editEp===e.n) h+=epForm(e);
+  if(mode==="list"){
+   h+='<div class="notes listwrap" data-ep="'+e.n+'">';
+   vis.forEach(function(x){h+=note(x,"rowmode")});
+   h+='</div>';
+   if(gapN) h+='<div class="ghost">חסרות '+gapN+' סצנות בפרק הזה</div>';
+  } else {
+   h+='<div class="notes tlbar" data-ep="'+e.n+'">';
+   vis.forEach(function(x){h+=note(x,"segmode")});
+   for(var i=vis.length;i<PER_EP;i++) h+='<span class="tlgap"></span>';
+   h+='</div>';
+  }
+  h+='</div>';
+ });
+ return h+'</div>';
+}
+function epForm(e){
+ var h='<div class="epform" data-form="__ep__">';
+ h+='<div class="f"><label>שם הפרק</label><input name="title" value="'+esc(e.title)+'"></div>';
+ h+='<div class="f"><label>שורת משנה</label><input name="sub" value="'+esc(e.sub)+'"></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveep" data-id="'+e.n+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="cancelep">ביטול</button></div></div>';
+ return h;
+}
+function note(x,extra){
+ var ch=charOf(x.char);
+ var h='<div class="pnote n-'+x.status+(extra?" "+extra:"")+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(x.id)+'" style="--cc:'+esc(charColor(x.char))+'"';
+ if(extra==="segmode") h+=' title="'+esc(x.id+" · "+x.title+" · "+(ch?ch.name:"")+" · "+STATUS[x.status].l)+'"'+(RO?"":' data-act="edit"');
+ h+='>';
+ h+=reddot(x.status);
+ h+='<div class="nchar" style="background:'+esc(charColor(x.char))+'">'+esc(ch?ch.name:"ללא דמות");
+ if(ch&&ch.role) h+='<small>'+esc(ch.role)+'</small>';
+ h+='</div>';
+ h+='<div class="c"><span>'+esc(x.id)+'</span><span>'+(Number(x.min)||0)+' דק׳</span></div>';
+ h+='<h4>'+esc(x.title)+'</h4><p>'+esc(shortOf(x))+'</p>';
+ if(extra==="rowmode") h+='<span class="st">'+esc(STATUS[x.status].l)+'</span>';
+ else if(x.status!=="shot"&&extra!=="segmode") h+='<span class="st">'+esc(STATUS[x.status].l)+'</span>';
+ if(extra!=="segmode"&&!RO){
+  h+='<div class="nfoot">';
+  if(state.confirmDel===x.id){
+   h+='<span class="nask">למחוק?</span>';
+   h+='<button class="nedit ndel" data-act="dodel" data-id="'+esc(x.id)+'">כן, מחק</button>';
+   h+='<button class="nedit" data-act="nodel">ביטול</button>';
+  } else {
+   h+='<button class="nedit" data-act="edit" data-id="'+esc(x.id)+'">ערוך</button>';
+   h+='<button class="nedit ndel" data-act="askdel" data-id="'+esc(x.id)+'">מחק</button>';
+   h+='<select class="nmove" data-id="'+esc(x.id)+'" title="העברה לפרק אחר">';
+   DATA.eps.forEach(function(ee){h+='<option value="'+ee.n+'"'+(ee.n===x.ep?" selected":"")+'>פרק '+ee.n+'</option>'});
+   h+='</select>';
+  }
+  h+='</div>';
+ }
+ return h+'</div>';
+}
+function reindex(){
+ DATA.eps.forEach(function(e){
+  DATA.scenes.filter(function(x){return x.ep===e.n})
+   .sort(function(a,b){return (a.ord||0)-(b.ord||0)})
+   .forEach(function(x,j){x.ord=j});
+ });
+ DATA.scenes.sort(function(a,b){return ((a.ep||99)-(b.ep||99))||((a.ord||0)-(b.ord||0))});
+}
+function moveScene(id,ep,beforeId){
+ var sc=null;DATA.scenes.forEach(function(x){if(x.id===id)sc=x});
+ if(!sc)return;
+ var col=DATA.scenes.filter(function(x){return x.ep===ep&&x.id!==id})
+  .sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+ var idx=col.length;
+ if(beforeId) col.forEach(function(x,j){if(x.id===beforeId)idx=j});
+ col.splice(idx,0,sc); sc.ep=ep;
+ col.forEach(function(x,j){x.ord=j});
+ reindex();
+}
+var dragId=null,ins=null;
+function cleanupDrag(){
+ if(ins&&ins.parentNode)ins.parentNode.removeChild(ins);
+ ins=null;
+ var d=document.querySelector(".pnote.dragging");
+ if(d)d.classList.remove("dragging");
+ dragId=null;
+}
+function autoScroll(e){
+ var m=110, step=26;
+ if(e.clientY<m) window.scrollBy(0,-step);
+ else if(window.innerHeight-e.clientY<m) window.scrollBy(0,step);
+ var ts=document.querySelectorAll(".tscroll");
+ for(var i=0;i<ts.length;i++){
+  var tr=ts[i].getBoundingClientRect();
+  if(e.clientY>tr.top&&e.clientY<tr.bottom){
+   if(e.clientX-tr.left<m) ts[i].scrollLeft-=step;
+   else if(tr.right-e.clientX<m) ts[i].scrollLeft+=step;
+  }
+ }
+ var bd=document.querySelector(".board");
+ if(bd){
+  var r=bd.getBoundingClientRect();
+  if(e.clientY>r.top&&e.clientY<r.bottom){
+   if(e.clientX-r.left<m) bd.scrollLeft-=step;
+   else if(r.right-e.clientX<m) bd.scrollLeft+=step;
+  }
+ }
+}
+function clearZones(){
+ var a=document.querySelectorAll(".dropok,.dropbucket,.dropcell");
+ for(var i=0;i<a.length;i++){a[i].classList.remove("dropok");a[i].classList.remove("dropbucket");a[i].classList.remove("dropcell")}
+}
+document.addEventListener("dragstart",function(e){
+ if(!canEdit())return;
+ var n=e.target&&e.target.closest?e.target.closest(".pnote,.scene,.mchip"):null;
+ if(!n)return;
+ dragId=n.getAttribute("data-id");
+ setTimeout(function(){n.classList.add("dragging")},0);
+ if(e.dataTransfer){e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",dragId)}catch(_){}}
+});
+document.addEventListener("dragend",function(){clearZones();cleanupDrag()});
+document.addEventListener("dragover",function(e){
+ if(!dragId)return;
+ autoScroll(e);
+ var td=e.target&&e.target.closest?e.target.closest("td[data-cell]"):null;
+ if(td){
+  e.preventDefault();
+  if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+  clearZones();td.classList.add("dropcell");
+  return;
+ }
+ var sec=e.target&&e.target.closest?e.target.closest("section.grp[data-grp]"):null;
+ if(sec&&sec.getAttribute("data-grp")){
+  e.preventDefault();
+  if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+  clearZones();sec.classList.add("dropok");
+  var bk=e.target.closest(".scenes[data-st]");
+  if(bk)bk.classList.add("dropbucket");
+  return;
+ }
+ var col=e.target&&e.target.closest?e.target.closest(".notes"):null;
+ if(!col){clearZones();return}
+ e.preventDefault();
+ if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+ if(!ins){ins=document.createElement("div");ins.className="ins"}
+ var n=e.target.closest(".pnote");
+ if(n&&n!==ins){
+  var r=n.getBoundingClientRect();
+  if(e.clientY<r.top+r.height/2) col.insertBefore(ins,n);
+  else col.insertBefore(ins,n.nextSibling);
+ } else if(!ins.parentNode||ins.parentNode!==col) col.appendChild(ins);
+});
+document.addEventListener("drop",function(e){
+ var tdz=e.target&&e.target.closest?e.target.closest("td[data-cell]"):null;
+ if(dragId&&tdz){
+  e.preventDefault();snap();
+  var parts=tdz.getAttribute("data-cell").split(":");
+  var sc=DATA.scenes.filter(function(x){return x.id===dragId})[0];
+  if(sc){
+   if(parts[0]==="c"){
+    sc.char=parts[1];
+    var ep=Number(parts[2])||sc.ep;
+    moveScene(sc.id,ep,null);
+    toast(sc.id+" עבר ל"+((charOf(parts[1])||{}).name||"")+", פרק "+ep);
+   } else if(parts[0]==="u"){
+    sc.unit=parts[1];
+    if(parts[2]&&STATUS[parts[2]])sc.status=parts[2];
+    toast(sc.id+" שויך ל"+unitName(parts[1])+(parts[2]==="shot"?" וסומן כצולם":parts[2]==="todo"?" וסומן לצילום":""));
+   }
+  }
+  clearZones();cleanupDrag();render();save();
+  return;
+ }
+ var sec=e.target&&e.target.closest?e.target.closest("section.grp[data-grp]"):null;
+ if(dragId&&sec&&sec.getAttribute("data-grp")){
+  e.preventDefault();snap();
+  var g=sec.getAttribute("data-grp").split(":");
+  var sc=DATA.scenes.filter(function(x){return x.id===dragId})[0];
+  if(sc){
+   if(g[0]==="char")sc.char=g[1]; else if(g[0]==="unit")sc.unit=g[1];
+   var bk=e.target.closest(".scenes[data-st]");
+   if(bk){var st=bk.getAttribute("data-st");if(STATUS[st])sc.status=st}
+   var lbl=g[0]==="char"?((charOf(g[1])||{}).name||""):unitName(g[1]);
+   clearZones();cleanupDrag();render();save();toast("הסצנה שויכה ל"+lbl);
+   return;
+  }
+  clearZones();cleanupDrag();return;
+ }
+ if(!dragId||!ins||!ins.parentNode){clearZones();cleanupDrag();return}
+ e.preventDefault();snap();
+ var col=ins.parentNode, ep=Number(col.getAttribute("data-ep"));
+ var nx=ins.nextElementSibling;
+ while(nx&&!nx.classList.contains("pnote"))nx=nx.nextElementSibling;
+ moveScene(dragId,ep,nx?nx.getAttribute("data-id"):null);
+ cleanupDrag();render();save();
+});
+function ideaPrompt(){
+ var who=fval("__ask__","who")||"", extra=(fval("__ask__","extra")||"").trim();
+ var lbl="הסדרה כולה", ctx="";
+ var c=DATA.chars.filter(function(x){return "c:"+x.k===who})[0];
+ var u=DATA.units.filter(function(x){return "u:"+x.k===who})[0];
+ if(c){
+  var sc=DATA.scenes.filter(function(x){return x.char===c.k});
+  lbl="הדמות "+c.name+(c.role?" ("+c.role+")":"");
+  ctx="מה שכבר יש עליה: "+(sc.filter(function(x){return x.status==="shot"}).map(function(x){return x.title}).join("; ")||"כלום")+".\n"
+   +"מה שמתוכנן ולא צולם: "+(sc.filter(function(x){return x.status!=="shot"}).map(function(x){return x.title}).join("; ")||"כלום")+".\n"
+   +"מה שחסר לדמות: "+((c.gaps||[]).join("; ")||"לא הוגדר")+".";
+ } else if(u){
+  var su=DATA.scenes.filter(function(x){return x.unit===u.k});
+  lbl="המחלקה "+u.name;
+  ctx="מה שכבר יש: "+(su.filter(function(x){return x.status==="shot"}).map(function(x){return x.title}).join("; ")||"כלום")+".\n"
+   +"מה שעוד צריך לפי היומן: "+((u.need||[]).join("; ")||"לא הוגדר")+".";
+ }
+ return "אני עובד על "+M().title+", סדרה תיעודית של חמישה פרקי חצי שעה על משטרת אילת. "
+  +"כל סצנה היא שתי דקות בערך.\n\nתן לי חמישה רעיונות לסצנות עבור "+lbl+".\n"
+  +(ctx?ctx+"\n":"")
+  +(extra?"\nמה שחשוב לי: "+extra+"\n":"")
+  +"\nלכל רעיון: כותרת קצרה, משפט אחד למה זה עובד, ובאיזה פרק זה יושב. "
+  +"בלי ראיונות מדברים, רק דברים שאפשר לצלם קורים.";
+}
+function gapScore(i){
+ var cs=DATA.scenes.filter(function(x){return x.char===i.char});
+ var csh=cs.filter(function(x){return x.status==="shot"}).length;
+ var ush=DATA.scenes.filter(function(x){return x.unit===i.unit&&x.status==="shot"}).length;
+ var epn=DATA.scenes.filter(function(x){return x.ep===i.ep}).length;
+ return (10-Math.min(csh,10))*3 + (4-Math.min(ush,4))*4 + Math.max(0,PER_EP-epn)*2;
+}
+function moreIdeas(){
+ var pool=DATA.pool||[];
+ if(!pool.length){
+  state.askText=ideaPrompt();
+  render();
+  toast("נגמר המאגר. בניתי לך בקשה מוכנה, תעתיק אותה לצ׳אט ואני אכתוב עוד",true);
+  return;
+ }
+ var ranked=pool.slice().map(function(i,ix){return {i:i,s:gapScore(i)*10-ix}})
+  .sort(function(a,b){return b.s-a.s}).slice(0,6).map(function(x){return x.i});
+ var take={};ranked.forEach(function(x){take[x.id]=1});
+ DATA.pool=pool.filter(function(x){return !take[x.id]});
+ DATA.ideas=(DATA.ideas||[]);
+ ranked.forEach(function(x){DATA.ideas.unshift(x)});
+ render();save();
+ toast("נוספו "+ranked.length+" רעיונות, לפי החורים הכי גדולים כרגע");
+}
+function ideasView(){
+ var h='<section class="grp"><div class="grp-h"><h2>רעיונות לסצנות</h2><span class="role">בנק רעיונות פתוח, בלחיצה אחת נכנס ליומן</span></div>';
+ h+='<p class="grp-note">בחר דמות או מחלקה, אני בונה לך בקשה מוכנה עם כל ההקשר של היומן. תעתיק אותה לצ׳אט ותקבל רעיונות, ואני מכניס אותם לכאן. כל רעיון אפשר להוסיף כפתק ורוד ליומן.</p>';
+ if(!RO){
+ h+='<div class="ask" data-form="__ask__">';
+ h+='<div class="row2"><div class="f"><label>על מי או על מה</label><select name="who">';
+ h+='<option value="">הסדרה כולה</option>';
+ h+='<optgroup label="דמויות">'+DATA.chars.map(function(x){return '<option value="c:'+x.k+'"'+(state.askWho==="c:"+x.k?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</optgroup>';
+ h+='<optgroup label="מחלקות">'+DATA.units.map(function(x){return '<option value="u:'+x.k+'"'+(state.askWho==="u:"+x.k?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</optgroup>';
+ h+='</select></div>';
+ h+='<div class="f"><label>מה חשוב לך שיהיה שם</label><textarea name="extra" placeholder="למשל: משהו בלי דיבורים, או סצנה שמחברת בין שתי דמויות">'+esc(state.askExtra||"")+'</textarea></div></div>';
+ h+='<div class="s-foot" style="border:0;padding:0">';
+ h+='<button class="btn" data-act="moreideas">הוסף עוד רעיונות'+((DATA.pool||[]).length?' <span class="n">'+(DATA.pool||[]).length+'</span>':'')+'</button>';
+ h+='<button class="btn ghost" data-act="buildask">בנה בקשה לצ׳אט</button>';
+ if(state.askText) h+='<button class="btn ghost" data-act="copyask">העתק</button>';
+ h+='<button class="btn ghost" data-act="addidea">הוסף רעיון משלי</button></div>';
+ if(state.askText) h+='<div class="prompt">'+esc(state.askText)+'</div>';
+ h+='</div>';
+ }
+ var list=(DATA.ideas||[]);
+ h+='<div class="ideas">';
+ if(!list.length) h+='<div class="empty">אין עדיין רעיונות בבנק.</div>';
+ list.forEach(function(i){
+  var c=charOf(i.char);
+  h+='<div class="idea"><div class="ihead" style="background:'+esc(charColor(i.char))+'">'+esc(c?c.name:"הסדרה");
+  h+='<small>'+esc(unitName(i.unit)||"")+' · פרק '+(i.ep||1)+'</small></div>';
+  h+='<div class="ibody"><h4>'+esc(i.title)+'</h4><p>'+esc(i.why||"")+'</p></div>';
+  h+='<div class="ifoot">';
+  if(!RO){h+='<button class="btn" data-act="useidea" data-id="'+esc(i.id)+'">הוסף ליומן</button>';
+  h+='<button class="btn ghost" data-act="delidea" data-id="'+esc(i.id)+'">מחק</button>';}
+  h+='<span class="spacer"></span><span class="tagi'+(i.from==="me"?" mine":"")+'">'+(i.from==="me"?"שלי":"הצעה")+'</span></div></div>';
+ });
+ return h+'</div></section>';
+}
+function tagsOf(){return DATA.tagdefs||[]}
+function fillTable(){
+ var TD=tagsOf();
+ var h='<section class="grp"><div class="grp-h"><h2>טבלת השלמות</h2><span class="role">מה כבר יש לכל דמות ומה עוד חסר לה כדי לעמוד</span></div>';
+ h+='<p class="grp-note">דמות תיעודית עומדת כשיש לה שישה דברים. ירוק אומר שזה כבר בקופסה, כתום אומר שזה מתוכנן ולא צולם, ורוד אומר שאין ואף אחד עוד לא חשב על זה.</p>';
+ h+='<div class="tscroll"><table class="arc"><thead><tr><th class="c0">דמות</th>';
+ TD.forEach(function(t){h+='<th>'+esc(t.label)+'</th>'});
+ h+='<th class="tot">ציון</th></tr></thead><tbody>';
+ DATA.chars.forEach(function(c){
+  var mine=DATA.scenes.filter(function(x){return x.char===c.k});
+  var score=0;
+  h+='<tr><th class="c0" style="--ccol:'+esc(c.color||"#455160")+'"><b>'+esc(c.name)+'</b><em>'+esc(c.role||"")+'</em></th>';
+  TD.forEach(function(t){
+   var hit=mine.filter(function(x){return (x.tags||[]).indexOf(t.k)>-1});
+   var shot=hit.filter(function(x){return x.status==="shot"});
+   var k=shot.length?"yes":(hit.length?"plan":"no");
+   if(k==="yes")score++;
+   h+='<td class="k-'+k+'"><span class="kmark">'+(k==="yes"?"יש":k==="plan"?"מתוכנן":"אין")+'</span>';
+   if(hit.length) h+='<span class="kcode">'+hit.map(function(x){return esc(x.id)}).join(" · ")+'</span>';
+   h+='</td>';
+  });
+  h+='<td class="tot"><span class="score" style="color:'+(score>=5?"var(--shot)":score>=3?"var(--partial)":"var(--todo)")+'">'+score+'/'+TD.length+'</span></td></tr>';
+ });
+ return h+'</tbody></table></div></section>';
+}
+function unitTable(){
+ var h='<section class="grp"><div class="grp-h"><h2>טבלת מחלקות</h2><span class="role">אילו אירועים יש לכל מחלקה ומה עוד צריך לצלם</span></div>';
+ h+='<div class="tscroll"><table class="arc" style="min-width:1080px"><thead><tr><th class="c0">מחלקה</th><th style="min-width:96px">מצב</th><th>אירועים שיש</th><th>מה עוד צריך</th></tr></thead><tbody>';
+ ["full","partial","none"].forEach(function(cv){
+  DATA.units.filter(function(u){return coverOf(u)===cv}).forEach(function(u){
+   var sc=DATA.scenes.filter(function(x){return x.unit===u.k});
+   var got=sc.filter(function(x){return x.status!=="todo"});
+   var wait=sc.filter(function(x){return x.status==="todo"});
+   h+='<tr><th class="c0"><b>'+esc(u.name)+'</b><em>'+sc.length+' סצנות</em></th>';
+   h+='<td><span class="upill '+cv+'">'+esc(COVER[cv])+'</span></td>';
+   h+='<td>';
+   if(got.length) got.forEach(function(x){
+    h+='<button class="mchip m-'+x.status+'"'+(RO?"":' draggable="true" data-act="edit"')+' data-id="'+esc(x.id)+'">'+reddot(x.status)+'<em>'+esc(x.id)+'</em>'+esc(x.title)+'</button>';
+   }); else h+='<span class="kcode">אין עדיין שום אירוע. אפשר לגרור לכאן</span>';
+   h+='</td><td'+(RO?"":' data-cell="u:'+esc(u.k)+':todo"')+'>';
+   if(wait.length) wait.forEach(function(x){
+    h+='<button class="mchip m-todo"'+(RO?"":' draggable="true" data-act="edit"')+' data-id="'+esc(x.id)+'">'+reddot("todo")+'<em>'+esc(x.id)+'</em>'+esc(x.title)+'</button>';
+   });
+   if((u.need||[]).length) h+='<ul class="needlist">'+u.need.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>';
+   if(!wait.length&&!(u.need||[]).length) h+='<span class="kcode">סגור</span>';
+   h+='</td></tr>';
+  });
+ });
+ return h+'</tbody></table></div></section>';
+}
+function arcTable(){
+ var h='<section class="grp"><div class="grp-h"><h2>המהלך העונתי</h2><span class="role">כל דמות לרוחב חמשת הפרקים</span></div>';
+ h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
+ h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
+ h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
+ h+='<span><i class="dot-key"></i>נקודה אדומה = לא צולם. עיגול חלול = חלקי</span>';
+ h+='<span style="color:var(--ink-3)">אפשר לגרור כל טאב לכל תא בטבלה. זה משנה גם דמות וגם פרק</span></div>';
+ h+='<div class="tscroll"><table class="arc"><thead><tr><th class="c0">דמות</th>';
+ DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
+ h+='<th class="tot">סה״כ</th></tr></thead><tbody>';
+ DATA.chars.forEach(function(c){
+  var all=DATA.scenes.filter(function(x){return x.char===c.k});
+  h+='<tr><th class="c0" style="--ccol:'+esc(c.color||"#455160")+'"><b>'+esc(c.name)+'</b><em>'+esc(c.role)+'</em></th>';
+  DATA.eps.forEach(function(e){
+   var cell=all.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+   var ck='c:'+c.k+':'+e.n;
+   var cattr=RO?"":' data-cell="'+esc(ck)+'"';
+   if(!cell.length){h+='<td class="void"'+cattr+'></td>';return}
+   h+='<td'+cattr+'>';
+   cell.forEach(function(x){
+    h+='<button class="mchip m-'+x.status+'"'+(RO?"":' draggable="true" data-act="edit"')+' data-id="'+esc(x.id)+'">';
+    h+=reddot(x.status)+'<em>'+esc(x.id)+'</em>'+esc(x.title)+'</button>';
+   });
+   h+='</td>';
+  });
+  var sh=all.filter(function(x){return x.status==="shot"}).length;
+  h+='<td class="tot"><b>'+all.length+'</b><em>'+sh+' צולמו</em></td></tr>';
+ });
+ return h+'</tbody></table></div></section>';
+}
+function focusNew(){
+ var el=document.querySelector('[data-form="__new2__"] input[name="title"]');
+ if(el){try{el.focus()}catch(_){}}
+}
+function unitMap(){
+ var h='<section class="grp"><div class="grp-h"><h2>מפת מחלקות</h2><span class="role">איפה יש חומר ואיפה אין</span></div>';
+ h+='<p class="grp-note">שש דמויות והשטח כולו בפנים: סיור, נוער, בילוש, דוברות ולשכה. מה שנשאר פתוח הוא לא כמות אלא איזון. הבלשים הם היחידים בלי בית, חלפון הוא היחיד בלי כישלון מצולם, והמלחמה והמפונים, שהיו פרק שלם בהצעה המקורית, עדיין לא צולמו בכלל.</p>';
+ h+='<div class="units">';
+ ["full","partial","none"].forEach(function(cv){
+  DATA.units.filter(function(u){return coverOf(u)===cv}).forEach(function(u){
+   var cnt=DATA.scenes.filter(function(s){return s.unit===u.k}).length;
+   h+='<div class="unit" data-c="'+coverOf(u)+'"><div class="unit-h"><span class="dot"></span><h3>'+esc(u.name)+'</h3>';
+   h+='<span class="cnt">'+cnt+' סצנות</span></div>';
+   if(u.note) h+='<p>'+esc(u.note)+'</p>';
+   if((u.need||[]).length){h+='<p class="lab">צריך לצלם</p><ul>'+u.need.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>'}
+   h+='</div>';});});
+ return h+'</div></section>';
+}
+
+function vbtn(k,label){
+ return '<button data-act="group" data-k="'+k+'" aria-pressed="'+(state.group===k)+'">'+esc(label)+'</button>';
+}
+function chip(kind,k,label,n){
+ var on = kind==="group" ? state.group===k : state.filter===k;
+ return '<button class="chip" data-act="'+kind+'" data-k="'+k+'" aria-pressed="'+on+'">'+esc(label)+(n===undefined?"":'<span class="n">'+n+'</span>')+'</button>';
+}
+
+function card(s){
+ if(state.editing===s.id) return '<article class="scene" data-s="'+s.status+'">'+form(s)+'</article>';
+ var h='<article class="scene" data-s="'+s.status+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(s.id)+'">';
+ h+='<div class="s-head">'+(RO?"":'<div class="grip" title="גרור מכאן">⠿</div>')+reddot(s.status)+'<div class="code">'+esc(s.id)+'</div><div class="s-title"><h3>'+esc(s.title)+(s.mine?'<span class="tag">הצעה</span>':'')+'</h3><div class="people">';
+ if(s.unit) h+='<span class="person unit">'+esc(unitName(s.unit))+'</span>';
+ (s.people||[]).forEach(function(p){h+='<span class="person">'+esc(p)+'</span>'});
+ h+='</div></div><div class="mins">'+(Number(s.min)||0)+' דק׳</div>';
+ h+='<button class="pill" data-s="'+s.status+'"'+(RO?"":' data-act="cycle"')+' data-id="'+esc(s.id)+'" title="לחיצה מחליפה סטטוס">'+STATUS[s.status].l+'</button></div>';
+ if(s.short) h+='<div class="cardshort">'+esc(s.short)+'</div>';
+ h+='<div class="cols"><div class="col have"><h4>יש ביד</h4>'+list(s.have,"אין עדיין כלום")+'</div>';
+ h+='<div class="col need"><h4>חסר כדי לסגור</h4>'+list(s.need,"הסצנה סגורה")+'</div></div>';
+ if(s.note) h+='<div class="note"><b>הערת עריכה</b>'+esc(s.note)+'</div>';
+ if(RO) return h+'</article>';
+ h+='<div class="s-foot"><button class="btn ghost" data-act="edit" data-id="'+esc(s.id)+'">ערוך</button>';
+ h+='<button class="btn ghost" data-act="askdel" data-id="'+esc(s.id)+'">מחק</button>';
+ if(state.confirmDel===s.id) h+='<button class="btn danger" data-act="dodel" data-id="'+esc(s.id)+'">כן, מחק</button><button class="btn ghost" data-act="nodel">ביטול</button>';
+ h+='<div class="spacer"></div><div class="movebar"><span class="mlab">העבר אל</span>';
+ h+='<select class="smove nmove" data-id="'+esc(s.id)+'" title="העברה לפרק אחר">'+DATA.eps.map(function(e){return '<option value="'+e.n+'"'+(e.n===s.ep?" selected":"")+'>פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select>';
+ h+='<select class="smove schar" data-id="'+esc(s.id)+'" title="שיוך לדמות אחרת">'+DATA.chars.map(function(c){return '<option value="'+c.k+'"'+(c.k===s.char?" selected":"")+'>דמות · '+esc(c.name)+'</option>'}).join("")+'</select>';
+ h+='<select class="smove sunit" data-id="'+esc(s.id)+'" title="שיוך למחלקה אחרת">'+DATA.units.map(function(u){return '<option value="'+u.k+'"'+(u.k===s.unit?" selected":"")+'>מחלקה · '+esc(u.name)+'</option>'}).join("")+'</select>';
+ h+='</div></div></article>';
+ return h;
+}
+function list(a,t){if(!(a||[]).length) return '<p class="none">'+esc(t)+'</p>';
+ return '<ul>'+a.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>'}
+
+function form(s){
+ var n=s||{id:"",title:"",char:DATA.chars[0].k,unit:DATA.units[0].k,status:"todo",min:MIN_PER,ep:1,people:[],have:[],need:[],note:""};
+ var h='<div class="form" data-form="'+(s?esc(s.id):"__new__")+'">';
+ h+='<div class="row"><div class="f"><label>קוד סצנה</label><input name="id" value="'+esc(n.id)+'" placeholder="C-01"></div>';
+ h+='<div class="f"><label>אורך מוערך בדקות</label><input name="min" type="number" min="0" step="1" value="'+(Number(n.min)||0)+'"></div></div>';
+ h+='<div class="f"><label>כותרת הסצנה</label><input name="title" value="'+esc(n.title)+'"></div>';
+ h+='<div class="row"><div class="f"><label>דמות מובילה</label><select name="char">'+DATA.chars.map(function(x){return '<option value="'+x.k+'"'+(x.k===n.char?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>';
+ h+='<div class="f"><label>מחלקה</label><select name="unit">'+DATA.units.map(function(x){return '<option value="'+x.k+'"'+(x.k===n.unit?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div></div>';
+ h+='<div class="row"><div class="f"><label>סטטוס</label><select name="status">'+ORDER.map(function(k){return '<option value="'+k+'"'+(k===n.status?" selected":"")+'>'+STATUS[k].l+'</option>'}).join("")+'</select></div>';
+ h+='<div class="f"><label>פרק</label><select name="ep">'+DATA.eps.map(function(e){return '<option value="'+e.n+'"'+(e.n===(n.ep||1)?" selected":"")+'>פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select></div></div>';
+ h+='<div class="f"><label>מי בפריים</label><input name="people" value="'+esc((n.people||[]).join(", "))+'" placeholder="מופרד בפסיקים"></div>';
+ h+='<div class="row"><div class="f"><label>יש ביד</label><textarea name="have">'+esc(lines(n.have))+'</textarea><p class="hint">שורה לכל פריט</p></div>';
+ h+='<div class="f"><label>חסר כדי לסגור</label><textarea name="need">'+esc(lines(n.need))+'</textarea><p class="hint">שורה לכל פריט</p></div></div>';
+ h+='<div class="f"><label>מה הסצנה נותנת לדמות</label><div class="tagbox">'+tagsOf().map(function(t){
+  return '<label><input type="checkbox" name="tag_'+t.k+'"'+(((n.tags||[]).indexOf(t.k)>-1)?" checked":"")+'>'+esc(t.label)+'</label>';
+ }).join("")+'</div></div>';
+ h+='<div class="f"><label>טקסט הפתק</label><textarea name="short" style="min-height:52px" placeholder="מה שיופיע על הפתק במפת הפרקים. אם ריק, נלקח אוטומטית מהשדות למעלה">'+esc(n.short||"")+'</textarea></div>';
+ h+='<div class="f"><label>הערת עריכה</label><textarea name="note" style="min-height:56px">'+esc(n.note)+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0">';
+ h+='<button class="btn" data-act="save" data-id="'+(s?esc(s.id):"__new__")+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="cancel">ביטול</button>';
+ if(s) h+='<div class="spacer"></div><button class="btn danger" data-act="del" data-id="'+esc(s.id)+'">מחק</button>';
+ return h+'</div></div>';
+}
+function charForm(c){
+ var h='<div class="grpform" data-form="__char__">';
+ h+='<div class="row"><div class="f"><label>שם הדמות</label><input name="name" value="'+esc(c.name)+'"></div>';
+ h+='<div class="f"><label>תפקיד</label><input name="role" value="'+esc(c.role||"")+'"></div></div>';
+ h+='<div class="f"><label>מה הסיפור</label><textarea name="story" style="min-height:96px">'+esc(c.story||"")+'</textarea></div>';
+ h+='<div class="row"><div class="f"><label>מה היא רוצה</label><textarea name="want" style="min-height:60px">'+esc(c.want||"")+'</textarea></div>';
+ h+='<div class="f"><label>מה הפצע</label><textarea name="wound" style="min-height:60px">'+esc(c.wound||"")+'</textarea></div></div>';
+ h+='<div class="f"><label>צבע הדמות</label><input name="color" type="color" value="'+esc(c.color||"#455160")+'" style="height:42px;padding:4px"></div>';
+ h+='<div class="f"><label>מה חסר לדמות</label><textarea name="gaps">'+esc(lines(c.gaps))+'</textarea><p class="hint">שורה לכל פריט</p></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="savechar" data-id="'+esc(c.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="cancelgrp">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="delchar" data-id="'+esc(c.k)+'">מחק דמות</button></div>';
+ return h+'</div>';
+}
+function unitForm(u){
+ var h='<div class="grpform" data-form="__unit__">';
+ h+='<div class="f"><label>שם המחלקה</label><input name="name" value="'+esc(u.name)+'"></div>';
+ h+='<div class="f"><label>הערה</label><textarea name="note" style="min-height:60px">'+esc(u.note||"")+'</textarea></div>';
+ h+='<div class="f"><label>צריך לצלם</label><textarea name="need">'+esc(lines(u.need))+'</textarea><p class="hint">שורה לכל פריט. מצב הכיסוי מחושב לבד לפי הסצנות שצולמו</p></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveunit" data-id="'+esc(u.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="cancelgrp">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="delunit" data-id="'+esc(u.k)+'">מחק מחלקה</button></div>';
+ return h+'</div>';
+}
+function readForm(key){
+ var el=document.querySelector('[data-form="'+(window.CSS&&CSS.escape?CSS.escape(key):key)+'"]');
+ if(!el) return null;
+ function v(n){var f=el.querySelector('[name="'+n+'"]');return f?f.value:""}
+ return {id:v("id").trim()||("X-"+(DATA.scenes.length+1)),title:v("title").trim()||"סצנה ללא שם",
+  char:v("char"),unit:v("unit"),status:v("status"),min:Number(v("min"))||MIN_PER,ep:Number(v("ep"))||1,
+  people:v("people").split(",").map(function(x){return x.trim()}).filter(Boolean),
+  have:toArr(v("have")),need:toArr(v("need")),short:v("short").trim(),note:v("note").trim(),
+  tags:tagsOf().filter(function(t){var f=el.querySelector('[name="tag_'+t.k+'"]');return f&&f.checked}).map(function(t){return t.k})};
+}
+function toast(m,bad){var t=document.getElementById("toast");if(!t)return;
+ t.textContent=m;t.className="toast on"+(bad?" bad":"");
+ clearTimeout(t._h);t._h=setTimeout(function(){t.className="toast"},2600)}
+function buildDoc(){
+ var css=document.getElementById("app-style").textContent;
+ var code=document.getElementById("app-code").textContent;
+ var json=JSON.stringify(STORE).replace(/</g,"\\u003c");
+ var S="script";
+ return '<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">'+
+ '<meta name="viewport" content="width=device-width,initial-scale=1"><title>'+TITLE+'</title>'+FONT+
+ '<style id="app-style">'+css+'</style></head><body><div id="root"></div>'+
+ '<'+S+' id="scene-data" type="application/json">'+json+'</'+S+'>'+
+ '<'+S+' id="app-code">'+code+'</'+S+'></body></html>';
+}
+var UIKEY="marhav-eilat-ui-v1", firstPaint=true, uiT=null, restoreY=0, restoreX=0;
+function loadUI(){
+ try{
+  var r=localStorage.getItem(UIKEY);if(!r)return;
+  var o=JSON.parse(r);if(!o)return;
+  if(o.group)state.group=o.group;
+  if(o.boardMode)state.boardMode=o.boardMode;
+  if(o.filter)state.filter=o.filter;
+  restoreY=Number(o.scrollY)||0;
+  restoreX=Number(o.scrollX)||0;
+ }catch(_){}
+}
+function saveUI(){
+ clearTimeout(uiT);
+ uiT=setTimeout(function(){
+  try{
+   var bd=document.querySelector(".board");
+   localStorage.setItem(UIKEY,JSON.stringify({
+    group:state.group,boardMode:state.boardMode,filter:state.filter,
+    scrollY:window.scrollY||window.pageYOffset||0,
+    scrollX:bd?bd.scrollLeft:0
+   }));
+  }catch(_){}
+ },300);
+}
+function paint(h){
+ if(state.showUsers) h+=userPanel();
+ var y=window.scrollY||window.pageYOffset||0;
+ var bd0=document.querySelector(".board");
+ var x=bd0?bd0.scrollLeft:0;
+ document.getElementById("root").innerHTML=h;
+ if(firstPaint){firstPaint=false;y=restoreY||0;x=restoreX||0}
+ requestAnimationFrame(function(){
+  if(y)window.scrollTo(0,y);
+  var bd=document.querySelector(".board");
+  if(bd&&x)bd.scrollLeft=x;
+  saveUI();
+ });
+}
+var hist=[],future=[],preSnap=null,skipHist=false;
+function snap(){try{preSnap=JSON.stringify(STORE)}catch(_){preSnap=null}}
+function pushHist(){
+ if(skipHist){skipHist=false;preSnap=null;return}
+ if(preSnap!==null){
+  var now=null;try{now=JSON.stringify(STORE)}catch(_){}
+  if(now!==null&&now!==preSnap){hist.push(preSnap);if(hist.length>60)hist.shift();future.length=0}
+ }
+ preSnap=null;
+}
+function undo(){
+ if(!hist.length){toast("אין לאן לחזור",true);return}
+ try{future.push(JSON.stringify(STORE))}catch(_){}
+ STORE=normStore(JSON.parse(hist.pop()));useView();
+ skipHist=true;
+ state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editEp=null;state.editMeta=false;
+ render();save();toast("הפעולה בוטלה");
+}
+function redo(){
+ if(!future.length){toast("אין לאן להתקדם",true);return}
+ try{hist.push(JSON.stringify(STORE))}catch(_){}
+ STORE=normStore(JSON.parse(future.pop()));useView();
+ skipHist=true;render();save();toast("הפעולה שוחזרה");
+}
+var SNAPDATE="";
+
+var SB_URL="https://auhzumbvgjmwggurgkzn.supabase.co", SB_KEY="sb_publishable_FcWBT2i9cIU-JIuVWfoQRg_DRV99Scn", GATE="";
+var REST=SB_URL.replace(/\/+$/,"")+"/rest/v1/docs";
+var HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
+var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false;
+function rowsOf(){
+ var r={users:STORE.users,base:STORE.base};
+ Object.keys(STORE.layers||{}).forEach(function(k){r["layer:"+k]=STORE.layers[k]});
+ return r;
+}
+function applyRows(list){
+ var users=null,base=null,layers={},seen=false;
+ list.forEach(function(row){
+  if(row.id==="users")users=row.data;
+  else if(row.id==="base")base=row.data;
+  else if(row.id.indexOf("layer:")===0)layers[row.id.slice(6)]=row.data;
+  seen=true;
+ });
+ if(!seen)return false;
+ if(users)STORE.users=users;
+ if(base)STORE.base=base;
+ STORE.layers=layers;
+ return true;
+}
+function pull(initial){
+ if(pulling)return Promise.resolve(false);
+ pulling=true;
+ return fetch(REST+"?select=id,data,updated_at",{headers:HDR})
+  .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
+  .then(function(list){
+   pulling=false;
+   var incoming=JSON.stringify(list.map(function(x){return [x.id,x.data]}).sort());
+   if(!initial&&incoming===lastPull)return list.length;
+   lastPull=incoming;
+   var changed=applyRows(list);
+   if(changed){
+    list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
+    useView();render();
+   }
+   netStatus("ok");
+   return list.length;
+  })
+  .catch(function(e){pulling=false;netStatus("err");return -1});
+}
+function pushRows(){
+ var r=rowsOf(), out=[];
+ Object.keys(r).forEach(function(id){
+  var j=JSON.stringify(r[id]);
+  if(sent[id]!==j){out.push({id:id,data:r[id]});sent[id]=j}
+ });
+ if(!out.length){netStatus("ok");return Promise.resolve()}
+ netStatus("saving");
+ return fetch(REST+"?on_conflict=id",{
+   method:"POST",
+   headers:Object.assign({},HDR,{"Prefer":"resolution=merge-duplicates,return=minimal"}),
+   body:JSON.stringify(out.map(function(x){return {id:x.id,data:x.data,updated_at:new Date().toISOString()}}))
+  })
+  .then(function(res){if(!res.ok)throw new Error("http "+res.status);lastSaved=clock();netStatus("ok")})
+  .catch(function(e){out.forEach(function(x){delete sent[x.id]});netStatus("err")});
+}
+function netStatus(st){
+ netState=st;
+ setSave(st==="saving"?"saving":st==="err"?"error":"saved");
+}
+function startPoll(){
+ clearInterval(pollT);
+ pollT=setInterval(function(){if(document.hidden)return;pull(false)},6000);
+ document.addEventListener("visibilitychange",function(){if(!document.hidden)pull(false)});
+}
+
+var saveState="saved", lastSaved="";
+function clock(){try{var d=new Date();return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}catch(_){return ""}}
+function userPanel(){
+ var h='<div class="upanel" data-act="closeusers"><div class="ubox" data-stop="1">';
+ h+='<div class="uhead"><h3>'+(state.me?"משתמשים":"מי אתה?")+'</h3>';
+ h+='<p>'+(state.me?"לחיצה על שם פותחת את הגרסה שלו. עורכים רק את הגרסה שלך.":"בחר את השם שלך. כל אחד עובד על הגרסה שלו, ורואה את של כולם.")+'</p></div>';
+ h+='<div class="ulist">';
+ h+='<button class="urow" data-act="pickview" data-k="" aria-current="'+(!state.viewUser)+'" style="--uc:#5A6472"><i></i>';
+ h+='<b>המקור המשותף</b><span class="tagi">בסיס</span><span>'+(STORE.base.scenes||[]).length+' סצנות</span></button>';
+ users().forEach(function(u){
+  var n=hasLayer(u.k)?(STORE.layers[u.k].scenes||[]).length:(STORE.base.scenes||[]).length;
+  h+='<button class="urow" data-act="pickview" data-k="'+esc(u.k)+'" aria-current="'+(state.viewUser===u.k)+'" style="--uc:'+esc(u.color||"#455160")+'"><i></i>';
+  h+='<b>'+esc(u.name)+'</b>';
+  if(state.me===u.k) h+='<span class="tagi">אני</span>';
+  else if(!hasLayer(u.k)) h+='<span class="tagi" style="color:var(--ink-3);border-color:var(--line-2)">עוד לא ערך</span>';
+  h+='<span>'+n+' סצנות</span></button>';
+ });
+ h+='</div>';
+ if(!RO){
+  h+='<div class="newu"><input name="newuser" placeholder="שם של משתמש חדש" autocomplete="off">';
+  h+='<button class="btn" data-act="adduser">הוסף</button></div>';
+  h+='<div class="ufoot">';
+  if(state.me){
+   if(hasLayer(state.me)) h+='<button class="btn" data-act="promote" title="הגרסה שלך הופכת למקור המשותף של כולם">הפוך את הגרסה שלי למקור לכולם</button>';
+   if(!FORCE_ME) h+='<button class="btn ghost" data-act="switchme">אני לא '+esc(userName(state.me))+'</button>';
+   if(hasLayer(state.me)) h+='<button class="btn danger" data-act="resetme">אפס את הגרסה שלי למקור</button>';
+  }
+  if(state.confirmPromote){
+   h+='<div style="flex:1 0 100%;font-family:\'Heebo\',sans-serif;font-size:13px;color:var(--partial);padding-top:6px">';
+   h+='זה מחליף את המקור המשותף בגרסה שלך, ומוחק את כל השכבות של האחרים. בטוח?';
+   h+='<button class="btn danger" style="margin-inline-start:10px" data-act="promoteYes">כן, החלף</button>';
+   h+='<button class="btn ghost" style="margin-inline-start:6px" data-act="promoteNo">ביטול</button></div>';
+  }
+  h+='<div class="spacer"></div><button class="btn ghost" data-act="closeusers">סגור</button></div>';
+ } else {
+  h+='<div class="ufoot"><div class="spacer"></div><button class="btn ghost" data-act="closeusers">סגור</button></div>';
+ }
+ return h+'</div></div>';
+}
+function userBtn(){
+ var k=state.viewUser;
+ var lbl=state.me?userName(state.me):"בחר משתמש";
+ var h='<button class="ubtn" data-act="openusers" style="--uc:'+esc(state.me?userColor(state.me):"#5A6472")+'"><i></i>'+esc(lbl);
+ if(k!==state.me) h+='<small>צופה ב'+esc(userName(k))+'</small>';
+ h+='</button>';
+ return h;
+}
+function saveBadge(){
+ var cls="s-ok",txt="הכול שמור"+(lastSaved?" · "+lastSaved:"");
+ if(saveState==="saving"){cls="s-saving";txt="שומר"}
+ else if(saveState==="dirty"){cls="s-dirty";txt="יש שינויים שלא נשמרו"}
+ else if(saveState==="error"){cls="s-err";txt="השמירה נכשלה"}
+ return '<span class="savebadge '+cls+'" id="savebadge"><i></i>'+esc(txt)+'</span>';
+}
+function setSave(st){
+ saveState=st;
+ var el=document.getElementById("savebadge");
+ if(el){var d=document.createElement("div");d.innerHTML=saveBadge();el.parentNode.replaceChild(d.firstChild,el)}
+}
+var DRIVE_ON=false;
+var DRIVE_FOLDER="1kACtuJk2rwXtDN3U1Gsv4_ZxG-KXiz9V";
+function toText(){
+ var L={shot:"צולם",partial:"חלקי",todo:"לצילום",dropped:"ירד"};
+ var o=M().title+" · יומן סצנות\n\n"+M().sub+"\n\n";
+ var c={};DATA.scenes.forEach(function(x){c[x.status]=(c[x.status]||0)+1});
+ o+=DATA.scenes.length+" סצנות מתוך "+TARGET+" ביעד. צולם "+(c.shot||0)+", חלקי "+(c.partial||0)+", לצילום "+(c.todo||0)+".\n";
+ o+="עודכן: "+stamp()+"\n\n";
+ o+="=== מפת הפרקים ===\n\n";
+ DATA.eps.forEach(function(e){
+  var a=DATA.scenes.filter(function(x){return x.ep===e.n}).sort(function(x,y){return (x.ord||0)-(y.ord||0)});
+  o+="פרק "+e.n+" · "+e.title+"  ("+e.sub+")\n";
+  o+=a.length+" מתוך "+PER_EP+" סצנות · "+a.filter(function(x){return x.status==="shot"}).length+" צולמו · "+(a.length*MIN_PER)+" דקות\n";
+  a.forEach(function(x,i){
+   var ch=charOf(x.char);
+   o+="  "+(i+1)+". ["+x.id+"] "+x.title+" — "+(ch?ch.name:"")+" — "+L[x.status]+"\n";
+   if(x.short)o+="      "+x.short+"\n";
+   if((x.need||[]).length)o+="      חסר: "+x.need.join("; ")+"\n";
+  });
+  o+="\n";
+ });
+ o+="=== הדמויות ===\n\n";
+ DATA.chars.forEach(function(ch){
+  var sc=DATA.scenes.filter(function(x){return x.char===ch.k});
+  o+=ch.name+" — "+(ch.role||"")+"  ("+sc.length+" סצנות, "+sc.filter(function(x){return x.status==="shot"}).length+" צולמו)\n";
+  if(ch.story)o+=ch.story+"\n";
+  if(ch.want)o+="רוצה: "+ch.want+"\n";
+  if(ch.wound)o+="פצע: "+ch.wound+"\n";
+  if((ch.gaps||[]).length)o+="חסר לדמות: "+ch.gaps.join(" · ")+"\n";
+  o+="\n";
+ });
+ o+="=== מחלקות ===\n\n";
+ DATA.units.forEach(function(u){
+  var n=DATA.scenes.filter(function(x){return x.unit===u.k});
+  o+=u.name+" ("+COVER[coverOf(u)]+", "+n.length+" סצנות). "+(u.note||"");
+  if((u.need||[]).length)o+=" צריך: "+u.need.join(", ")+".";
+  o+="\n";
+ });
+ if((DATA.ideas||[]).length){
+  o+="\n=== בנק רעיונות ===\n\n";
+  DATA.ideas.forEach(function(i){
+   var ch=charOf(i.char);
+   o+="- "+i.title+" ("+(ch?ch.name:"")+", פרק "+i.ep+"): "+(i.why||"")+"\n";
+  });
+ }
+ return o;
+}
+function driveErr(e){
+ var c=e&&e.code;
+ if(c==="needs_reauth")return "צריך להתחבר מחדש לגוגל דרייב בהגדרות הקונקטורים";
+ if(c==="server_not_connected")return "גוגל דרייב לא מחובר לחשבון הזה";
+ if(c==="blocked_by_policy")return "המדיניות חוסמת שמירה לדרייב";
+ if(c==="approval_required")return "צריך לאשר את הפעולה כדי לשמור לדרייב";
+ if(c==="rate_limited")return "יותר מדי בקשות. נסה שוב בעוד רגע";
+ if(c==="tool_error")return "דרייב החזיר שגיאה: "+((e&&e.message)||"");
+ if(c==="server_unavailable")return "דרייב לא זמין כרגע. ייתכן שהקובץ בכל זאת נשמר, בדוק לפני שתנסה שוב";
+ return "השמירה לדרייב נכשלה";
+}
+var driveBusy=false;
+function driveSave(){
+ if(driveBusy)return;
+ if(!(window.claude&&window.claude.use)){toast("שמירה לדרייב לא זמינה בגרסה הזו",true);return}
+ driveBusy=true;toast("שומר לגוגל דרייב");
+ window.claude.use("mcp").then(function(mcp){
+  if(!mcp){driveBusy=false;toast("החיבור לדרייב לא זמין בתצוגה הזו",true);return null}
+  var base="מרחב אילת · יומן סצנות "+stamp();
+  return mcp.callTool("Google Drive","create_file",{
+   title:base+".json",
+   contentMimeType:"application/json",
+   textContent:JSON.stringify({v:2,saved:stamp(),store:STORE}),
+   parentId:DRIVE_FOLDER,
+   disableConversionToGoogleType:true
+  }).then(function(){
+   return mcp.callTool("Google Drive","create_file",{
+    title:base,
+    contentMimeType:"text/plain",
+    textContent:toText(),
+    parentId:DRIVE_FOLDER
+   });
+  }).then(function(){
+   driveBusy=false;toast("נשמר בדרייב, בתיקייה מרחב אילת");
+  });
+ }).catch(function(e){driveBusy=false;toast(driveErr(e),true)});
+}
+function stamp(){try{return new Date().toISOString().slice(0,10)}catch(_){return "backup"}}
+function backup(){
+ if(!(window.claude&&window.claude.use)){toast("שמירה למחשב לא זמינה כאן",true);return}
+ window.claude.use("downloads").then(function(dl){
+  if(!dl){toast("שמירה למחשב לא זמינה בתצוגה הזו",true);return null}
+  return dl.save({filename:"marhav-eilat-scene-log-"+stamp()+".json",
+   data:JSON.stringify({v:2,saved:stamp(),store:STORE},null,1)});
+ }).then(function(r){if(r)toast("נשמר למחשב")})
+ .catch(function(e){
+  var c=e&&e.code;
+  toast(c==="declined"?"הביטול נקלט":c==="too_large"?"הקובץ גדול מדי":"השמירה למחשב נכשלה",true);
+ });
+}
+function restore(){
+ var inp=document.createElement("input");
+ inp.type="file";inp.accept=".json,application/json";
+ inp.onchange=function(){
+  var f=inp.files&&inp.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+   try{
+    var o=JSON.parse(String(r.result));
+    var st=o&&o.store?o.store:(o&&o.data?o.data:o);
+    if(!st||(!st.base&&!st.scenes)) throw new Error("bad");
+    STORE=normStore(st);useView();reindex();render();save();toast("הגיבוי נטען");
+   }catch(_){toast("הקובץ אינו גיבוי תקין של היומן",true)}
+  };
+  r.onerror=function(){toast("לא הצלחתי לקרוא את הקובץ",true)};
+  r.readAsText(f);
+ };
+ inp.click();
+}
+var pushT=null;
+function save(){
+ if(RO)return;
+ pushHist();
+ setSave("saving");
+ clearTimeout(pushT);
+ pushT=setTimeout(function(){pushRows()},450);
+}
+document.addEventListener("change",function(e){
+ var el=e.target;
+ if(!el||!el.classList||!el.classList.contains("nmove"))return;
+ if(!ensureEdit()){render();return}
+ snap();
+ var id=el.getAttribute("data-id"), ep=Number(el.value);
+ var cur=DATA.scenes.filter(function(x){return x.id===id})[0];
+ if(!cur||cur.ep===ep)return;
+ moveScene(id,ep,null);render();save();
+ toast("הסצנה עברה לפרק "+ep);
+});
+document.addEventListener("change",function(e){
+ var el=e.target;if(!el||!el.classList)return;
+ var id=el.getAttribute("data-id");
+ var sc=DATA.scenes.filter(function(x){return x.id===id})[0];
+ if(!sc)return;
+ if(!ensureEdit()){render();return}
+ snap();
+ if(el.classList.contains("schar")){sc.char=el.value;render();save();toast("הסצנה שויכה ל"+(charOf(el.value)||{}).name);return}
+ if(el.classList.contains("sunit")){sc.unit=el.value;render();save();toast("הסצנה שויכה ל"+unitName(el.value));return}
+});
+document.addEventListener("click",function(e){
+ var b=e.target.closest("[data-act]");if(!b)return;
+ var act=b.getAttribute("data-act"),id=b.getAttribute("data-id");
+ snap();
+ if(act==="openusers"){state.showUsers=true;render();return}
+ if(act==="closeusers"){if(e.target.closest("[data-stop]")&&act!=="closeusers")return;
+  if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="closeusers"]'))return;
+  if(!state.me&&!RO){toast("בחר משתמש כדי להתחיל",true);return}
+  state.showUsers=false;render();return}
+ if(act==="pickview"){
+  var k=b.getAttribute("data-k")||"";
+  if(!state.me&&!RO&&k){setMe(k);state.showUsers=false;render();toast("שלום "+userName(k));return}
+  state.viewUser=k;state.showUsers=false;render();
+  toast(k?("צופה בגרסה של "+userName(k)):"צופה במקור המשותף");return}
+ if(act==="switchme"){state.me="";state.viewUser="";try{localStorage.removeItem(MEKEY)}catch(_){}
+  state.showUsers=true;render();return}
+ if(act==="adduser"){
+  if(RO)return;
+  var f=document.querySelector('[name="newuser"]');
+  var nm=f?f.value.trim():"";
+  if(!nm){toast("כתוב שם",true);return}
+  var key="u"+(users().length+1)+"_"+Math.floor(Math.random()*9999);
+  var pal=["#B5541A","#1B4B8F","#A8102E","#146B3A","#3F3A78","#A81E6B"];
+  STORE.users.push({k:key,name:nm,color:pal[users().length%pal.length]});
+  if(!state.me)setMe(key); else {state.viewUser=key}
+  render();save();toast("נוסף משתמש "+nm);return}
+ if(act==="promote"){state.confirmPromote=true;render();return}
+ if(act==="promoteNo"){state.confirmPromote=false;render();return}
+ if(act==="promoteYes"){
+  if(!state.me||RO||!hasLayer(state.me))return;
+  STORE.base=JSON.parse(JSON.stringify(STORE.layers[state.me]));
+  STORE.layers={};
+  state.viewUser=state.me;state.confirmPromote=false;state.showUsers=false;
+  useView();render();save();
+  toast("הגרסה שלך היא עכשיו המקור לכולם");return}
+ if(act==="resetme"){
+  if(!state.me||RO)return;
+  delete STORE.layers[state.me];
+  state.viewUser=state.me;state.showUsers=false;render();save();
+  toast("הגרסה שלך אופסה למקור");return}
+ var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
+  saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
+  edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
+ if(MUT[act]&&!ensureEdit())return;
+ if(act==="undo"){undo();return}
+ if(act==="redo"){redo();return}
+ if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
+ if(act==="group"){state.group=b.getAttribute("data-k");render();return}
+ if(act==="buildask"){
+  state.askWho=fval("__ask__","who");state.askExtra=fval("__ask__","extra");
+  state.askText=ideaPrompt();render();return}
+ if(act==="copyask"){
+  var t=state.askText||"";
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+   navigator.clipboard.writeText(t).then(function(){toast("הבקשה הועתקה. הדבק אותה בצ׳אט")})
+    .catch(function(){toast("לא הצלחתי להעתיק. סמן את הטקסט למטה ידנית",true)});
+  } else toast("סמן את הטקסט למטה והעתק ידנית",true);
+  return}
+ if(act==="moreideas"){moreIdeas();return}
+ if(act==="addidea"){
+  DATA.ideas=DATA.ideas||[];
+  DATA.ideas.unshift({id:"m"+(DATA.ideas.length+1)+"_"+Math.floor(Math.random()*9999),
+   title:"רעיון חדש",why:"",char:DATA.chars[0].k,unit:DATA.units[0].k,ep:1,from:"me"});
+  render();save();toast("נוסף רעיון. לחץ הוסף ליומן כדי להפוך אותו לסצנה");return}
+ if(act==="delidea"){
+  DATA.ideas=(DATA.ideas||[]).filter(function(x){return x.id!==id});
+  render();save();return}
+ if(act==="useidea"){
+  var ix=(DATA.ideas||[]).filter(function(x){return x.id===id})[0];
+  if(!ix)return;
+  var nid=nextId(ix.char);
+  DATA.scenes.push({id:nid,title:ix.title,char:ix.char,unit:ix.unit,status:"todo",min:MIN_PER,
+   ep:Number(ix.ep)||1,ord:999,people:[],have:[],need:[],short:ix.why||"",note:"נכנס מבנק הרעיונות.",tags:[],mine:true});
+  DATA.ideas=(DATA.ideas||[]).filter(function(x){return x.id!==id});
+  reindex();state.group="board";render();save();
+  toast("נוספה סצנה "+nid+" לפרק "+(Number(ix.ep)||1));return}
+ if(act==="bmode"){state.boardMode=b.getAttribute("data-k");render();return}
+ if(act==="newat"){state.newAt=b.getAttribute("data-k");state.editing=null;render();return}
+ if(act==="newcancel"){state.newAt=null;render();return}
+ if(act==="newshot"){createAt("shot");return}
+ if(act==="newtodo"){createAt("todo");return}
+ if(act==="cancelgrp"){state.editChar=null;state.editUnit=null;render();return}
+ if(act==="editchar"){state.editChar=id;state.editUnit=null;render();return}
+ if(act==="savechar"){
+  DATA.chars.forEach(function(c){if(c.k===id){
+   c.name=fval("__char__","name").trim()||c.name;
+   c.role=fval("__char__","role").trim();
+   c.story=fval("__char__","story").trim();
+   c.want=fval("__char__","want").trim();
+   c.wound=fval("__char__","wound").trim();
+   c.gaps=toArr(fval("__char__","gaps"));
+   c.color=fval("__char__","color")||c.color;
+  }});
+  state.editChar=null;render();save();return}
+ if(act==="delchar"){
+  var used=DATA.scenes.filter(function(x){return x.char===id}).length;
+  if(used){toast("אי אפשר למחוק. יש "+used+" סצנות משויכות לדמות",true);return}
+  DATA.chars=DATA.chars.filter(function(c){return c.k!==id});
+  state.editChar=null;render();save();return}
+ if(act==="addchar"){
+  var k="c"+(DATA.chars.length+1)+"_"+Math.floor(Math.random()*9999);
+  DATA.chars.push({k:k,name:"דמות חדשה",role:"",story:"",want:"",wound:"",gaps:[],color:"#455160"});
+  state.editChar=k;state.group="char";render();save();return}
+ if(act==="editunit"){state.editUnit=id;state.editChar=null;render();return}
+ if(act==="saveunit"){
+  DATA.units.forEach(function(u){if(u.k===id){
+   u.name=fval("__unit__","name").trim()||u.name;
+   u.note=fval("__unit__","note").trim();
+   u.need=toArr(fval("__unit__","need"));
+  }});
+  state.editUnit=null;render();save();return}
+ if(act==="delunit"){
+  var uu=DATA.scenes.filter(function(x){return x.unit===id}).length;
+  if(uu){toast("אי אפשר למחוק. יש "+uu+" סצנות משויכות למחלקה",true);return}
+  DATA.units=DATA.units.filter(function(u){return u.k!==id});
+  state.editUnit=null;render();save();return}
+ if(act==="addunit"){
+  var uk="u"+(DATA.units.length+1)+"_"+Math.floor(Math.random()*9999);
+  DATA.units.push({k:uk,name:"מחלקה חדשה",need:[],note:""});
+  state.editUnit=uk;state.group="unit";render();save();return}
+ if(act==="askdel"){state.confirmDel=id;render();return}
+ if(act==="nodel"){state.confirmDel=null;render();return}
+ if(act==="dodel"){DATA.scenes=DATA.scenes.filter(function(x){return x.id!==id});
+  state.confirmDel=null;state.editing=null;reindex();render();save();return}
+ if(act==="closemodal"){if(e.target.closest("[data-stop]"))return;state.editing=null;render();return}
+ if(act==="editmeta"){state.editMeta=true;render();return}
+ if(act==="cancelmeta"){state.editMeta=false;render();return}
+ if(act==="savemeta"){
+  var mm=M();
+  mm.eyebrow=fval("__meta__","eyebrow").trim()||mm.eyebrow;
+  mm.title=fval("__meta__","title").trim()||mm.title;
+  mm.sub=fval("__meta__","sub").trim()||mm.sub;
+  state.editMeta=false;render();save();return}
+ if(act==="editep"){state.editEp=Number(id);render();return}
+ if(act==="cancelep"){state.editEp=null;render();return}
+ if(act==="saveep"){
+  var t=fval("__ep__","title").trim(), sb=fval("__ep__","sub").trim();
+  DATA.eps.forEach(function(e){if(e.n===Number(id)){if(t)e.title=t;e.sub=sb}});
+  state.editEp=null;render();save();return}
+ if(act==="saveNow"){save();toast(saveState==="error"?"מנסה לשמור שוב":"שומר");return}
+ if(act==="drive"){driveSave();return}
+ if(act==="backup"){backup();return}
+ if(act==="restore"){restore();return}
+ if(act==="add"){state.adding=true;state.editing=null;render();window.scrollTo({top:0,behavior:"smooth"});return}
+ if(act==="edit"){state.editing=id;state.adding=false;render();return}
+ if(act==="cancel"){state.editing=null;state.adding=false;render();return}
+ if(act==="cycle"){var s=DATA.scenes.filter(function(x){return x.id===id})[0];if(!s)return;
+  s.status=ORDER[(ORDER.indexOf(s.status)+1)%ORDER.length];render();save();return}
+ if(act==="del"){DATA.scenes=DATA.scenes.filter(function(x){return x.id!==id});state.editing=null;reindex();render();save();return}
+ if(act==="save"){var d=readForm(id);if(!d)return;
+  if(id==="__new__"){d.ord=999;DATA.scenes.push(d);state.adding=false}
+  else{var i=-1;DATA.scenes.forEach(function(x,j){if(x.id===id)i=j});
+   if(i>-1){d.ord=DATA.scenes[i].ord;if(DATA.scenes[i].mine)d.mine=true;DATA.scenes[i]=d}
+   state.editing=null}
+  reindex();render();save();return}
+});
+document.addEventListener("keydown",function(e){
+ var mod=e.ctrlKey||e.metaKey;
+ var inField=e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||"");
+ if(mod&&(e.key==="z"||e.key==="Z")&&!inField){e.preventDefault();if(e.shiftKey)redo();else undo();return}
+ if(mod&&(e.key==="y"||e.key==="Y")&&!inField){e.preventDefault();redo();return}
+ if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
+ if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
+ if(e.key==="Escape"&&state.newAt){state.newAt=null;render();return}
+ if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit)){
+  state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;render();
+ }
+});
+window.addEventListener("scroll",saveUI,{passive:true});
+document.addEventListener("scroll",function(e){
+ if(e.target&&e.target.classList&&e.target.classList.contains("board"))saveUI();
+},true);
+loadUI();
+loadMe();
+if(!state.me&&!RO) state.showUsers=true;
+useView();
+state.writable=true;
+render();
+pull(true).then(function(n){
+ if(n===0){ sent={}; pushRows().then(function(){toast("הפלטפורמה אותחלה עם התוכן הנוכחי")}); }
+ startPoll();
+});
+})();
+</script>
+
+</body>
+</html>
