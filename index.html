@@ -4348,7 +4348,11 @@ document.addEventListener("click",function(e){
  if(act==="nodel"){state.confirmDel=null;render();return}
  if(act==="dodel"){DATA.scenes=DATA.scenes.filter(function(x){return x.id!==id});
   state.confirmDel=null;state.editing=null;reindex();render();save();return}
- if(act==="closemodal"){if(e.target.closest("[data-stop]"))return;state.editing=null;state.editLine=null;render();return}
+ if(act==="closemodal"){
+  if(e.target.closest("[data-stop]"))return;
+  if(document.querySelector('.modal [data-form][data-dirty]')){
+   toast("יש שינויים שלא נשמרו. לחץ שמור, או ביטול כדי לצאת",true);return}
+  state.editing=null;state.editLine=null;render();return}
  if(act==="editmeta"){state.editMeta=true;render();return}
  if(act==="cancelmeta"){state.editMeta=false;render();return}
  if(act==="savemeta"){
@@ -4391,6 +4395,10 @@ document.addEventListener("keydown",function(e){
  if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit||state.editLine)){
   state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;state.editLine=null;render();
  }
+});
+document.addEventListener("input",function(e){
+ var f=e.target&&e.target.closest?e.target.closest("[data-form]"):null;
+ if(f)f.setAttribute("data-dirty","1");
 });
 document.addEventListener("focusin",function(e){
  var t=e.target;
