@@ -377,8 +377,13 @@ table.arc{border-collapse:collapse;width:100%;min-width:1040px}
 .unit .lab{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);margin:11px 0 4px}
 .unit ul{margin:0;padding-inline-start:16px}
 .unit li{font-size:13.5px;color:var(--ink-2);margin-bottom:2px}
-.modal{position:fixed;inset:0;background:rgba(8,11,15,.6);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:38px 16px;overflow:auto}
-.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:740px;width:100%;box-shadow:0 22px 64px rgba(0,0,0,.45);overflow:hidden}
+.modal{position:fixed;inset:0;height:100dvh;background:rgba(8,11,15,.6);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:38px 16px;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+html.modal-open,html.modal-open body{overflow:hidden}
+@media (max-width:640px){.modal{padding:12px 8px}}
+.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:740px;width:100%;box-shadow:0 22px 64px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100dvh - 76px)}
+@media (max-width:640px){.modal .box{max-height:calc(100dvh - 24px)}}
+.modal .box>.mhead{flex:0 0 auto}
+.modal .box>.form,.modal .box>.grpform{overflow-y:auto;min-height:0}
 .modal .mhead{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--surface-2);font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;letter-spacing:.11em;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center}
 .modal .mhead button{background:transparent;border:0;color:var(--ink-3);font-size:20px;line-height:1;cursor:pointer;padding:0 4px}
 .modal .mhead button:hover{color:var(--ink)}
@@ -2981,6 +2986,7 @@ function counts(){var c={shot:0,partial:0,todo:0,dropped:0,min:0};
  DATA.scenes.forEach(function(s){c[s.status]=(c[s.status]||0)+1;if(s.status!=="dropped")c.min+=Number(s.min)||0});return c}
 
 function render(){
+ pendingRender=false;
  useView();
  var c=counts(),n=DATA.scenes.length,tot=Math.max(n,TARGET);
  var h="";
@@ -3853,6 +3859,7 @@ function loadUI(){
 function saveUI(){
  clearTimeout(uiT);
  uiT=setTimeout(function(){
+  if(document.documentElement.classList.contains("modal-open"))return;
   try{
    var bd=document.querySelector(".board");
    localStorage.setItem(UIKEY,JSON.stringify({
@@ -3869,13 +3876,19 @@ function paint(h){
  var bd0=document.querySelector(".board");
  var x=bd0?bd0.scrollLeft:0;
  document.getElementById("root").innerHTML=h;
+ var hasModal=!!document.querySelector(".modal");
+ document.documentElement.classList.toggle("modal-open",hasModal);
  if(firstPaint){firstPaint=false;y=restoreY||0;x=restoreX||0}
  requestAnimationFrame(function(){
-  if(y)window.scrollTo(0,y);
+  if(y&&!hasModal)window.scrollTo(0,y);
   var bd=document.querySelector(".board");
   if(bd&&x)bd.scrollLeft=x;
   saveUI();
  });
+}
+var pendingRender=false;
+function editorOpen(){
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editMeta||state.editEp!==null);
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
 function snap(){try{preSnap=JSON.stringify(STORE)}catch(_){preSnap=null}}
@@ -3939,7 +3952,9 @@ function pull(initial){
    var changed=applyRows(list);
    if(changed){
     list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
-    useView();render();
+    useView();
+    if(editorOpen()){ pendingRender=true; }
+    else { pendingRender=false; render(); }
    }
    netStatus("ok");
    return list.length;
@@ -4377,6 +4392,17 @@ document.addEventListener("keydown",function(e){
   state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;state.editLine=null;render();
  }
 });
+document.addEventListener("focusin",function(e){
+ var t=e.target;
+ if(!t||!t.closest||!t.closest(".modal"))return;
+ setTimeout(function(){try{t.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}},240);
+});
+if(window.visualViewport){
+ window.visualViewport.addEventListener("resize",function(){
+  var a=document.activeElement;
+  if(a&&a.closest&&a.closest(".modal")){setTimeout(function(){try{a.scrollIntoView({block:"center"})}catch(_){}},60)}
+ });
+}
 window.addEventListener("scroll",saveUI,{passive:true});
 document.addEventListener("scroll",function(e){
  if(e.target&&e.target.classList&&e.target.classList.contains("board"))saveUI();
