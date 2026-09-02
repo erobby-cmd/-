@@ -384,6 +384,7 @@ table.arc{border-collapse:collapse;width:100%;min-width:1040px}
 .modal .mhead button:hover{color:var(--ink)}
 .cardshort{padding:0 22px 15px;font-size:15px;line-height:1.55;color:var(--ink-2)}
 .grpform{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:17px 19px 19px;margin-top:16px;display:grid;gap:12px}
+.modal .grpform{margin:0;border:0;border-radius:0;background:var(--surface)}
 .nchar{margin:-11px -13px 10px;padding:8px 13px 7px;font-family:"Heebo",sans-serif;font-size:15px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:3px 3px 0 0;line-height:1.2}
 .nchar small{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:500;opacity:.78;display:block;margin-top:1px;letter-spacing:.04em}
 .cdot{display:inline-block;width:14px;height:14px;border-radius:4px;margin-inline-end:9px;vertical-align:-1px}
@@ -3051,6 +3052,14 @@ function render(){
  if(state.group==="lines"){
   h+=linesView();
   h+='</div>';
+  if(state.editLine){
+   var le=lineObj(state.editLine);
+   if(le){
+    h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+    h+='<div class="mhead"><span>עריכת ליין</span><button data-act="cancelgrp" title="סגור">\u00d7</button></div>';
+    h+=lineForm(le)+'</div></div>';
+   }
+  }
   if(state.editing){
    var ls=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
    if(ls){
@@ -3658,7 +3667,6 @@ function linesView(){
  h+='<section class="grp"><div class="grp-h"><h2>הערות על הליינים</h2><span class="role">מה כל סיפור צריך כדי לעמוד</span></div><div class="units">';
  LS.forEach(function(l){
   var s=ST[l.k];
-  if(state.editLine===l.k){h+='<div class="unit" data-c="'+(s.kind==="ok"?"full":s.kind==="gap"?"partial":"none")+'">'+lineForm(l)+'</div>';return}
   h+='<div class="unit" data-c="'+(s.kind==="ok"?"full":s.kind==="gap"?"partial":"none")+'"><div class="unit-h"><span class="dot" style="background:'+esc(l.color||"#455160")+'"></span><h3>'+esc(l.name)+'</h3>';
   h+='<span class="cnt">'+s.all.length+' סצנות</span></div>';
   if(l.what) h+='<p class="lab2">'+esc(l.what)+'</p>';
@@ -4325,7 +4333,7 @@ document.addEventListener("click",function(e){
  if(act==="nodel"){state.confirmDel=null;render();return}
  if(act==="dodel"){DATA.scenes=DATA.scenes.filter(function(x){return x.id!==id});
   state.confirmDel=null;state.editing=null;reindex();render();save();return}
- if(act==="closemodal"){if(e.target.closest("[data-stop]"))return;state.editing=null;render();return}
+ if(act==="closemodal"){if(e.target.closest("[data-stop]"))return;state.editing=null;state.editLine=null;render();return}
  if(act==="editmeta"){state.editMeta=true;render();return}
  if(act==="cancelmeta"){state.editMeta=false;render();return}
  if(act==="savemeta"){
