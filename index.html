@@ -304,6 +304,29 @@ table.arc{border-collapse:collapse;width:100%;min-width:1040px}
 .arc td.tot b{font-family:"Heebo",sans-serif;font-size:21px;font-variant-numeric:tabular-nums;display:block;line-height:1.2}
 .arc td.tot em{font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3);font-style:normal}
 .arc tbody tr:hover td,.arc tbody tr:hover th.c0{background-color:var(--surface-2)}
+.arc.lmap td{min-width:176px}
+.arc.lmap th.c0{min-width:212px}
+.arc.lmap th.c0 b{font-size:16px}
+.ldots{display:flex;gap:3px;margin-top:7px}
+.ldots i{width:100%;height:5px;border-radius:3px;background:var(--line-2)}
+.ldots i.on{background:var(--ccol,#455160)}
+.ldots i.hole{background:repeating-linear-gradient(45deg,var(--todo),var(--todo) 2px,transparent 2px,transparent 4px)}
+.lbadge{display:inline-block;margin-top:7px;font-family:"Heebo",sans-serif;font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-3)}
+.lbadge.l-ok{background:var(--shot-soft);color:var(--shot)}
+.lbadge.l-gap{background:var(--partial-soft);color:var(--partial)}
+.lbadge.l-drop,.lbadge.l-thin,.lbadge.l-empty{background:var(--todo-soft);color:var(--todo)}
+.arc.lmap td.hole{background-color:var(--pinkbg)}
+.arc.lmap td.hole em.holem{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--todo);font-style:normal}
+.arc.lmap tr.norow th.c0 b{color:var(--ink-3)}
+.holekey{width:13px;height:13px;border-radius:3px;background:var(--pinkbg);border:1px solid var(--todo);display:inline-block}
+.ldiag{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px;margin:16px 0 4px}
+.lcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow);position:relative}
+.lcard .ldot{position:absolute;inset-inline-start:0;top:12px;bottom:12px;width:3px;border-radius:3px}
+.lcard b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:15.5px;display:block;margin-inline-start:9px}
+.lcard .lbadge{margin:6px 0 0 0;margin-inline-start:9px}
+.lcard p{font-size:13px;color:var(--ink-2);margin:7px 0 0;margin-inline-start:9px;line-height:1.5}
+.unit .lab2{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;color:var(--ink-2);margin:0 0 4px}
+.unit .lnote{border-top:1px solid var(--line);margin-top:9px;padding-top:9px;font-size:13px;color:var(--ink-2)}
 .cpanel .gap{background:var(--pinkbg)}
 .arc td.k-yes{background-color:#DCEFE0}
 .arc td.k-plan{background-color:#F8EEDA}
@@ -2888,7 +2911,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -2992,7 +3015,7 @@ function render(){
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
  h+='<div class="views">';
- h+=vbtn("board","מפת הפרקים")+vbtn("char","לפי דמות")+vbtn("unit","לפי מחלקה")+vbtn("ideas","רעיונות לסצנות");
+ h+=vbtn("board","מפת הפרקים")+vbtn("lines","מפת הליינים")+vbtn("char","לפי דמות")+vbtn("unit","לפי מחלקה")+vbtn("ideas","רעיונות לסצנות");
  h+='</div>';
  if(!RO){
   h+='<div class="sep"></div>';
@@ -3008,6 +3031,7 @@ function render(){
   h+='<button class="btn ghost" data-act="restore" title="טעינת גיבוי מהמחשב">טען גיבוי</button>';
   h+='<button class="btn ghost" data-act="backup" title="שמירת עותק של כל היומן למחשב">שמור למחשב</button>';
    if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button class="btn ghost" data-act="drive" title="שמירת עותק בגוגל דרייב, בתיקייה מרחב אילת">שמור לדרייב</button>';
+  if(state.group==="lines") h+='<button class="btn ghost" data-act="addline">הוסף ליין</button>';
   if(state.group==="char") h+='<button class="btn ghost" data-act="addchar">הוסף דמות</button>';
   if(state.group==="unit") h+='<button class="btn ghost" data-act="addunit">הוסף מחלקה</button>';
   if(state.group==="ideas") h+='<button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
@@ -3021,6 +3045,21 @@ function render(){
  if(state.group==="ideas"){
   h+=ideasView();
   h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
+ if(state.group==="lines"){
+  h+=linesView();
+  h+='</div>';
+  if(state.editing){
+   var ls=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
+   if(ls){
+    h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+    h+='<div class="mhead"><span>עריכת סצנה '+esc(ls.id)+'</span><button data-act="cancel" title="סגור">\u00d7</button></div>';
+    h+=form(ls)+'</div></div>';
+   }
+  }
+  h+='<div class="toast" id="toast"></div>';
   paint(h);
   return;
  }
@@ -3307,6 +3346,11 @@ document.addEventListener("drop",function(e){
     var ep=Number(parts[2])||sc.ep;
     moveScene(sc.id,ep,null);
     toast(sc.id+" עבר ל"+((charOf(parts[1])||{}).name||"")+", פרק "+ep);
+   } else if(parts[0]==="l"){
+    sc.line=parts[1]==="__none__"?"-":parts[1];
+    var lep=Number(parts[2])||sc.ep;
+    moveScene(sc.id,lep,null);
+    toast(parts[1]==="__none__"?(sc.id+" הוצא מכל ליין, פרק "+lep):(sc.id+" עבר לליין "+lineName(parts[1])+", פרק "+lep));
    } else if(parts[0]==="u"){
     sc.unit=parts[1];
     if(parts[2]&&STATUS[parts[2]])sc.status=parts[2];
@@ -3471,6 +3515,161 @@ function unitTable(){
  });
  return h+'</tbody></table></div></section>';
 }
+
+/* ===== ליינים: הסיפורים שרצים לאורך העונה ===== */
+var DEFAULT_LINES=[
+ {k:"hunt",name:"הציד: דוד כסאות והסרסור",what:"התיק הגדול של הימ״ר, מהמארב שנשרף ועד המעצר",color:"#B0472B",note:"הליין העלילתי היחיד בסדרה עם התחלה, אמצע וסוף. הוא נושא את פרק 3 כמעט לבד."},
+ {k:"kalfon",name:"חלפון והשליטה במרחב",what:"מפקד שלקח על עצמו עיר שאי אפשר לשלוט בה",color:"#1B4B8F",note:"יושב כמעט כולו בפרק 1 ואז נעלם. אין רגע אחד שבו הוא מאבד שליטה, וזה החור."},
+ {k:"efrat",name:"אפרת, הקריירה והאמהות",what:"הדוברת שמוכרת את המשטרה ולא מגדלת את הבן שלה",color:"#8A2D8F",note:"הליין הכי שלם רגשית. נפתח בעבודה, נשבר בבית, ונסגר במעבר לבית החדש."},
+ {k:"youth",name:"הנוער של אילת",what:"סמים, אלכוהול, סכינים והרחוב",color:"#9A6206",note:"עולם עשיר שנדחס לפרק אחד. אין לו המשך ואין לו סגירה."},
+ {k:"itamar",name:"איתמר, אחרי הגירושים",what:"שוטר שמחזיק אנשים זרים ולא הצליח להחזיק את הבית",color:"#0C6B75",note:"מתחיל רק בפרק 4. חצי הסדרה הראשונה עוברת בלעדיו."},
+ {k:"noa",name:"נועה, להישאר או לעזוב",what:"ההחלטה אם נשארים במשטרה ובעיר הזו",color:"#5B3FA8",note:"כל הליין יושב בפרק האחרון. אין שום הכנה מוקדמת שתגרום להחלטה לעבוד."},
+ {k:"tomer",name:"תומר, בן העיר בשער שלה",what:"אילתי ששומר על הכניסה לעיר שלו, מהמחסום ועד הים",color:"#166F5B",note:"פותח את הסדרה וסוגר אותה. ליין נקי בשני קצוות, אבל ריק לגמרי באמצע."},
+ {k:"border",name:"הגבול, הצבא והכניסה לעיר",what:"ים, ירדן ומצרים, ומי נכנס לעיר בכל בוקר",color:"#4A5A6B",note:"חומר פתיחה מצוין. לא חוזר אחר כך אף פעם."},
+ {k:"dolev",name:"דולב, הבית והקידום",what:"בלש שמשלם על העבודה בבית ומקבל צוות",color:"#A8305C",note:"שלוש סצנות שפרושות נכון על העונה. צריך עוד גוף כדי שהקידום בסוף ירגיש מרוויח."},
+ {k:"yuval",name:"יובל, בין המדים לבית",what:"",color:"#7A6A1E",note:"שתי סצנות. עוד לא ליין."},
+ {k:"lauren",name:"לורן ומח״ש",what:"",color:"#6B4A2E",note:"סצנה אחת. או שמפתחים אותה או שהיא נבלעת בליין אחר."}
+];
+var AUTO_LINE={"B-01":"hunt","B-02":"hunt","B-03":"hunt","B-04":"hunt","B-05":"hunt","B-06":"hunt","B-07":"hunt","B-09":"hunt","B-10":"hunt","B-13":"hunt","B-14":"hunt","T-01":"hunt","E-10":"hunt",
+"B-08":"dolev","B-11":"dolev","B-12":"dolev",
+"A-01":"kalfon","A-05":"kalfon","A-06":"kalfon","A-07":"kalfon","A-08":"kalfon","A-09":"kalfon","A-11":"kalfon",
+"A-02":"border","A-03":"border","A-04":"border","A-10":"border",
+"E-01":"efrat","E-02":"efrat","E-03":"efrat","E-04":"efrat","E-05":"efrat","E-06":"efrat","E-07":"efrat","E-08":"efrat","E-09":"efrat",
+"M-01":"youth","M-02":"youth","D-01":"youth","D-03":"youth","D-04":"youth","D-06":"youth","D-07":"youth","I-08":"youth",
+"I-01":"itamar","I-02":"itamar","I-03":"itamar","I-04":"itamar","I-05":"itamar","I-06":"itamar","I-07":"itamar",
+"N-02":"noa","N-03":"noa","N-05":"noa","N-06":"noa","N-07":"noa",
+"G-01":"tomer","G-02":"tomer","G-03":"tomer","G-04":"tomer",
+"Y-01":"yuval","Y-02":"yuval","L-01":"lauren"};
+var LKIND={ok:{l:"רץ לאורך העונה",c:"ok"},gap:{l:"נשמט באמצע",c:"gap"},drop:{l:"יושב בפרק אחד",c:"drop"},thin:{l:"דק מדי",c:"thin"},empty:{l:"ריק",c:"empty"}};
+function LINES(){
+ if(!DATA.lines||!DATA.lines.length) DATA.lines=JSON.parse(JSON.stringify(DEFAULT_LINES));
+ return DATA.lines;
+}
+function lineObj(k){var a=LINES().filter(function(l){return l.k===k});return a[0]||null}
+function lineOf(s){var k=s.line||AUTO_LINE[s.id]||"";return lineObj(k)?k:""}
+function lineName(k){var l=lineObj(k);return l?l.name:"בלי ליין"}
+function lineColor(k){var l=lineObj(k);return (l&&l.color)?l.color:"#8A93A0"}
+function lineStat(k){
+ var all=DATA.scenes.filter(function(x){return lineOf(x)===k&&x.status!=="dropped"});
+ var eps={},first=99,last=0;
+ all.forEach(function(x){var e=Number(x.ep)||1;eps[e]=(eps[e]||0)+1;if(e<first)first=e;if(e>last)last=e});
+ var holes=[],e2;
+ for(e2=first;e2<=last;e2++) if(!eps[e2]) holes.push(e2);
+ var present=0;for(var kk in eps)present++;
+ var kind=!all.length?"empty":all.length<=2?"thin":present===1?"drop":holes.length?"gap":"ok";
+ return {all:all,eps:eps,first:all.length?first:0,last:last,holes:holes,present:present,kind:kind,
+  min:all.reduce(function(a,x){return a+(Number(x.min)||0)},0),
+  shot:all.filter(function(x){return x.status==="shot"}).length};
+}
+function joinHe(a){
+ if(!a.length)return "";
+ if(a.length===1)return String(a[0]);
+ return a.slice(0,-1).join(", ")+" ו-"+a[a.length-1];
+}
+function lineHint(k,st){
+ if(st.kind==="empty") return "אין אף סצנה בליין הזה";
+ if(st.kind==="thin") return st.all.length+" סצנות בלבד. זו עוד לא עלילה, זו הופעה";
+ if(st.kind==="drop") return "כל הליין יושב בפרק "+st.first+". אין לו המשך ואין לו סגירה";
+ if(st.kind==="gap") return "נשמט ב"+(st.holes.length>1?"פרקים ":"פרק ")+joinHe(st.holes)+". הצופה מאבד את החוט ומוצא אותו אחר כך בלי סיבה";
+ return "נפתח בפרק "+st.first+", נסגר בפרק "+st.last+", בלי חורים";
+}
+function lineForm(l){
+ var h='<div class="grpform" data-form="__line__">';
+ h+='<div class="row"><div class="f"><label>שם הליין</label><input name="name" value="'+esc(l.name)+'"></div>';
+ h+='<div class="f"><label>צבע</label><input name="color" type="color" value="'+esc(l.color||"#455160")+'" style="height:42px;padding:4px"></div></div>';
+ h+='<div class="f"><label>מה הסיפור בשורה אחת</label><input name="what" value="'+esc(l.what||"")+'"></div>';
+ h+='<div class="f"><label>הערת עריכה</label><textarea name="note" style="min-height:70px">'+esc(l.note||"")+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveline" data-id="'+esc(l.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="cancelgrp">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="delline" data-id="'+esc(l.k)+'">מחק ליין</button></div>';
+ return h+'</div>';
+}
+function linesView(){
+ var LS=LINES(),ST={};
+ LS.forEach(function(l){ST[l.k]=lineStat(l.k)});
+ var un=DATA.scenes.filter(function(x){return !lineOf(x)});
+ var bad=LS.filter(function(l){return ST[l.k].kind!=="ok"});
+ var h='<section class="grp"><div class="grp-h"><h2>מפת הליינים</h2><span class="role">כל סיפור לרוחב חמשת הפרקים</span>';
+ h+='<span class="meta">'+LS.length+' ליינים · '+bad.length+' צריכים טיפול</span></div>';
+ h+='<p class="grp-note">מפת הפרקים אומרת מה יש בתוך כל פרק. המפה הזו אומרת מה ממשיך מפרק לפרק. כל שורה היא סיפור אחד וכל עמודה היא פרק. תא ריק בין שני תאים מלאים הוא ליין שנשמט באמצע, וליין שכל כולו בפרק אחד הוא לא ליין אלא סצנה שהתחפשה לסיפור.</p>';
+ if(bad.length){
+  h+='<div class="ldiag">';
+  bad.forEach(function(l){
+   var s=ST[l.k];
+   h+='<div class="lcard" data-k="'+s.kind+'"><span class="ldot" style="background:'+esc(l.color||"#455160")+'"></span>';
+   h+='<b>'+esc(l.name)+'</b><span class="lbadge l-'+s.kind+'">'+esc(LKIND[s.kind].l)+'</span>';
+   h+='<p>'+esc(lineHint(l.k,s))+'</p></div>';
+  });
+  h+='</div>';
+ }
+ h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
+ h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
+ h+='<span><i class="holekey"></i>תא ורוד = הליין נשמט בפרק הזה</span>';
+ h+='<span style="color:var(--ink-3)">'+(RO?"":"אפשר לגרור כל סצנה לכל תא. זה משנה גם ליין וגם פרק")+'</span></div>';
+ h+='<div class="tscroll"><table class="arc lmap"><thead><tr><th class="c0">ליין</th>';
+ DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
+ h+='<th class="tot">המהלך</th></tr></thead><tbody>';
+ LS.forEach(function(l){
+  var s=ST[l.k];
+  h+='<tr><th class="c0" style="--ccol:'+esc(l.color||"#455160")+'"><b>'+esc(l.name)+'</b>';
+  if(l.what) h+='<em>'+esc(l.what)+'</em>';
+  h+='<span class="ldots">';
+  DATA.eps.forEach(function(e){
+   var on=!!s.eps[e.n], hole=!on&&s.first&&e.n>s.first&&e.n<s.last;
+   h+='<i class="'+(on?"on":hole?"hole":"")+'"></i>';
+  });
+  h+='</span>';
+  h+='<span class="lbadge l-'+s.kind+'">'+esc(LKIND[s.kind].l)+'</span>';
+  if(!RO) h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>';
+  h+='</th>';
+  DATA.eps.forEach(function(e){
+   var cell=s.all.filter(function(x){return x.ep===e.n&&(state.filter==="all"||x.status===state.filter)})
+    .sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+   var ck='l:'+l.k+':'+e.n;
+   var cattr=RO?"":' data-cell="'+esc(ck)+'"';
+   var hole=!s.eps[e.n]&&s.first&&e.n>s.first&&e.n<s.last;
+   if(!cell.length){h+='<td class="'+(hole?"hole":"void")+'"'+cattr+'>'+(hole?'<em class="holem">נשמט</em>':"")+'</td>';return}
+   h+='<td'+cattr+'>';
+   cell.forEach(function(x){
+    h+='<button class="mchip m-'+x.status+'"'+(RO?"":' draggable="true" data-act="edit"')+' data-id="'+esc(x.id)+'">';
+    h+=reddot(x.status)+'<em>'+esc(x.id)+'</em>'+esc(x.title)+'</button>';
+   });
+   h+='</td>';
+  });
+  h+='<td class="tot"><b>'+s.all.length+'</b><em>'+(s.first?"פרק "+s.first+" ← פרק "+s.last:"אין סצנות")+'</em>';
+  h+='<em>'+s.shot+' צולמו · '+s.min+' דק׳</em></td></tr>';
+ });
+ var unv=un.filter(function(x){return state.filter==="all"||x.status===state.filter});
+ h+='<tr class="norow"><th class="c0" style="--ccol:#8A93A0"><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
+ DATA.eps.forEach(function(e){
+  var cell=unv.filter(function(x){return x.ep===e.n});
+  var cattr=RO?"":' data-cell="l:__none__:'+e.n+'"';
+  if(!cell.length){h+='<td class="void"'+cattr+'></td>';return}
+  h+='<td'+cattr+'>';
+  cell.forEach(function(x){
+   h+='<button class="mchip m-'+x.status+'"'+(RO?"":' draggable="true" data-act="edit"')+' data-id="'+esc(x.id)+'">';
+   h+=reddot(x.status)+'<em>'+esc(x.id)+'</em>'+esc(x.title)+'</button>';
+  });
+  h+='</td>';
+ });
+ h+='<td class="tot"><b>'+un.length+'</b><em>לא משויכות</em></td></tr>';
+ h+='</tbody></table></div>';
+ h+='</section>';
+ h+='<section class="grp"><div class="grp-h"><h2>הערות על הליינים</h2><span class="role">מה כל סיפור צריך כדי לעמוד</span></div><div class="units">';
+ LS.forEach(function(l){
+  var s=ST[l.k];
+  if(state.editLine===l.k){h+='<div class="unit" data-c="'+(s.kind==="ok"?"full":s.kind==="gap"?"partial":"none")+'">'+lineForm(l)+'</div>';return}
+  h+='<div class="unit" data-c="'+(s.kind==="ok"?"full":s.kind==="gap"?"partial":"none")+'"><div class="unit-h"><span class="dot" style="background:'+esc(l.color||"#455160")+'"></span><h3>'+esc(l.name)+'</h3>';
+  h+='<span class="cnt">'+s.all.length+' סצנות</span></div>';
+  if(l.what) h+='<p class="lab2">'+esc(l.what)+'</p>';
+  h+='<p>'+esc(lineHint(l.k,s))+'</p>';
+  if(l.note) h+='<p class="lnote">'+esc(l.note)+'</p>';
+  if(!RO) h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך ליין</button>';
+  h+='</div>';
+ });
+ return h+'</div></section>';
+}
+
 function arcTable(){
  var h='<section class="grp"><div class="grp-h"><h2>המהלך העונתי</h2><span class="role">כל דמות לרוחב חמשת הפרקים</span></div>';
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
@@ -3548,6 +3747,7 @@ function card(s){
  h+='<select class="smove nmove" data-id="'+esc(s.id)+'" title="העברה לפרק אחר">'+DATA.eps.map(function(e){return '<option value="'+e.n+'"'+(e.n===s.ep?" selected":"")+'>פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select>';
  h+='<select class="smove schar" data-id="'+esc(s.id)+'" title="שיוך לדמות אחרת">'+DATA.chars.map(function(c){return '<option value="'+c.k+'"'+(c.k===s.char?" selected":"")+'>דמות · '+esc(c.name)+'</option>'}).join("")+'</select>';
  h+='<select class="smove sunit" data-id="'+esc(s.id)+'" title="שיוך למחלקה אחרת">'+DATA.units.map(function(u){return '<option value="'+u.k+'"'+(u.k===s.unit?" selected":"")+'>מחלקה · '+esc(u.name)+'</option>'}).join("")+'</select>';
+ h+='<select class="smove sline" data-id="'+esc(s.id)+'" title="שיוך לליין אחר"><option value="-"'+(lineOf(s)?"":" selected")+'>בלי ליין</option>'+LINES().map(function(l){return '<option value="'+l.k+'"'+(l.k===lineOf(s)?" selected":"")+'>ליין · '+esc(l.name)+'</option>'}).join("")+'</select>';
  h+='</div></div></article>';
  return h;
 }
@@ -3562,6 +3762,7 @@ function form(s){
  h+='<div class="f"><label>כותרת הסצנה</label><input name="title" value="'+esc(n.title)+'"></div>';
  h+='<div class="row"><div class="f"><label>דמות מובילה</label><select name="char">'+DATA.chars.map(function(x){return '<option value="'+x.k+'"'+(x.k===n.char?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>';
  h+='<div class="f"><label>מחלקה</label><select name="unit">'+DATA.units.map(function(x){return '<option value="'+x.k+'"'+(x.k===n.unit?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div></div>';
+ h+='<div class="f"><label>ליין</label><select name="line"><option value="-"'+((s?lineOf(n):"")?"":" selected")+'>בלי ליין</option>'+LINES().map(function(x){return '<option value="'+x.k+'"'+((s&&lineOf(n)===x.k)?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>';
  h+='<div class="row"><div class="f"><label>סטטוס</label><select name="status">'+ORDER.map(function(k){return '<option value="'+k+'"'+(k===n.status?" selected":"")+'>'+STATUS[k].l+'</option>'}).join("")+'</select></div>';
  h+='<div class="f"><label>פרק</label><select name="ep">'+DATA.eps.map(function(e){return '<option value="'+e.n+'"'+(e.n===(n.ep||1)?" selected":"")+'>פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select></div></div>';
  h+='<div class="f"><label>מי בפריים</label><input name="people" value="'+esc((n.people||[]).join(", "))+'" placeholder="מופרד בפסיקים"></div>';
@@ -3606,11 +3807,14 @@ function readForm(key){
  var el=document.querySelector('[data-form="'+(window.CSS&&CSS.escape?CSS.escape(key):key)+'"]');
  if(!el) return null;
  function v(n){var f=el.querySelector('[name="'+n+'"]');return f?f.value:""}
- return {id:v("id").trim()||("X-"+(DATA.scenes.length+1)),title:v("title").trim()||"סצנה ללא שם",
+ var _o={id:v("id").trim()||("X-"+(DATA.scenes.length+1)),title:v("title").trim()||"סצנה ללא שם",
   char:v("char"),unit:v("unit"),status:v("status"),min:Number(v("min"))||MIN_PER,ep:Number(v("ep"))||1,
   people:v("people").split(",").map(function(x){return x.trim()}).filter(Boolean),
   have:toArr(v("have")),need:toArr(v("need")),short:v("short").trim(),note:v("note").trim(),
   tags:tagsOf().filter(function(t){var f=el.querySelector('[name="tag_'+t.k+'"]');return f&&f.checked}).map(function(t){return t.k})};
+ var _lf=el.querySelector('[name="line"]');
+ if(_lf) _o.line=_lf.value;
+ return _o;
 }
 function toast(m,bad){var t=document.getElementById("toast");if(!t)return;
  t.textContent=m;t.className="toast on"+(bad?" bad":"");
@@ -3680,7 +3884,7 @@ function undo(){
  try{future.push(JSON.stringify(STORE))}catch(_){}
  STORE=normStore(JSON.parse(hist.pop()));useView();
  skipHist=true;
- state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editEp=null;state.editMeta=false;
+ state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editEp=null;state.editMeta=false;
  render();save();toast("הפעולה בוטלה");
 }
 function redo(){
@@ -3840,6 +4044,21 @@ function toText(){
   });
   o+="\n";
  });
+ o+="=== מפת הליינים ===\n\n";
+ LINES().forEach(function(l){
+  var st=lineStat(l.k);
+  o+=l.name+(l.what?" — "+l.what:"")+"\n";
+  o+="  "+LKIND[st.kind].l+". "+lineHint(l.k,st)+"\n";
+  o+="  "+st.all.length+" סצנות, "+st.shot+" צולמו, "+st.min+" דקות\n";
+  DATA.eps.forEach(function(e){
+   var cell=st.all.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+   o+="    פרק "+e.n+": "+(cell.length?cell.map(function(x){return x.id+" "+x.title}).join(" | "):"—")+"\n";
+  });
+  if(l.note)o+="  "+l.note+"\n";
+  o+="\n";
+ });
+ var noln=DATA.scenes.filter(function(x){return !lineOf(x)});
+ if(noln.length)o+="בלי ליין: "+noln.map(function(x){return x.id}).join(", ")+"\n\n";
  o+="=== הדמויות ===\n\n";
  DATA.chars.forEach(function(ch){
   var sc=DATA.scenes.filter(function(x){return x.char===ch.k});
@@ -3962,6 +4181,7 @@ document.addEventListener("change",function(e){
  snap();
  if(el.classList.contains("schar")){sc.char=el.value;render();save();toast("הסצנה שויכה ל"+(charOf(el.value)||{}).name);return}
  if(el.classList.contains("sunit")){sc.unit=el.value;render();save();toast("הסצנה שויכה ל"+unitName(el.value));return}
+ if(el.classList.contains("sline")){sc.line=el.value;render();save();toast(el.value==="-"?"הסצנה הוצאה מכל ליין":"הסצנה שויכה לליין "+lineName(el.value));return}
 });
 document.addEventListener("click",function(e){
  var b=e.target.closest("[data-act]");if(!b)return;
@@ -4044,7 +4264,7 @@ document.addEventListener("click",function(e){
  if(act==="newcancel"){state.newAt=null;render();return}
  if(act==="newshot"){createAt("shot");return}
  if(act==="newtodo"){createAt("todo");return}
- if(act==="cancelgrp"){state.editChar=null;state.editUnit=null;render();return}
+ if(act==="cancelgrp"){state.editChar=null;state.editUnit=null;state.editLine=null;render();return}
  if(act==="editchar"){state.editChar=id;state.editUnit=null;render();return}
  if(act==="savechar"){
   DATA.chars.forEach(function(c){if(c.k===id){
@@ -4083,6 +4303,24 @@ document.addEventListener("click",function(e){
   var uk="u"+(DATA.units.length+1)+"_"+Math.floor(Math.random()*9999);
   DATA.units.push({k:uk,name:"מחלקה חדשה",need:[],note:""});
   state.editUnit=uk;state.group="unit";render();save();return}
+ if(act==="editline"){state.editLine=id;state.editChar=null;state.editUnit=null;state.group="lines";render();return}
+ if(act==="saveline"){
+  LINES().forEach(function(l){if(l.k===id){
+   l.name=fval("__line__","name").trim()||l.name;
+   l.what=fval("__line__","what").trim();
+   l.note=fval("__line__","note").trim();
+   l.color=fval("__line__","color")||l.color;
+  }});
+  state.editLine=null;render();save();return}
+ if(act==="delline"){
+  var lu=DATA.scenes.filter(function(x){return lineOf(x)===id}).length;
+  if(lu){toast("אי אפשר למחוק. יש "+lu+" סצנות בליין הזה. תעביר אותן קודם",true);return}
+  DATA.lines=LINES().filter(function(l){return l.k!==id});
+  state.editLine=null;render();save();return}
+ if(act==="addline"){
+  var lk="l"+(LINES().length+1)+"_"+Math.floor(Math.random()*9999);
+  LINES().push({k:lk,name:"ליין חדש",what:"",note:"",color:"#455160"});
+  state.editLine=lk;state.group="lines";render();save();return}
  if(act==="askdel"){state.confirmDel=id;render();return}
  if(act==="nodel"){state.confirmDel=null;render();return}
  if(act==="dodel"){DATA.scenes=DATA.scenes.filter(function(x){return x.id!==id});
@@ -4127,8 +4365,8 @@ document.addEventListener("keydown",function(e){
  if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
  if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
  if(e.key==="Escape"&&state.newAt){state.newAt=null;render();return}
- if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit)){
-  state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;render();
+ if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit||state.editLine)){
+  state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;state.editLine=null;render();
  }
 });
 window.addEventListener("scroll",saveUI,{passive:true});
