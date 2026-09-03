@@ -376,6 +376,38 @@ table.arc{border-collapse:collapse;width:100%;min-width:1040px}
 .dmoments{margin:0;padding-inline-start:17px}
 .dmoments li{font-size:14px;line-height:1.55;color:var(--ink);margin-bottom:3px}
 .dsec.note p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.nmodes{margin-top:16px}
+.nlist{margin-top:18px;display:grid;gap:22px}
+.ngrp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 0 4px;box-shadow:var(--shadow);overflow:hidden}
+.ngrp-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:13px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ngrp-h .ndot{width:9px;height:9px;border-radius:50%;background:var(--cc,#455160);align-self:center;flex:0 0 auto}
+.ngrp-h h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:18px;font-weight:700;margin:0}
+.ngrp-h em{font-style:normal;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.ngrp-h .ncount{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ngaps{padding:11px 18px;border-bottom:1px solid var(--line);background:var(--pinkbg)}
+.ngaps b{display:block;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--todo);margin-bottom:5px}
+.ngaps ul{margin:0;padding-inline-start:17px}
+.ngaps li{font-size:13px;color:var(--ink-2);line-height:1.5}
+.nrow{padding:13px 18px;border-bottom:1px solid var(--line)}
+.nrow:last-child{border-bottom:0}
+.nrow.n-partial{background:linear-gradient(to left,transparent,transparent),var(--surface);box-shadow:inset 3px 0 0 var(--partial)}
+.nrow.n-todo{box-shadow:inset 3px 0 0 var(--todo)}
+.nhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.ncode{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.nhead h4{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16.5px;font-weight:700;margin:0;flex:1 1 auto}
+.npill{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px}
+.npill.p-todo{background:var(--todo-soft);color:var(--todo)}
+.npill.p-partial{background:var(--partial-soft);color:var(--partial)}
+.nmeta{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.nmeta span{display:inline-flex;align-items:center;gap:5px;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.nmeta i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.nshort{margin:7px 0 0;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.nneed{margin-top:9px}
+.nneed b{display:block;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--todo);margin-bottom:4px}
+.nneed ul{margin:0;padding-inline-start:17px}
+.nneed li{font-size:13.5px;color:var(--ink);line-height:1.55}
+.nhave{margin-top:8px;font-size:12.5px;color:var(--ink-3)}
+.nhave b{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--shot);margin-inline-end:7px}
 .sclock{display:flex;flex-wrap:wrap;gap:22px;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-top:16px;box-shadow:var(--shadow)}
 .sbig{flex:0 0 auto;min-width:130px;border-inline-end:1px solid var(--line);padding-inline-end:22px}
 .sbig b{display:block;font-family:"Heebo",sans-serif;font-weight:700;font-size:52px;line-height:1;font-variant-numeric:tabular-nums}
@@ -2979,7 +3011,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3084,7 +3116,7 @@ function render(){
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
  h+='<div class="views">';
- h+=vbtn("days","לוג ימי צילום")+vbtn("unit","לפי מחלקה")+vbtn("char","לפי דמות")+vbtn("lines","מפת הליינים")+vbtn("board","מפת הפרקים")+vbtn("ideas","רעיונות לסצנות")+vbtn("shifts","שעון משמרות");
+ h+=vbtn("need","צריך לצלם")+vbtn("days","לוג ימי צילום")+vbtn("unit","לפי מחלקה")+vbtn("char","לפי דמות")+vbtn("lines","מפת הליינים")+vbtn("board","מפת הפרקים")+vbtn("ideas","רעיונות לסצנות")+vbtn("shifts","שעון משמרות");
  h+='</div>';
  if(!RO){
   h+='<div class="sep"></div>';
@@ -3115,6 +3147,21 @@ function render(){
  if(state.group==="ideas"){
   h+=ideasView();
   h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
+ if(state.group==="need"){
+  h+=needView();
+  h+='</div>';
+  if(state.editing){
+   var ne=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
+   if(ne){
+    h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+    h+='<div class="mhead"><span>עריכת סצנה '+esc(ne.id)+'</span><button data-act="cancel" title="סגור">\u00d7</button></div>';
+    h+=form(ne)+'</div></div>';
+   }
+  }
+  h+='<div class="toast" id="toast"></div>';
   paint(h);
   return;
  }
@@ -3724,6 +3771,91 @@ function daysView(){
  return h+'</section>';
 }
 
+/* ===== צריך לצלם ===== */
+function openScenes(){
+ return DATA.scenes.filter(function(s){return s.status==="todo"||s.status==="partial"});
+}
+function needGroups(mode){
+ var g=[];
+ if(mode==="line"){
+  LINES().forEach(function(l){g.push({k:"l:"+l.k,name:l.name,sub:l.what||"",color:l.color||"#455160",
+   f:function(s){return lineOf(s)===l.k}})});
+  g.push({k:"l:none",name:"בלי ליין",sub:"סצנות שלא שייכות לשום סיפור",color:"#8A93A0",
+   f:function(s){return !lineOf(s)}});
+ } else if(mode==="ep"){
+  DATA.eps.forEach(function(e){g.push({k:"e:"+e.n,name:"פרק "+e.n+" · "+e.title,sub:e.sub||"",color:"#4A5A6B",
+   f:function(s){return s.ep===e.n}})});
+ } else {
+  DATA.chars.forEach(function(c){g.push({k:"c:"+c.k,name:c.name,sub:c.role||"",color:c.color||"#455160",
+   gaps:c.gaps||[],f:function(s){return s.char===c.k}})});
+  g.push({k:"c:none",name:"בלי דמות",sub:"",color:"#8A93A0",f:function(s){return !charOf(s.char)}});
+ }
+ return g;
+}
+function needView(){
+ var mode=state.needMode||"char";
+ var open=openScenes();
+ var mins=open.reduce(function(a,s){return a+(Number(s.min)||0)},0);
+ var partial=open.filter(function(s){return s.status==="partial"}).length;
+ var h='<section class="grp"><div class="grp-h"><h2>צריך לצלם</h2><span class="role">כל מה שעוד לא בקופסה</span>';
+ h+='<span class="meta">'+open.length+' סצנות</span></div>';
+ h+='<p class="grp-note">הרשימה הפתוחה של הסדרה. כל סצנה שסומנה לצילום או חלקית, עם מה שחסר בה כדי לסגור אותה. אפשר להסתכל על זה לפי דמות, לפי ליין או לפי פרק, תלוי איך אתה מתכנן את יום הצילום הבא.</p>';
+ if(!open.length){
+  return h+'<div class="dempty"><b>הכול בקופסה</b><p>אין כרגע אף סצנה שמסומנת לצילום או חלקית.</p></div></section>';
+ }
+ h+='<div class="dstats">';
+ h+='<div class="dstat"><b>'+open.length+'</b><span>סצנות לצלם</span></div>';
+ h+='<div class="dstat"><b>'+mins+'</b><span>דקות חסרות</span></div>';
+ h+='<div class="dstat"><b>'+partial+'</b><span>חלקיות, צריך השלמה</span></div>';
+ h+='<div class="dstat"><b>'+(open.length-partial)+'</b><span>לא צולמו בכלל</span></div>';
+ h+='</div>';
+ h+='<div class="modes nmodes">';
+ [["char","לפי דמות"],["line","לפי ליין"],["ep","לפי פרק"]].forEach(function(m){
+  h+='<button data-act="nmode" data-k="'+m[0]+'" aria-pressed="'+(mode===m[0])+'">'+esc(m[1])+'</button>';
+ });
+ h+='</div>';
+ h+='<div class="nlist">';
+ needGroups(mode).forEach(function(g){
+  var rows=open.filter(g.f).sort(function(a,b){return ((a.ep||99)-(b.ep||99))||((a.ord||0)-(b.ord||0))});
+  var gaps=(mode==="char"&&g.gaps)?g.gaps:[];
+  if(!rows.length&&!gaps.length) return;
+  var gm=rows.reduce(function(a,s){return a+(Number(s.min)||0)},0);
+  h+='<div class="ngrp"><div class="ngrp-h" style="--cc:'+esc(g.color)+'"><span class="ndot"></span>';
+  h+='<h3>'+esc(g.name)+'</h3>';
+  if(g.sub) h+='<em>'+esc(g.sub)+'</em>';
+  h+='<span class="ncount">'+rows.length+' סצנות · '+gm+' דק׳</span></div>';
+  if(gaps.length){
+   h+='<div class="ngaps"><b>מה חסר לדמות</b><ul>'+gaps.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+  }
+  rows.forEach(function(s){
+   var ch=charOf(s.char), ln=lineObj(lineOf(s));
+   h+='<div class="nrow n-'+s.status+'">';
+   h+='<div class="nhead"><span class="ncode">'+esc(s.id)+'</span>';
+   h+='<h4>'+esc(s.title)+'</h4>';
+   h+='<span class="npill p-'+s.status+'">'+esc(STATUS[s.status].l)+'</span>';
+   if(!RO) h+='<button class="tinyedit" data-act="edit" data-id="'+esc(s.id)+'">ערוך</button>';
+   h+='</div>';
+   h+='<div class="nmeta">';
+   h+='<span>פרק '+(s.ep||1)+'</span>';
+   if(mode!=="char"&&ch) h+='<span><i style="background:'+esc(charColor(s.char))+'"></i>'+esc(ch.name)+'</span>';
+   if(mode!=="line"&&ln) h+='<span><i style="background:'+esc(ln.color||"#455160")+'"></i>'+esc(ln.name)+'</span>';
+   if(s.unit) h+='<span>'+esc(unitName(s.unit))+'</span>';
+   h+='<span>'+(Number(s.min)||0)+' דק׳</span>';
+   h+='</div>';
+   if(s.short) h+='<p class="nshort">'+esc(s.short)+'</p>';
+   if((s.need||[]).length){
+    h+='<div class="nneed"><b>חסר כדי לסגור</b><ul>'+s.need.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+   }
+   if((s.have||[]).length){
+    h+='<div class="nhave"><b>כבר ביד</b>'+esc(s.have.join(" · "))+'</div>';
+   }
+   h+='</div>';
+  });
+  h+='</div>';
+ });
+ return h+'</div></section>';
+}
+
 /* ===== שעון משמרות ===== */
 function SHIFTS(){ if(!DATA.shifts) DATA.shifts=[]; return DATA.shifts }
 function shiftPeople(){
@@ -4134,6 +4266,7 @@ function loadUI(){
   var o=JSON.parse(r);if(!o)return;
   if(o.group)state.group=o.group;
   if(o.boardMode)state.boardMode=o.boardMode;
+  if(o.needMode)state.needMode=o.needMode;
   if(o.filter)state.filter=o.filter;
   restoreY=Number(o.scrollY)||0;
   restoreX=Number(o.scrollX)||0;
@@ -4146,7 +4279,7 @@ function saveUI(){
   try{
    var bd=document.querySelector(".board");
    localStorage.setItem(UIKEY,JSON.stringify({
-    group:state.group,boardMode:state.boardMode,filter:state.filter,
+    group:state.group,boardMode:state.boardMode,needMode:state.needMode,filter:state.filter,
     scrollY:window.scrollY||window.pageYOffset||0,
     scrollX:bd?bd.scrollLeft:0
    }));
@@ -4350,6 +4483,22 @@ function toText(){
   });
   o+="\n";
  });
+ var _open=openScenes();
+ if(_open.length){
+  o+="=== צריך לצלם ===\n\n";
+  o+=_open.length+" סצנות פתוחות, "+_open.reduce(function(a,x){return a+(Number(x.min)||0)},0)+" דקות.\n\n";
+  DATA.eps.forEach(function(e){
+   var r=_open.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+   if(!r.length)return;
+   o+="פרק "+e.n+" · "+e.title+"\n";
+   r.forEach(function(x){
+    var ch=charOf(x.char);
+    o+="  ["+x.id+"] "+x.title+" — "+(ch?ch.name:"")+" — "+L[x.status]+"\n";
+    (x.need||[]).forEach(function(y){o+="      · "+y+"\n"});
+   });
+   o+="\n";
+  });
+ }
  if(SHIFTS().length){
   o+="=== שעון משמרות ===\n\n";
   var _tg=shiftTarget(),_us=SHIFTS().length;
@@ -4591,6 +4740,7 @@ document.addEventListener("click",function(e){
   reindex();state.group="board";render();save();
   toast("נוספה סצנה "+nid+" לפרק "+(Number(ix.ep)||1));return}
  if(act==="bmode"){state.boardMode=b.getAttribute("data-k");render();return}
+ if(act==="nmode"){state.needMode=b.getAttribute("data-k");render();return}
  if(act==="newat"){state.newAt=b.getAttribute("data-k");state.editing=null;render();return}
  if(act==="newcancel"){state.newAt=null;render();return}
  if(act==="newshot"){createAt("shot");return}
