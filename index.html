@@ -56,6 +56,7 @@ h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(
 .stats{display:flex;flex-wrap:wrap;margin:26px 0 0;border-top:1px solid var(--line)}
 .stat{flex:1 1 104px;padding:14px 16px 16px;border-inline-start:1px solid var(--line)}
 .stat:first-child{border-inline-start:0;padding-inline-start:0}
+.stat.s-shift b{color:var(--accent)}
 .stat b{display:block;font-family:"Heebo",sans-serif;font-weight:700;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
 .stat span{font-size:12.5px;color:var(--ink-3);font-family:"Heebo",sans-serif;letter-spacing:.04em}
 .stat.s-shot b{color:var(--shot)}.stat.s-partial b{color:var(--partial)}
@@ -3103,7 +3104,8 @@ function render(){
  h+='<div class="stat s-partial"><b>'+c.partial+'</b><span>חלקי</span></div>';
  h+='<div class="stat s-todo"><b>'+c.todo+'</b><span>לצילום</span></div>';
  h+='<div class="stat s-min"><b>'+Math.max(TARGET-n,0)+'</b><span>חסרות עד '+TARGET+'</span></div>';
- h+='<div class="stat"><b>'+c.min+'</b><span>דק׳ במצטבר</span></div></div>';
+ h+='<div class="stat"><b>'+c.min+'</b><span>דק׳ במצטבר</span></div>';
+ h+='<div class="stat s-shift"><b>'+SHIFTS().length+'</b><span>משמרות מתוך '+shiftTarget()+'</span></div></div>';
  h+='<div class="gauge">';
  ["shot","partial","todo"].forEach(function(k){
   h+='<i style="width:'+((c[k]||0)/tot*100).toFixed(1)+'%;background:var(--'+k+')"></i>';});
