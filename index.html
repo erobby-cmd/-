@@ -347,6 +347,38 @@ table.arc{border-collapse:collapse;width:100%;min-width:1040px}
 .upill.none{background:var(--todo-soft);color:var(--todo)}
 .needlist{margin:6px 0 0;padding-inline-start:16px}
 .needlist li{font-size:13px;color:var(--todo);margin-bottom:2px}
+.dstats{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:16px 0 0;overflow:hidden}
+.dstat{padding:13px 20px;border-inline-start:1px solid var(--line);flex:1 1 130px}
+.dstat:first-child{border-inline-start:0}
+.dstat b{display:block;font-family:"Heebo",sans-serif;font-weight:700;font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums}
+.dstat b.sm{font-size:14px;font-weight:700;padding-top:7px}
+.dstat span{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.dstat.wide{flex:1 1 210px}
+.dwhobar{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.dchip{display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.dchip i{width:8px;height:8px;border-radius:50%;background:var(--cc,#455160);flex:0 0 auto}
+.dchip em{font-style:normal;font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:11px}
+.dchip.sm{padding:2px 9px;font-size:11.5px;background:var(--surface-2);border-color:var(--line)}
+.dlog{margin-top:20px;display:grid;gap:12px}
+.dmonth{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);padding:12px 2px 2px;border-bottom:1px solid var(--line)}
+.dday{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 18px 16px;box-shadow:var(--shadow)}
+.dhead{display:flex;gap:16px;align-items:flex-start}
+.ddate{flex:0 0 auto;min-width:96px;padding-top:2px}
+.ddate b{display:block;font-family:"Heebo",sans-serif;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.ddate em{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);margin-top:2px}
+.dtitle{flex:1 1 auto;min-width:0}
+.dtitle h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:19px;font-weight:700;margin:0 0 7px}
+.dwho{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dppl{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.dppl.none{font-style:italic}
+.dsec{margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+.dsec h4{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.09em;color:var(--ink-3);margin:0 0 6px}
+.dmoments{margin:0;padding-inline-start:17px}
+.dmoments li{font-size:14px;line-height:1.55;color:var(--ink);margin-bottom:3px}
+.dsec.note p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.dempty{background:var(--surface);border:1px dashed var(--line-2);border-radius:12px;padding:34px 24px;text-align:center;margin-top:18px}
+.dempty b{display:block;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:19px;margin-bottom:6px}
+.dempty p{margin:0;color:var(--ink-3);font-size:13.5px}
 .tagbox{display:flex;flex-wrap:wrap;gap:7px}
 .tagbox label{display:flex;align-items:center;gap:5px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-2);border-radius:6px;padding:5px 10px;cursor:pointer;margin:0;letter-spacing:0}
 .tagbox input{width:auto;margin:0}
@@ -2917,7 +2949,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3022,7 +3054,7 @@ function render(){
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
  h+='<div class="views">';
- h+=vbtn("board","מפת הפרקים")+vbtn("lines","מפת הליינים")+vbtn("char","לפי דמות")+vbtn("unit","לפי מחלקה")+vbtn("ideas","רעיונות לסצנות");
+ h+=vbtn("board","מפת הפרקים")+vbtn("lines","מפת הליינים")+vbtn("char","לפי דמות")+vbtn("unit","לפי מחלקה")+vbtn("days","לוג ימי צילום")+vbtn("ideas","רעיונות לסצנות");
  h+='</div>';
  if(!RO){
   h+='<div class="sep"></div>';
@@ -3039,6 +3071,7 @@ function render(){
   h+='<button class="btn ghost" data-act="backup" title="שמירת עותק של כל היומן למחשב">שמור למחשב</button>';
    if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button class="btn ghost" data-act="drive" title="שמירת עותק בגוגל דרייב, בתיקייה מרחב אילת">שמור לדרייב</button>';
   if(state.group==="lines") h+='<button class="btn ghost" data-act="addline">הוסף ליין</button>';
+  if(state.group==="days") h+='<button class="btn" data-act="addday">הוסף יום צילום</button>';
   if(state.group==="char") h+='<button class="btn ghost" data-act="addchar">הוסף דמות</button>';
   if(state.group==="unit") h+='<button class="btn ghost" data-act="addunit">הוסף מחלקה</button>';
   if(state.group==="ideas") h+='<button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
@@ -3052,6 +3085,21 @@ function render(){
  if(state.group==="ideas"){
   h+=ideasView();
   h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
+ if(state.group==="days"){
+  h+=daysView();
+  h+='</div>';
+  if(state.editDay){
+   var de=DAYS().filter(function(x){return x.k===state.editDay})[0];
+   if(de){
+    h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+    h+='<div class="mhead"><span>יום צילום</span><button data-act="cancelgrp" title="סגור">\u00d7</button></div>';
+    h+=dayForm(de)+'</div></div>';
+   }
+  }
+  h+='<div class="toast" id="toast"></div>';
   paint(h);
   return;
  }
@@ -3531,6 +3579,115 @@ function unitTable(){
  return h+'</tbody></table></div></section>';
 }
 
+/* ===== לוג ימי צילום ===== */
+var HEDAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+var HEMON=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+function DAYS(){ if(!DATA.days) DATA.days=[]; return DATA.days }
+function dparts(s){
+ var m=String(s||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+ if(!m) return null;
+ var d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+ if(isNaN(d.getTime())) return null;
+ return {y:d.getFullYear(),m:d.getMonth(),d:d.getDate(),w:d.getDay(),t:d.getTime()};
+}
+function dayLabel(s){
+ var p=dparts(s);
+ if(!p) return "בלי תאריך";
+ return p.d+"."+(p.m+1)+"."+p.y;
+}
+function dayWeek(s){var p=dparts(s);return p?"יום "+HEDAYS[p.w]:""}
+function monthKey(s){var p=dparts(s);return p?p.y+"-"+(p.m<9?"0":"")+(p.m+1):"zzz"}
+function monthLabel(s){var p=dparts(s);return p?HEMON[p.m]+" "+p.y:"בלי תאריך"}
+function daysSorted(){
+ return DAYS().slice().sort(function(a,b){
+  var pa=dparts(a.date),pb=dparts(b.date);
+  if(pa&&pb) return pb.t-pa.t;
+  if(pa) return -1;
+  if(pb) return 1;
+  return 0;
+ });
+}
+function dayForm(d){
+ var h='<div class="grpform" data-form="__day__">';
+ h+='<div class="row"><div class="f"><label>תאריך</label><input name="date" type="date" value="'+esc(d.date||"")+'"></div>';
+ h+='<div class="f"><label>מיקום</label><input name="loc" value="'+esc(d.loc||"")+'" placeholder="איפה צילמנו"></div></div>';
+ h+='<div class="f"><label>מי צולם</label><div class="tagbox">'+DATA.chars.map(function(c){
+  return '<label><input type="checkbox" name="ch_'+c.k+'"'+(((d.chars||[]).indexOf(c.k)>-1)?" checked":"")+'>'+esc(c.name)+'</label>';
+ }).join("")+'</div></div>';
+ h+='<div class="f"><label>עוד מי שהיה בפריים</label><input name="people" value="'+esc(d.people||"")+'" placeholder="מופרד בפסיקים"></div>';
+ h+='<div class="f"><label>רגעים חזקים</label><textarea name="moments" style="min-height:96px" placeholder="שורה לכל רגע">'+esc(lines(d.moments))+'</textarea><p class="hint">שורה לכל רגע. מה שנתפס במצלמה ושווה לחזור אליו</p></div>';
+ h+='<div class="f"><label>הערות מהיום</label><textarea name="note" style="min-height:76px" placeholder="מה עבד, מה פספסנו, למה לחזור">'+esc(d.note||"")+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveday" data-id="'+esc(d.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="cancelgrp">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="delday" data-id="'+esc(d.k)+'">מחק יום</button></div>';
+ return h+'</div>';
+}
+function daysView(){
+ var all=daysSorted();
+ var h='<section class="grp"><div class="grp-h"><h2>לוג ימי צילום</h2><span class="role">מה צולם, מתי, ומה שווה לחזור אליו</span>';
+ h+='<span class="meta">'+all.length+' ימי צילום</span></div>';
+ h+='<p class="grp-note">יומן של החומר שכבר בקופסה. כל יום צילום עם התאריך, המיקום, מי צולם, והרגעים שכדאי לזכור כשחוזרים לחומר הגלם. זה המקום לרשום את מה שראית במצלמה ולא נכנס עדיין לשום סצנה.</p>';
+ if(!all.length){
+  h+='<div class="dempty"><b>עוד לא נרשם אף יום צילום</b><p>לחץ על "הוסף יום צילום" למעלה כדי לפתוח את הראשון.</p></div>';
+  return h+'</section>';
+ }
+ var moments=0,minT=null,maxT=null,perChar={};
+ all.forEach(function(d){
+  moments+=(d.moments||[]).length;
+  var p=dparts(d.date);
+  if(p){ if(minT===null||p.t<minT)minT=p.t; if(maxT===null||p.t>maxT)maxT=p.t; }
+  (d.chars||[]).forEach(function(k){perChar[k]=(perChar[k]||0)+1});
+ });
+ var span="";
+ if(minT!==null){
+  var a=new Date(minT),b=new Date(maxT);
+  span=a.getDate()+"."+(a.getMonth()+1)+"."+a.getFullYear()+" עד "+b.getDate()+"."+(b.getMonth()+1)+"."+b.getFullYear();
+ }
+ h+='<div class="dstats">';
+ h+='<div class="dstat"><b>'+all.length+'</b><span>ימי צילום</span></div>';
+ h+='<div class="dstat"><b>'+moments+'</b><span>רגעים מסומנים</span></div>';
+ h+='<div class="dstat"><b>'+Object.keys(perChar).length+'</b><span>דמויות שצולמו</span></div>';
+ if(span) h+='<div class="dstat wide"><b class="sm">'+esc(span)+'</b><span>טווח הצילומים</span></div>';
+ h+='</div>';
+ var ranked=DATA.chars.filter(function(c){return perChar[c.k]}).sort(function(a,b){return perChar[b.k]-perChar[a.k]});
+ if(ranked.length){
+  h+='<div class="dwhobar">';
+  ranked.forEach(function(c){
+   h+='<span class="dchip" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'<em>'+perChar[c.k]+'</em></span>';
+  });
+  h+='</div>';
+ }
+ h+='<div class="dlog">';
+ var lastM=null;
+ all.forEach(function(d){
+  var mk=monthKey(d.date);
+  if(mk!==lastM){ lastM=mk; h+='<div class="dmonth">'+esc(monthLabel(d.date))+'</div>'; }
+  h+='<article class="dday">';
+  h+='<div class="dhead"><div class="ddate"><b>'+esc(dayLabel(d.date))+'</b><em>'+esc(dayWeek(d.date))+'</em></div>';
+  h+='<div class="dtitle"><h3>'+esc(d.loc||"בלי מיקום")+'</h3>';
+  var who=(d.chars||[]).map(function(k){var c=charOf(k);return c?c.name:""}).filter(Boolean);
+  h+='<div class="dwho">';
+  (d.chars||[]).forEach(function(k){
+   var c=charOf(k); if(!c)return;
+   h+='<span class="dchip sm" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</span>';
+  });
+  if(d.people) h+='<span class="dppl">'+esc(d.people)+'</span>';
+  if(!who.length&&!d.people) h+='<span class="dppl none">לא נרשם מי צולם</span>';
+  h+='</div></div>';
+  if(!RO) h+='<button class="tinyedit" data-act="editday" data-id="'+esc(d.k)+'">ערוך</button>';
+  h+='</div>';
+  if((d.moments||[]).length){
+   h+='<div class="dsec"><h4>רגעים חזקים</h4><ul class="dmoments">';
+   d.moments.forEach(function(x){h+='<li>'+esc(x)+'</li>'});
+   h+='</ul></div>';
+  }
+  if(d.note) h+='<div class="dsec note"><h4>הערות מהיום</h4><p>'+esc(d.note)+'</p></div>';
+  h+='</article>';
+ });
+ h+='</div>';
+ return h+'</section>';
+}
+
 /* ===== ליינים: הסיפורים שרצים לאורך העונה ===== */
 var DEFAULT_LINES=[
  {k:"hunt",name:"הציד: דוד כסאות והסרסור",what:"התיק הגדול של הימ״ר, מהמארב שנשרף ועד המעצר",color:"#B0472B",note:"הליין העלילתי היחיד בסדרה עם התחלה, אמצע וסוף. הוא נושא את פרק 3 כמעט לבד."},
@@ -3888,7 +4045,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editMeta||state.editEp!==null);
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editMeta||state.editEp!==null);
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
 function snap(){try{preSnap=JSON.stringify(STORE)}catch(_){preSnap=null}}
@@ -3905,7 +4062,7 @@ function undo(){
  try{future.push(JSON.stringify(STORE))}catch(_){}
  STORE=normStore(JSON.parse(hist.pop()));useView();
  skipHist=true;
- state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editEp=null;state.editMeta=false;
+ state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;state.editEp=null;state.editMeta=false;
  render();save();toast("הפעולה בוטלה");
 }
 function redo(){
@@ -4067,6 +4224,17 @@ function toText(){
   });
   o+="\n";
  });
+ if(DAYS().length){
+  o+="=== לוג ימי צילום ===\n\n";
+  daysSorted().forEach(function(d){
+   o+=dayLabel(d.date)+(dayWeek(d.date)?" ("+dayWeek(d.date)+")":"")+" — "+(d.loc||"בלי מיקום")+"\n";
+   var who=(d.chars||[]).map(function(k){var c=charOf(k);return c?c.name:""}).filter(Boolean);
+   if(who.length||d.people) o+="  מי צולם: "+who.concat(d.people?[d.people]:[]).join(", ")+"\n";
+   (d.moments||[]).forEach(function(x){o+="  · "+x+"\n"});
+   if(d.note)o+="  הערה: "+d.note+"\n";
+   o+="\n";
+  });
+ }
  o+="=== מפת הליינים ===\n\n";
  LINES().forEach(function(l){
   var st=lineStat(l.k);
@@ -4287,7 +4455,7 @@ document.addEventListener("click",function(e){
  if(act==="newcancel"){state.newAt=null;render();return}
  if(act==="newshot"){createAt("shot");return}
  if(act==="newtodo"){createAt("todo");return}
- if(act==="cancelgrp"){state.editChar=null;state.editUnit=null;state.editLine=null;render();return}
+ if(act==="cancelgrp"){state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;render();return}
  if(act==="editchar"){state.editChar=id;state.editUnit=null;render();return}
  if(act==="savechar"){
   DATA.chars.forEach(function(c){if(c.k===id){
@@ -4326,6 +4494,26 @@ document.addEventListener("click",function(e){
   var uk="u"+(DATA.units.length+1)+"_"+Math.floor(Math.random()*9999);
   DATA.units.push({k:uk,name:"מחלקה חדשה",need:[],note:""});
   state.editUnit=uk;state.group="unit";render();save();return}
+ if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
+ if(act==="saveday"){
+  var dform=document.querySelector('[data-form="__day__"]');
+  DAYS().forEach(function(d){if(d.k===id){
+   d.date=fval("__day__","date");
+   d.loc=fval("__day__","loc").trim();
+   d.people=fval("__day__","people").trim();
+   d.moments=toArr(fval("__day__","moments"));
+   d.note=fval("__day__","note").trim();
+   d.chars=DATA.chars.filter(function(c){var f=dform&&dform.querySelector('[name="ch_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
+  }});
+  state.editDay=null;render();save();toast("יום הצילום נשמר");return}
+ if(act==="delday"){
+  DATA.days=DAYS().filter(function(d){return d.k!==id});
+  state.editDay=null;render();save();toast("יום הצילום נמחק");return}
+ if(act==="addday"){
+  var dk="d"+Date.now()+"_"+Math.floor(Math.random()*999);
+  var td=new Date(), pad=function(n){return n<10?"0"+n:""+n};
+  DAYS().push({k:dk,date:td.getFullYear()+"-"+pad(td.getMonth()+1)+"-"+pad(td.getDate()),loc:"",chars:[],people:"",moments:[],note:""});
+  state.editDay=dk;state.group="days";render();save();return}
  if(act==="editline"){state.editLine=id;state.editChar=null;state.editUnit=null;state.group="lines";render();return}
  if(act==="saveline"){
   LINES().forEach(function(l){if(l.k===id){
@@ -4352,7 +4540,7 @@ document.addEventListener("click",function(e){
   if(e.target.closest("[data-stop]"))return;
   if(document.querySelector('.modal [data-form][data-dirty]')){
    toast("יש שינויים שלא נשמרו. לחץ שמור, או ביטול כדי לצאת",true);return}
-  state.editing=null;state.editLine=null;render();return}
+  state.editing=null;state.editLine=null;state.editDay=null;render();return}
  if(act==="editmeta"){state.editMeta=true;render();return}
  if(act==="cancelmeta"){state.editMeta=false;render();return}
  if(act==="savemeta"){
@@ -4392,8 +4580,8 @@ document.addEventListener("keydown",function(e){
  if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
  if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
  if(e.key==="Escape"&&state.newAt){state.newAt=null;render();return}
- if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit||state.editLine)){
-  state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;state.editLine=null;render();
+ if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit||state.editLine||state.editDay)){
+  state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;render();
  }
 });
 document.addEventListener("input",function(e){
