@@ -294,7 +294,9 @@ table.arc{border-collapse:collapse;width:100%;min-width:1040px}
 .mchip:hover{filter:brightness(1.05);transform:translateY(-1px)}
 .mchip:active{cursor:grabbing}
 .mchip.dragging{opacity:.3}
-.arc td.dropcell{outline:3px dashed var(--accent);outline-offset:-3px;box-shadow:inset 0 0 0 999px rgba(12,107,117,.10)}
+.arc td.dropcell,.arc th.c0.dropcell{outline:3px dashed var(--accent);outline-offset:-3px;box-shadow:inset 0 0 0 999px rgba(12,107,117,.10)}
+html.dragging .arc th.c0{cursor:copy}
+html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .arc td{transition:box-shadow .1s}
 .mchip:last-child{margin-bottom:0}
 .mchip.m-todo{background:#F3C4D4;color:#2C1A22}
@@ -3411,6 +3413,7 @@ function moveScene(id,ep,beforeId){
 }
 var dragId=null,ins=null;
 function cleanupDrag(){
+ document.documentElement.classList.remove("dragging");
  if(ins&&ins.parentNode)ins.parentNode.removeChild(ins);
  ins=null;
  var d=document.querySelector(".pnote.dragging");
@@ -3418,15 +3421,16 @@ function cleanupDrag(){
  dragId=null;
 }
 function autoScroll(e){
- var m=110, step=26;
+ var m=110, step=26, tm=52, tstep=16;
+ var overSticky=!!(e.target&&e.target.closest&&e.target.closest(".arc th.c0"));
  if(e.clientY<m) window.scrollBy(0,-step);
  else if(window.innerHeight-e.clientY<m) window.scrollBy(0,step);
  var ts=document.querySelectorAll(".tscroll");
  for(var i=0;i<ts.length;i++){
   var tr=ts[i].getBoundingClientRect();
-  if(e.clientY>tr.top&&e.clientY<tr.bottom){
-   if(e.clientX-tr.left<m) ts[i].scrollLeft-=step;
-   else if(tr.right-e.clientX<m) ts[i].scrollLeft+=step;
+  if(!overSticky&&e.clientY>tr.top&&e.clientY<tr.bottom){
+   if(e.clientX-tr.left<tm) ts[i].scrollLeft-=tstep;
+   else if(tr.right-e.clientX<tm) ts[i].scrollLeft+=tstep;
   }
  }
  var bd=document.querySelector(".board");
@@ -3447,6 +3451,7 @@ document.addEventListener("dragstart",function(e){
  var n=e.target&&e.target.closest?e.target.closest(".pnote,.scene,.mchip"):null;
  if(!n)return;
  dragId=n.getAttribute("data-id");
+ document.documentElement.classList.add("dragging");
  setTimeout(function(){n.classList.add("dragging")},0);
  if(e.dataTransfer){e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",dragId)}catch(_){}}
 });
@@ -3454,7 +3459,7 @@ document.addEventListener("dragend",function(){clearZones();cleanupDrag()});
 document.addEventListener("dragover",function(e){
  if(!dragId)return;
  autoScroll(e);
- var td=e.target&&e.target.closest?e.target.closest("td[data-cell]"):null;
+ var td=e.target&&e.target.closest?e.target.closest("[data-cell]"):null;
  if(td){
   e.preventDefault();
   if(e.dataTransfer)e.dataTransfer.dropEffect="move";
@@ -3483,7 +3488,7 @@ document.addEventListener("dragover",function(e){
  } else if(!ins.parentNode||ins.parentNode!==col) col.appendChild(ins);
 });
 document.addEventListener("drop",function(e){
- var tdz=e.target&&e.target.closest?e.target.closest("td[data-cell]"):null;
+ var tdz=e.target&&e.target.closest?e.target.closest("[data-cell]"):null;
  if(dragId&&tdz){
   e.preventDefault();snap();
   var parts=tdz.getAttribute("data-cell").split(":");
@@ -4038,13 +4043,13 @@ function linesView(){
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
  h+='<span><i class="holekey"></i>תא ורוד = הליין נשמט בפרק הזה</span>';
- h+='<span style="color:var(--ink-3)">'+(RO?"":"אפשר לגרור כל סצנה לכל תא. זה משנה גם ליין וגם פרק")+'</span></div>';
+ h+='<span style="color:var(--ink-3)">'+(RO?"":"גרור סצנה לתא כדי לשנות ליין ופרק, או על שם הליין בעמודה הראשונה כדי לשנות רק ליין")+'</span></div>';
  h+='<div class="tscroll"><table class="arc lmap"><thead><tr><th class="c0">ליין</th>';
  DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
  h+='<th class="tot">המהלך</th></tr></thead><tbody>';
  LS.forEach(function(l){
   var s=ST[l.k];
-  h+='<tr><th class="c0" style="--ccol:'+esc(l.color||"#455160")+'"><b>'+esc(l.name)+'</b>';
+  h+='<tr><th class="c0"'+(RO?"":' data-cell="l:'+esc(l.k)+':0" title="גרור לכאן כדי להעביר לליין הזה בלי לשנות פרק"')+' style="--ccol:'+esc(l.color||"#455160")+'"><b>'+esc(l.name)+'</b>';
   if(l.what) h+='<em>'+esc(l.what)+'</em>';
   h+='<span class="ldots">';
   DATA.eps.forEach(function(e){
@@ -4073,7 +4078,7 @@ function linesView(){
   h+='<em>'+s.shot+' צולמו · '+s.min+' דק׳</em></td></tr>';
  });
  var unv=un.filter(function(x){return state.filter==="all"||x.status===state.filter});
- h+='<tr class="norow"><th class="c0" style="--ccol:#8A93A0"><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
+ h+='<tr class="norow"><th class="c0"'+(RO?"":' data-cell="l:__none__:0" title="גרור לכאן כדי להוציא מכל ליין"')+' style="--ccol:#8A93A0"><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
  DATA.eps.forEach(function(e){
   var cell=unv.filter(function(x){return x.ep===e.n});
   var cattr=RO?"":' data-cell="l:__none__:'+e.n+'"';
@@ -4108,13 +4113,13 @@ function arcTable(){
  h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
  h+='<span><i class="dot-key"></i>נקודה אדומה = לא צולם. עיגול חלול = חלקי</span>';
- h+='<span style="color:var(--ink-3)">אפשר לגרור כל טאב לכל תא בטבלה. זה משנה גם דמות וגם פרק</span></div>';
+ h+='<span style="color:var(--ink-3)">גרור פתק לתא כדי לשנות דמות ופרק, או על שם הדמות בעמודה הראשונה כדי לשנות רק דמות</span></div>';
  h+='<div class="tscroll"><table class="arc"><thead><tr><th class="c0">דמות</th>';
  DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
  h+='<th class="tot">סה״כ</th></tr></thead><tbody>';
  DATA.chars.forEach(function(c){
   var all=DATA.scenes.filter(function(x){return x.char===c.k});
-  h+='<tr><th class="c0" style="--ccol:'+esc(c.color||"#455160")+'"><b>'+esc(c.name)+'</b><em>'+esc(c.role)+'</em></th>';
+  h+='<tr><th class="c0"'+(RO?"":' data-cell="c:'+esc(c.k)+':0" title="גרור לכאן כדי לשייך לדמות הזו בלי לשנות פרק"')+' style="--ccol:'+esc(c.color||"#455160")+'"><b>'+esc(c.name)+'</b><em>'+esc(c.role)+'</em></th>';
   DATA.eps.forEach(function(e){
    var cell=all.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
    var ck='c:'+c.k+':'+e.n;
