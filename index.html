@@ -376,6 +376,36 @@ table.arc{border-collapse:collapse;width:100%;min-width:1040px}
 .dmoments{margin:0;padding-inline-start:17px}
 .dmoments li{font-size:14px;line-height:1.55;color:var(--ink);margin-bottom:3px}
 .dsec.note p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.sclock{display:flex;flex-wrap:wrap;gap:22px;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-top:16px;box-shadow:var(--shadow)}
+.sbig{flex:0 0 auto;min-width:130px;border-inline-end:1px solid var(--line);padding-inline-end:22px}
+.sbig b{display:block;font-family:"Heebo",sans-serif;font-weight:700;font-size:52px;line-height:1;font-variant-numeric:tabular-nums}
+.sbig span{font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3)}
+.sside{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.sline{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-3)}
+.sline em{font-style:normal;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.sbar{display:flex;height:12px;border-radius:999px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line)}
+.sbar i{display:block;height:100%}
+.speople{display:flex;flex-wrap:wrap;gap:20px;margin-top:2px}
+.sperson{display:flex;align-items:baseline;gap:7px}
+.sperson .sdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;align-self:center}
+.sperson b{font-family:"Heebo",sans-serif;font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.sperson .snm{font-family:"Heebo",sans-serif;font-size:13px;font-weight:600}
+.sperson em{font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3)}
+.sadd{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:16px}
+.sadd .f{margin:0;flex:0 0 auto}
+.sadd .f.grow{flex:1 1 240px;min-width:180px}
+.sadd .f label{display:block;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin-bottom:5px}
+.slog{margin-top:18px}
+.dmonth .mcount{font-weight:400;letter-spacing:0;color:var(--ink-3);margin-inline-start:8px}
+.srow{display:flex;align-items:center;gap:11px;padding:9px 12px;border-bottom:1px solid var(--line)}
+.srow:hover{background:var(--surface)}
+.srow .sdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.srow .sdate{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;min-width:84px}
+.srow .sday{font-style:normal;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);min-width:62px}
+.srow .swho{font-family:"Heebo",sans-serif;font-size:13px;font-weight:600;min-width:74px}
+.srow .snote{font-size:13px;color:var(--ink-2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sdel{margin-inline-start:auto;background:transparent;border:0;color:var(--ink-3);font-size:17px;line-height:1;cursor:pointer;padding:2px 7px;border-radius:5px}
+.sdel:hover{background:var(--todo-soft);color:var(--todo)}
 .dempty{background:var(--surface);border:1px dashed var(--line-2);border-radius:12px;padding:34px 24px;text-align:center;margin-top:18px}
 .dempty b{display:block;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:19px;margin-bottom:6px}
 .dempty p{margin:0;color:var(--ink-3);font-size:13.5px}
@@ -2949,7 +2979,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3054,7 +3084,7 @@ function render(){
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
  h+='<div class="views">';
- h+=vbtn("board","מפת הפרקים")+vbtn("lines","מפת הליינים")+vbtn("char","לפי דמות")+vbtn("unit","לפי מחלקה")+vbtn("days","לוג ימי צילום")+vbtn("ideas","רעיונות לסצנות");
+ h+=vbtn("board","מפת הפרקים")+vbtn("lines","מפת הליינים")+vbtn("char","לפי דמות")+vbtn("unit","לפי מחלקה")+vbtn("days","לוג ימי צילום")+vbtn("shifts","שעון משמרות")+vbtn("ideas","רעיונות לסצנות");
  h+='</div>';
  if(!RO){
   h+='<div class="sep"></div>';
@@ -3084,6 +3114,12 @@ function render(){
 
  if(state.group==="ideas"){
   h+=ideasView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
+ if(state.group==="shifts"){
+  h+=shiftsView();
   h+='</div><div class="toast" id="toast"></div>';
   paint(h);
   return;
@@ -3688,6 +3724,96 @@ function daysView(){
  return h+'</section>';
 }
 
+/* ===== שעון משמרות ===== */
+function SHIFTS(){ if(!DATA.shifts) DATA.shifts=[]; return DATA.shifts }
+function shiftPeople(){
+ if(!DATA.shiftPeople||!DATA.shiftPeople.length) DATA.shiftPeople=["רובי","גבי"];
+ return DATA.shiftPeople;
+}
+function shiftTarget(){ var n=Number(DATA.shiftTarget); return n>0?n:150 }
+function todayISO(){var d=new Date(),p=function(n){return n<10?"0"+n:""+n};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
+function shiftsSorted(){
+ return SHIFTS().slice().sort(function(a,b){
+  var pa=dparts(a.date),pb=dparts(b.date);
+  if(pa&&pb) return pb.t-pa.t;
+  if(pa) return -1; if(pb) return 1; return 0;
+ });
+}
+function shiftColor(i){
+ var pal=["#0C6B75","#A8791E","#8A2D8F","#1B4B8F","#A8305C","#146B3A"];
+ return pal[i%pal.length];
+}
+function shiftsView(){
+ var ppl=shiftPeople(), all=SHIFTS(), tgt=shiftTarget();
+ var per={},other=0;
+ all.forEach(function(s){ if(ppl.indexOf(s.who)>-1) per[s.who]=(per[s.who]||0)+1; else other++; });
+ var used=all.length, left=Math.max(tgt-used,0);
+ var h='<section class="grp"><div class="grp-h"><h2>שעון משמרות</h2><span class="role">כמה משמרות נשרפו מתוך המכסה</span>';
+ h+='<span class="meta">'+used+' מתוך '+tgt+'</span></div>';
+ h+='<p class="grp-note">יש '+tgt+' משמרות לכל הסדרה. כל מי שיוצא למשמרת רושם אותה כאן עם התאריך, והשעון יורד. זה המספר שקובע כמה עוד אפשר לצלם, ולא התחושה.</p>';
+
+ h+='<div class="sclock">';
+ h+='<div class="sbig"><b>'+left+'</b><span>משמרות נשארו</span></div>';
+ h+='<div class="sside">';
+ h+='<div class="sline"><em>'+used+'</em> נוצלו · <em>'+tgt+'</em> במכסה'+(RO?"":' <button class="tinyedit" data-act="shiftset">הגדרות</button>')+'</div>';
+ h+='<div class="sbar">';
+ ppl.forEach(function(p,i){
+  var n=per[p]||0;
+  if(n) h+='<i style="width:'+(n/tgt*100).toFixed(2)+'%;background:'+shiftColor(i)+'" title="'+esc(p)+' '+n+'"></i>';
+ });
+ if(other) h+='<i style="width:'+(other/tgt*100).toFixed(2)+'%;background:#8A93A0"></i>';
+ h+='</div>';
+ h+='<div class="speople">';
+ ppl.forEach(function(p,i){
+  var n=per[p]||0;
+  h+='<div class="sperson"><span class="sdot" style="background:'+shiftColor(i)+'"></span>';
+  h+='<b>'+n+'</b><span class="snm">'+esc(p)+'</span>';
+  h+='<em>'+(used?Math.round(n/used*100):0)+'% מהמשמרות</em></div>';
+ });
+ if(other) h+='<div class="sperson"><span class="sdot" style="background:#8A93A0"></span><b>'+other+'</b><span class="snm">אחרים</span><em>לא ברשימה</em></div>';
+ h+='</div></div></div>';
+
+ if(state.shiftSet&&!RO){
+  h+='<div class="grpform" data-form="__sset__" style="max-width:620px">';
+  h+='<div class="row"><div class="f"><label>כמה משמרות במכסה</label><input name="target" type="number" min="1" step="1" value="'+tgt+'"></div>';
+  h+='<div class="f"><label>מי עושה משמרות</label><input name="people" value="'+esc(ppl.join(", "))+'" placeholder="מופרד בפסיקים"></div></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="savesset">שמור</button>';
+  h+='<button class="btn ghost" data-act="cancelsset">ביטול</button></div></div>';
+ }
+
+ if(!RO){
+  h+='<div class="sadd" data-form="__shift__">';
+  h+='<div class="f"><label>תאריך</label><input name="date" type="date" value="'+esc(state.shiftDate||todayISO())+'"></div>';
+  h+='<div class="f"><label>מי</label><select name="who">'+ppl.map(function(p){
+   return '<option value="'+esc(p)+'"'+(state.shiftWho===p?" selected":"")+'>'+esc(p)+'</option>'}).join("")+'</select></div>';
+  h+='<div class="f grow"><label>מה היה במשמרת</label><input name="note" placeholder="לא חובה. איפה, עם מי, מה יצא"></div>';
+  h+='<button class="btn" data-act="addshift">רשום משמרת</button>';
+  h+='</div>';
+ }
+
+ if(!all.length) return h+'<div class="dempty"><b>עוד לא נרשמה אף משמרת</b><p>רשום את הראשונה בשורה שלמעלה.</p></div></section>';
+
+ h+='<div class="slog">';
+ var lastM=null;
+ shiftsSorted().forEach(function(s){
+  var mk=monthKey(s.date);
+  if(mk!==lastM){
+   lastM=mk;
+   var cnt=SHIFTS().filter(function(x){return monthKey(x.date)===mk}).length;
+   h+='<div class="dmonth">'+esc(monthLabel(s.date))+' <span class="mcount">'+cnt+' משמרות</span></div>';
+  }
+  var i=ppl.indexOf(s.who);
+  h+='<div class="srow"><span class="sdot" style="background:'+(i>-1?shiftColor(i):"#8A93A0")+'"></span>';
+  h+='<b class="sdate">'+esc(dayLabel(s.date))+'</b><em class="sday">'+esc(dayWeek(s.date))+'</em>';
+  h+='<span class="swho">'+esc(s.who||"לא צוין")+'</span>';
+  h+='<span class="snote">'+esc(s.note||"")+'</span>';
+  if(!RO) h+='<button class="sdel" data-act="delshift" data-id="'+esc(s.k)+'" title="מחק משמרת">×</button>';
+  h+='</div>';
+ });
+ h+='</div>';
+ return h+'</section>';
+}
+
 /* ===== ליינים: הסיפורים שרצים לאורך העונה ===== */
 var DEFAULT_LINES=[
  {k:"hunt",name:"הציד: דוד כסאות והסרסור",what:"התיק הגדול של הימ״ר, מהמארב שנשרף ועד המעצר",color:"#B0472B",note:"הליין העלילתי היחיד בסדרה עם התחלה, אמצע וסוף. הוא נושא את פרק 3 כמעט לבד."},
@@ -4224,6 +4350,19 @@ function toText(){
   });
   o+="\n";
  });
+ if(SHIFTS().length){
+  o+="=== שעון משמרות ===\n\n";
+  var _tg=shiftTarget(),_us=SHIFTS().length;
+  o+=_us+" משמרות נוצלו מתוך "+_tg+". נשארו "+Math.max(_tg-_us,0)+".\n";
+  shiftPeople().forEach(function(pp){
+   o+="  "+pp+": "+SHIFTS().filter(function(x){return x.who===pp}).length+"\n";
+  });
+  o+="\n";
+  shiftsSorted().forEach(function(x){
+   o+="  "+dayLabel(x.date)+" — "+(x.who||"")+(x.note?" — "+x.note:"")+"\n";
+  });
+  o+="\n";
+ }
  if(DAYS().length){
   o+="=== לוג ימי צילום ===\n\n";
   daysSorted().forEach(function(d){
@@ -4415,6 +4554,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
  if(MUT[act]&&!ensureEdit())return;
@@ -4494,6 +4634,26 @@ document.addEventListener("click",function(e){
   var uk="u"+(DATA.units.length+1)+"_"+Math.floor(Math.random()*9999);
   DATA.units.push({k:uk,name:"מחלקה חדשה",need:[],note:""});
   state.editUnit=uk;state.group="unit";render();save();return}
+ if(act==="shiftset"){state.shiftSet=true;render();return}
+ if(act==="cancelsset"){state.shiftSet=false;render();return}
+ if(act==="savesset"){
+  var tv=Number(fval("__sset__","target"))||shiftTarget();
+  DATA.shiftTarget=Math.max(1,Math.round(tv));
+  var pl=fval("__sset__","people").split(",").map(function(x){return x.trim()}).filter(Boolean);
+  if(pl.length) DATA.shiftPeople=pl;
+  state.shiftSet=false;render();save();toast("ההגדרות נשמרו");return}
+ if(act==="addshift"){
+  var sd=fval("__shift__","date")||todayISO();
+  var sw=fval("__shift__","who")||shiftPeople()[0];
+  var sn=fval("__shift__","note").trim();
+  SHIFTS().push({k:"s"+Date.now()+"_"+Math.floor(Math.random()*999),date:sd,who:sw,note:sn});
+  state.shiftDate=sd;state.shiftWho=sw;
+  render();save();
+  toast("נרשמה משמרת ל"+sw+" ב-"+dayLabel(sd)+". נשארו "+Math.max(shiftTarget()-SHIFTS().length,0));
+  return}
+ if(act==="delshift"){
+  DATA.shifts=SHIFTS().filter(function(x){return x.k!==id});
+  render();save();toast("המשמרת נמחקה. Ctrl+Z מחזיר");return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
  if(act==="saveday"){
   var dform=document.querySelector('[data-form="__day__"]');
