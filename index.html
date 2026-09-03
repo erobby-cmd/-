@@ -419,6 +419,32 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .cleg b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:10.5px}
 .clegtog{margin-inline-start:auto;background:transparent;border:1px solid var(--line);border-radius:6px;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;color:var(--ink-3);padding:2px 9px;cursor:pointer}
 .clegtog:hover{color:var(--ink);border-color:var(--line-2)}
+.cleg{cursor:pointer;transition:.12s}
+.cleg:hover{border-color:var(--cc,#455160);color:var(--ink);transform:translateY(-1px)}
+.modal .box.cpbox{max-width:820px}
+.cphead{background:var(--surface);border-bottom:2px solid var(--cc,#455160)}
+.cpname{display:inline-flex;align-items:center;gap:9px;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);letter-spacing:0;text-transform:none}
+.cpname i{width:11px;height:11px;border-radius:50%;background:var(--cc,#455160)}
+.cpname em{font-style:normal;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:400;color:var(--ink-3);letter-spacing:0}
+.cpbody{padding:16px 22px 22px;overflow-y:auto;min-height:0}
+.cpbody .dstats{margin-top:0}
+.cpstory{margin:14px 0 0;font-size:14.5px;line-height:1.65;color:var(--ink-2)}
+.cpww{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+.cpww>div{flex:1 1 240px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.cpww b{display:block;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin-bottom:4px}
+.cpep{margin-top:18px}
+.cpep h4{display:flex;align-items:baseline;gap:9px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);margin:0 0 7px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.cpep h4 span{margin-inline-start:auto;font-weight:400;font-variant-numeric:tabular-nums}
+.cprow{display:flex;align-items:center;gap:10px;width:100%;text-align:start;background:transparent;border:0;border-inline-start:3px solid transparent;padding:8px 11px;cursor:pointer;border-radius:7px;font-family:"Assistant",sans-serif}
+.cprow:hover{background:var(--surface-2)}
+.cprow.n-shot{border-inline-start-color:var(--shot)}
+.cprow.n-partial{border-inline-start-color:var(--partial)}
+.cprow.n-todo{border-inline-start-color:var(--todo)}
+.cprow.n-dropped{border-inline-start-color:var(--dropped)}
+.cptitle{flex:1 1 auto;font-size:14.5px;color:var(--ink);min-width:0}
+.cpmeta{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);white-space:nowrap}
+.npill.p-shot{background:var(--shot-soft);color:var(--shot)}
+.npill.p-dropped{background:var(--dropped-soft);color:var(--dropped)}
 .trup{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:15px 17px 16px;margin-top:16px;display:grid;gap:12px}
 .trrow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 .trrow .f{margin:0;flex:0 0 auto}
@@ -3054,7 +3080,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",trQ:"",trOpen:"",trPick:"",trDate:"",legOpen:true,shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",trQ:"",trOpen:"",trPick:"",trDate:"",legOpen:true,charPanel:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3297,6 +3323,7 @@ function render(){
   h+='<section class="grp" data-grp="'+(g.obj?"char:"+esc(g.obj.k):(g.uobj?"unit:"+esc(g.uobj.k):""))+'"><div class="grp-h"><h2>';
   if(g.obj) h+='<span class="cdot" style="background:'+esc(g.obj.color||"#455160")+'"></span>';
   h+=esc(g.name);
+  if(g.obj) h+='<button class="tinyedit" data-act="charopen" data-id="'+esc(g.obj.k)+'">כל הסצנות</button>';
   if(!RO&&g.obj) h+='<button class="tinyedit" data-act="editchar" data-id="'+esc(g.obj.k)+'">ערוך דמות</button>';
   if(!RO&&g.uobj) h+='<button class="tinyedit" data-act="editunit" data-id="'+esc(g.uobj.k)+'">ערוך מחלקה</button>';
   h+='</h2>';
@@ -3924,6 +3951,78 @@ function needView(){
  return h+'</div></section>';
 }
 
+/* ===== כרטיס דמות: כל הסצנות שלה ===== */
+function charPanelHtml(){
+ var c=charOf(state.charPanel);
+ if(!c) return "";
+ var all=DATA.scenes.filter(function(x){return x.char===c.k});
+ var shot=all.filter(function(x){return x.status==="shot"}).length;
+ var mins=all.reduce(function(a,x){return a+(x.status==="dropped"?0:(Number(x.min)||0))},0);
+ var eps={};all.forEach(function(x){eps[x.ep||1]=1});
+ var epList=Object.keys(eps).sort(function(a,b){return a-b});
+ var trs=trList().filter(function(t){return t.char===c.k});
+ var h='<div class="modal" data-act="charclose"><div class="box cpbox" data-stop="1">';
+ h+='<div class="mhead cphead" style="--cc:'+esc(c.color||"#455160")+'"><span class="cpname"><i></i>'+esc(c.name)+(c.role?'<em>'+esc(c.role)+'</em>':'')+'</span>';
+ h+='<button data-act="charclose" title="סגור">×</button></div>';
+ h+='<div class="cpbody">';
+ h+='<div class="dstats">';
+ h+='<div class="dstat"><b>'+all.length+'</b><span>סצנות</span></div>';
+ h+='<div class="dstat"><b>'+shot+'</b><span>צולמו</span></div>';
+ h+='<div class="dstat"><b>'+(all.length-shot)+'</b><span>עוד לא</span></div>';
+ h+='<div class="dstat"><b>'+mins+'</b><span>דקות</span></div>';
+ h+='<div class="dstat"><b>'+epList.length+'</b><span>פרקים</span></div>';
+ if(trs.length) h+='<div class="dstat"><b>'+trs.length+'</b><span>תמלולים</span></div>';
+ h+='</div>';
+ if(c.story) h+='<p class="cpstory">'+esc(c.story)+'</p>';
+ if(c.want||c.wound){
+  h+='<div class="cpww">';
+  if(c.want) h+='<div><b>רוצה</b>'+esc(c.want)+'</div>';
+  if(c.wound) h+='<div><b>פצע</b>'+esc(c.wound)+'</div>';
+  h+='</div>';
+ }
+ if((c.gaps||[]).length){
+  h+='<div class="ngaps" style="border-radius:9px;border-bottom:0;margin-top:12px"><b>מה חסר לדמות</b><ul>'+
+   c.gaps.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+ }
+ if(!all.length){
+  h+='<div class="dempty" style="margin-top:14px"><b>אין לה עדיין אף סצנה</b><p>אפשר להוסיף סצנה ולשייך אותה אליה.</p></div>';
+ }
+ DATA.eps.forEach(function(e){
+  var rows=all.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+  if(!rows.length) return;
+  h+='<div class="cpep"><h4>פרק '+e.n+' · '+esc(e.title)+'<span>'+rows.length+' סצנות</span></h4>';
+  rows.forEach(function(x){
+   var ln=lineObj(lineOf(x));
+   h+='<button class="cprow n-'+x.status+'" data-act="gotoscene" data-id="'+esc(x.id)+'" title="פתח את הסצנה במפת הפרקים">';
+   h+='<span class="ncode">'+esc(x.id)+'</span><span class="cptitle">'+esc(x.title)+'</span>';
+   h+='<span class="npill p-'+x.status+'">'+esc(STATUS[x.status].l)+'</span>';
+   h+='<span class="cpmeta">'+(x.unit?esc(unitName(x.unit)):'')+(ln?' · '+esc(ln.name):'')+'</span>';
+   h+='</button>';
+  });
+  h+='</div>';
+ });
+ var noEp=all.filter(function(x){return !DATA.eps.filter(function(e){return e.n===x.ep}).length});
+ if(noEp.length){
+  h+='<div class="cpep"><h4>בלי פרק<span>'+noEp.length+'</span></h4>';
+  noEp.forEach(function(x){
+   h+='<button class="cprow n-'+x.status+'" data-act="gotoscene" data-id="'+esc(x.id)+'">';
+   h+='<span class="ncode">'+esc(x.id)+'</span><span class="cptitle">'+esc(x.title)+'</span>';
+   h+='<span class="npill p-'+x.status+'">'+esc(STATUS[x.status].l)+'</span></button>';
+  });
+  h+='</div>';
+ }
+ if(trs.length){
+  h+='<div class="cpep"><h4>תמלולים<span>'+trs.length+'</span></h4>';
+  trs.forEach(function(t){
+   h+='<button class="cprow" data-act="gototr" data-id="'+esc(t.k)+'"><span class="ncode">'+esc(dayLabel(t.date))+'</span>';
+   h+='<span class="cptitle">'+esc(t.title||"תמלול")+'</span><span class="cpmeta">'+(t.words||0).toLocaleString("he-IL")+' מילים</span></button>';
+  });
+  h+='</div>';
+ }
+ h+='</div></div></div>';
+ return h;
+}
+
 /* ===== תמלולים ===== */
 function TR(){ if(!STORE.tr) STORE.tr={}; return STORE.tr }
 function trList(){
@@ -4390,7 +4489,7 @@ function legendStrip(){
  if(state.legOpen){
   DATA.chars.forEach(function(c){
    var n=DATA.scenes.filter(function(x){return x.char===c.k}).length;
-   h+='<span class="cleg" style="--cc:'+esc(c.color||"#455160")+'" title="'+esc(c.name+(c.role?" · "+c.role:""))+'"><i></i>'+esc(c.name)+'<b>'+n+'</b></span>';
+   h+='<button class="cleg" data-act="charopen" data-id="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'" title="'+esc(c.name+(c.role?" · "+c.role:"")+" — לחץ לכל הסצנות שלה")+'"><i></i>'+esc(c.name)+'<b>'+n+'</b></button>';
   });
  } else {
   h+='<span class="trhint">'+DATA.chars.length+' דמויות</span>';
@@ -4548,6 +4647,7 @@ function saveUI(){
 }
 function paint(h){
  if(state.showUsers) h+=userPanel();
+ if(state.charPanel) h+=charPanelHtml();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
  var x=bd0?bd0.scrollLeft:0;
@@ -5099,6 +5199,12 @@ document.addEventListener("click",function(e){
   var uk="u"+(DATA.units.length+1)+"_"+Math.floor(Math.random()*9999);
   DATA.units.push({k:uk,name:"מחלקה חדשה",need:[],note:""});
   state.editUnit=uk;state.group="unit";render();save();return}
+ if(act==="charopen"){state.charPanel=id;render();return}
+ if(act==="charclose"){if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="charclose"]'))return;state.charPanel="";render();return}
+ if(act==="gotoscene"){
+  state.charPanel="";state.filter="all";state.group="board";state.editing=id;state.adding=false;
+  render();return}
+ if(act==="gototr"){state.charPanel="";state.group="tr";state.trOpen=id;render();return}
  if(act==="legtog"){state.legOpen=!state.legOpen;render();return}
  if(act==="tropen"){state.trOpen=(state.trOpen===id)?"":id;render();return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
@@ -5218,6 +5324,7 @@ document.addEventListener("keydown",function(e){
  if(mod&&(e.key==="y"||e.key==="Y")&&!inField){e.preventDefault();redo();return}
  if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
  if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
+ if(e.key==="Escape"&&state.charPanel){state.charPanel="";render();return}
  if(e.key==="Escape"&&state.newAt){state.newAt=null;render();return}
  if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit||state.editLine||state.editDay)){
   state.editing=null;state.adding=false;state.editEp=null;state.editMeta=false;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;render();
