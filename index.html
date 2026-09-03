@@ -210,6 +210,7 @@ section.grp.dropok{outline:3px dashed var(--accent);outline-offset:10px;border-r
 .epbar i{display:block;height:100%;background:var(--accent)}
 .ghost{margin-top:13px;padding:15px 13px;border:1.5px dashed #D9799C;border-radius:4px;color:var(--ink-3);font-family:"Heebo",sans-serif;font-size:12.5px;text-align:center}
 .ins{height:5px;background:var(--accent);border-radius:3px;margin:-4px 0}
+.arc td .ins{margin:2px 0;height:4px}
 .nedit{margin-top:9px;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;background:rgba(0,0,0,.07);border:0;border-radius:4px;padding:3px 9px;color:inherit;cursor:pointer;opacity:.65}
 .nedit:hover{opacity:1;background:rgba(0,0,0,.13)}
 .modes{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;margin-top:16px}
@@ -3496,6 +3497,13 @@ function moveScene(id,ep,beforeId){
  col.forEach(function(x,j){x.ord=j});
  reindex();
 }
+function moveAfter(id,ep,afterId){
+ var col=DATA.scenes.filter(function(x){return x.ep===ep&&x.id!==id})
+  .sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+ var idx=col.length;
+ col.forEach(function(x,j){if(x.id===afterId)idx=j+1});
+ moveScene(id,ep,col[idx]?col[idx].id:null);
+}
 var dragId=null,ins=null;
 function cleanupDrag(){
  document.documentElement.classList.remove("dragging");
@@ -3507,6 +3515,7 @@ function cleanupDrag(){
 }
 function autoScroll(e){
  var m=110, step=26, tm=52, tstep=16;
+ if(e.clientY<0||e.clientY>window.innerHeight) return;
  var overSticky=!!(e.target&&e.target.closest&&e.target.closest(".arc th.c0"));
  if(e.clientY<m) window.scrollBy(0,-step);
  else if(window.innerHeight-e.clientY<m) window.scrollBy(0,step);
@@ -3543,14 +3552,24 @@ document.addEventListener("dragstart",function(e){
 document.addEventListener("dragend",function(){clearZones();cleanupDrag()});
 document.addEventListener("dragover",function(e){
  if(!dragId)return;
- autoScroll(e);
  var td=e.target&&e.target.closest?e.target.closest("[data-cell]"):null;
  if(td){
   e.preventDefault();
   if(e.dataTransfer)e.dataTransfer.dropEffect="move";
   clearZones();td.classList.add("dropcell");
+  if(td.tagName==="TD"){
+   if(!ins){ins=document.createElement("div");ins.className="ins"}
+   var mc=e.target.closest?e.target.closest(".mchip"):null;
+   if(mc&&mc!==ins){
+    var mr=mc.getBoundingClientRect();
+    if(e.clientY<mr.top+mr.height/2) td.insertBefore(ins,mc);
+    else td.insertBefore(ins,mc.nextSibling);
+   } else if(!ins.parentNode||ins.parentNode!==td) td.appendChild(ins);
+  } else if(ins&&ins.parentNode){ ins.parentNode.removeChild(ins) }
+  autoScroll(e);
   return;
  }
+ autoScroll(e);
  var sec=e.target&&e.target.closest?e.target.closest("section.grp[data-grp]"):null;
  if(sec&&sec.getAttribute("data-grp")){
   e.preventDefault();
@@ -3578,17 +3597,33 @@ document.addEventListener("drop",function(e){
   e.preventDefault();snap();
   var parts=tdz.getAttribute("data-cell").split(":");
   var sc=DATA.scenes.filter(function(x){return x.id===dragId})[0];
+  var beforeId=null, afterId=null;
+  if(ins&&ins.parentNode===tdz){
+   var nx=ins.nextElementSibling;
+   while(nx&&!(nx.classList&&nx.classList.contains("mchip"))) nx=nx.nextElementSibling;
+   if(nx&&nx.getAttribute("data-id")!==dragId) beforeId=nx.getAttribute("data-id");
+   if(!beforeId){
+    var pv=ins.previousElementSibling;
+    while(pv&&!(pv.classList&&pv.classList.contains("mchip"))) pv=pv.previousElementSibling;
+    if(pv&&pv.getAttribute("data-id")!==dragId) afterId=pv.getAttribute("data-id");
+   }
+  }
+  function place(ep){
+   if(beforeId) moveScene(sc.id,ep,beforeId);
+   else if(afterId) moveAfter(sc.id,ep,afterId);
+   else if(ep!==sc.ep) moveScene(sc.id,ep,null);
+  }
   if(sc){
    if(parts[0]==="c"){
+    var ep=Number(parts[2])||sc.ep, epch=ep!==sc.ep;
     sc.char=parts[1];
-    var ep=Number(parts[2])||sc.ep;
-    if(ep!==sc.ep) moveScene(sc.id,ep,null);
-    toast(sc.id+" עבר ל"+((charOf(parts[1])||{}).name||"")+(ep!==sc.ep?", פרק "+ep:""));
+    place(ep);
+    toast(sc.id+" עבר ל"+((charOf(parts[1])||{}).name||"")+(epch?", פרק "+ep:""));
    } else if(parts[0]==="l"){
     var lep=Number(parts[2])||sc.ep;
     var moved=lep!==sc.ep;
     sc.line=parts[1]==="__none__"?"-":parts[1];
-    if(moved) moveScene(sc.id,lep,null);
+    place(lep);
     toast(parts[1]==="__none__"?(sc.id+" הוצא מכל ליין"+(moved?", פרק "+lep:"")):(sc.id+" עבר לליין "+lineName(parts[1])+(moved?", פרק "+lep:"")));
    } else if(parts[0]==="u"){
     sc.unit=parts[1];
