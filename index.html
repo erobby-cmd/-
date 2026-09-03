@@ -411,6 +411,37 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .nneed li{font-size:13.5px;color:var(--ink);line-height:1.55}
 .nhave{margin-top:8px;font-size:12.5px;color:var(--ink-3)}
 .nhave b{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--shot);margin-inline-end:7px}
+.clegend{border-top:1px solid var(--line);background:var(--surface-2)}
+.clegend-in{max-width:1100px;margin:0 auto;padding:7px 20px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.clegend .lgl{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin-inline-end:4px}
+.cleg{display:inline-flex;align-items:center;gap:5px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.cleg i{width:8px;height:8px;border-radius:50%;background:var(--cc,#455160);flex:0 0 auto}
+.cleg b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:10.5px}
+.clegtog{margin-inline-start:auto;background:transparent;border:1px solid var(--line);border-radius:6px;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;color:var(--ink-3);padding:2px 9px;cursor:pointer}
+.clegtog:hover{color:var(--ink);border-color:var(--line-2)}
+.trup{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:15px 17px 16px;margin-top:16px;display:grid;gap:12px}
+.trrow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.trrow .f{margin:0;flex:0 0 auto}
+.trrow .f.grow{flex:1 1 260px;min-width:200px}
+.trrow .f label,.trup>.f label{display:block;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin-bottom:5px}
+.trpick{cursor:pointer;display:inline-flex;align-items:center}
+.trhint{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.trstat{font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3);margin-inline-start:10px}
+.trsearch{display:flex;gap:9px;align-items:center;margin-top:16px}
+.trsearch input{flex:1 1 auto;font-family:"Assistant",sans-serif;font-size:14px;padding:10px 13px;border:1px solid var(--line-2);border-radius:9px;background:var(--surface);color:var(--ink)}
+.trres{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-3);margin:9px 0 0}
+.trlist{margin-top:16px;display:grid;gap:20px}
+.trrow2{padding:11px 18px;border-bottom:1px solid var(--line)}
+.trrow2:last-child{border-bottom:0}
+.trhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.trtitle{background:transparent;border:0;padding:0;cursor:pointer;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16px;font-weight:700;color:var(--ink);text-align:start}
+.trtitle:hover{color:var(--accent)}
+.trmeta{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.trhits{margin-top:7px;display:grid;gap:4px}
+.trhit{font-size:13px;line-height:1.5;color:var(--ink-2);padding-inline-start:8px;border-inline-start:2px solid var(--line-2)}
+.trhit em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10px;color:var(--ink-3);margin-inline-end:7px;font-variant-numeric:tabular-nums}
+mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius:3px}
+.trtext{margin:10px 0 0;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:13px 15px;max-height:460px;overflow:auto;white-space:pre-wrap;font-family:"Assistant",sans-serif;font-size:14px;line-height:1.7;color:var(--ink)}
 .sclock{display:flex;flex-wrap:wrap;gap:22px;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-top:16px;box-shadow:var(--shadow)}
 .sbig{flex:0 0 auto;min-width:130px;border-inline-end:1px solid var(--line);padding-inline-end:22px}
 .sbig b{display:block;font-family:"Heebo",sans-serif;font-weight:700;font-size:52px;line-height:1;font-variant-numeric:tabular-nums}
@@ -447,6 +478,14 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .tagbox{display:flex;flex-wrap:wrap;gap:7px}
 .tagbox label{display:flex;align-items:center;gap:5px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-2);border-radius:6px;padding:5px 10px;cursor:pointer;margin:0;letter-spacing:0}
 .tagbox input{width:auto;margin:0}
+.tagbox .cchip{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.pnote .nextra{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0 0}
+.pnote .nextra span{display:inline-flex;align-items:center;gap:4px;font-family:"Heebo",sans-serif;font-size:10px;font-weight:600;background:rgba(0,0,0,.06);border-radius:999px;padding:1px 7px}
+.pnote .nextra i{width:6px;height:6px;border-radius:50%;background:var(--cc,#455160)}
+.person.pchar{display:inline-flex;align-items:center;gap:5px}
+.person.pchar i{width:7px;height:7px;border-radius:50%;background:var(--cc,#455160)}
+.mchip.m-guest{opacity:.85;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.mchip.m-guest em{opacity:.85}
 .ask{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px 20px;margin-top:18px;box-shadow:var(--shadow);display:grid;gap:12px;max-width:820px}
 .ask .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:660px){.ask .row2{grid-template-columns:1fr}}
@@ -2978,6 +3017,7 @@ function normStore(o){
  if(o.scenes) o={users:DEFAULT_USERS.slice(),base:o,layers:{}};
  if(!o.users||!o.users.length) o.users=DEFAULT_USERS.slice();
  if(!o.layers) o.layers={};
+ if(!o.tr) o.tr={};
  return o;
 }
 var STORE=normStore(JSON.parse(document.getElementById("scene-data").textContent));
@@ -3014,7 +3054,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",trQ:"",trOpen:"",trPick:"",trDate:"",legOpen:true,shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3072,6 +3112,11 @@ function createAt(status){
  toast(status==="shot"?"נוספה סצנה שצולמה":"נוספה סצנה לצילום");
 }
 function charOf(k){var c=DATA.chars.filter(function(x){return x.k===k})[0];return c||null}
+function extraChars(s){
+ return (s.chars||[]).filter(function(k){return k&&k!==s.char&&charOf(k)});
+}
+function inScene(s,k){ return s.char===k||extraChars(s).indexOf(k)>-1 }
+function extraNames(s){ return extraChars(s).map(function(k){return (charOf(k)||{}).name||""}).filter(Boolean) }
 function charColor(k){var c=charOf(k);return (c&&c.color)?c.color:"#455160"}
 function coverOf(u){
  var sc=DATA.scenes.filter(function(x){return x.unit===u.k});
@@ -3120,7 +3165,7 @@ function render(){
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
  h+='<div class="views">';
- h+=vbtn("days","לוג ימי צילום")+vbtn("unit","סצנות לפי מחלקה")+vbtn("char","סצנות לפי דמות")+vbtn("lines","מפת הליינים")+vbtn("board","מפת הפרקים")+vbtn("ideas","רעיונות לסצנות")+vbtn("need","צריך לצלם")+vbtn("shifts","שעון משמרות");
+ h+=vbtn("days","לוג ימי צילום")+vbtn("unit","סצנות לפי מחלקה")+vbtn("char","סצנות לפי דמות")+vbtn("lines","מפת הליינים")+vbtn("board","מפת הפרקים")+vbtn("ideas","רעיונות לסצנות")+vbtn("need","צריך לצלם")+vbtn("shifts","שעון משמרות")+vbtn("tr","תמלולים");
  h+='</div>';
  if(!RO){
   h+='<div class="sep"></div>';
@@ -3145,7 +3190,7 @@ function render(){
  } else {
   h+='<span class="savebadge s-ok"><i></i>עותק צפייה · '+esc(SNAPDATE)+'</span>';
  }
- h+='</div></div><div class="wrap'+(state.group==="board"?" boardmode":"")+'">';
+ h+='</div>'+legendStrip()+'</div><div class="wrap'+(state.group==="board"?" boardmode":"")+'">';
  if(state.adding) h+='<div class="scene" data-s="todo" style="margin-top:24px">'+form(null)+'</div>';
 
  if(state.group==="ideas"){
@@ -3167,6 +3212,14 @@ function render(){
   }
   h+='<div class="toast" id="toast"></div>';
   paint(h);
+  return;
+ }
+ if(state.group==="tr"){
+  h+=trView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  var _q=document.getElementById("trq");
+  if(_q&&state.trFocus){try{_q.focus();_q.setSelectionRange(_q.value.length,_q.value.length)}catch(_){}}
   return;
  }
  if(state.group==="shifts"){
@@ -3233,7 +3286,7 @@ function render(){
  if(state.group==="char") h+=arcTable()+fillTable();
  if(state.group==="unit") h+=unitTable();
  var groups = state.group==="char"
-  ? DATA.chars.map(function(x){return {name:x.name,role:x.role,obj:x,f:function(s){return s.char===x.k}}})
+  ? DATA.chars.map(function(x){return {name:x.name,role:x.role,obj:x,f:function(s){return inScene(s,x.k)}}})
   : DATA.units.map(function(x){return {name:x.name,role:COVER[coverOf(x)],note:x.note,uobj:x,f:function(s){return s.unit===x.k}}});
 
  groups.forEach(function(g){
@@ -3371,6 +3424,11 @@ function note(x,extra){
  h+='<div class="nchar" style="background:'+esc(charColor(x.char))+'">'+esc(ch?ch.name:"ללא דמות");
  if(ch&&ch.role) h+='<small>'+esc(ch.role)+'</small>';
  h+='</div>';
+ var _ex=extraChars(x);
+ if(_ex.length&&extra!=="segmode"){
+  h+='<div class="nextra">'+_ex.map(function(k){var cc=charOf(k);
+   return '<span style="--cc:'+esc(cc.color||"#455160")+'"><i></i>'+esc(cc.name)+'</span>'}).join("")+'</div>';
+ }
  h+='<div class="c"><span>'+esc(x.id)+'</span><span>'+(Number(x.min)||0)+' דק׳</span></div>';
  h+='<h4>'+esc(x.title)+'</h4><p>'+esc(shortOf(x))+'</p>';
  if(extra==="rowmode") h+='<span class="st">'+esc(STATUS[x.status].l)+'</span>';
@@ -3795,7 +3853,7 @@ function needGroups(mode){
    f:function(s){return s.ep===e.n}})});
  } else {
   DATA.chars.forEach(function(c){g.push({k:"c:"+c.k,name:c.name,sub:c.role||"",color:c.color||"#455160",
-   gaps:c.gaps||[],f:function(s){return s.char===c.k}})});
+   gaps:c.gaps||[],f:function(s){return inScene(s,c.k)}})});
   g.push({k:"c:none",name:"בלי דמות",sub:"",color:"#8A93A0",f:function(s){return !charOf(s.char)}});
  }
  return g;
@@ -3846,6 +3904,8 @@ function needView(){
    h+='<div class="nmeta">';
    h+='<span>פרק '+(s.ep||1)+'</span>';
    if(mode!=="char"&&ch) h+='<span><i style="background:'+esc(charColor(s.char))+'"></i>'+esc(ch.name)+'</span>';
+   extraChars(s).forEach(function(k){var cc=charOf(k);
+    h+='<span><i style="background:'+esc(cc.color||"#455160")+'"></i>'+esc(cc.name)+'</span>'});
    if(mode!=="line"&&ln) h+='<span><i style="background:'+esc(ln.color||"#455160")+'"></i>'+esc(ln.name)+'</span>';
    if(s.unit) h+='<span>'+esc(unitName(s.unit))+'</span>';
    h+='<span>'+(Number(s.min)||0)+' דק׳</span>';
@@ -3856,6 +3916,173 @@ function needView(){
    }
    if((s.have||[]).length){
     h+='<div class="nhave"><b>כבר ביד</b>'+esc(s.have.join(" · "))+'</div>';
+   }
+   h+='</div>';
+  });
+  h+='</div>';
+ });
+ return h+'</div></section>';
+}
+
+/* ===== תמלולים ===== */
+function TR(){ if(!STORE.tr) STORE.tr={}; return STORE.tr }
+function trList(){
+ var t=TR();
+ return Object.keys(t).map(function(k){return t[k]}).filter(function(x){return x&&!x.deleted});
+}
+function trOf(k){var x=TR()[k];return (x&&!x.deleted)?x:null}
+function wordCount(s){var a=String(s||"").trim();return a?a.split(/\s+/).length:0}
+function loadJSZip(){
+ return new Promise(function(res,rej){
+  if(window.JSZip) return res(window.JSZip);
+  var s=document.createElement("script");
+  s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+  s.onload=function(){window.JSZip?res(window.JSZip):rej(new Error("no"))};
+  s.onerror=function(){rej(new Error("no"))};
+  document.head.appendChild(s);
+ });
+}
+function unent(s){
+ return s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"')
+  .replace(/&apos;/g,"'").replace(/&#39;/g,"'").replace(/&amp;/g,"&");
+}
+function docxToText(file){
+ return loadJSZip()
+  .then(function(JSZip){return JSZip.loadAsync(file)})
+  .then(function(zip){
+   var f=zip.file("word/document.xml");
+   if(!f) throw new Error("bad");
+   return f.async("string");
+  })
+  .then(function(xml){
+   return unent(xml.replace(/<w:tab[^>]*\/?>/g,"\t")
+     .replace(/<w:br[^>]*\/?>/g,"\n")
+     .replace(/<\/w:p>/g,"\n")
+     .replace(/<[^>]+>/g,""))
+     .replace(/\r/g,"").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+  });
+}
+function readAsText(file){
+ return new Promise(function(res,rej){
+  var r=new FileReader();
+  r.onload=function(){res(String(r.result||""))};
+  r.onerror=function(){rej(new Error("read"))};
+  r.readAsText(file,"utf-8");
+ });
+}
+function fileToText(file){
+ var n=(file.name||"").toLowerCase();
+ if(/\.docx$/.test(n)) return docxToText(file);
+ if(/\.(txt|md|srt|vtt|csv|rtf)$/.test(n)||/^text\//.test(file.type||"")) return readAsText(file).then(function(t){
+   return /\.rtf$/.test(n)?t.replace(/\\'([0-9a-f]{2})/gi,"").replace(/\{\\[^}]*\}/g,"").replace(/\\[a-z]+-?\d* ?/gi,"").replace(/[{}]/g,"").trim():t;
+ });
+ if(/\.doc$/.test(n)) return Promise.reject(new Error("doc"));
+ return readAsText(file);
+}
+function addTranscript(o){
+ var k="t"+Date.now()+"_"+Math.floor(Math.random()*9999);
+ TR()[k]={k:k,char:o.char||"",title:o.title||"תמלול",date:o.date||todayISO(),
+  text:o.text||"",words:wordCount(o.text),src:o.src||"",at:new Date().toISOString()};
+ return k;
+}
+function trGroups(){
+ var by={},all=trList();
+ all.forEach(function(t){ (by[t.char]=by[t.char]||[]).push(t) });
+ var out=[];
+ DATA.chars.forEach(function(c){
+  if(by[c.k]) out.push({k:c.k,name:c.name,role:c.role||"",color:c.color||"#455160",items:by[c.k]});
+ });
+ var loose=[];
+ Object.keys(by).forEach(function(k){ if(!charOf(k)) loose=loose.concat(by[k]) });
+ if(loose.length) out.push({k:"",name:"בלי דמות",role:"תמלולים שעוד לא שויכו",color:"#8A93A0",items:loose});
+ out.forEach(function(g){g.items.sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""))})});
+ return out;
+}
+function hiLite(line,q){
+ var h=esc(line);
+ if(!q) return h;
+ var qq=esc(q).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+ try{ h=h.replace(new RegExp(qq,"gi"),function(m){return '<mark>'+m+'</mark>'}) }catch(_){}
+ return h;
+}
+function trMatches(t,q){
+ if(!q) return [];
+ var out=[], lines=String(t.text||"").split("\n"), lq=q.toLowerCase();
+ for(var i=0;i<lines.length&&out.length<8;i++){
+  if(lines[i].toLowerCase().indexOf(lq)>-1) out.push({n:i+1,s:lines[i].trim()});
+ }
+ return out;
+}
+function trView(){
+ var all=trList(), q=(state.trQ||"").trim();
+ var words=all.reduce(function(a,t){return a+(t.words||0)},0);
+ var chars=trGroups().filter(function(g){return g.k}).length;
+ var h='<section class="grp"><div class="grp-h"><h2>תמלולים</h2><span class="role">הראיונות עצמם, לפי דמות</span>';
+ h+='<span class="meta">'+all.length+' תמלולים</span></div>';
+ h+='<p class="grp-note">כאן יושב הטקסט הגולמי. מעלים קובץ וורד או טקסט, או פשוט מדביקים, ומשייכים לדמות. אחר כך אפשר לחפש מילה אחת על פני כל הראיונות ולראות מי אמר אותה ואיפה, בלי לפתוח קבצים.</p>';
+
+ if(!RO){
+  h+='<div class="trup" data-form="__tr__">';
+  h+='<div class="trrow">';
+  h+='<div class="f"><label>לאיזו דמות</label><select name="char"><option value="">בלי דמות</option>'+DATA.chars.map(function(c){
+   return '<option value="'+esc(c.k)+'"'+(state.trPick===c.k?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select></div>';
+  h+='<div class="f"><label>תאריך הראיון</label><input name="date" type="date" value="'+esc(state.trDate||todayISO())+'"></div>';
+  h+='<div class="f grow"><label>שם התמלול</label><input name="title" placeholder="למשל: ראיון ארוך עם חלפון, לשכה"></div>';
+  h+='</div>';
+  h+='<div class="trrow">';
+  h+='<label class="btn trpick" for="trfile">בחר קבצים</label>';
+  h+='<input id="trfile" type="file" multiple accept=".txt,.md,.srt,.vtt,.csv,.rtf,.docx,text/plain" style="display:none">';
+  h+='<span class="trhint">וורד (docx), טקסט, srt. אפשר כמה קבצים ביחד, כל קובץ נכנס כתמלול נפרד</span>';
+  h+='</div>';
+  h+='<div class="f"><label>או להדביק טקסט</label><textarea name="paste" style="min-height:90px" placeholder="הדבק כאן את התמלול ולחץ הוסף"></textarea></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="trpaste">הוסף את הטקסט</button>';
+  h+='<span class="trstat" id="trstat"></span></div>';
+  h+='</div>';
+ }
+
+ if(!all.length) return h+'<div class="dempty"><b>עוד לא נטען אף תמלול</b><p>העלה קובץ או הדבק טקסט למעלה.</p></div></section>';
+
+ h+='<div class="dstats">';
+ h+='<div class="dstat"><b>'+all.length+'</b><span>תמלולים</span></div>';
+ h+='<div class="dstat"><b>'+words.toLocaleString("he-IL")+'</b><span>מילים בסך הכול</span></div>';
+ h+='<div class="dstat"><b>'+chars+'</b><span>דמויות עם תמלול</span></div>';
+ h+='</div>';
+
+ h+='<div class="trsearch"><input id="trq" placeholder="חפש מילה או משפט בכל התמלולים" value="'+esc(q)+'">';
+ if(q) h+='<button class="btn ghost" data-act="trclear">נקה</button>';
+ h+='</div>';
+
+ var hits=0;
+ if(q) all.forEach(function(t){ if(trMatches(t,q).length) hits++ });
+ if(q) h+='<p class="trres">'+(hits?('נמצא ב-'+hits+' תמלולים'):'לא נמצא כלום')+'</p>';
+
+ h+='<div class="trlist">';
+ trGroups().forEach(function(g){
+  var items=q?g.items.filter(function(t){return trMatches(t,q).length}):g.items;
+  if(!items.length) return;
+  h+='<div class="ngrp"><div class="ngrp-h" style="--cc:'+esc(g.color)+'"><span class="ndot"></span>';
+  h+='<h3>'+esc(g.name)+'</h3>';
+  if(g.role) h+='<em>'+esc(g.role)+'</em>';
+  h+='<span class="ncount">'+items.length+' תמלולים · '+items.reduce(function(a,t){return a+(t.words||0)},0).toLocaleString("he-IL")+' מילים</span></div>';
+  items.forEach(function(t){
+   var open=state.trOpen===t.k;
+   h+='<div class="trrow2">';
+   h+='<div class="trhead"><button class="trtitle" data-act="tropen" data-id="'+esc(t.k)+'">'+(open?"▾ ":"▸ ")+esc(t.title||"תמלול")+'</button>';
+   h+='<span class="trmeta">'+esc(dayLabel(t.date))+' · '+(t.words||0).toLocaleString("he-IL")+' מילים'+(t.src?' · '+esc(t.src):'')+'</span>';
+   if(!RO){
+    h+='<select class="smove trchar" data-id="'+esc(t.k)+'" title="שיוך לדמות אחרת"><option value="">בלי דמות</option>'+DATA.chars.map(function(c){
+     return '<option value="'+esc(c.k)+'"'+(c.k===t.char?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select>';
+    h+='<button class="sdel" data-act="trdel" data-id="'+esc(t.k)+'" title="מחק תמלול">×</button>';
+   }
+   h+='</div>';
+   var ms=trMatches(t,q);
+   if(ms.length&&!open){
+    h+='<div class="trhits">';
+    ms.forEach(function(m){h+='<div class="trhit"><em>'+m.n+'</em>'+hiLite(m.s,q)+'</div>'});
+    h+='</div>';
+   }
+   if(open){
+    h+='<pre class="trtext">'+(q?String(t.text||"").split("\n").map(function(l){return hiLite(l,q)}).join("\n"):esc(t.text||""))+'</pre>';
    }
    h+='</div>';
   });
@@ -4118,7 +4345,7 @@ function arcTable(){
  DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
  h+='<th class="tot">סה״כ</th></tr></thead><tbody>';
  DATA.chars.forEach(function(c){
-  var all=DATA.scenes.filter(function(x){return x.char===c.k});
+  var all=DATA.scenes.filter(function(x){return inScene(x,c.k)});
   h+='<tr><th class="c0"'+(RO?"":' data-cell="c:'+esc(c.k)+':0" title="גרור לכאן כדי לשייך לדמות הזו בלי לשנות פרק"')+' style="--ccol:'+esc(c.color||"#455160")+'"><b>'+esc(c.name)+'</b><em>'+esc(c.role)+'</em></th>';
   DATA.eps.forEach(function(e){
    var cell=all.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
@@ -4127,8 +4354,9 @@ function arcTable(){
    if(!cell.length){h+='<td class="void"'+cattr+'></td>';return}
    h+='<td'+cattr+'>';
    cell.forEach(function(x){
-    h+='<button class="mchip m-'+x.status+'"'+(RO?"":' draggable="true" data-act="edit"')+' data-id="'+esc(x.id)+'">';
-    h+=reddot(x.status)+'<em>'+esc(x.id)+'</em>'+esc(x.title)+'</button>';
+    var guest=x.char!==c.k;
+    h+='<button class="mchip m-'+x.status+(guest?" m-guest":"")+'"'+(RO?"":' draggable="true" data-act="edit"')+' data-id="'+esc(x.id)+'"'+(guest?' title="הדמות המובילה כאן היא '+esc((charOf(x.char)||{}).name||"")+'"':"")+'>';
+    h+=reddot(x.status)+'<em>'+esc(x.id)+(guest?' · גם בסצנה':'')+'</em>'+esc(x.title)+'</button>';
    });
    h+='</td>';
   });
@@ -4156,6 +4384,20 @@ function unitMap(){
  return h+'</div></section>';
 }
 
+function legendStrip(){
+ var h='<div class="clegend"><div class="clegend-in">';
+ h+='<span class="lgl">הדמויות</span>';
+ if(state.legOpen){
+  DATA.chars.forEach(function(c){
+   var n=DATA.scenes.filter(function(x){return x.char===c.k}).length;
+   h+='<span class="cleg" style="--cc:'+esc(c.color||"#455160")+'" title="'+esc(c.name+(c.role?" · "+c.role:""))+'"><i></i>'+esc(c.name)+'<b>'+n+'</b></span>';
+  });
+ } else {
+  h+='<span class="trhint">'+DATA.chars.length+' דמויות</span>';
+ }
+ h+='<button class="clegtog" data-act="legtog">'+(state.legOpen?"הסתר":"הצג")+'</button>';
+ return h+'</div></div>';
+}
 function vbtn(k,label){
  return '<button data-act="group" data-k="'+k+'" aria-pressed="'+(state.group===k)+'">'+esc(label)+'</button>';
 }
@@ -4169,6 +4411,8 @@ function card(s){
  var h='<article class="scene" data-s="'+s.status+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(s.id)+'">';
  h+='<div class="s-head">'+(RO?"":'<div class="grip" title="גרור מכאן">⠿</div>')+reddot(s.status)+'<div class="code">'+esc(s.id)+'</div><div class="s-title"><h3>'+esc(s.title)+(s.mine?'<span class="tag">הצעה</span>':'')+'</h3><div class="people">';
  if(s.unit) h+='<span class="person unit">'+esc(unitName(s.unit))+'</span>';
+ extraChars(s).forEach(function(k){var cc=charOf(k);
+  h+='<span class="person pchar" style="--cc:'+esc(cc.color||"#455160")+'"><i></i>'+esc(cc.name)+'</span>'});
  (s.people||[]).forEach(function(p){h+='<span class="person">'+esc(p)+'</span>'});
  h+='</div></div><div class="mins">'+(Number(s.min)||0)+' דק׳</div>';
  h+='<button class="pill" data-s="'+s.status+'"'+(RO?"":' data-act="cycle"')+' data-id="'+esc(s.id)+'" title="לחיצה מחליפה סטטוס">'+STATUS[s.status].l+'</button></div>';
@@ -4199,6 +4443,9 @@ function form(s){
  h+='<div class="f"><label>כותרת הסצנה</label><input name="title" value="'+esc(n.title)+'"></div>';
  h+='<div class="row"><div class="f"><label>דמות מובילה</label><select name="char">'+DATA.chars.map(function(x){return '<option value="'+x.k+'"'+(x.k===n.char?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>';
  h+='<div class="f"><label>מחלקה</label><select name="unit">'+DATA.units.map(function(x){return '<option value="'+x.k+'"'+(x.k===n.unit?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div></div>';
+ h+='<div class="f"><label>עוד דמויות בסצנה</label><div class="tagbox">'+DATA.chars.map(function(x){
+  return '<label><input type="checkbox" name="sc_'+x.k+'"'+(((n.chars||[]).indexOf(x.k)>-1)?" checked":"")+'><i class="cchip" style="background:'+esc(x.color||"#455160")+'"></i>'+esc(x.name)+'</label>';
+ }).join("")+'</div><p class="hint">הדמות המובילה למעלה. כאן מסמנים את מי שעוד נמצא בסצנה איתה</p></div>';
  h+='<div class="f"><label>ליין</label><select name="line"><option value="-"'+((s?lineOf(n):"")?"":" selected")+'>בלי ליין</option>'+LINES().map(function(x){return '<option value="'+x.k+'"'+((s&&lineOf(n)===x.k)?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>';
  h+='<div class="row"><div class="f"><label>סטטוס</label><select name="status">'+ORDER.map(function(k){return '<option value="'+k+'"'+(k===n.status?" selected":"")+'>'+STATUS[k].l+'</option>'}).join("")+'</select></div>';
  h+='<div class="f"><label>פרק</label><select name="ep">'+DATA.eps.map(function(e){return '<option value="'+e.n+'"'+(e.n===(n.ep||1)?" selected":"")+'>פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select></div></div>';
@@ -4251,6 +4498,11 @@ function readForm(key){
   tags:tagsOf().filter(function(t){var f=el.querySelector('[name="tag_'+t.k+'"]');return f&&f.checked}).map(function(t){return t.k})};
  var _lf=el.querySelector('[name="line"]');
  if(_lf) _o.line=_lf.value;
+ if(el.querySelector('[name^="sc_"]')){
+  _o.chars=DATA.chars.filter(function(x){
+   var f=el.querySelector('[name="sc_'+x.k+'"]');return f&&f.checked&&x.k!==_o.char;
+  }).map(function(x){return x.k});
+ }
  return _o;
 }
 function toast(m,bad){var t=document.getElementById("toast");if(!t)return;
@@ -4319,27 +4571,30 @@ function editorOpen(){
  return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editMeta||state.editEp!==null);
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
-function snap(){try{preSnap=JSON.stringify(STORE)}catch(_){preSnap=null}}
+function snapStr(){try{return JSON.stringify({users:STORE.users,base:STORE.base,layers:STORE.layers})}catch(_){return null}}
+function snap(){preSnap=snapStr()}
 function pushHist(){
  if(skipHist){skipHist=false;preSnap=null;return}
  if(preSnap!==null){
-  var now=null;try{now=JSON.stringify(STORE)}catch(_){}
+  var now=snapStr();
   if(now!==null&&now!==preSnap){hist.push(preSnap);if(hist.length>60)hist.shift();future.length=0}
  }
  preSnap=null;
 }
 function undo(){
  if(!hist.length){toast("אין לאן לחזור",true);return}
- try{future.push(JSON.stringify(STORE))}catch(_){}
- STORE=normStore(JSON.parse(hist.pop()));useView();
+ var _tr=STORE.tr;
+ var _s=snapStr(); if(_s!==null) future.push(_s);
+ STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;useView();
  skipHist=true;
  state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;state.editEp=null;state.editMeta=false;
  render();save();toast("הפעולה בוטלה");
 }
 function redo(){
  if(!future.length){toast("אין לאן להתקדם",true);return}
- try{hist.push(JSON.stringify(STORE))}catch(_){}
- STORE=normStore(JSON.parse(future.pop()));useView();
+ var _tr2=STORE.tr;
+ var _s2=snapStr(); if(_s2!==null) hist.push(_s2);
+ STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;useView();
  skipHist=true;render();save();toast("הפעולה שוחזרה");
 }
 var SNAPDATE="";
@@ -4351,41 +4606,48 @@ var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false;
 function rowsOf(){
  var r={users:STORE.users,base:STORE.base};
  Object.keys(STORE.layers||{}).forEach(function(k){r["layer:"+k]=STORE.layers[k]});
+ Object.keys(STORE.tr||{}).forEach(function(k){r["tr:"+k]=STORE.tr[k]});
  return r;
 }
 function applyRows(list){
- var users=null,base=null,layers={},seen=false;
+ var users=null,base=null,layers={},tr={},seen=false;
  list.forEach(function(row){
   if(row.id==="users")users=row.data;
   else if(row.id==="base")base=row.data;
   else if(row.id.indexOf("layer:")===0)layers[row.id.slice(6)]=row.data;
+  else if(row.id.indexOf("tr:")===0)tr[row.id.slice(3)]=row.data;
   seen=true;
  });
  if(!seen)return false;
  if(users)STORE.users=users;
  if(base)STORE.base=base;
  STORE.layers=layers;
+ STORE.tr=tr;
  return true;
 }
 function pull(initial){
  if(pulling)return Promise.resolve(false);
  pulling=true;
- return fetch(REST+"?select=id,data,updated_at",{headers:HDR})
+ return fetch(REST+"?select=id,updated_at",{headers:HDR})
   .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
-  .then(function(list){
-   pulling=false;
-   var incoming=JSON.stringify(list.map(function(x){return [x.id,x.data]}).sort());
-   if(!initial&&incoming===lastPull)return list.length;
+  .then(function(meta){
+   var incoming=JSON.stringify(meta.map(function(x){return [x.id,x.updated_at]}).sort());
+   if(!initial&&incoming===lastPull){pulling=false;netStatus("ok");return meta.length}
    lastPull=incoming;
-   var changed=applyRows(list);
-   if(changed){
-    list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
-    useView();
-    if(editorOpen()){ pendingRender=true; }
-    else { pendingRender=false; render(); }
-   }
-   netStatus("ok");
-   return list.length;
+   return fetch(REST+"?select=id,data,updated_at",{headers:HDR})
+    .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
+    .then(function(list){
+     pulling=false;
+     var changed=applyRows(list);
+     if(changed){
+      list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
+      useView();
+      if(editorOpen()){ pendingRender=true; }
+      else { pendingRender=false; render(); }
+     }
+     netStatus("ok");
+     return list.length;
+    });
   })
   .catch(function(e){pulling=false;netStatus("err");return -1});
 }
@@ -4489,12 +4751,20 @@ function toText(){
   o+=a.length+" מתוך "+PER_EP+" סצנות · "+a.filter(function(x){return x.status==="shot"}).length+" צולמו · "+(a.length*MIN_PER)+" דקות\n";
   a.forEach(function(x,i){
    var ch=charOf(x.char);
-   o+="  "+(i+1)+". ["+x.id+"] "+x.title+" — "+(ch?ch.name:"")+" — "+L[x.status]+"\n";
+   o+="  "+(i+1)+". ["+x.id+"] "+x.title+" — "+(ch?ch.name:"")+(extraNames(x).length?" + "+extraNames(x).join(", "):"")+" — "+L[x.status]+"\n";
    if(x.short)o+="      "+x.short+"\n";
    if((x.need||[]).length)o+="      חסר: "+x.need.join("; ")+"\n";
   });
   o+="\n";
  });
+ if(trList().length){
+  o+="=== תמלולים ===\n\n";
+  trGroups().forEach(function(g){
+   o+=g.name+" — "+g.items.length+" תמלולים\n";
+   g.items.forEach(function(t){o+="  "+dayLabel(t.date)+" · "+(t.title||"תמלול")+" · "+(t.words||0)+" מילים\n"});
+   o+="\n";
+  });
+ }
  var _open=openScenes();
  if(_open.length){
   o+="=== צריך לצלם ===\n\n";
@@ -4653,6 +4923,31 @@ function save(){
  pushT=setTimeout(function(){pushRows()},450);
 }
 document.addEventListener("change",function(e){
+ if(e.target&&e.target.id==="trfile"){
+  var inp=e.target, files=[].slice.call(inp.files||[]);
+  if(!files.length)return;
+  if(!ensureEdit()){inp.value="";render();return}
+  var ck=fval("__tr__","char"), dt=fval("__tr__","date")||todayISO(), ttl=fval("__tr__","title").trim();
+  var st=document.getElementById("trstat");
+  if(st)st.textContent="קורא "+files.length+" קבצים...";
+  snap();
+  var done=0,fail=[];
+  Promise.all(files.map(function(f){
+   return fileToText(f).then(function(t){
+    if(!t||!t.trim()){fail.push(f.name);return}
+    addTranscript({char:ck,date:dt,title:(ttl||f.name.replace(/\.[^.]+$/,"")),text:t,src:f.name});
+    done++;
+   }).catch(function(){fail.push(f.name)});
+  })).then(function(){
+   inp.value="";
+   state.trPick=ck;state.trDate=dt;
+   render();save();
+   if(done) toast("נוספו "+done+" תמלולים"+(fail.length?", "+fail.length+" נכשלו":""));
+   else toast("לא הצלחתי לקרוא את הקבצים. נסה docx או txt, או הדבק את הטקסט",true);
+   if(fail.length){var s2=document.getElementById("trstat");if(s2)s2.textContent="לא נקראו: "+fail.join(", ")}
+  });
+  return;
+ }
  var el=e.target;
  if(!el||!el.classList||!el.classList.contains("nmove"))return;
  if(!ensureEdit()){render();return}
@@ -4665,6 +4960,13 @@ document.addEventListener("change",function(e){
 });
 document.addEventListener("change",function(e){
  var el=e.target;if(!el||!el.classList)return;
+ if(el.classList.contains("trchar")){
+  if(!ensureEdit()){render();return}
+  snap();
+  var t3=TR()[el.getAttribute("data-id")];
+  if(t3){t3.char=el.value;render();save();toast(el.value?("התמלול שויך ל"+((charOf(el.value)||{}).name||"")):"התמלול הוצא מכל דמות")}
+  return;
+ }
  var id=el.getAttribute("data-id");
  var sc=DATA.scenes.filter(function(x){return x.id===id})[0];
  if(!sc)return;
@@ -4672,6 +4974,7 @@ document.addEventListener("change",function(e){
  snap();
  if(el.classList.contains("schar")){sc.char=el.value;render();save();toast("הסצנה שויכה ל"+(charOf(el.value)||{}).name);return}
  if(el.classList.contains("sunit")){sc.unit=el.value;render();save();toast("הסצנה שויכה ל"+unitName(el.value));return}
+ if(el.classList.contains("trchar")){return}
  if(el.classList.contains("sline")){sc.line=el.value;render();save();toast(el.value==="-"?"הסצנה הוצאה מכל ליין":"הסצנה שויכה לליין "+lineName(el.value));return}
 });
 document.addEventListener("click",function(e){
@@ -4715,7 +5018,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
  if(MUT[act]&&!ensureEdit())return;
@@ -4796,6 +5099,20 @@ document.addEventListener("click",function(e){
   var uk="u"+(DATA.units.length+1)+"_"+Math.floor(Math.random()*9999);
   DATA.units.push({k:uk,name:"מחלקה חדשה",need:[],note:""});
   state.editUnit=uk;state.group="unit";render();save();return}
+ if(act==="legtog"){state.legOpen=!state.legOpen;render();return}
+ if(act==="tropen"){state.trOpen=(state.trOpen===id)?"":id;render();return}
+ if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
+ if(act==="trdel"){
+  var td2=TR()[id];
+  if(td2){td2.deleted=true;td2.text="";td2.words=0}
+  render();save();toast("התמלול נמחק");return}
+ if(act==="trpaste"){
+  var ptxt=fval("__tr__","paste");
+  if(!ptxt||!ptxt.trim()){toast("אין טקסט להוסיף",true);return}
+  var pk=addTranscript({char:fval("__tr__","char"),date:fval("__tr__","date"),
+   title:fval("__tr__","title").trim()||"תמלול מודבק",text:ptxt,src:"הודבק"});
+  state.trPick=fval("__tr__","char");state.trDate=fval("__tr__","date");
+  state.trOpen=pk;render();save();toast("נוסף תמלול, "+wordCount(ptxt).toLocaleString("he-IL")+" מילים");return}
  if(act==="shiftset"){state.shiftSet=true;render();return}
  if(act==="cancelsset"){state.shiftSet=false;render();return}
  if(act==="savesset"){
@@ -4907,6 +5224,12 @@ document.addEventListener("keydown",function(e){
  }
 });
 document.addEventListener("input",function(e){
+ if(e.target&&e.target.id==="trq"){
+  state.trQ=e.target.value; state.trFocus=true;
+  clearTimeout(window.__trT);
+  window.__trT=setTimeout(function(){render()},260);
+  return;
+ }
  var f=e.target&&e.target.closest?e.target.closest("[data-form]"):null;
  if(f)f.setAttribute("data-dirty","1");
 });
