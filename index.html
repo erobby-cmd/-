@@ -3490,13 +3490,14 @@ document.addEventListener("drop",function(e){
    if(parts[0]==="c"){
     sc.char=parts[1];
     var ep=Number(parts[2])||sc.ep;
-    moveScene(sc.id,ep,null);
-    toast(sc.id+" עבר ל"+((charOf(parts[1])||{}).name||"")+", פרק "+ep);
+    if(ep!==sc.ep) moveScene(sc.id,ep,null);
+    toast(sc.id+" עבר ל"+((charOf(parts[1])||{}).name||"")+(ep!==sc.ep?", פרק "+ep:""));
    } else if(parts[0]==="l"){
-    sc.line=parts[1]==="__none__"?"-":parts[1];
     var lep=Number(parts[2])||sc.ep;
-    moveScene(sc.id,lep,null);
-    toast(parts[1]==="__none__"?(sc.id+" הוצא מכל ליין, פרק "+lep):(sc.id+" עבר לליין "+lineName(parts[1])+", פרק "+lep));
+    var moved=lep!==sc.ep;
+    sc.line=parts[1]==="__none__"?"-":parts[1];
+    if(moved) moveScene(sc.id,lep,null);
+    toast(parts[1]==="__none__"?(sc.id+" הוצא מכל ליין"+(moved?", פרק "+lep:"")):(sc.id+" עבר לליין "+lineName(parts[1])+(moved?", פרק "+lep:"")));
    } else if(parts[0]==="u"){
     sc.unit=parts[1];
     if(parts[2]&&STATUS[parts[2]])sc.status=parts[2];
@@ -4291,6 +4292,8 @@ function paint(h){
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
  var x=bd0?bd0.scrollLeft:0;
+ var tsx=[];
+ (function(){var a=document.querySelectorAll(".tscroll");for(var i=0;i<a.length;i++)tsx.push(a[i].scrollLeft)})();
  document.getElementById("root").innerHTML=h;
  var hasModal=!!document.querySelector(".modal");
  document.documentElement.classList.toggle("modal-open",hasModal);
@@ -4299,6 +4302,8 @@ function paint(h){
   if(y&&!hasModal)window.scrollTo(0,y);
   var bd=document.querySelector(".board");
   if(bd&&x)bd.scrollLeft=x;
+  var ts=document.querySelectorAll(".tscroll");
+  for(var i=0;i<ts.length;i++){ if(tsx[i]) ts[i].scrollLeft=tsx[i]; }
   saveUI();
  });
 }
