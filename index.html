@@ -189,6 +189,7 @@ section.grp.dropok{outline:3px dashed var(--accent);outline-offset:10px;border-r
 .grip{font-family:"Heebo",sans-serif;font-size:15px;line-height:1;color:var(--ink-3);padding:4px 2px 0;cursor:grab;letter-spacing:-1px}
 .grip:hover{color:var(--accent)}
 .movebar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.addgrp{display:inline-flex;gap:8px;flex-wrap:nowrap;align-items:center}
 .mlab{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3)}
 .scene:active{cursor:grabbing}
 .scene.dragging{opacity:.3}
@@ -3248,17 +3249,19 @@ function render(){
  ORDER.forEach(function(k){if(k==="dropped"&&!c.dropped)return;h+=chip("filter",k,STATUS[k].l,c[k]||0)});
  h+='<div class="spacer"></div>';
  if(!RO){
+  if(state.group==="lines") h+='<button class="btn ghost" data-act="mineopen">שלוף ליינים מתוך התחקיר</button>';
   h+=saveBadge();
   h+='<button class="btn" data-act="saveNow" title="שמירה עכשיו">שמור</button>';
   h+='<button class="btn ghost" data-act="restore" title="טעינת גיבוי מהמחשב">טען גיבוי</button>';
   h+='<button class="btn ghost" data-act="backup" title="שמירת עותק של כל היומן למחשב">שמור למחשב</button>';
    if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button class="btn ghost" data-act="drive" title="שמירת עותק בגוגל דרייב, בתיקייה מרחב אילת">שמור לדרייב</button>';
-  if(state.group==="lines") h+='<button class="btn" data-act="mineopen">שלוף ליינים מתוך התחקיר</button><button class="btn ghost" data-act="addline">הוסף ליין</button>';
-  if(state.group==="days") h+='<button class="btn" data-act="addday">הוסף יום צילום</button>';
-  if(state.group==="char") h+='<button class="btn ghost" data-act="addchar">הוסף דמות</button>';
-  if(state.group==="unit") h+='<button class="btn ghost" data-act="addunit">הוסף מחלקה</button>';
-  if(state.group==="ideas") h+='<button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
-  h+='<button class="btn" data-act="add">הוסף סצנה</button>';
+  var addx="";
+  if(state.group==="lines") addx='<button class="btn" data-act="addline">הוסף ליין</button>';
+  else if(state.group==="days") addx='<button class="btn" data-act="addday">הוסף יום צילום</button>';
+  else if(state.group==="char") addx='<button class="btn" data-act="addchar">הוסף דמות</button>';
+  else if(state.group==="unit") addx='<button class="btn" data-act="addunit">הוסף מחלקה</button>';
+  else if(state.group==="ideas") addx='<button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
+  h+='<span class="addgrp">'+addx+'<button class="btn" data-act="add">הוסף סצנה</button></span>';
  } else {
   h+='<span class="savebadge s-ok"><i></i>עותק צפייה · '+esc(SNAPDATE)+'</span>';
  }
