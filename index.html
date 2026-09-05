@@ -4424,6 +4424,7 @@ function trView(){
 
  h+='<div class="trsearch"><input id="trq" placeholder="חפש מילה או משפט בכל התמלולים" value="'+esc(q)+'">';
  if(q) h+='<button class="btn ghost" data-act="trclear">נקה</button>';
+ h+='<button class="btn ghost" data-act="trdocxall" title="כל התמלולים בקובץ וורד אחד">ייצא הכל לוורד</button>';
  h+='</div>';
 
  var hits=0;
@@ -4446,6 +4447,7 @@ function trView(){
    if(!RO){
     h+='<select class="smove trchar" data-id="'+esc(t.k)+'" title="שיוך לדמות אחרת"><option value="">בלי דמות</option>'+DATA.chars.map(function(c){
      return '<option value="'+esc(c.k)+'"'+(c.k===t.char?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select>';
+    h+='<button class="tinyedit" data-act="trdocx" data-id="'+esc(t.k)+'" title="ייצוא לקובץ וורד">וורד</button>';
     h+='<button class="sdel" data-act="trdel" data-id="'+esc(t.k)+'" title="מחק תמלול">×</button>';
    }
    h+='</div>';
@@ -4463,6 +4465,89 @@ function trView(){
   h+='</div>';
  });
  return h+'</div></section>';
+}
+
+/* ===== ייצוא תמלולים לוורד ===== */
+var CTRL_RE=new RegExp("[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]","g");
+function xmlEsc(s){
+ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;").replace(/'/g,"&apos;").replace(CTRL_RE,"");
+}
+function docxPara(text,opt){
+ opt=opt||{};
+ var sz=opt.size||24, b=opt.bold?'<w:b/><w:bCs/>':'', col=opt.color?'<w:color w:val="'+opt.color+'"/>':'';
+ var rpr='<w:rPr>'+b+'<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/>'+col+'<w:rtl/></w:rPr>';
+ var spc=opt.before?'<w:spacing w:before="'+opt.before+'"/>':'';
+ var ppr='<w:pPr><w:bidi/>'+spc+'<w:jc w:val="right"/>'+(opt.bold?'<w:keepNext/>':'')+'</w:pPr>';
+ if(!String(text||"").length) return '<w:p>'+ppr+'</w:p>';
+ return '<w:p>'+ppr+'<w:r>'+rpr+'<w:t xml:space="preserve">'+xmlEsc(text)+'</w:t></w:r></w:p>';
+}
+function buildDocx(paras){
+ var body=paras.join("");
+ var doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+ '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+body+
+ '<w:sectPr><w:bidi/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>'+
+ '</w:body></w:document>';
+ var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+ '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+ '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+ '<Default Extension="xml" ContentType="application/xml"/>'+
+ '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+ '</Types>';
+ var rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+ '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+ '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+ '</Relationships>';
+ return loadJSZip().then(function(JSZip){
+  var z=new JSZip();
+  z.file("[Content_Types].xml",ct);
+  z.folder("_rels").file(".rels",rels);
+  z.folder("word").file("document.xml",doc);
+  return z.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+ });
+}
+function dlBlob(blob,name){
+ var u=URL.createObjectURL(blob), a=document.createElement("a");
+ a.href=u; a.download=name; document.body.appendChild(a); a.click();
+ setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},1500);
+}
+function safeName(s){
+ return String(s||"תמלול").replace(/[\\\/:*?"<>|]/g,"-").replace(/\s+/g," ").trim().slice(0,80);
+}
+function trParas(t){
+ var ch=charOf(t.char), p=[];
+ p.push(docxPara(t.title||"תמלול",{bold:true,size:32}));
+ p.push(docxPara((ch?ch.name+" · ":"")+dayLabel(t.date)+" · "+(t.words||0)+" מילים"+(t.src?" · "+t.src:""),{size:20,color:"777777"}));
+ p.push(docxPara(""));
+ String(t.text||"").split("\n").forEach(function(l){ p.push(docxPara(l)) });
+ return p;
+}
+function trFallbackDoc(inner,title){
+ var html='<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8">'+
+  '<style>body{font-family:Arial;direction:rtl;text-align:right}h1{font-size:18pt}p{font-size:12pt;margin:0 0 6pt}</style>'+
+  '</head><body dir="rtl">'+inner+'</body></html>';
+ dlBlob(new Blob(["﻿"+html],{type:"application/msword"}),safeName(title)+".doc");
+}
+function exportTrDocx(list,name){
+ if(!list.length){toast("אין מה לייצא",true);return}
+ var paras=[];
+ list.forEach(function(t,i){
+  if(i) paras.push(docxPara("",{before:400}));
+  paras=paras.concat(trParas(t));
+ });
+ toast("בונה קובץ וורד...");
+ buildDocx(paras).then(function(blob){
+  dlBlob(blob,safeName(name)+".docx");
+  toast("הקובץ ירד");
+ }).catch(function(){
+  var html=list.map(function(t){
+   var ch=charOf(t.char);
+   return '<h1>'+esc(t.title||"תמלול")+'</h1><p><small>'+esc((ch?ch.name+" · ":"")+dayLabel(t.date))+'</small></p>'+
+    String(t.text||"").split("\n").map(function(l){return '<p>'+esc(l)+'</p>'}).join("");
+  }).join('<hr>');
+  trFallbackDoc(html,name);
+  toast("וורד המלא לא נטען, ירד קובץ doc פשוט שנפתח בוורד",true);
+ });
 }
 
 /* ===== בקשת רעיונות שקוראת את הכל ===== */
@@ -5858,6 +5943,18 @@ document.addEventListener("click",function(e){
  if(act==="gototr"){state.charPanel="";state.group="tr";state.trOpen=id;render();return}
  if(act==="legtog"){state.legOpen=!state.legOpen;render();return}
  if(act==="tropen"){state.trOpen=(state.trOpen===id)?"":id;render();return}
+ if(act==="trdocx"){
+  var td3=trOf(id);
+  if(!td3){toast("התמלול לא נמצא",true);return}
+  var ch3=charOf(td3.char);
+  exportTrDocx([td3],(ch3?ch3.name+" - ":"")+(td3.title||"תמלול")+" - "+dayLabel(td3.date));
+  return}
+ if(act==="trdocxall"){
+  var qq=(state.trQ||"").trim();
+  var lst=trGroups().reduce(function(a,g){return a.concat(g.items)},[]);
+  if(qq) lst=lst.filter(function(t){return trMatches(t,qq).length});
+  exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
+  return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
  if(act==="trdel"){
   var td2=TR()[id];
