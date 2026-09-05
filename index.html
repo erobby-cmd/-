@@ -476,6 +476,14 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .ltl-seg.t-shot{opacity:1}
 .ltl-key{display:inline-block;width:13px;height:13px;border-radius:3px;background:var(--ink-3);opacity:.32}
 @media (max-width:760px){.ltl-row{grid-template-columns:132px minmax(0,1fr);gap:9px;padding:5px 10px}}
+.trmed{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--surface);border:1px dashed var(--line-2);border-radius:10px;padding:11px 14px}
+.trmed .f{margin:0}
+.trmed select{font-family:"Assistant",sans-serif;font-size:13px;padding:6px 10px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface);color:var(--ink)}
+.trbusy{display:flex;align-items:center;gap:9px;background:var(--partial-soft);border:1px solid var(--partial);border-radius:9px;padding:10px 14px;margin-top:12px;font-family:"Heebo",sans-serif;font-size:13px;color:var(--ink)}
+.trbusy i{width:13px;height:13px;border-radius:50%;border:2px solid var(--partial);border-top-color:transparent;animation:trspin .8s linear infinite;flex:0 0 auto}
+@keyframes trspin{to{transform:rotate(360deg)}}
+.traudio{margin-top:9px}
+.traudio audio{width:100%;max-width:520px;height:34px}
 .trup{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:15px 17px 16px;margin-top:16px;display:grid;gap:12px}
 .trrow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 .trrow .f{margin:0;flex:0 0 auto}
@@ -3118,7 +3126,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",trQ:"",trOpen:"",trPick:"",trDate:"",legOpen:true,charPanel:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4155,6 +4163,113 @@ function charPanelHtml(){
  return h;
 }
 
+/* ===== תמלול אודיו בתוך הדפדפן ===== */
+var STTKEY="marhav-eilat-stt-v1";
+var MODELS=[
+ {k:"onnx-community/whisper-large-v3-turbo",name:"הכי טוב לעברית",note:"הורדה חד פעמית של כ-570 מגה, דורש כרטיס גרפי",
+  dt:{encoder_model:"fp16",decoder_model_merged:"q4"},gpu:true},
+ {k:"onnx-community/whisper-small",name:"בינוני",note:"כ-300 מגה, עברית סבירה, עובד גם בלי כרטיס גרפי",
+  dt:{encoder_model:"fp32",decoder_model_merged:"q4"}},
+ {k:"onnx-community/whisper-base",name:"מהיר וגס",note:"כ-80 מגה, מהיר, עברית חלשה. רק לבדיקה",
+  dt:{encoder_model:"fp32",decoder_model_merged:"q4"}}
+];
+function modelDef(k){var a=MODELS.filter(function(m){return m.k===k});return a[0]||MODELS[1]}
+function sttModel(){
+ try{var v=localStorage.getItem(STTKEY);if(v&&MODELS.filter(function(m){return m.k===v}).length)return v}catch(_){}
+ return navigator.gpu?MODELS[0].k:MODELS[1].k;
+}
+function setSttModel(k){try{localStorage.setItem(STTKEY,k)}catch(_){}}
+function isMedia(f){
+ var n=(f.name||"").toLowerCase();
+ return /^(audio|video)\//.test(f.type||"")||/\.(mp3|m4a|wav|aac|ogg|opus|flac|mp4|mov|m4v|webm|mkv|wma|aif|aiff)$/.test(n);
+}
+function mmss(sec){
+ sec=Math.max(0,Math.round(sec||0));
+ var h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+ var p=function(n){return n<10?"0"+n:""+n};
+ return (h?h+":"+p(m):""+m)+":"+p(s);
+}
+var _sttPipe=null,_sttPipeKey="";
+function sttStatus(t){
+ state.trBusy=t;
+ var el=document.getElementById("trstat");
+ if(el) el.textContent=t||"";
+ var bs=document.querySelector(".trbusy span");
+ if(bs) bs.textContent=t||"";
+}
+function getPipe(model,onDl){
+ if(_sttPipe&&_sttPipeKey===model) return Promise.resolve(_sttPipe);
+ var md=modelDef(model);
+ return import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1")
+  .then(function(T){
+   T.env.allowLocalModels=false;
+   var mk=function(o){return T.pipeline("automatic-speech-recognition",model,o)};
+   var tries=[];
+   if(navigator.gpu) tries.push({device:"webgpu",dtype:md.dt,progress_callback:onDl});
+   if(!md.gpu){
+    tries.push({dtype:md.dt,progress_callback:onDl});
+    tries.push({dtype:"q8",progress_callback:onDl});
+   }
+   if(!tries.length) tries.push({dtype:md.dt,progress_callback:onDl});
+   var i=0;
+   function next(err){
+    if(i>=tries.length) throw (err||new Error("no engine"));
+    var o=tries[i++];
+    return mk(o).catch(next);
+   }
+   return next(null);
+  })
+  .then(function(pp){_sttPipe=pp;_sttPipeKey=model;return pp});
+}
+function decodeTo16k(file){
+ return file.arrayBuffer().then(function(ab){
+  var AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC) throw new Error("audio");
+  var ctx=new AC({sampleRate:16000});
+  return ctx.decodeAudioData(ab).then(function(buf){
+   var n=buf.length, out=new Float32Array(n), ch=buf.numberOfChannels;
+   for(var c=0;c<ch;c++){var d=buf.getChannelData(c);for(var i=0;i<n;i++)out[i]+=d[i]/ch}
+   try{ctx.close()}catch(_){}
+   return out;
+  });
+ });
+}
+function transcribeFile(file){
+ var model=sttModel(), total=0;
+ sttStatus("קורא את הקובץ...");
+ return decodeTo16k(file).then(function(pcm){
+  total=pcm.length/16000;
+  sttStatus("טוען את מנוע התמלול. בפעם הראשונה זו הורדה של כמה מאות מגה...");
+  return getPipe(model,function(p){
+   if(p&&p.status==="progress"&&p.total) sttStatus("מוריד את המודל: "+Math.round((p.loaded/p.total)*100)+"% ("+(p.file||"")+")");
+  }).then(function(pipe){return {pipe:pipe,pcm:pcm}});
+ }).then(function(o){
+  var SEG=600*16000, parts=[], lines=[];
+  for(var off=0;off<o.pcm.length;off+=SEG) parts.push(off);
+  var i=0;
+  function step(){
+   if(i>=parts.length) return Promise.resolve(lines.join("\n"));
+   var off=parts[i], end=Math.min(off+SEG,o.pcm.length);
+   sttStatus("מתמלל "+mmss(off/16000)+" מתוך "+mmss(total)+"  ("+(i+1)+"/"+parts.length+")");
+   return o.pipe(o.pcm.slice(off,end),{
+     chunk_length_s:30,stride_length_s:5,language:"he",task:"transcribe",return_timestamps:true
+    }).then(function(r){
+     var base=off/16000;
+     if(r&&r.chunks&&r.chunks.length){
+      r.chunks.forEach(function(c){
+       var t=(c.text||"").trim(); if(!t) return;
+       var st=(c.timestamp&&c.timestamp[0]!=null)?c.timestamp[0]:0;
+       lines.push("["+mmss(base+st)+"] "+t);
+      });
+     } else if(r&&r.text){ lines.push("["+mmss(base)+"] "+r.text.trim()) }
+     i++;
+     return new Promise(function(res){setTimeout(res,0)}).then(step);
+    });
+  }
+  return step();
+ });
+}
+
 /* ===== תמלולים ===== */
 function TR(){ if(!STORE.tr) STORE.tr={}; return STORE.tr }
 function trList(){
@@ -4265,10 +4380,18 @@ function trView(){
   h+='<input id="trfile" type="file" multiple accept=".txt,.md,.srt,.vtt,.csv,.rtf,.docx,text/plain" style="display:none">';
   h+='<span class="trhint">וורד (docx), טקסט, srt. אפשר כמה קבצים ביחד, כל קובץ נכנס כתמלול נפרד</span>';
   h+='</div>';
+  h+='<div class="trmed">';
+  h+='<label class="btn ghost trpick" for="trmedia">הקלטה לתמלול אוטומטי</label>';
+  h+='<input id="trmedia" type="file" accept="audio/*,video/*" style="display:none">';
+  h+='<select id="trmodel">'+MODELS.map(function(m){
+   return '<option value="'+esc(m.k)+'"'+(sttModel()===m.k?" selected":"")+'>'+esc(m.name+" · "+m.note)+'</option>'}).join("")+'</select>';
+  h+='<span class="trhint">הכל רץ אצלך במחשב, שום קובץ לא נשלח לשום מקום. ההורדה הראשונה של המנוע לוקחת כמה דקות, ואחריה היא נשמרת</span>';
+  h+='</div>';
   h+='<div class="f"><label>או להדביק טקסט</label><textarea name="paste" style="min-height:90px" placeholder="הדבק כאן את התמלול ולחץ הוסף"></textarea></div>';
   h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="trpaste">הוסף את הטקסט</button>';
-  h+='<span class="trstat" id="trstat"></span></div>';
+  h+='<span class="trstat" id="trstat">'+esc(state.trBusy||"")+'</span></div>';
   h+='</div>';
+  if(state.trBusy) h+='<div class="trbusy"><i></i><span>'+esc(state.trBusy)+'</span></div>';
  }
 
  if(!all.length) return h+'<div class="dempty"><b>עוד לא נטען אף תמלול</b><p>העלה קובץ או הדבק טקסט למעלה.</p></div></section>';
@@ -5225,6 +5348,30 @@ function save(){
  pushT=setTimeout(function(){pushRows()},450);
 }
 document.addEventListener("change",function(e){
+ if(e.target&&e.target.id==="trmodel"){ setSttModel(e.target.value); toast("המנוע שנבחר: "+e.target.options[e.target.selectedIndex].text); return }
+ if(e.target&&e.target.id==="trmedia"){
+  var mi=e.target, mf=(mi.files||[])[0];
+  if(!mf)return;
+  mi.value="";
+  if(!ensureEdit()){render();return}
+  if(!isMedia(mf)){toast("זה לא קובץ אודיו או וידאו",true);return}
+  var mck=fval("__tr__","char"), mdt=fval("__tr__","date")||todayISO(), mttl=fval("__tr__","title").trim();
+  state.trBusy="מתחיל...";render();
+  transcribeFile(mf).then(function(txt){
+   state.trBusy="";
+   if(!txt||!txt.trim()){toast("לא יצא טקסט מהקובץ",true);render();return}
+   snap();
+   var nk=addTranscript({char:mck,date:mdt,title:mttl||mf.name.replace(/\.[^.]+$/,""),text:txt,src:"תומלל מ-"+mf.name});
+   state.trOpen=nk;
+   render();save();
+   toast("התמלול מוכן, "+wordCount(txt).toLocaleString("he-IL")+" מילים");
+  }).catch(function(err){
+   state.trBusy="";
+   render();
+   toast("התמלול נכשל: "+((err&&err.message)||"שגיאה")+". נסה קובץ אודיו רגיל, או הדבק טקסט",true);
+  });
+  return;
+ }
  if(e.target&&e.target.id==="trfile"){
   var inp=e.target, files=[].slice.call(inp.files||[]);
   if(!files.length)return;
