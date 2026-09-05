@@ -3127,7 +3127,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",minePanel:false,mineText:"",mineTr:null,shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3249,14 +3249,13 @@ function render(){
  ORDER.forEach(function(k){if(k==="dropped"&&!c.dropped)return;h+=chip("filter",k,STATUS[k].l,c[k]||0)});
  h+='<div class="spacer"></div>';
  if(!RO){
-  if(state.group==="lines") h+='<button class="btn ghost" data-act="mineopen">שלוף ליינים מתוך התחקיר</button>';
   h+=saveBadge();
   h+='<button class="btn" data-act="saveNow" title="שמירה עכשיו">שמור</button>';
   h+='<button class="btn ghost" data-act="restore" title="טעינת גיבוי מהמחשב">טען גיבוי</button>';
   h+='<button class="btn ghost" data-act="backup" title="שמירת עותק של כל היומן למחשב">שמור למחשב</button>';
    if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button class="btn ghost" data-act="drive" title="שמירת עותק בגוגל דרייב, בתיקייה מרחב אילת">שמור לדרייב</button>';
   var addx="";
-  if(state.group==="lines") addx='<button class="btn" data-act="addline">הוסף ליין</button>';
+  if(state.group==="lines") addx='<button class="btn ghost" data-act="mineopen">שלוף ליינים</button><button class="btn" data-act="addline">הוסף ליין</button>';
   else if(state.group==="days") addx='<button class="btn" data-act="addday">הוסף יום צילום</button>';
   else if(state.group==="char") addx='<button class="btn" data-act="addchar">הוסף דמות</button>';
   else if(state.group==="unit") addx='<button class="btn" data-act="addunit">הוסף מחלקה</button>';
@@ -4573,7 +4572,17 @@ function fullBrief(focus,extra){
  o+="כותרת | למה זה עובד במשפט אחד | שם הדמות | מספר פרק | יש או לצלם\n\n";
  o+="דוגמה:\n";
  o+="הלילה שבו חלפון מאבד שליטה | הדמות היחידה בסדרה בלי רגע אחד של כישלון, וזה מה שמשאיר אותה שטוחה | אלון חלפון | 1 | לצלם\n\n";
-
+ return o+briefContext();
+}
+function briefHead(){
+ var o="", c=counts(), n=DATA.scenes.length, used=SHIFTS().length, tgt=shiftTarget();
+ o+="אני עורך סדרה תיעודית בת חמישה פרקים על מרחב אילת של משטרת ישראל. כל פרק חצי שעה, חמש עשרה סצנות של כשתי דקות, סך הכול "+TARGET+" סצנות. הפרקים בנויים לפי תמות ולא לפי דמויות, וכל דמות חוזרת לאורך העונה.\n\n";
+ o+="מצב נוכחי: "+n+" סצנות ביומן, "+c.shot+" צולמו, "+(c.partial||0)+" חלקיות, "+(c.todo||0)+" מחכות לצילום. נשארו "+Math.max(TARGET-n,0)+" סצנות עד היעד.\n";
+ o+="תקציב הצילום: "+used+" משמרות נוצלו מתוך "+tgt+", נשארו "+Math.max(tgt-used,0)+".\n\n";
+ return o;
+}
+function briefContext(){
+ var o="";
  o+="=== הפרקים ===\n";
  DATA.eps.forEach(function(e){
   var a=DATA.scenes.filter(function(x){return x.ep===e.n});
@@ -4643,6 +4652,25 @@ function fullBrief(focus,extra){
  }
  return o;
 }
+function linesBrief(focus,extra){
+ var o=briefHead();
+ o+="=== המשימה ===\n";
+ o+="קרא את כל החומר שמצורף כאן, את התמלולים, את לוג ימי הצילום, ואת כל מה שכתוב בכרטיסי הדמויות ובהערות של הסצנות, ותשלוף לי ליינים.\n";
+ o+="ליין הוא סיפור אחד שרץ לאורך העונה, עם התחלה, התפתחות וסגירה. לא נושא ולא תמה. ליין טוב אפשר לנסח בו מי רוצה מה, מה עומד בדרך, ומה משתנה בסוף.\n\n";
+ o+="מה אני צריך:\n";
+ o+="1. ליינים שכבר קיימים בחומר ולא סימנתי אותם. חפש בתמלולים וברגעים החזקים מלוג הצילום.\n";
+ o+="2. ליינים שקיימים חלקית וצריך עוד סצנה אחת או שתיים כדי לסגור אותם.\n";
+ o+="3. אל תמציא. אם משהו לא נאמר בחומר, אל תכתוב אותו.\n";
+ o+="4. לכל ליין תן את קודי הסצנות מהיומן ששייכות אליו, אם יש.\n";
+ o+="5. תעדיף ליינים שסוגרים חור קיים על ליינים שמוסיפים עוד מאותו דבר.\n";
+ if(focus) o+="6. התמקד ב"+focus+".\n";
+ if(extra) o+="7. מה שחשוב לי: "+extra+"\n";
+ o+="\nפורמט התשובה, שורה אחת לכל ליין, בלי שום טקסט נוסף לפני או אחרי:\n";
+ o+="שם הליין | מה הסיפור במשפט אחד | קודי סצנות מופרדים בפסיק\n\n";
+ o+="דוגמה:\n";
+ o+="הציד אחרי דוד כסאות | בלש שנשרף לו מארב ורודף אחרי אותו אדם עד שהוא תופס אותו | B-01, B-02, B-07\n\n";
+ return o+briefContext();
+}
 function parseIdeas(txt){
  var res={made:0,unknownChar:[]};
  String(txt||"").split("\n").forEach(function(raw){
@@ -4685,53 +4713,6 @@ function trPicked(){
  if(!sel) return all;
  return all.filter(function(t){return sel[t.k]!==false});
 }
-function minePrompt(){
- var o="";
- o+="אני עורך סדרה תיעודית בת חמישה פרקים על מרחב אילת של משטרת ישראל. כל פרק חצי שעה, חמש עשרה סצנות של כשתי דקות. הפרקים בנויים לפי תמות ולא לפי דמויות.\n\n";
- o+="המשימה שלך: לשלוף מתוך חומר התחקיר שמצורף כאן ליינים. ליין הוא סיפור אחד שרץ לאורך העונה, עם התחלה, התפתחות וסגירה, ולא נושא ולא תמה. ליין טוב הוא כזה שאפשר לנסח בו מי רוצה מה, מה עומד בדרך, ומה משתנה בסוף.\n\n";
- o+="מה אני צריך:\n";
- o+="1. ליינים שכבר קיימים בחומר ואני לא סימנתי אותם.\n";
- o+="2. ליינים שקיימים חלקית וצריך עוד סצנה אחת או שתיים כדי לסגור אותם.\n";
- o+="3. אל תמציא. אם משהו לא נאמר בחומר, אל תכתוב אותו.\n";
- o+="4. לכל ליין תן את קודי הסצנות מהיומן שמשתייכות אליו, אם יש.\n\n";
- o+="פורמט התשובה, שורה אחת לכל ליין, בלי שום טקסט נוסף לפני או אחרי:\n";
- o+="שם הליין | מה הסיפור במשפט אחד | קודי סצנות מופרדים בפסיק\n\n";
- o+="דוגמה:\n";
- o+="הציד אחרי דוד כסאות | בלש שנשרף לו מארב ורודף אחרי אותו אדם עד שהוא תופס אותו | B-01, B-02, B-07\n\n";
- o+="=== הליינים שכבר מסומנים אצלי ===\n";
- LINES().forEach(function(l){
-  var st=lineStat(l.k);
-  o+="- "+l.name+(l.what?" ("+l.what+")":"")+" — "+st.all.length+" סצנות, "+LKIND[st.kind].l+"\n";
- });
- o+="\n=== הדמויות ===\n";
- DATA.chars.forEach(function(c){
-  o+="- "+c.name+(c.role?", "+c.role:"")+"\n";
-  if(c.story) o+="  "+c.story+"\n";
-  if(c.want) o+="  רוצה: "+c.want+"\n";
-  if(c.wound) o+="  פצע: "+c.wound+"\n";
- });
- o+="\n=== הסצנות ביומן ===\n";
- DATA.eps.forEach(function(e){
-  o+="\nפרק "+e.n+" · "+e.title+" ("+e.sub+")\n";
-  DATA.scenes.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)}).forEach(function(x){
-   var ch=charOf(x.char);
-   o+="["+x.id+"] "+x.title+" — "+(ch?ch.name:"")+" — "+STATUS[x.status].l;
-   if(x.short) o+=" — "+x.short;
-   o+="\n";
-  });
- });
- var trs=trPicked();
- if(trs.length){
-  o+="\n=== תמלולים ===\n";
-  trs.forEach(function(t){
-   var ch=charOf(t.char);
-   o+="\n### "+(t.title||"תמלול")+(ch?" · "+ch.name:"")+" · "+dayLabel(t.date)+"\n";
-   o+=String(t.text||"")+"\n";
-  });
- }
- return o;
-}
-function mineSize(){ return minePrompt().length }
 function parseLines(txt){
  var res={made:[],assigned:0,unknown:[]};
  var pal=["#B0472B","#1B4B8F","#8A2D8F","#9A6206","#0C6B75","#5B3FA8","#166F5B","#4A5A6B","#A8305C","#7A6A1E","#6B4A2E","#1BA3A8","#2F3A4A"];
@@ -4758,39 +4739,6 @@ function parseLines(txt){
  });
  return res;
 }
-function minePanel(){
- var all=trList(), sel=state.mineTr||{};
- var size=state.mineText?state.mineText.length:0;
- var h='<div class="modal" data-act="mineclose"><div class="box cpbox" data-stop="1">';
- h+='<div class="mhead"><span>שליפת ליינים מתוך התחקיר</span><button data-act="mineclose" title="סגור">×</button></div>';
- h+='<div class="cpbody">';
- h+='<p class="grp-note" style="margin:0">הכפתור אוסף את כל מה שיש ביומן, הדמויות, הסצנות והתמלולים שתבחר, ובונה בקשה מוכנה. תעתיק אותה לצ׳אט, תקבל רשימת ליינים, ותדביק אותה חזרה כאן. הליינים ייווצרו לבד והסצנות ישויכו אליהם.</p>';
- if(all.length){
-  h+='<div class="f" style="margin-top:14px"><label>אילו תמלולים לצרף</label><div class="tagbox">';
-  all.forEach(function(t){
-   var ch=charOf(t.char);
-   h+='<label><input type="checkbox" class="minetr" data-id="'+esc(t.k)+'"'+(sel[t.k]===false?"":" checked")+'>'+
-     esc((ch?ch.name+" · ":"")+(t.title||"תמלול")+" ("+(t.words||0).toLocaleString("he-IL")+" מילים)")+'</label>';
-  });
-  h+='</div></div>';
- } else {
-  h+='<p class="trhint" style="margin-top:12px">אין עדיין תמלולים. הבקשה תיבנה מהיומן ומהדמויות בלבד.</p>';
- }
- h+='<div class="s-foot" style="border:0;padding:0;margin-top:14px"><button class="btn" data-act="minebuild">בנה את הבקשה</button>';
- if(state.mineText) h+='<button class="btn ghost" data-act="minecopy">העתק</button>';
- h+='<span class="trhint">'+(state.mineText?(size.toLocaleString("he-IL")+" תווים"):"")+'</span></div>';
- if(state.mineText){
-  h+='<div class="f" style="margin-top:12px"><label>הבקשה</label><textarea id="minetext" style="min-height:150px;font-size:12.5px">'+esc(state.mineText)+'</textarea></div>';
- }
- h+='<div class="f" style="margin-top:14px" data-form="__mine__"><label>הדבק כאן את התשובה</label>';
- h+='<textarea name="ans" style="min-height:130px" placeholder="שם הליין | מה הסיפור | B-01, B-02"></textarea>';
- h+='<p class="hint">שורה לכל ליין. שם, קו מפריד, משפט אחד, קו מפריד, קודי סצנות. שם שכבר קיים לא ייווצר פעמיים אלא רק יקבל את הסצנות.</p></div>';
- h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="mineapply">צור ליינים</button>';
- h+='<button class="btn ghost" data-act="mineclose">סגור</button></div>';
- h+='</div></div></div>';
- return h;
-}
-
 /* ===== שעון משמרות ===== */
 function SHIFTS(){ if(!DATA.shifts) DATA.shifts=[]; return DATA.shifts }
 function shiftPeople(){
@@ -5003,6 +4951,37 @@ function linesView(){
  var h='<section class="grp"><div class="grp-h"><h2>מפת הליינים</h2><span class="role">כל סיפור לרוחב חמשת הפרקים</span>';
  h+='<span class="meta">'+LS.length+' ליינים · '+bad.length+' צריכים טיפול</span></div>';
  h+='<p class="grp-note">מפת הפרקים אומרת מה יש בתוך כל פרק. המפה הזו אומרת מה ממשיך מפרק לפרק. כל שורה היא סיפור אחד וכל עמודה היא פרק. תא ריק בין שני תאים מלאים הוא ליין שנשמט באמצע, וליין שכל כולו בפרק אחד הוא לא ליין אלא סצנה שהתחפשה לסיפור.</p>';
+
+ if(!RO){
+  h+='<div class="ask" data-form="__lask__">';
+  h+='<div class="row2"><div class="f"><label>על מי או על מה להתמקד</label><select name="who">';
+  h+='<option value="">כל הסדרה, בלי מיקוד</option>';
+  h+='<optgroup label="דמויות">'+DATA.chars.map(function(x){return '<option value="c:'+x.k+'"'+(state.lineAskWho==="c:"+x.k?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</optgroup>';
+  h+='<optgroup label="ליינים">'+LINES().map(function(x){return '<option value="l:'+x.k+'"'+(state.lineAskWho==="l:"+x.k?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</optgroup>';
+  h+='<optgroup label="פרקים">'+DATA.eps.map(function(x){return '<option value="e:'+x.n+'"'+(state.lineAskWho==="e:"+x.n?" selected":"")+'>פרק '+x.n+' · '+esc(x.title)+'</option>'}).join("")+'</optgroup>';
+  h+='</select></div>';
+  h+='<div class="f"><label>מה חשוב לך שיהיה שם</label><textarea name="extra" placeholder="למשל: ליין שמחבר בין שתי דמויות, או משהו שנסגר בפרק 5">'+esc(state.lineAskExtra||"")+'</textarea></div></div>';
+  var _tl=trList();
+  if(_tl.length){
+   h+='<div class="f"><label>אילו תמלולים לצרף לקריאה</label><div class="tagbox">';
+   _tl.forEach(function(t){
+    var tc=charOf(t.char);
+    h+='<label><input type="checkbox" class="minetr" data-id="'+esc(t.k)+'"'+((state.mineTr&&state.mineTr[t.k]===false)?"":" checked")+'>'+
+      esc((tc?tc.name+" · ":"")+(t.title||"תמלול")+" ("+(t.words||0).toLocaleString("he-IL")+" מילים)")+'</label>';
+   });
+   h+='</div></div>';
+  }
+  h+='<div class="s-foot" style="border:0;padding:0">';
+  h+='<button class="btn" data-act="linebuild">בנה בקשה שקוראת את הכל</button>';
+  if(state.mineText) h+='<button class="btn ghost" data-act="minecopy">העתק</button>';
+  h+='<span class="trhint">'+(state.mineText?(state.mineText.length.toLocaleString("he-IL")+" תווים"):"")+'</span></div>';
+  if(state.mineText) h+='<div class="prompt">'+esc(state.mineText)+'</div>';
+  h+='<div class="f" data-form="__mine__" style="margin-top:4px"><label>הדבק כאן את התשובה</label>';
+  h+='<textarea name="ans" style="min-height:110px" placeholder="שם הליין | מה הסיפור | B-01, B-02"></textarea>';
+  h+='<p class="hint">שורה לכל ליין. שם שכבר קיים לא ייווצר פעמיים אלא רק יקבל את הסצנות.</p></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="mineapply">צור את הליינים</button></div>';
+  h+='</div>';
+ }
  if(bad.length){
   h+='<div class="ldiag">';
   bad.forEach(function(l){
@@ -5319,7 +5298,6 @@ function saveUI(){
 function paint(h){
  if(state.showUsers) h+=userPanel();
  if(state.charPanel) h+=charPanelHtml();
- if(state.minePanel) h+=minePanel();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
  var x=bd0?bd0.scrollLeft:0;
@@ -5819,7 +5797,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
  if(MUT[act]&&!ensureEdit())return;
@@ -5915,10 +5893,18 @@ document.addEventListener("click",function(e){
   var uk="u"+(DATA.units.length+1)+"_"+Math.floor(Math.random()*9999);
   DATA.units.push({k:uk,name:"מחלקה חדשה",need:[],note:""});
   state.editUnit=uk;state.group="unit";render();save();return}
- if(act==="mineopen"){state.minePanel=true;state.group="lines";render();return}
- if(act==="mineclose"){if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="mineclose"]'))return;
-  state.minePanel=false;render();return}
- if(act==="minebuild"){state.mineText=minePrompt();render();toast("הבקשה מוכנה, "+state.mineText.length.toLocaleString("he-IL")+" תווים");return}
+ if(act==="mineopen"){
+  state.group="lines";render();
+  setTimeout(function(){var el=document.querySelector('[data-form="__lask__"]');if(el)el.scrollIntoView({block:"center",behavior:"smooth"})},80);
+  return}
+ if(act==="linebuild"){
+  state.lineAskWho=fval("__lask__","who");state.lineAskExtra=fval("__lask__","extra");
+  var lf=state.lineAskWho||"", llb="";
+  if(lf.indexOf("c:")===0) llb="דמות "+((charOf(lf.slice(2))||{}).name||"");
+  else if(lf.indexOf("l:")===0) llb="ליין "+lineName(lf.slice(2));
+  else if(lf.indexOf("e:")===0) llb="פרק "+lf.slice(2);
+  state.mineText=linesBrief(llb,(state.lineAskExtra||"").trim());
+  render();toast("הבקשה מוכנה, "+state.mineText.length.toLocaleString("he-IL")+" תווים");return}
  if(act==="minecopy"){
   var mt=state.mineText||"";
   if(navigator.clipboard&&navigator.clipboard.writeText){
@@ -5931,7 +5917,7 @@ document.addEventListener("click",function(e){
   if(!ans||!ans.trim()){toast("אין מה להדביק",true);return}
   var r2=parseLines(ans);
   if(!r2.made.length&&!r2.assigned){toast("לא זיהיתי אף שורה בפורמט הנכון",true);return}
-  state.minePanel=false;state.mineText="";
+  state.mineText="";
   render();save();
   toast("נוצרו "+r2.made.length+" ליינים, שויכו "+r2.assigned+" סצנות"+(r2.unknown.length?", "+r2.unknown.length+" קודים לא נמצאו":""));
   return}
@@ -6072,7 +6058,6 @@ document.addEventListener("keydown",function(e){
  if(mod&&(e.key==="y"||e.key==="Y")&&!inField){e.preventDefault();redo();return}
  if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
  if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
- if(e.key==="Escape"&&state.minePanel){state.minePanel=false;render();return}
  if(e.key==="Escape"&&state.charPanel){state.charPanel="";render();return}
  if(e.key==="Escape"&&state.newAt){state.newAt=null;render();return}
  if(e.key==="Escape"&&(state.editing||state.adding||state.editEp!==null||state.editMeta||state.editChar||state.editUnit||state.editLine||state.editDay)){
