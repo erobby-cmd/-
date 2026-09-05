@@ -3815,21 +3815,38 @@ function moreIdeas(){
 }
 function ideasView(){
  var h='<section class="grp"><div class="grp-h"><h2>רעיונות לסצנות</h2><span class="role">בנק רעיונות פתוח, בלחיצה אחת נכנס ליומן</span></div>';
- h+='<p class="grp-note">בחר דמות או מחלקה, אני בונה לך בקשה מוכנה עם כל ההקשר של היומן. תעתיק אותה לצ׳אט ותקבל רעיונות, ואני מכניס אותם לכאן. כל רעיון אפשר להוסיף כפתק ורוד ליומן.</p>';
+ h+='<p class="grp-note">הבקשה כאן קוראת את הכל: הפרקים, כל הדמויות עם הפצע והחורים, מצב הליינים, כיסוי המחלקות, כל הסצנות עם מה שיש ומה שחסר בהן, לוג ימי הצילום עם הרגעים החזקים, תקציב המשמרות שנשאר, והתמלולים שתסמן. היא מבקשת שתי קטגוריות: סצנות שכבר קיימות בחומר ולא סימנת, וסצנות שחסרות לפי החורים האמיתיים. תעתיק לצ׳אט, תדביק את התשובה חזרה, והרעיונות ייכנסו לבנק.</p>';
  if(!RO){
  h+='<div class="ask" data-form="__ask__">';
- h+='<div class="row2"><div class="f"><label>על מי או על מה</label><select name="who">';
- h+='<option value="">הסדרה כולה</option>';
+ h+='<div class="row2"><div class="f"><label>על מי או על מה להתמקד</label><select name="who">';
+ h+='<option value="">כל הסדרה, בלי מיקוד</option>';
  h+='<optgroup label="דמויות">'+DATA.chars.map(function(x){return '<option value="c:'+x.k+'"'+(state.askWho==="c:"+x.k?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</optgroup>';
+ h+='<optgroup label="ליינים">'+LINES().map(function(x){return '<option value="l:'+x.k+'"'+(state.askWho==="l:"+x.k?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</optgroup>';
  h+='<optgroup label="מחלקות">'+DATA.units.map(function(x){return '<option value="u:'+x.k+'"'+(state.askWho==="u:"+x.k?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</optgroup>';
+ h+='<optgroup label="פרקים">'+DATA.eps.map(function(x){return '<option value="e:'+x.n+'"'+(state.askWho==="e:"+x.n?" selected":"")+'>פרק '+x.n+' · '+esc(x.title)+'</option>'}).join("")+'</optgroup>';
  h+='</select></div>';
  h+='<div class="f"><label>מה חשוב לך שיהיה שם</label><textarea name="extra" placeholder="למשל: משהו בלי דיבורים, או סצנה שמחברת בין שתי דמויות">'+esc(state.askExtra||"")+'</textarea></div></div>';
+ var _tr=trList();
+ if(_tr.length){
+  h+='<div class="f"><label>אילו תמלולים לצרף לקריאה</label><div class="tagbox">';
+  _tr.forEach(function(t){
+   var tc=charOf(t.char);
+   h+='<label><input type="checkbox" class="minetr" data-id="'+esc(t.k)+'"'+((state.mineTr&&state.mineTr[t.k]===false)?"":" checked")+'>'+
+     esc((tc?tc.name+" · ":"")+(t.title||"תמלול")+" ("+(t.words||0).toLocaleString("he-IL")+" מילים)")+'</label>';
+  });
+  h+='</div></div>';
+ }
  h+='<div class="s-foot" style="border:0;padding:0">';
- h+='<button class="btn" data-act="moreideas">הוסף עוד רעיונות'+((DATA.pool||[]).length?' <span class="n">'+(DATA.pool||[]).length+'</span>':'')+'</button>';
- h+='<button class="btn ghost" data-act="buildask">בנה בקשה לצ׳אט</button>';
+ h+='<button class="btn" data-act="buildask">בנה בקשה שקוראת את הכל</button>';
  if(state.askText) h+='<button class="btn ghost" data-act="copyask">העתק</button>';
- h+='<button class="btn ghost" data-act="addidea">הוסף רעיון משלי</button></div>';
+ h+='<button class="btn ghost" data-act="moreideas">מהמאגר'+((DATA.pool||[]).length?' <span class="n">'+(DATA.pool||[]).length+'</span>':'')+'</button>';
+ h+='<button class="btn ghost" data-act="addidea">הוסף רעיון משלי</button>';
+ h+='<span class="trhint">'+(state.askText?(state.askText.length.toLocaleString("he-IL")+" תווים"):"")+'</span></div>';
  if(state.askText) h+='<div class="prompt">'+esc(state.askText)+'</div>';
+ h+='<div class="f" data-form="__gid__" style="margin-top:4px"><label>הדבק כאן את התשובה</label>';
+ h+='<textarea name="ans" style="min-height:110px" placeholder="כותרת | למה זה עובד | שם הדמות | פרק | יש או לצלם"></textarea>';
+ h+='<p class="hint">שורה לכל רעיון. הרעיונות ייכנסו לבנק למטה, ומשם בלחיצה אחת ליומן.</p></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="ideasapply">הכנס את הרעיונות לבנק</button></div>';
  h+='</div>';
  }
  var list=(DATA.ideas||[]);
@@ -4446,6 +4463,134 @@ function trView(){
   h+='</div>';
  });
  return h+'</div></section>';
+}
+
+/* ===== בקשת רעיונות שקוראת את הכל ===== */
+function fullBrief(focus,extra){
+ var o="";
+ var c=counts(), n=DATA.scenes.length;
+ var used=SHIFTS().length, tgt=shiftTarget();
+ o+="אני עורך סדרה תיעודית בת חמישה פרקים על מרחב אילת של משטרת ישראל. כל פרק חצי שעה, חמש עשרה סצנות של כשתי דקות, סך הכול "+TARGET+" סצנות. הפרקים בנויים לפי תמות ולא לפי דמויות, וכל דמות חוזרת לאורך העונה.\n\n";
+ o+="מצב נוכחי: "+n+" סצנות ביומן, "+c.shot+" צולמו, "+(c.partial||0)+" חלקיות, "+(c.todo||0)+" מחכות לצילום. נשארו "+Math.max(TARGET-n,0)+" סצנות עד היעד.\n";
+ o+="תקציב הצילום: "+used+" משמרות נוצלו מתוך "+tgt+", נשארו "+Math.max(tgt-used,0)+".\n\n";
+ o+="=== המשימה ===\n";
+ o+="קרא את כל החומר שמצורף כאן, כולל התמלולים ולוג ימי הצילום, ותן לי רעיונות לסצנות בשתי קטגוריות נפרדות:\n";
+ o+="א. סצנות שכבר קיימות בחומר הגלם ולא סימנתי אותן. חפש בתמלולים וברגעים החזקים מלוג הצילום דברים שנאמרו או קרו ושלא מופיעים ביומן. אלה סצנות בחינם, לא צריך לצלם אותן.\n";
+ o+="ב. סצנות שחסרות וצריך לצלם. תבסס אותן על החורים האמיתיים: ליין שנשמט באמצע העונה, דמות בלי פצע מצולם, פרק שחסרות בו סצנות, מחלקה בלי כיסוי.\n\n";
+ o+="כללים:\n";
+ o+="1. אל תמציא עובדות. אם משהו לא נאמר בחומר, אל תכתוב אותו כאילו הוא קיים.\n";
+ o+="2. סצנות שאפשר לצלם, לא ראיונות מדברים. משהו שקורה מול המצלמה.\n";
+ o+="3. לכל רעיון תגיד למה הוא עובד במשפט אחד, בלי מליצות.\n";
+ o+="4. תעדיף רעיונות שסוגרים חור קיים על רעיונות שמוסיפים עוד מאותו דבר.\n";
+ if(focus) o+="5. התמקד ב"+focus+".\n";
+ if(extra) o+="6. מה שחשוב לי: "+extra+"\n";
+ o+="\nפורמט התשובה, שורה אחת לכל רעיון, בלי שום טקסט נוסף לפני או אחרי:\n";
+ o+="כותרת | למה זה עובד במשפט אחד | שם הדמות | מספר פרק | יש או לצלם\n\n";
+ o+="דוגמה:\n";
+ o+="הלילה שבו חלפון מאבד שליטה | הדמות היחידה בסדרה בלי רגע אחד של כישלון, וזה מה שמשאיר אותה שטוחה | אלון חלפון | 1 | לצלם\n\n";
+
+ o+="=== הפרקים ===\n";
+ DATA.eps.forEach(function(e){
+  var a=DATA.scenes.filter(function(x){return x.ep===e.n});
+  o+="פרק "+e.n+" · "+e.title+" ("+e.sub+"). "+a.length+" מתוך "+PER_EP+" סצנות, "+a.filter(function(x){return x.status==="shot"}).length+" צולמו.\n";
+ });
+
+ o+="\n=== הדמויות ===\n";
+ DATA.chars.forEach(function(ch){
+  var sc=DATA.scenes.filter(function(x){return x.char===ch.k});
+  o+="\n"+ch.name+(ch.role?" — "+ch.role:"")+" ("+sc.length+" סצנות, "+sc.filter(function(x){return x.status==="shot"}).length+" צולמו)\n";
+  if(ch.story) o+="  "+ch.story+"\n";
+  if(ch.want) o+="  רוצה: "+ch.want+"\n";
+  if(ch.wound) o+="  פצע: "+ch.wound+"\n";
+  if((ch.gaps||[]).length) o+="  חסר לדמות: "+ch.gaps.join(" · ")+"\n";
+ });
+
+ o+="\n=== הליינים ומצבם ===\n";
+ LINES().forEach(function(l){
+  var st=lineStat(l.k);
+  o+=l.name+(l.what?" ("+l.what+")":"")+" — "+LKIND[st.kind].l+". "+lineHint(l.k,st)+"\n";
+  if(l.note) o+="  "+l.note+"\n";
+ });
+
+ o+="\n=== המחלקות ===\n";
+ DATA.units.forEach(function(u){
+  var su=DATA.scenes.filter(function(x){return x.unit===u.k});
+  o+=u.name+" ("+COVER[coverOf(u)]+", "+su.length+" סצנות). "+(u.note||"");
+  if((u.need||[]).length) o+=" צריך: "+u.need.join(", ")+".";
+  o+="\n";
+ });
+
+ o+="\n=== הסצנות ביומן ===\n";
+ DATA.eps.forEach(function(e){
+  o+="\nפרק "+e.n+" · "+e.title+"\n";
+  DATA.scenes.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)}).forEach(function(x){
+   var ch=charOf(x.char), ln=lineObj(lineOf(x));
+   o+="["+x.id+"] "+x.title+" — "+(ch?ch.name:"")+" — "+STATUS[x.status].l+(ln?" — ליין: "+ln.name:"")+"\n";
+   if(x.short) o+="    "+x.short+"\n";
+   if((x.have||[]).length) o+="    יש: "+x.have.join("; ")+"\n";
+   if((x.need||[]).length) o+="    חסר: "+x.need.join("; ")+"\n";
+  });
+ });
+
+ if(DAYS().length){
+  o+="\n=== לוג ימי צילום, מה באמת צולם ===\n";
+  daysSorted().forEach(function(d){
+   var who=(d.chars||[]).map(function(k){var cc=charOf(k);return cc?cc.name:""}).filter(Boolean);
+   o+="\n"+dayLabel(d.date)+" · "+(d.loc||"בלי מיקום")+(who.length?" · "+who.join(", "):"")+(d.people?" · "+d.people:"")+"\n";
+   (d.moments||[]).forEach(function(m){o+="  רגע: "+m+"\n"});
+   if(d.note) o+="  הערה: "+d.note+"\n";
+  });
+ }
+
+ if((DATA.ideas||[]).length){
+  o+="\n=== רעיונות שכבר בבנק, אל תחזור עליהם ===\n";
+  (DATA.ideas||[]).forEach(function(i){o+="- "+i.title+"\n"});
+ }
+
+ var trs=trPicked();
+ if(trs.length){
+  o+="\n=== תמלולים ===\n";
+  trs.forEach(function(t){
+   var ch=charOf(t.char);
+   o+="\n### "+(t.title||"תמלול")+(ch?" · "+ch.name:"")+" · "+dayLabel(t.date)+"\n";
+   o+=String(t.text||"")+"\n";
+  });
+ }
+ return o;
+}
+function parseIdeas(txt){
+ var res={made:0,unknownChar:[]};
+ String(txt||"").split("\n").forEach(function(raw){
+  var line=raw.trim();
+  if(!line||line.charAt(0)==="#"||line.indexOf("|")<0) return;
+  var p=line.split("|");
+  var title=(p[0]||"").replace(/^[-*\d.\s]+/,"").trim();
+  var why=(p[1]||"").trim();
+  var cn=(p[2]||"").trim();
+  var ep=parseInt((p[3]||"").replace(/\D/g,""),10)||1;
+  var kind=(p[4]||"").trim();
+  if(!title) return;
+  var ck="", nrm=function(x){return String(x||"").replace(/[״"'׳`.,]/g,"").replace(/\s+/g," ").trim()};
+  var cnn=nrm(cn);
+  if(cnn){
+   DATA.chars.forEach(function(c){ if(!ck&&nrm(c.name)===cnn) ck=c.k });
+   if(!ck) DATA.chars.forEach(function(c){
+    var a=nrm(c.name);
+    if(!ck&&(a.indexOf(cnn)>-1||cnn.indexOf(a)>-1)) ck=c.k;
+   });
+   if(!ck) DATA.chars.forEach(function(c){
+    var w=nrm(c.name).split(" ");
+    if(!ck&&w.some(function(x){return x.length>2&&cnn.indexOf(x)>-1})) ck=c.k;
+   });
+   if(!ck) res.unknownChar.push(cn);
+  }
+  DATA.ideas=DATA.ideas||[];
+  DATA.ideas.unshift({id:"g"+Date.now().toString(36)+Math.floor(Math.random()*9999),
+   title:title, why:why+(kind?"  ["+kind+"]":""), char:ck, unit:unitGuess(ck),
+   ep:Math.min(Math.max(ep,1),EPISODES), from:"chat"});
+  res.made++;
+ });
+ return res;
 }
 
 /* ===== שליפת ליינים מתוך התחקיר ===== */
@@ -5589,7 +5734,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
  if(MUT[act]&&!ensureEdit())return;
@@ -5599,7 +5744,21 @@ document.addEventListener("click",function(e){
  if(act==="group"){state.group=b.getAttribute("data-k");render();return}
  if(act==="buildask"){
   state.askWho=fval("__ask__","who");state.askExtra=fval("__ask__","extra");
-  state.askText=ideaPrompt();render();return}
+  var fk=state.askWho||"", lbl="";
+  if(fk.indexOf("c:")===0) lbl="דמות "+((charOf(fk.slice(2))||{}).name||"");
+  else if(fk.indexOf("u:")===0) lbl="מחלקת "+unitName(fk.slice(2));
+  else if(fk.indexOf("l:")===0) lbl="ליין "+lineName(fk.slice(2));
+  else if(fk.indexOf("e:")===0) lbl="פרק "+fk.slice(2);
+  state.askText=fullBrief(lbl,(state.askExtra||"").trim());
+  render();toast("הבקשה מוכנה, "+state.askText.length.toLocaleString("he-IL")+" תווים");return}
+ if(act==="ideasapply"){
+  var ga=fval("__gid__","ans");
+  if(!ga||!ga.trim()){toast("אין מה להדביק",true);return}
+  var gr=parseIdeas(ga);
+  if(!gr.made){toast("לא זיהיתי אף שורה בפורמט הנכון",true);return}
+  state.askText="";render();save();
+  toast("נכנסו "+gr.made+" רעיונות לבנק"+(gr.unknownChar.length?", "+gr.unknownChar.length+" שמות דמויות לא זוהו":""));
+  return}
  if(act==="copyask"){
   var t=state.askText||"";
   if(navigator.clipboard&&navigator.clipboard.writeText){
