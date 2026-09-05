@@ -553,6 +553,18 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .mchip.m-guest{opacity:.85;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
 .mchip.m-guest em{opacity:.85}
 
+.llegend{border:1px solid var(--line);background:var(--surface-2);border-radius:11px;padding:9px 13px;margin-top:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.llegend .lgl{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin-inline-end:4px}
+.lleg{display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap;cursor:pointer;transition:.12s}
+.lleg i{width:9px;height:9px;border-radius:50%;background:var(--cc,#455160);flex:0 0 auto}
+.lleg b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:10.5px}
+.lleg s{text-decoration:none;font-size:10px;font-weight:700;letter-spacing:.03em;border-radius:4px;padding:1px 5px}
+.lleg s.l-gap{background:rgba(176,71,43,.16);color:#C4593B}
+.lleg s.l-drop{background:rgba(154,98,6,.16);color:#B07A18}
+.lleg s.l-thin{background:rgba(122,106,30,.16);color:#93801F}
+.lleg s.l-empty{background:rgba(120,128,138,.16);color:#8A93A0}
+.lleg:hover{border-color:var(--cc,#455160);color:var(--ink);transform:translateY(-1px)}
+.lleg.none{border-style:dashed}
 .modal .box.lsbox{max-width:1120px}
 .lsbody{padding:16px 20px 20px;overflow:auto}
 .lsnote{margin:0 0 14px;font-size:13.6px;color:var(--ink-3);line-height:1.55}
@@ -5163,6 +5175,17 @@ function lsApply(key){
  render();save();
  toast((o.kind==="new"?"נוצר ליין, ":"")+"שויכו "+nSc(n)+" לליין "+lineName(k));
 }
+function lineStrip(){
+ var h='<div class="llegend"><span class="lgl">הליינים</span>';
+ LINES().forEach(function(l){
+  var st=lineStat(l.k);
+  var tag=st.kind==="ok"?"":'<s class="l-'+st.kind+'">'+esc(LKIND[st.kind].l)+'</s>';
+  h+='<button class="lleg" data-act="editline" data-id="'+esc(l.k)+'" style="--cc:'+esc(l.color||"#455160")+'" title="'+esc(l.name+(l.what?" · "+l.what:"")+" — לחץ לעריכה")+'"><i></i>'+esc(l.name)+'<b>'+st.all.length+'</b>'+tag+'</button>';
+ });
+ var un=DATA.scenes.filter(function(x){return x.status!=="dropped"&&!lineOf(x)}).length;
+ if(un) h+='<span class="lleg none" style="--cc:#8A93A0"><i></i>בלי ליין<b>'+un+'</b></span>';
+ return h+'</div>';
+}
 function linesView(){
  var LS=LINES(),ST={};
  LS.forEach(function(l){ST[l.k]=lineStat(l.k)});
@@ -5171,6 +5194,7 @@ function linesView(){
  var h='<section class="grp"><div class="grp-h"><h2>מפת הליינים</h2><span class="role">כל סיפור לרוחב חמשת הפרקים</span>';
  h+='<span class="meta">'+LS.length+' ליינים · '+bad.length+' צריכים טיפול</span></div>';
  h+='<p class="grp-note">מפת הפרקים אומרת מה יש בתוך כל פרק. המפה הזו אומרת מה ממשיך מפרק לפרק. כל שורה היא סיפור אחד וכל עמודה היא פרק. תא ריק בין שני תאים מלאים הוא ליין שנשמט באמצע, וליין שכל כולו בפרק אחד הוא לא ליין אלא סצנה שהתחפשה לסיפור.</p>';
+ h+=lineStrip();
 
  if(bad.length){
   h+='<div class="ldiag">';
