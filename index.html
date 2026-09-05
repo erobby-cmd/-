@@ -324,7 +324,7 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .ldots i.hole{background:repeating-linear-gradient(45deg,var(--todo),var(--todo) 2px,transparent 2px,transparent 4px)}
 .lbadge{display:inline-block;margin-top:7px;font-family:"Heebo",sans-serif;font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-3)}
 .lbadge.l-ok{background:var(--shot-soft);color:var(--shot)}
-.lbadge.l-gap{background:var(--partial-soft);color:var(--partial)}
+.lbadge.l-gap,.lbadge.l-end{background:var(--partial-soft);color:var(--partial)}
 .lbadge.l-drop,.lbadge.l-thin,.lbadge.l-empty{background:var(--todo-soft);color:var(--todo)}
 .arc.lmap td.hole{background-color:var(--pinkbg)}
 .arc.lmap td.hole em.holem{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--todo);font-style:normal}
@@ -560,6 +560,7 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .lleg b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:10.5px}
 .lleg s{text-decoration:none;font-size:10px;font-weight:700;letter-spacing:.03em;border-radius:4px;padding:1px 5px}
 .lleg s.l-gap{background:rgba(176,71,43,.16);color:#C4593B}
+.lleg s.l-end{background:rgba(154,98,6,.18);color:#9A6206}
 .lleg s.l-drop{background:rgba(154,98,6,.16);color:#B07A18}
 .lleg s.l-thin{background:rgba(122,106,30,.16);color:#93801F}
 .lleg s.l-empty{background:rgba(120,128,138,.16);color:#8A93A0}
@@ -655,14 +656,18 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .nbtns .bshot{background:#BEDFC4;color:#1B2A20}
 .nbtns .btodo{background:#F3C4D4;color:#2C1A22}
 .nbtns .bcan{background:transparent;color:var(--ink-3);border:1px solid var(--line-2)}
-.reddot{position:absolute;top:7px;inset-inline-end:7px;width:13px;height:13px;border-radius:50%;
- background:var(--reddot);box-shadow:0 0 0 2.5px #fff,0 1px 4px rgba(0,0,0,.45);z-index:5;display:block}
-.reddot.half{background:transparent;border:4px solid var(--reddot);box-shadow:0 0 0 2.5px #fff,0 1px 4px rgba(0,0,0,.3)}
+.reddot{position:absolute;top:6px;inset-inline-end:6px;z-index:5;display:inline-block;
+ font-family:"Heebo",sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.02em;line-height:1;
+ padding:3px 6px;border-radius:5px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.reddot.rd-todo{background:var(--reddot);color:#fff}
+.reddot.rd-part{background:#fff;color:#A8401F;border:1.5px solid var(--reddot);padding:2px 5px}
+.reddot.rd-shot{background:rgba(255,255,255,.92);color:#18603B;border:1px solid rgba(24,96,59,.3)}
+.reddot.rd-drop{background:rgba(255,255,255,.9);color:#6B7280;border:1px solid rgba(107,114,128,.35)}
 .pnote.rowmode .reddot{top:50%;transform:translateY(-50%);inset-inline-end:11px}
-.pnote.segmode .reddot{top:4px;inset-inline-end:4px;width:11px;height:11px;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
-.mchip .reddot{top:5px;inset-inline-end:5px;width:11px;height:11px;box-shadow:0 0 0 2px rgba(255,255,255,.9)}
-.scene .reddot{position:static;flex:none;width:13px;height:13px;margin-top:6px;box-shadow:0 0 0 2px var(--surface)}
-.dot-key{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--reddot);vertical-align:-2px;margin-inline-end:7px;box-shadow:0 0 0 2px #fff}
+.pnote.segmode .reddot{top:3px;inset-inline-end:3px;font-size:8.5px;padding:2px 4px}
+.mchip .reddot{position:static;display:inline-block;margin-inline-end:5px;font-size:8.5px;padding:2px 5px;box-shadow:none;vertical-align:1px}
+.scene .reddot{position:static;flex:none;margin-top:5px;align-self:flex-start}
+.dot-key{display:inline-block;background:var(--reddot);color:#fff;font-family:"Heebo",sans-serif;font-size:9.5px;font-weight:700;border-radius:5px;padding:2px 6px;vertical-align:-1px;margin-inline-end:7px}
 .nfoot{display:flex;gap:6px;align-items:center;margin-top:9px;flex-wrap:wrap}
 .nedit.ndel{color:#8B2440}
 .nmove{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.05em;background:rgba(0,0,0,.07);border:0;border-radius:4px;padding:3px 7px;color:inherit;cursor:pointer;margin-inline-start:auto}
@@ -3446,9 +3451,10 @@ function render(){
 }
 
 function reddot(st){
- if(st==="todo") return '<span class="reddot" title="עוד לא צולם"></span>';
- if(st==="partial") return '<span class="reddot half" title="חלקי, חסרה השלמה"></span>';
- return "";
+ if(st==="todo") return '<span class="reddot rd-todo">לא צולם</span>';
+ if(st==="partial") return '<span class="reddot rd-part">חלקי</span>';
+ if(st==="dropped") return '<span class="reddot rd-drop">ירד</span>';
+ return '<span class="reddot rd-shot">צולם</span>';
 }
 function shortOf(s){
  if(s.short&&String(s.short).trim()) return s.short;
@@ -3468,7 +3474,7 @@ function board(){
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
- h+='<span><i class="dot-key"></i>נקודה אדומה = לא צולם. עיגול חלול = חלקי</span>';
+ h+='<span><i class="dot-key">לא צולם</i>התווית על כל פתק אומרת אם הסצנה צולמה או לא</span>';
  h+='<span style="color:var(--ink-3)">'+(mode==="notes"?"גרור פתק כדי לסדר, או בחר פרק בתפריט שעל הפתק":mode==="list"?"סדר הצפייה של הפרק. גרור שורה כדי לשנות את הסדר":"כל סצנה היא שתי דקות. הצבע הוא הדמות, הפס למטה הוא הסטטוס")+'</span></div>';
 
  if(mode==="notes"){
@@ -4598,17 +4604,27 @@ function fullBrief(focus,extra){
  o+="מצב נוכחי: "+n+" סצנות ביומן, "+c.shot+" צולמו, "+(c.partial||0)+" חלקיות, "+(c.todo||0)+" מחכות לצילום. נשארו "+Math.max(TARGET-n,0)+" סצנות עד היעד.\n";
  o+="תקציב הצילום: "+used+" משמרות נוצלו מתוך "+tgt+", נשארו "+Math.max(tgt-used,0)+".\n\n";
  o+="=== המשימה ===\n";
- o+="קרא את כל החומר שמצורף כאן, כולל התמלולים ולוג ימי הצילום, ותן לי רעיונות לסצנות בשתי קטגוריות נפרדות:\n";
+ o+="קרא את כל החומר שמצורף כאן, כולל התמלולים, לוג ימי הצילום והמבט הרוחבי על העונה, ותן לי רעיונות לסצנות בשתי קטגוריות נפרדות:\n";
  o+="א. סצנות שכבר קיימות בחומר הגלם ולא סימנתי אותן. חפש בתמלולים וברגעים החזקים מלוג הצילום דברים שנאמרו או קרו ושלא מופיעים ביומן. אלה סצנות בחינם, לא צריך לצלם אותן.\n";
  o+="ב. סצנות שחסרות וצריך לצלם. תבסס אותן על החורים האמיתיים: ליין שנשמט באמצע העונה, דמות בלי פצע מצולם, פרק שחסרות בו סצנות, מחלקה בלי כיסוי.\n\n";
+ o+="לפני שאתה מציע, תסתכל על העונה רוחבית ותעבור על שמונה הזוויות האלה, אחת אחת. לכל זווית תגיד לי בשורה אחת מה ראית, ורק אחר כך תיתן את הרעיונות:\n";
+ o+="1. ציר הזמן של כל דמות. איפה היא נכנסת, איפה היא נעלמת, איפה היא נגמרת. דמות שיש לה אפס בפרק באמצע היא חור, ודמות שנגמרת לפני הפרק האחרון לא נסגרת בעונה.\n";
+ o+="2. חזרתיות. מה נראה כמו אותה סצנה חמש פעמים בשמות שונים, ומה אפשר לוותר עליו בלי שאיש ירגיש.\n";
+ o+="3. ניגודים ומפגשים. שתי דמויות שמעולם לא נמצאות באותה סצנה ואולי צריכות להיפגש, ודמות שחיה לבד בכל העונה.\n";
+ o+="4. פתיחות וסגירות. מה פותח ומה סוגר כל פרק, ואיפה הפרק נגמר בלי שום דבר שסוגר אותו.\n";
+ o+="5. הסיום. מה חייב לקרות בפרק האחרון כדי שהעונה תסתיים, וכמה מזה כבר קיים.\n";
+ o+="6. העיר עצמה. אילת בקיץ, החום, הלילה, התיירים, מה שקורה בעיר בלי אף שוטר בפריים.\n";
+ o+="7. מה שאין בכלל. מחלקה, מקום, שעה ביום או סוג אירוע שאין להם אף סצנה בשום פרק.\n";
+ o+="8. מחיר. מה כל דמות משלמת על העבודה הזו, ואיפה זה נראה במצלמה ולא רק נאמר בראיון.\n\n";
  o+="כללים:\n";
  o+="1. אל תמציא עובדות. אם משהו לא נאמר בחומר, אל תכתוב אותו כאילו הוא קיים.\n";
  o+="2. סצנות שאפשר לצלם, לא ראיונות מדברים. משהו שקורה מול המצלמה.\n";
  o+="3. לכל רעיון תגיד למה הוא עובד במשפט אחד, בלי מליצות.\n";
  o+="4. תעדיף רעיונות שסוגרים חור קיים על רעיונות שמוסיפים עוד מאותו דבר.\n";
- if(focus) o+="5. התמקד ב"+focus+".\n";
- if(extra) o+="6. מה שחשוב לי: "+extra+"\n";
- o+="\nפורמט התשובה, שורה אחת לכל רעיון, בלי שום טקסט נוסף לפני או אחרי:\n";
+ o+="5. אל תיתן חמישה רעיונות מאותה זווית. תפזר, זווית אחת או שתיים לכל היותר לכל רעיון.\n";
+ if(focus) o+="6. התמקד ב"+focus+".\n";
+ if(extra) o+="7. מה שחשוב לי: "+extra+"\n";
+ o+="\nפורמט התשובה: קודם שמונה שורות של מה ראית בכל זווית, ואז שורה ריקה, ואז הרעיונות. שורה אחת לכל רעיון, בלי שום טקסט נוסף אחרי:\n";
  o+="כותרת | למה זה עובד במשפט אחד | שם הדמות | מספר פרק | יש או לצלם\n\n";
  o+="דוגמה:\n";
  o+="הלילה שבו חלפון מאבד שליטה | הדמות היחידה בסדרה בלי רגע אחד של כישלון, וזה מה שמשאיר אותה שטוחה | אלון חלפון | 1 | לצלם\n\n";
@@ -4619,6 +4635,91 @@ function briefHead(){
  o+="אני עורך סדרה תיעודית בת חמישה פרקים על מרחב אילת של משטרת ישראל. כל פרק חצי שעה, חמש עשרה סצנות של כשתי דקות, סך הכול "+TARGET+" סצנות. הפרקים בנויים לפי תמות ולא לפי דמויות, וכל דמות חוזרת לאורך העונה.\n\n";
  o+="מצב נוכחי: "+n+" סצנות ביומן, "+c.shot+" צולמו, "+(c.partial||0)+" חלקיות, "+(c.todo||0)+" מחכות לצילום. נשארו "+Math.max(TARGET-n,0)+" סצנות עד היעד.\n";
  o+="תקציב הצילום: "+used+" משמרות נוצלו מתוך "+tgt+", נשארו "+Math.max(tgt-used,0)+".\n\n";
+ return o;
+}
+
+function crossSeason(){
+ var o="", live=DATA.scenes.filter(function(x){return x.status!=="dropped"});
+ var eps=DATA.eps.map(function(e){return e.n});
+ function inEp(n){return live.filter(function(x){return (Number(x.ep)||1)===n})}
+
+ o+="\n=== מבט רוחבי על העונה ===\n";
+ o+="הטבלה הזו היא העונה משמאל לימין. כל שורה היא דמות או ליין, כל עמודה היא פרק, והמספר הוא כמה סצנות יש שם. אפס אומר שהיא נעלמת בפרק הזה.\n\n";
+
+ o+="דמות: "+eps.map(function(n){return "פ"+n}).join(" | ")+"\n";
+ DATA.chars.forEach(function(c){
+  var row=eps.map(function(n){return inEp(n).filter(function(x){return x.char===c.k}).length});
+  var tot=row.reduce(function(a,b){return a+b},0);
+  if(!tot) return;
+  var holes=[],first=-1,last=-1,i;
+  for(i=0;i<row.length;i++){ if(row[i]){ if(first<0)first=i; last=i } }
+  for(i=first;i<=last;i++) if(!row[i]) holes.push(eps[i]);
+  var tail=[];
+  if(holes.length) tail.push("נעלמת ב"+(holes.length>1?"פרקים ":"פרק ")+joinHe(holes));
+  if(last<eps.length-1) tail.push("נגמרת בפרק "+eps[last]+" ולא חוזרת");
+  if(first>0) tail.push("מופיעה רק מפרק "+eps[first]);
+  o+=c.name+": "+row.join(" | ")+(tail.length?"   >> "+tail.join(", "):"")+"\n";
+ });
+
+ o+="\nליין: "+eps.map(function(n){return "פ"+n}).join(" | ")+"\n";
+ LINES().forEach(function(l){
+  var row=eps.map(function(n){return inEp(n).filter(function(x){return lineOf(x)===l.k}).length});
+  var st=lineStat(l.k);
+  var ex=[LKIND[st.kind].l];
+  if(st.last&&st.last<eps[eps.length-1]) ex.push("נגמר בפרק "+st.last+" ולא חוזר");
+  if(st.first>eps[0]) ex.push("מתחיל רק בפרק "+st.first);
+  o+=l.name+": "+row.join(" | ")+"   >> "+ex.join(", ")+"\n";
+ });
+
+ o+="\nמחלקה: "+eps.map(function(n){return "פ"+n}).join(" | ")+"\n";
+ DATA.units.forEach(function(u){
+  var row=eps.map(function(n){return inEp(n).filter(function(x){return x.unit===u.k}).length});
+  if(!row.reduce(function(a,b){return a+b},0)) return;
+  o+=u.name+": "+row.join(" | ")+"\n";
+ });
+
+ o+="\n--- מה פותח ומה סוגר כל פרק ---\n";
+ DATA.eps.forEach(function(e){
+  var a=inEp(e.n).sort(function(p,q){return (p.ord||0)-(q.ord||0)});
+  if(!a.length){o+="פרק "+e.n+": ריק\n";return}
+  var f=a[0], t=a[a.length-1];
+  o+="פרק "+e.n+" · "+e.title+": נפתח ב["+f.id+"] "+f.title+" · נסגר ב["+t.id+"] "+t.title+"\n";
+ });
+
+ o+="\n--- מי נפגש עם מי ---\n";
+ var pair={};
+ live.forEach(function(x){
+  var all=[x.char].concat(extraChars(x)).filter(Boolean);
+  all.forEach(function(a){ all.forEach(function(b){ if(a<b) pair[a+"|"+b]=(pair[a+"|"+b]||0)+1 }) });
+ });
+ var pk=Object.keys(pair).sort(function(a,b){return pair[b]-pair[a]});
+ if(pk.length){
+  pk.slice(0,12).forEach(function(k){
+   var p=k.split("|"), a=charOf(p[0]), b=charOf(p[1]);
+   if(a&&b) o+=a.name+" + "+b.name+": "+pair[k]+" סצנות משותפות\n";
+  });
+ }
+ var solo=DATA.chars.filter(function(c){
+  return live.some(function(x){return x.char===c.k}) && !pk.some(function(k){return k.split("|").indexOf(c.k)>-1});
+ }).map(function(c){return c.name});
+ if(solo.length) o+="דמויות שלא נפגשות עם אף אחד בשום סצנה: "+joinHe(solo)+"\n";
+
+ o+="\n--- מה חוזר על עצמו ---\n";
+ var words={};
+ live.forEach(function(x){
+  String(x.title||"").split(/[\s,.:;״"'()]+/).forEach(function(w){
+   if(w.length<4) return;
+   words[w]=(words[w]||0)+1;
+  });
+ });
+ var wk=Object.keys(words).filter(function(w){return words[w]>=4}).sort(function(a,b){return words[b]-words[a]}).slice(0,14);
+ if(wk.length) o+="מילים שחוזרות בכותרות הסצנות: "+wk.map(function(w){return w+" ("+words[w]+")"}).join(", ")+"\n";
+ var st2={};
+ live.forEach(function(x){var k=(x.unit||"?")+"|"+(Number(x.ep)||1);st2[k]=(st2[k]||0)+1});
+ var heavy=Object.keys(st2).filter(function(k){return st2[k]>=6}).map(function(k){
+  var p=k.split("|");return unitName(p[0])+" בפרק "+p[1]+" ("+st2[k]+" סצנות)"});
+ if(heavy.length) o+="ריכוזים כבדים: "+joinHe(heavy)+"\n";
+
  return o;
 }
 function briefContext(){
@@ -4653,6 +4754,8 @@ function briefContext(){
   if((u.need||[]).length) o+=" צריך: "+u.need.join(", ")+".";
   o+="\n";
  });
+
+ o+=crossSeason();
 
  o+="\n=== הסצנות ביומן ===\n";
  DATA.eps.forEach(function(e){
@@ -4893,7 +4996,7 @@ var AUTO_LINE={"B-01":"hunt","B-02":"hunt","B-03":"hunt","B-04":"hunt","B-05":"h
 "N-02":"noa","N-03":"noa","N-05":"noa","N-06":"noa","N-07":"noa",
 "G-01":"tomer","G-02":"tomer","G-03":"tomer","G-04":"tomer",
 "Y-01":"yuval","Y-02":"yuval","L-01":"lauren"};
-var LKIND={ok:{l:"רץ לאורך העונה",c:"ok"},gap:{l:"נשמט באמצע",c:"gap"},drop:{l:"יושב בפרק אחד",c:"drop"},thin:{l:"דק מדי",c:"thin"},empty:{l:"ריק",c:"empty"}};
+var LKIND={ok:{l:"רץ לאורך העונה",c:"ok"},end:{l:"נגמר לפני הסוף",c:"end"},gap:{l:"נשמט באמצע",c:"gap"},drop:{l:"יושב בפרק אחד",c:"drop"},thin:{l:"דק מדי",c:"thin"},empty:{l:"ריק",c:"empty"}};
 function LINES(){
  if(!DATA.lines||!DATA.lines.length) DATA.lines=JSON.parse(JSON.stringify(DEFAULT_LINES));
  return DATA.lines;
@@ -4909,7 +5012,8 @@ function lineStat(k){
  var holes=[],e2;
  for(e2=first;e2<=last;e2++) if(!eps[e2]) holes.push(e2);
  var present=0;for(var kk in eps)present++;
- var kind=!all.length?"empty":all.length<=2?"thin":present===1?"drop":holes.length?"gap":"ok";
+ var maxEp=DATA.eps.length?DATA.eps[DATA.eps.length-1].n:5;
+ var kind=!all.length?"empty":all.length<=2?"thin":present===1?"drop":holes.length?"gap":(last<maxEp?"end":"ok");
  return {all:all,eps:eps,first:all.length?first:0,last:last,holes:holes,present:present,kind:kind,
   min:all.reduce(function(a,x){return a+(Number(x.min)||0)},0),
   shot:all.filter(function(x){return x.status==="shot"}).length};
@@ -4924,6 +5028,7 @@ function lineHint(k,st){
  if(st.kind==="thin") return st.all.length+" סצנות בלבד. זו עוד לא עלילה, זו הופעה";
  if(st.kind==="drop") return "כל הליין יושב בפרק "+st.first+". אין לו המשך ואין לו סגירה";
  if(st.kind==="gap") return "נשמט ב"+(st.holes.length>1?"פרקים ":"פרק ")+joinHe(st.holes)+". הצופה מאבד את החוט ומוצא אותו אחר כך בלי סיבה";
+ if(st.kind==="end") return "נפתח בפרק "+st.first+" ונגמר בפרק "+st.last+". אין לו סגירה בסוף העונה";
  return "נפתח בפרק "+st.first+", נסגר בפרק "+st.last+", בלי חורים";
 }
 function lineForm(l){
@@ -5037,10 +5142,12 @@ function lineSuggest(){
  /* ג. סתימת חורים: להעביר סצנות של אותן דמויות אל תוך הליין שנשמט */
  LINES().forEach(function(l){
   var st=lineStat(l.k);
-  if(st.kind!=="gap"&&st.kind!=="drop") return;
+  if(st.kind!=="gap"&&st.kind!=="drop"&&st.kind!=="end") return;
   var chars={};
   st.all.forEach(function(x){chars[x.char]=1});
-  var holes=st.kind==="gap"?st.holes:DATA.eps.map(function(x){return x.n}).filter(function(n){return n!==st.first});
+  var holes=st.kind==="gap"?st.holes:
+   st.kind==="end"?DATA.eps.map(function(x){return x.n}).filter(function(n){return n>st.last}):
+   DATA.eps.map(function(x){return x.n}).filter(function(n){return n!==st.first});
   var cand=live.filter(function(x){
    return lineOf(x)!==l.k&&chars[x.char]&&holes.indexOf(Number(x.ep)||1)>-1&&canTake(x);
   });
@@ -5049,7 +5156,7 @@ function lineSuggest(){
   out.push({kind:"fill",line:l.k,color:l.color||"#455160",name:l.name,
    what:LKIND[st.kind].l+", חסר ב"+epTxt(holes),
    why:"יש "+nSc(cand.length)+" עם אותן דמויות ב"+epTxt(ce)+" ("+fromTxt(cand)+"). להעביר אותן לכאן וזה סוגר את החור",
-   ids:idsOrd(cand), score:cand.length*9+(st.kind==="drop"?18:14)});
+   ids:idsOrd(cand), score:cand.length*9+(st.kind==="drop"?18:st.kind==="end"?16:14)});
  });
 
  /* ד. מיזוג ליין דק לתוך ליין שמחזיק את אותה דמות */
@@ -5299,7 +5406,7 @@ function arcTable(){
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
- h+='<span><i class="dot-key"></i>נקודה אדומה = לא צולם. עיגול חלול = חלקי</span>';
+ h+='<span><i class="dot-key">לא צולם</i>התווית על כל פתק אומרת אם הסצנה צולמה או לא</span>';
  h+='<span style="color:var(--ink-3)">גרור פתק לתא כדי לשנות דמות ופרק, או על שם הדמות בעמודה הראשונה כדי לשנות רק דמות</span></div>';
  h+='<div class="tscroll"><table class="arc"><thead><tr><th class="c0">דמות</th>';
  DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
