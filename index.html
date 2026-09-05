@@ -230,7 +230,7 @@ html.linedrag .mchip{pointer-events:none}
 .epband .sub{font-size:14px;color:var(--ink-2);margin:0}
 .epband .bm{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .notes.listwrap{gap:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);min-height:44px}
-.pnote.rowmode{display:grid;grid-template-columns:162px 56px minmax(0,1fr) 76px auto;align-items:center;gap:14px;
+.pnote.rowmode{display:grid;grid-template-columns:162px 132px 56px minmax(0,1fr) 76px auto;align-items:center;gap:14px;
  transform:none!important;border-radius:0;box-shadow:none;padding:9px 14px;border-top:1px solid rgba(0,0,0,.09)}
 .pnote.rowmode:first-child{border-top:0}
 .pnote.rowmode:hover{transform:none!important;filter:brightness(1.03)}
@@ -452,6 +452,30 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .cpmeta{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);white-space:nowrap}
 .npill.p-shot{background:var(--shot-soft);color:var(--shot)}
 .npill.p-dropped{background:var(--dropped-soft);color:var(--dropped)}
+.ltl{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 0;box-shadow:var(--shadow);overflow:hidden}
+.ltl-row{display:grid;grid-template-columns:212px minmax(0,1fr);align-items:center;gap:14px;padding:5px 16px}
+.ltl-row:not(.ltl-head):hover{background:var(--surface-2)}
+.ltl-head{padding-top:10px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:5px}
+.ltl-head .ltl-name{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3)}
+.ltl-name{display:flex;align-items:center;gap:7px;min-width:0}
+.ltl-name i{width:9px;height:9px;border-radius:2px;background:var(--lc,#455160);flex:0 0 auto}
+.ltl-name b{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltl-name em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3);margin-inline-start:auto;font-variant-numeric:tabular-nums}
+.ltl-track{position:relative;display:grid;grid-auto-rows:22px;min-height:22px;align-items:center}
+.ltl-head .ltl-track{grid-auto-rows:auto}
+.ltl-ep{grid-row:1;border-inline-start:1px solid var(--line-2);padding-inline-start:7px;min-width:0;overflow:hidden}
+.ltl-ep:first-child{border-inline-start:0;padding-inline-start:0}
+.ltl-ep b{display:block;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+.ltl-ep span{display:block;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:12.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltl-sep{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--line-2);pointer-events:none}
+.ltl-span{grid-row:1;height:3px;align-self:center;background:var(--lc,#455160);opacity:.18;border-radius:2px}
+.ltl-seg{grid-row:1;height:15px;margin:0 1px;border:0;border-radius:3px;background:var(--lc,#455160);cursor:pointer;padding:0;transition:.12s;position:relative}
+.ltl-seg:hover{height:20px;filter:brightness(1.15);z-index:2}
+.ltl-seg.t-todo{background:var(--lc,#455160);opacity:.32}
+.ltl-seg.t-partial{opacity:.65;box-shadow:inset 0 -3px 0 var(--partial)}
+.ltl-seg.t-shot{opacity:1}
+.ltl-key{display:inline-block;width:13px;height:13px;border-radius:3px;background:var(--ink-3);opacity:.32}
+@media (max-width:760px){.ltl-row{grid-template-columns:132px minmax(0,1fr);gap:9px;padding:5px 10px}}
 .trup{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:15px 17px 16px;margin-top:16px;display:grid;gap:12px}
 .trrow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 .trrow .f{margin:0;flex:0 0 auto}
@@ -561,6 +585,13 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .modal .grpform{margin:0;border:0;border-radius:0;background:var(--surface)}
 .nchar{margin:-11px -13px 10px;padding:8px 13px 7px;font-family:"Heebo",sans-serif;font-size:15px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:3px 3px 0 0;line-height:1.2}
 .nchar small{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:500;opacity:.78;display:block;margin-top:1px;letter-spacing:.04em}
+.nlin{display:flex;align-items:center;gap:5px;margin:-6px -13px 9px;padding:4px 13px 5px;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.03em;background:rgba(0,0,0,.055);border-bottom:1px solid rgba(0,0,0,.07)}
+.nlin i{width:8px;height:8px;border-radius:2px;background:var(--lc,#8A93A0);flex:0 0 auto;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.nlin span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.8}
+.nlin.none span{opacity:.5;font-weight:500}
+.pnote.rowmode .nlin{margin:0;padding:0;background:transparent;border:0;font-size:10.5px}
+.person.pline{display:inline-flex;align-items:center;gap:5px}
+.person.pline i{width:8px;height:8px;border-radius:2px;background:var(--lc,#8A93A0)}
 .cdot{display:inline-block;width:14px;height:14px;border-radius:4px;margin-inline-end:9px;vertical-align:-1px}
 .grp-h h2 .cdot{width:16px;height:16px}
 .arc th.c0{border-inline-end:0}
@@ -3087,7 +3118,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",trQ:"",trOpen:"",trPick:"",trDate:"",legOpen:true,charPanel:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",trQ:"",trOpen:"",trPick:"",trDate:"",legOpen:true,charPanel:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3452,12 +3483,17 @@ function epForm(e){
 function note(x,extra){
  var ch=charOf(x.char);
  var h='<div class="pnote n-'+x.status+(extra?" "+extra:"")+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(x.id)+'" style="--cc:'+esc(charColor(x.char))+'"';
- if(extra==="segmode") h+=' title="'+esc(x.id+" · "+x.title+" · "+(ch?ch.name:"")+" · "+STATUS[x.status].l)+'"'+(RO?"":' data-act="edit"');
+ if(extra==="segmode"){var _sl=lineObj(lineOf(x));
+  h+=' title="'+esc(x.id+" · "+x.title+" · "+(ch?ch.name:"")+(_sl?" · "+_sl.name:"")+" · "+STATUS[x.status].l)+'"'+(RO?"":' data-act="edit"');}
  h+='>';
  h+=reddot(x.status);
  h+='<div class="nchar" style="background:'+esc(charColor(x.char))+'">'+esc(ch?ch.name:"ללא דמות");
  if(ch&&ch.role) h+='<small>'+esc(ch.role)+'</small>';
  h+='</div>';
+ if(extra!=="segmode"){
+  var lk=lineOf(x), lo=lineObj(lk);
+  h+='<div class="nlin'+(lo?"":" none")+'" style="--lc:'+esc(lo?(lo.color||"#455160"):"#8A93A0")+'"><i></i><span>'+esc(lo?lo.name:"בלי ליין")+'</span></div>';
+ }
  var _ex=extraChars(x);
  if(_ex.length&&extra!=="segmode"){
   h+='<div class="nextra">'+_ex.map(function(k){var cc=charOf(k);
@@ -4444,6 +4480,52 @@ function lineForm(l){
  h+='<div class="spacer"></div><button class="btn danger" data-act="delline" data-id="'+esc(l.k)+'">מחק ליין</button></div>';
  return h+'</div>';
 }
+function seasonSeq(){
+ var out=[];
+ DATA.eps.forEach(function(e){
+  DATA.scenes.filter(function(x){return x.ep===e.n&&x.status!=="dropped"})
+   .sort(function(a,b){return (a.ord||0)-(b.ord||0)})
+   .forEach(function(x){out.push(x)});
+ });
+ return out;
+}
+function linesTimeline(){
+ var LS=LINES(), seq=seasonSeq(), N=seq.length;
+ if(!N) return '<div class="dempty"><b>אין סצנות להציג</b><p>הוסף סצנות ליומן והציר יופיע כאן.</p></div>';
+ var pos={}; seq.forEach(function(x,i){pos[x.id]=i});
+ var epStart=[],epCount={};
+ seq.forEach(function(x,i){ var e=x.ep||1; if(epCount[e]===undefined){epCount[e]=0;epStart.push({ep:e,i:i})} epCount[e]++ });
+ var h='<div class="ltl">';
+ h+='<div class="ltl-row ltl-head"><div class="ltl-name">הציר של העונה</div><div class="ltl-track" style="grid-template-columns:repeat('+N+',minmax(0,1fr))">';
+ epStart.forEach(function(b){
+  var e=DATA.eps.filter(function(x){return x.n===b.ep})[0];
+  h+='<div class="ltl-ep" style="grid-column:'+(b.i+1)+' / span '+epCount[b.ep]+'"><b>פרק '+b.ep+'</b><span>'+esc(e?e.title:"")+'</span></div>';
+ });
+ h+='</div></div>';
+ var rows=LS.map(function(l){return {k:l.k,name:l.name,color:l.color||"#455160"}});
+ rows.push({k:"",name:"בלי ליין",color:"#8A93A0"});
+ rows.forEach(function(r){
+  var mine=seq.filter(function(x){return lineOf(x)===r.k});
+  if(!mine.length&&r.k==="") return;
+  var first=mine.length?pos[mine[0].id]:-1, last=mine.length?pos[mine[mine.length-1].id]:-1;
+  h+='<div class="ltl-row"><div class="ltl-name" style="--lc:'+esc(r.color)+'"><i></i><b>'+esc(r.name)+'</b><em>'+mine.length+'</em></div>';
+  h+='<div class="ltl-track" style="grid-template-columns:repeat('+N+',minmax(0,1fr))">';
+  if(mine.length>1) h+='<div class="ltl-span" style="grid-column:'+(first+1)+' / span '+(last-first+1)+';--lc:'+esc(r.color)+'"></div>';
+  epStart.forEach(function(b,bi){ if(bi) h+='<span class="ltl-sep" style="inset-inline-start:'+(b.i/N*100).toFixed(3)+'%"></span>' });
+  mine.forEach(function(x){
+   var lo=lineObj(r.k);
+   h+='<button class="ltl-seg t-'+x.status+'" style="grid-column:'+(pos[x.id]+1)+';--lc:'+esc(r.color)+'"'+(RO?"":' data-act="gotoscene" data-id="'+esc(x.id)+'"')+
+      ' title="'+esc(x.id+" · "+x.title+" · פרק "+(x.ep||1)+" · "+STATUS[x.status].l)+'"></button>';
+  });
+  h+='</div></div>';
+ });
+ h+='</div>';
+ h+='<div class="legend"><span><i style="background:var(--shot)"></i>צולם</span>';
+ h+='<span><i style="background:var(--partial)"></i>חלקי</span>';
+ h+='<span><i class="ltl-key"></i>עוד לא צולם</span>';
+ h+='<span style="color:var(--ink-3)">כל מלבן הוא סצנה אחת לפי סדר הצפייה בעונה. הפס הדהוי הוא הטווח שהליין חי בו, והחורים בתוכו הם הפרקים שהוא נשמט בהם</span></div>';
+ return h;
+}
 function linesView(){
  var LS=LINES(),ST={};
  LS.forEach(function(l){ST[l.k]=lineStat(l.k)});
@@ -4461,6 +4543,27 @@ function linesView(){
    h+='<p>'+esc(lineHint(l.k,s))+'</p></div>';
   });
   h+='</div>';
+ }
+ h+='<div class="modes">';
+ [["table","טבלה"],["time","ציר זמן"]].forEach(function(m){
+  h+='<button data-act="lmode" data-k="'+m[0]+'" aria-pressed="'+((state.lineMode||"table")===m[0])+'">'+esc(m[1])+'</button>';
+ });
+ h+='</div>';
+ if((state.lineMode||"table")==="time"){
+  h+=linesTimeline();
+  h+='</section>';
+  h+='<section class="grp"><div class="grp-h"><h2>הערות על הליינים</h2><span class="role">מה כל סיפור צריך כדי לעמוד</span></div><div class="units">';
+  LS.forEach(function(l){
+   var s2=ST[l.k];
+   h+='<div class="unit" data-c="'+(s2.kind==="ok"?"full":s2.kind==="gap"?"partial":"none")+'"><div class="unit-h"><span class="dot" style="background:'+esc(l.color||"#455160")+'"></span><h3>'+esc(l.name)+'</h3>';
+   h+='<span class="cnt">'+s2.all.length+' סצנות</span></div>';
+   if(l.what) h+='<p class="lab2">'+esc(l.what)+'</p>';
+   h+='<p>'+esc(lineHint(l.k,s2))+'</p>';
+   if(l.note) h+='<p class="lnote">'+esc(l.note)+'</p>';
+   if(!RO) h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך ליין</button>';
+   h+='</div>';
+  });
+  return h+'</div></section>';
  }
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
@@ -4606,6 +4709,8 @@ function card(s){
  var h='<article class="scene" data-s="'+s.status+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(s.id)+'">';
  h+='<div class="s-head">'+(RO?"":'<div class="grip" title="גרור מכאן">⠿</div>')+reddot(s.status)+'<div class="code">'+esc(s.id)+'</div><div class="s-title"><h3>'+esc(s.title)+(s.mine?'<span class="tag">הצעה</span>':'')+'</h3><div class="people">';
  if(s.unit) h+='<span class="person unit">'+esc(unitName(s.unit))+'</span>';
+ var _lk=lineOf(s), _lo=lineObj(_lk);
+ h+='<span class="person pline" style="--lc:'+esc(_lo?(_lo.color||"#455160"):"#8A93A0")+'"><i></i>'+esc(_lo?_lo.name:"בלי ליין")+'</span>';
  extraChars(s).forEach(function(k){var cc=charOf(k);
   h+='<span class="person pchar" style="--cc:'+esc(cc.color||"#455160")+'"><i></i>'+esc(cc.name)+'</span>'});
  (s.people||[]).forEach(function(p){h+='<span class="person">'+esc(p)+'</span>'});
@@ -4722,6 +4827,7 @@ function loadUI(){
   if(o.group)state.group=o.group;
   if(o.boardMode)state.boardMode=o.boardMode;
   if(o.needMode)state.needMode=o.needMode;
+  if(o.lineMode)state.lineMode=o.lineMode;
   if(o.filter)state.filter=o.filter;
   restoreY=Number(o.scrollY)||0;
   restoreX=Number(o.scrollX)||0;
@@ -4734,7 +4840,7 @@ function saveUI(){
   try{
    var bd=document.querySelector(".board");
    localStorage.setItem(UIKEY,JSON.stringify({
-    group:state.group,boardMode:state.boardMode,needMode:state.needMode,filter:state.filter,
+    group:state.group,boardMode:state.boardMode,needMode:state.needMode,lineMode:state.lineMode,filter:state.filter,
     scrollY:window.scrollY||window.pageYOffset||0,
     scrollX:bd?bd.scrollLeft:0
    }));
@@ -5252,6 +5358,7 @@ document.addEventListener("click",function(e){
   toast("נוספה סצנה "+nid+" לפרק "+(Number(ix.ep)||1));return}
  if(act==="bmode"){state.boardMode=b.getAttribute("data-k");render();return}
  if(act==="nmode"){state.needMode=b.getAttribute("data-k");render();return}
+ if(act==="lmode"){state.lineMode=b.getAttribute("data-k");render();return}
  if(act==="newat"){state.newAt=b.getAttribute("data-k");state.editing=null;render();return}
  if(act==="newcancel"){state.newAt=null;render();return}
  if(act==="newshot"){createAt("shot");return}
