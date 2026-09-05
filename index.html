@@ -211,6 +211,12 @@ section.grp.dropok{outline:3px dashed var(--accent);outline-offset:10px;border-r
 .ghost{margin-top:13px;padding:15px 13px;border:1.5px dashed #D9799C;border-radius:4px;color:var(--ink-3);font-family:"Heebo",sans-serif;font-size:12.5px;text-align:center}
 .ins{height:5px;background:var(--accent);border-radius:3px;margin:-4px 0}
 .arc td .ins{margin:2px 0;height:4px}
+.rgrip{display:inline-block;cursor:grab;color:var(--ink-3);font-size:13px;line-height:1;padding:1px 5px;border-radius:5px;margin-inline-end:6px;vertical-align:middle;user-select:none}
+.rgrip:hover{background:var(--surface-2);color:var(--ink)}
+.rgrip:active{cursor:grabbing}
+.arc tr.rowdrop-before>th,.arc tr.rowdrop-before>td{box-shadow:inset 0 4px 0 -1px var(--accent)}
+.arc tr.rowdrop-after>th,.arc tr.rowdrop-after>td{box-shadow:inset 0 -4px 0 -1px var(--accent)}
+html.linedrag .mchip{pointer-events:none}
 .nedit{margin-top:9px;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;background:rgba(0,0,0,.07);border:0;border-radius:4px;padding:3px 9px;color:inherit;cursor:pointer;opacity:.65}
 .nedit:hover{opacity:1;background:rgba(0,0,0,.13)}
 .modes{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;margin-top:16px}
@@ -3497,6 +3503,15 @@ function moveScene(id,ep,beforeId){
  col.forEach(function(x,j){x.ord=j});
  reindex();
 }
+function moveLine(k,beforeK){
+ var L=LINES(), i=-1;
+ L.forEach(function(x,j){if(x.k===k)i=j});
+ if(i<0)return false;
+ var item=L.splice(i,1)[0], idx=L.length;
+ if(beforeK) L.forEach(function(x,j){if(x.k===beforeK)idx=j});
+ L.splice(idx,0,item);
+ return true;
+}
 function moveAfter(id,ep,afterId){
  var col=DATA.scenes.filter(function(x){return x.ep===ep&&x.id!==id})
   .sort(function(a,b){return (a.ord||0)-(b.ord||0)});
@@ -3504,9 +3519,11 @@ function moveAfter(id,ep,afterId){
  col.forEach(function(x,j){if(x.id===afterId)idx=j+1});
  moveScene(id,ep,col[idx]?col[idx].id:null);
 }
-var dragId=null,ins=null;
+var dragId=null,dragLine=null,ins=null;
 function cleanupDrag(){
  document.documentElement.classList.remove("dragging");
+ document.documentElement.classList.remove("linedrag");
+ dragLine=null;
  if(ins&&ins.parentNode)ins.parentNode.removeChild(ins);
  ins=null;
  var d=document.querySelector(".pnote.dragging");
@@ -3537,11 +3554,20 @@ function autoScroll(e){
  }
 }
 function clearZones(){
- var a=document.querySelectorAll(".dropok,.dropbucket,.dropcell");
- for(var i=0;i<a.length;i++){a[i].classList.remove("dropok");a[i].classList.remove("dropbucket");a[i].classList.remove("dropcell")}
+ var a=document.querySelectorAll(".dropok,.dropbucket,.dropcell,.rowdrop-before,.rowdrop-after");
+ for(var i=0;i<a.length;i++){a[i].classList.remove("dropok");a[i].classList.remove("dropbucket");a[i].classList.remove("dropcell");
+  a[i].classList.remove("rowdrop-before");a[i].classList.remove("rowdrop-after")}
 }
 document.addEventListener("dragstart",function(e){
  if(!canEdit())return;
+ var g=e.target&&e.target.closest?e.target.closest(".rgrip"):null;
+ if(g){
+  dragLine=g.getAttribute("data-line");dragId=null;
+  document.documentElement.classList.add("dragging");
+  document.documentElement.classList.add("linedrag");
+  if(e.dataTransfer){e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",dragLine)}catch(_){}}
+  return;
+ }
  var n=e.target&&e.target.closest?e.target.closest(".pnote,.scene,.mchip"):null;
  if(!n)return;
  dragId=n.getAttribute("data-id");
@@ -3551,6 +3577,18 @@ document.addEventListener("dragstart",function(e){
 });
 document.addEventListener("dragend",function(){clearZones();cleanupDrag()});
 document.addEventListener("dragover",function(e){
+ if(dragLine){
+  var trow=e.target&&e.target.closest?e.target.closest("tr[data-line]"):null;
+  clearZones();
+  if(trow&&trow.getAttribute("data-line")!==dragLine){
+   e.preventDefault();
+   if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+   var rr=trow.getBoundingClientRect();
+   trow.classList.add(e.clientY<rr.top+rr.height/2?"rowdrop-before":"rowdrop-after");
+  }
+  autoScroll(e);
+  return;
+ }
  if(!dragId)return;
  var td=e.target&&e.target.closest?e.target.closest("[data-cell]"):null;
  if(td){
@@ -3592,6 +3630,29 @@ document.addEventListener("dragover",function(e){
  } else if(!ins.parentNode||ins.parentNode!==col) col.appendChild(ins);
 });
 document.addEventListener("drop",function(e){
+ if(dragLine){
+  var trow=e.target&&e.target.closest?e.target.closest("tr[data-line]"):null;
+  if(!trow||trow.getAttribute("data-line")===dragLine){clearZones();cleanupDrag();return}
+  e.preventDefault();snap();
+  var tk=trow.getAttribute("data-line");
+  var rr2=trow.getBoundingClientRect();
+  var before=e.clientY<rr2.top+rr2.height/2;
+  var beforeK=null;
+  if(tk==="__none__") beforeK=null;
+  else if(before) beforeK=tk;
+  else {
+   var nx=trow.nextElementSibling;
+   var nk=nx?nx.getAttribute("data-line"):null;
+   beforeK=(nk&&nk!=="__none__")?nk:null;
+  }
+  var nm=lineName(dragLine);
+  if(moveLine(dragLine,beforeK)){
+   clearZones();cleanupDrag();render();save();
+   toast("הליין "+nm+" הועבר"+(beforeK?(" מעל "+lineName(beforeK)):" לסוף"));
+   return;
+  }
+  clearZones();cleanupDrag();return;
+ }
  var tdz=e.target&&e.target.closest?e.target.closest("[data-cell]"):null;
  if(dragId&&tdz){
   e.preventDefault();snap();
@@ -4404,13 +4465,13 @@ function linesView(){
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
  h+='<span><i class="holekey"></i>תא ורוד = הליין נשמט בפרק הזה</span>';
- h+='<span style="color:var(--ink-3)">'+(RO?"":"גרור סצנה לתא כדי לשנות ליין ופרק, או על שם הליין בעמודה הראשונה כדי לשנות רק ליין")+'</span></div>';
+ h+='<span style="color:var(--ink-3)">'+(RO?"":"גרור סצנה לתא כדי לשנות ליין ופרק, על שם הליין כדי לשנות רק ליין, ובידית ⠿ כדי לסדר את הליינים עצמם")+'</span></div>';
  h+='<div class="tscroll"><table class="arc lmap"><thead><tr><th class="c0">ליין</th>';
  DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
  h+='<th class="tot">המהלך</th></tr></thead><tbody>';
  LS.forEach(function(l){
   var s=ST[l.k];
-  h+='<tr><th class="c0"'+(RO?"":' data-cell="l:'+esc(l.k)+':0" title="גרור לכאן כדי להעביר לליין הזה בלי לשנות פרק"')+' style="--ccol:'+esc(l.color||"#455160")+'"><b>'+esc(l.name)+'</b>';
+  h+='<tr data-line="'+esc(l.k)+'"><th class="c0"'+(RO?"":' data-cell="l:'+esc(l.k)+':0" title="גרור לכאן כדי להעביר לליין הזה בלי לשנות פרק"')+' style="--ccol:'+esc(l.color||"#455160")+'"><b>'+(RO?"":'<span class="rgrip" draggable="true" data-line="'+esc(l.k)+'" title="גרור כדי לשנות את סדר הליינים">⠿</span>')+esc(l.name)+'</b>';
   if(l.what) h+='<em>'+esc(l.what)+'</em>';
   h+='<span class="ldots">';
   DATA.eps.forEach(function(e){
@@ -4439,7 +4500,7 @@ function linesView(){
   h+='<em>'+s.shot+' צולמו · '+s.min+' דק׳</em></td></tr>';
  });
  var unv=un.filter(function(x){return state.filter==="all"||x.status===state.filter});
- h+='<tr class="norow"><th class="c0"'+(RO?"":' data-cell="l:__none__:0" title="גרור לכאן כדי להוציא מכל ליין"')+' style="--ccol:#8A93A0"><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
+ h+='<tr class="norow" data-line="__none__"><th class="c0"'+(RO?"":' data-cell="l:__none__:0" title="גרור לכאן כדי להוציא מכל ליין"')+' style="--ccol:#8A93A0"><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
  DATA.eps.forEach(function(e){
   var cell=unv.filter(function(x){return x.ep===e.n});
   var cattr=RO?"":' data-cell="l:__none__:'+e.n+'"';
