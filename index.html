@@ -598,6 +598,17 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .views button[aria-pressed="true"] .vn{background:var(--accent-ink);color:var(--accent)}
 .chatgrp{display:flex;flex-direction:column}
 .chatwrap{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:14px 16px;max-height:min(60vh,560px);overflow:auto;display:flex;flex-direction:column;gap:3px}
+.bell.chatb i{font-size:15px}
+.bell.chatb.on{border-color:#B0472B;color:#B0472B;animation:chatpulse 1.6s ease-in-out infinite}
+@keyframes chatpulse{0%,100%{box-shadow:0 0 0 0 rgba(176,71,43,.35)}50%{box-shadow:0 0 0 5px rgba(176,71,43,0)}}
+.chtabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.chtab{position:relative;display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--ink-2);cursor:pointer;transition:.15s}
+.chtab i{width:8px;height:8px;border-radius:50%;background:var(--uc,#455160)}
+.chtab:hover{border-color:var(--uc,#455160);color:var(--ink)}
+.chtab[aria-pressed="true"]{background:var(--uc,#455160);color:#fff;border-color:var(--uc,#455160)}
+.chtab[aria-pressed="true"] i{background:rgba(255,255,255,.85)}
+.chtab .n{background:#B0472B;color:#fff;font-size:10px;border-radius:999px;min-width:16px;padding:1px 5px;line-height:1.4}
+.chto{margin:9px 0 0;font-size:12.8px;color:var(--ink-3)}
 .chday{display:flex;align-items:center;justify-content:center;margin:12px 0 8px}
 .chday span{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
 .chnewline{display:flex;align-items:center;gap:9px;margin:10px 0 6px;color:#B0472B}
@@ -3289,7 +3300,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3399,7 +3410,7 @@ function render(){
  else if(!state.writable) h+='<div class="ro">העמוד במצב קריאה בלבד בתצוגה הזו. שינויים שתעשה כאן לא יישמרו.</div>';
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
- h+=searchBox()+themeBtn()+bellBtn()+'<div class="sep"></div>';
+ h+=searchBox()+themeBtn()+chatBtn()+bellBtn()+'<div class="sep"></div>';
  h+=catBar();
  h+='<div class="views">';
  catObj(curCat()).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
@@ -5975,6 +5986,11 @@ function agoTxt(t){
  var dd=Math.round(h/24);
  return dd===1?"אתמול":"לפני "+dd+" ימים";
 }
+function chatBtn(){
+ var n=chatUnread();
+ return '<button class="bell chatb'+(n?" on":"")+'" data-act="gochat" title="'+(n?n+" הודעות חדשות בצ׳אט":"צ׳אט הצוות")+'">'+
+  '<i>\u2709</i>'+(n?'<span class="n">'+n+'</span>':'')+'</button>';
+}
 function bellBtn(){
  var n=feedUnread();
  return '<button class="bell'+(n?" on":"")+'" data-act="feedopen" title="מה השתנה אצל האחרים">'+
@@ -6014,23 +6030,40 @@ function chatAll(){
  });
  return out.sort(function(a,c){return a.at-c.at});
 }
-function chatPush(txt){
+function chatPush(txt,to){
  var b=CHATB(), ks=Object.keys(b).map(Number).sort(function(x,y){return x-y});
  var last=ks.length?ks[ks.length-1]:0;
  if(!b[last]) b[last]={items:[]};
  if(b[last].items.length>=CHUNK){ last=last+1; b[last]={items:[]} }
- b[last].items.push({k:"m"+Date.now()+"_"+Math.floor(Math.random()*9999),who:state.me,at:Date.now(),t:txt});
+ b[last].items.push({k:"m"+Date.now()+"_"+Math.floor(Math.random()*9999),who:state.me,to:to||"",at:Date.now(),t:txt});
 }
-function chatSeen(){
- try{return Number(localStorage.getItem(CHATSEEN+":"+state.me))||0}catch(_){return 0}
+function chatThreads(){
+ var out=[{k:"",name:"לכולם",color:"#4A5A6B"}];
+ users().forEach(function(u){ if(u.k!==state.me) out.push({k:u.k,name:u.name,color:u.color||"#455160"}) });
+ return out;
 }
-function chatMark(){
- try{localStorage.setItem(CHATSEEN+":"+state.me,String(Date.now()))}catch(_){}
+function inThread(m,th){
+ var to=m.to||"";
+ if(th==="") return to==="";
+ return (m.who===state.me&&to===th)||(m.who===th&&to===state.me);
+}
+function chatFor(th){ return chatAll().filter(function(m){return inThread(m,th)}) }
+function chatSeen(th){
+ try{return Number(localStorage.getItem(CHATSEEN+":"+state.me+":"+(th||"all")))||0}catch(_){return 0}
+}
+function chatMark(th){
+ try{localStorage.setItem(CHATSEEN+":"+state.me+":"+(th||"all"),String(Date.now()))}catch(_){}
+}
+function chatUnreadIn(th){
+ if(!state.me) return 0;
+ var s=chatSeen(th);
+ return chatFor(th).filter(function(m){return m.who!==state.me&&m.at>s}).length;
 }
 function chatUnread(){
  if(!state.me) return 0;
- var s=chatSeen();
- return chatAll().filter(function(m){return m.who!==state.me&&m.at>s}).length;
+ var n=0;
+ chatThreads().forEach(function(t){ n+=chatUnreadIn(t.k) });
+ return n;
 }
 function chatDayLabel(t){
  var d=new Date(Number(t)), today=new Date();
@@ -6049,12 +6082,23 @@ function linkify(s){
  return t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,"<br>");
 }
 function chatView(){
- var msgs=chatAll(), seen=state.chatSeenAt||0;
+ var th=state.chatTo||"", ths=chatThreads();
+ if(th&&!ths.some(function(x){return x.k===th})){ th=""; state.chatTo="" }
+ var msgs=chatFor(th), seen=state.chatSeenAt||0;
+ var tho=ths.filter(function(x){return x.k===th})[0]||ths[0];
  var h='<section class="grp chatgrp"><div class="grp-h"><h2>צ׳אט הצוות</h2><span class="role">הכול נשמר, שום הודעה לא נמחקת</span>';
  h+='<span class="meta">'+msgs.length+' הודעות</span></div>';
+ h+='<div class="chtabs">';
+ ths.forEach(function(t){
+  var n=chatUnreadIn(t.k);
+  h+='<button class="chtab" data-act="chatto" data-k="'+esc(t.k)+'" aria-pressed="'+(t.k===th)+'" style="--uc:'+esc(t.color)+'">';
+  h+='<i></i>'+esc(t.name)+(n?'<span class="n">'+n+'</span>':'')+'</button>';
+ });
+ h+='</div>';
+ h+='<p class="chto">'+(th?('שיחה פרטית עם '+esc(tho.name)+'. רק שניכם רואים אותה'):'הודעה לכל הצוות. כולם רואים אותה')+'</p>';
  h+='<div class="chatwrap" id="chatwrap">';
  if(!msgs.length){
-  h+='<div class="dempty"><b>עוד לא נכתב כלום</b><p>תכתוב את ההודעה הראשונה למטה. כל מה שנכתב כאן נשמר לתמיד ונראה לכל מי שנכנס.</p></div>';
+  h+='<div class="dempty"><b>'+(th?('עוד לא דיברת עם '+esc(tho.name)):'עוד לא נכתב כלום')+'</b><p>תכתוב את ההודעה הראשונה למטה. כל מה שנכתב כאן נשמר לתמיד.</p></div>';
  } else {
   var lastDay="", lastWho="", firstNew=true;
   msgs.forEach(function(m){
@@ -6073,9 +6117,9 @@ function chatView(){
  }
  h+='</div>';
  if(!RO){
-  h+='<div class="chsend"><textarea id="chin" placeholder="תכתוב הודעה. אנטר שולח, שיפט ואנטר יורד שורה">'+esc(state.chatDraft||"")+'</textarea>';
-  h+='<button class="btn" data-act="chatsend">שלח</button></div>';
-  h+='<p class="hint chhint">ההודעות משותפות לכל המשתמשים ונשמרות לצמיתות. אין מחיקה ואין עריכה.</p>';
+  h+='<div class="chsend"><textarea id="chin" placeholder="'+(th?('הודעה ל'+esc(tho.name)):'הודעה לכל הצוות')+'. אנטר שולח, שיפט ואנטר יורד שורה">'+esc(state.chatDraft||"")+'</textarea>';
+  h+='<button class="btn" data-act="chatsend">שלח'+(th?' ל'+esc(tho.name):' לכולם')+'</button></div>';
+  h+='<p class="hint chhint">ההודעות נשמרות לצמיתות. אין מחיקה ואין עריכה.</p>';
  }
  return h+'</section>';
 }
@@ -6931,7 +6975,7 @@ document.addEventListener("click",function(e){
  if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
  if(act==="group"){
   state.group=b.getAttribute("data-k");
-  if(state.group==="chat"){ state.chatSeenAt=chatSeen(); chatMark(); }
+  if(state.group==="chat"){ state.chatSeenAt=chatSeen(state.chatTo||""); chatMark(state.chatTo||""); }
   if(!state.cat||!catHas(state.cat,state.group)) state.cat=catOf(state.group);
   state.catLast=state.catLast||{};state.catLast[state.cat]=state.group;
   render();return}
@@ -7091,9 +7135,18 @@ document.addEventListener("click",function(e){
   var ci=document.getElementById("chin");
   var tx=(ci?ci.value:(state.chatDraft||"")).replace(/\s+$/,"");
   if(!tx.trim()){toast("אין מה לשלוח",true);return}
-  chatPush(tx);
-  state.chatDraft="";state.chatFocus=true;chatMark();state.chatSeenAt=Date.now();
+  chatPush(tx,state.chatTo||"");
+  state.chatDraft="";state.chatFocus=true;chatMark(state.chatTo||"");state.chatSeenAt=Date.now();
   render();save();return}
+ if(act==="chatto"){
+  state.chatTo=b.getAttribute("data-k")||"";
+  state.chatSeenAt=chatSeen(state.chatTo);chatMark(state.chatTo);
+  state.chatDraft="";render();return}
+ if(act==="gochat"){
+  state.q="";state.group="chat";
+  if(!state.cat||!catHas(state.cat,"chat")) state.cat=catOf("chat");
+  state.chatSeenAt=chatSeen(state.chatTo||"");chatMark(state.chatTo||"");
+  render();return}
  if(act==="feedopen"){state.feedSeenAt=feedSeen();state.feedOpen=true;feedMark();render();return}
  if(act==="feedclose"){
   if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="feedclose"]'))return;
