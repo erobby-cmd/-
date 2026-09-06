@@ -594,6 +594,10 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .umerge:hover{border-color:var(--accent);color:var(--ink)}
 .umerge.off{opacity:.4}
 .umerge .n{background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:1px 5px;font-size:10px}
+.thbtn{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 12px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:.15s;margin-inline-start:8px}
+.thbtn i{font-style:normal;font-size:14px;line-height:1}
+.thbtn:hover{border-color:var(--accent);color:var(--ink)}
+@media (max-width:640px){.thbtn span{display:none}}
 .gsearch{position:relative;display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:0 10px 0 0;min-width:230px}
 .gsearch .gsi{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);padding-inline-start:11px}
 .gsearch input{flex:1;font-family:"Assistant",sans-serif;font-size:13.5px;border:0;background:transparent;color:var(--ink);padding:8px 0;outline:none;min-width:120px}
@@ -620,7 +624,7 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .gmain em{display:block;font-style:normal;font-size:12.5px;color:var(--ink-3);margin-top:2px;line-height:1.45}
 .gmeta{font-family:"Heebo",sans-serif;font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap;padding-inline-end:64px}
 .grow .reddot{top:50%;transform:translateY(-50%);inset-inline-end:10px}
-mark{background:rgba(214,166,38,.35);color:inherit;border-radius:3px;padding:0 2px}
+mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:var(--accent)!important;font-weight:800;border-radius:0;padding:0;box-shadow:inset 0 -2px 0 var(--accent)}
 @media (max-width:700px){.grow{grid-template-columns:1fr;gap:3px}.gmeta{padding-inline-end:0}.gsearch{min-width:170px}}
 .modal .box.mgbox{max-width:900px}
 .mgbody{padding:16px 20px 18px;overflow:auto}
@@ -3241,7 +3245,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3351,7 +3355,7 @@ function render(){
  else if(!state.writable) h+='<div class="ro">העמוד במצב קריאה בלבד בתצוגה הזו. שינויים שתעשה כאן לא יישמרו.</div>';
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
- h+=searchBox()+'<div class="sep"></div>';
+ h+=searchBox()+themeBtn()+'<div class="sep"></div>';
  h+=catBar();
  h+='<div class="views">';
  catObj(curCat()).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
@@ -5914,6 +5918,27 @@ function buildDoc(){
  '<'+S+' id="app-code">'+code+'</'+S+'></body></html>';
 }
 var UIKEY="marhav-eilat-ui-v1", firstPaint=true, uiT=null, restoreY=0, restoreX=0;
+var THKEY="marhav-eilat-theme-v1";
+var THEMES=[["","מערכת","◐"],["light","יום","☀"],["dark","לילה","☾"]];
+function themeObj(){
+ var t=state.theme||"";
+ var a=THEMES.filter(function(x){return x[0]===t});
+ return a[0]||THEMES[0];
+}
+function applyTheme(){
+ var t=state.theme||"";
+ if(t) document.documentElement.setAttribute("data-theme",t);
+ else document.documentElement.removeAttribute("data-theme");
+ try{localStorage.setItem(THKEY,t)}catch(_){}
+}
+function loadTheme(){
+ try{var v=localStorage.getItem(THKEY); if(v==="light"||v==="dark") state.theme=v}catch(_){}
+ applyTheme();
+}
+function themeBtn(){
+ var o=themeObj();
+ return '<button class="thbtn" data-act="theme" title="תצוגה: '+esc(o[1])+'. לחיצה מחליפה בין מערכת, יום ולילה"><i>'+o[2]+'</i><span>'+esc(o[1])+'</span></button>';
+}
 function loadUI(){
  try{
   var r=localStorage.getItem(UIKEY);if(!r)return;
@@ -6748,6 +6773,11 @@ document.addEventListener("click",function(e){
   return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
  if(act==="qclear"){state.q="";state.qFocus=false;render();return}
+ if(act==="theme"){
+  var i=0,j;
+  for(j=0;j<THEMES.length;j++) if(THEMES[j][0]===(state.theme||"")) i=j;
+  state.theme=THEMES[(i+1)%THEMES.length][0];
+  applyTheme();render();return}
  if(act==="trdel"){
   var td2=TR()[id];
   if(td2){td2.deleted=true;td2.text="";td2.words=0}
@@ -6925,6 +6955,7 @@ window.addEventListener("scroll",saveUI,{passive:true});
 document.addEventListener("scroll",function(e){
  if(e.target&&e.target.classList&&e.target.classList.contains("board"))saveUI();
 },true);
+loadTheme();
 loadUI();
 loadMe();
 if(!state.me&&!RO) state.showUsers=true;
