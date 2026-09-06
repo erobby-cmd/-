@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<title>יומן עבודה מרחב אילת - הפקה, תוכן, פוסט</title>
+<title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
 :root{
@@ -594,6 +594,23 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .umerge:hover{border-color:var(--accent);color:var(--ink)}
 .umerge.off{opacity:.4}
 .umerge .n{background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:1px 5px;font-size:10px}
+.bell{position:relative;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 11px;color:var(--ink-3);cursor:pointer;margin-inline-start:8px;transition:.15s}
+.bell i{font-style:normal;font-size:13px;line-height:1}
+.bell:hover{border-color:var(--accent);color:var(--ink)}
+.bell.on{border-color:var(--accent);color:var(--accent)}
+.bell .n{position:absolute;top:-7px;inset-inline-end:-7px;background:#B0472B;color:#fff;font-family:"Heebo",sans-serif;font-size:10px;font-weight:700;border-radius:999px;min-width:17px;padding:1px 4px;line-height:1.4}
+.modal .box.fdbox{max-width:800px}
+.fdbody{padding:12px 18px 16px;overflow:auto}
+.fdrow{display:grid;grid-template-columns:112px 1fr auto;gap:11px;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:5px;background:var(--surface);text-align:start;width:100%}
+.fdrow.can{cursor:pointer}
+.fdrow.can:hover{border-color:var(--uc,#455160)}
+.fdrow.new{border-inline-start:4px solid var(--uc,#455160);background:var(--surface-2)}
+.fdrow.mine{opacity:.62}
+.fdwho{display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fdwho i{width:9px;height:9px;border-radius:50%;background:var(--uc,#455160);flex:0 0 auto}
+.fdtxt{font-size:13.8px;line-height:1.45;color:var(--ink)}
+.fdago{font-family:"Heebo",sans-serif;font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap}
+@media (max-width:700px){.fdrow{grid-template-columns:1fr;gap:3px}}
 .thbtn{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 12px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:.15s;margin-inline-start:8px}
 .thbtn i{font-style:normal;font-size:14px;line-height:1}
 .thbtn:hover{border-color:var(--accent);color:var(--ink)}
@@ -2602,7 +2619,7 @@ html.modal-open,html.modal-open body{overflow:hidden}
 }
 ],
 "meta": {
-"title": "יומן עבודה מרחב אילת - הפקה, תוכן, פוסט",
+"title": "יומן עבודה מרחב אילת - הפקה, תוכן, עריכה",
 "eyebrow": "סדרה תיעודית · 5 × 30 דקות",
 "sub": "חמישה פרקים של חצי שעה, חמש עשרה סצנות בפרק, שתי דקות לסצנה. הפרקים בנויים לפי תמות ולא לפי דמויות, כך שכל דמות חוזרת לאורך העונה. לכל סצנה: מה יש ביד ומה עוד צריך לצלם."
 },
@@ -3192,7 +3209,7 @@ html.modal-open,html.modal-open body{overflow:hidden}
 <script id="app-code">
 (function(){
 var RO=false;
-var TITLE="יומן עבודה מרחב אילת - הפקה, תוכן, פוסט";
+var TITLE="יומן עבודה מרחב אילת - הפקה, תוכן, עריכה";
 var FONT='<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">';
 var SUB="חמישה פרקים של חצי שעה, חמש עשרה סצנות בפרק, שתי דקות לסצנה. לכל דמות: מה הסיפור שלה, אילו סצנות כבר בקופסה, ומה עוד צריך לצאת ולצלם. החלוקה לפרקים תיקבע כשהחומר ייסגר.";
 var MIN_PER=2,PER_EP=15,EPISODES=5,TARGET=EPISODES*PER_EP;
@@ -3209,6 +3226,8 @@ function normStore(o){
  if(!o.users||!o.users.length) o.users=DEFAULT_USERS.slice();
  if(!o.layers) o.layers={};
  if(!o.tr) o.tr={};
+ if(!o.shifts||typeof o.shifts!=="object"||o.shifts.constructor===Array) o.shifts={list:null,people:null,target:0};
+ if(!o.feed||!o.feed.items) o.feed={items:[]};
  return o;
 }
 var STORE=normStore(JSON.parse(document.getElementById("scene-data").textContent));
@@ -3223,6 +3242,7 @@ function useView(){
  var v=state.viewUser;
  DATA=(v&&STORE.layers[v])?STORE.layers[v]:STORE.base;
 }
+function resetSnap(){ try{lastSnap=feedSnap()}catch(_){} }
 function myLayer(){
  if(!STORE.layers[state.me]) STORE.layers[state.me]=JSON.parse(JSON.stringify(STORE.base));
  DATA=STORE.layers[state.me];
@@ -3245,13 +3265,13 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,feedOpen:false,feedSeenAt:0,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
  DATA.meta=DATA.meta||{};
  var m=DATA.meta;
- if(!m.title)m.title="יומן עבודה מרחב אילת - הפקה, תוכן, פוסט";
+ if(!m.title)m.title="יומן עבודה מרחב אילת - הפקה, תוכן, עריכה";
  if(!m.eyebrow)m.eyebrow="סדרה תיעודית · 5 × 30 דקות";
  if(!m.sub)m.sub=SUB;
  return m;
@@ -3355,7 +3375,7 @@ function render(){
  else if(!state.writable) h+='<div class="ro">העמוד במצב קריאה בלבד בתצוגה הזו. שינויים שתעשה כאן לא יישמרו.</div>';
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
- h+=searchBox()+themeBtn()+'<div class="sep"></div>';
+ h+=searchBox()+themeBtn()+bellBtn()+'<div class="sep"></div>';
  h+=catBar();
  h+='<div class="views">';
  catObj(curCat()).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
@@ -5044,12 +5064,40 @@ function parseLines(txt){
  return res;
 }
 /* ===== שעון משמרות ===== */
-function SHIFTS(){ if(!DATA.shifts) DATA.shifts=[]; return DATA.shifts }
-function shiftPeople(){
- if(!DATA.shiftPeople||!DATA.shiftPeople.length) DATA.shiftPeople=["רובי","גבי"];
- return DATA.shiftPeople;
+function SH(){ if(!STORE.shifts) STORE.shifts={list:null,people:null,target:0}; return STORE.shifts }
+function shiftMigrate(){
+ var sh=SH();
+ if(sh.list) return sh;
+ var seen={}, all=[];
+ function take(d){
+  ((d&&d.shifts)||[]).forEach(function(x){
+   var k=(x.date||"")+"|"+(x.who||"");
+   if(seen[k]) return; seen[k]=1; all.push(x);
+  });
+ }
+ take(STORE.base);
+ Object.keys(STORE.layers||{}).forEach(function(k){ take(STORE.layers[k]) });
+ sh.list=all;
+ if(!sh.people||!sh.people.length){
+  var pp=(STORE.base&&STORE.base.shiftPeople)||null;
+  Object.keys(STORE.layers||{}).forEach(function(k){ if(!pp&&STORE.layers[k].shiftPeople) pp=STORE.layers[k].shiftPeople });
+  sh.people=(pp&&pp.length)?pp.slice():["רובי","גבי"];
+ }
+ if(!sh.target){
+  var tt=0;
+  if(STORE.base&&Number(STORE.base.shiftTarget)>0) tt=Number(STORE.base.shiftTarget);
+  Object.keys(STORE.layers||{}).forEach(function(k){ if(!tt&&Number(STORE.layers[k].shiftTarget)>0) tt=Number(STORE.layers[k].shiftTarget) });
+  sh.target=tt||150;
+ }
+ return sh;
 }
-function shiftTarget(){ var n=Number(DATA.shiftTarget); return n>0?n:150 }
+function SHIFTS(){ var sh=shiftMigrate(); if(!sh.list) sh.list=[]; return sh.list }
+function shiftPeople(){
+ var sh=shiftMigrate();
+ if(!sh.people||!sh.people.length) sh.people=["רובי","גבי"];
+ return sh.people;
+}
+function shiftTarget(){ var n=Number(shiftMigrate().target); return n>0?n:150 }
 function todayISO(){var d=new Date(),p=function(n){return n<10?"0"+n:""+n};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
 function shiftsSorted(){
  return SHIFTS().slice().sort(function(a,b){
@@ -5629,7 +5677,7 @@ function legendStrip(){
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"]]},
- {k:"post",name:"פוסט",views:[["board","מפת הפרקים"],["tr","תמלולים"],["shifts","שעון משמרות"]]}
+ {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]}
 ];
 function catOf(g){
  for(var i=0;i<CATS.length;i++){
@@ -5785,6 +5833,135 @@ function searchView(){
   h+='</div></div>';
  }
  return h+'</section>';
+}
+
+/* ===== התראות על שינויים ===== */
+var FEEDKEY="marhav-eilat-seen-v1";
+function FEED(){
+ if(!STORE.feed||!STORE.feed.items) STORE.feed={items:[]};
+ return STORE.feed;
+}
+function feedSnap(){
+ var d=DATA, o={sc:{},ln:{},dy:{},id:{},sh:{}};
+ (d.scenes||[]).forEach(function(x){
+  o.sc[x.id]={t:x.title||"",s:x.status||"",e:x.ep||"",c:x.char||"",l:lineOf(x),
+   h:(x.short||""),v:(x.have||[]).length,n:(x.need||[]).length,o:(x.note||"")};
+ });
+ (d.lines||[]).forEach(function(x){ o.ln[x.k]={n:x.name||"",w:x.what||""} });
+ (d.days||[]).forEach(function(x){ o.dy[x.k]={d:x.date||"",l:x.loc||"",c:x.crew||"us",m:(x.moments||[]).length} });
+ (d.ideas||[]).forEach(function(x){ o.id[x.title||""]=1 });
+ SHIFTS().forEach(function(x){ o.sh[x.k]={d:x.date||"",w:x.who||""} });
+ return o;
+}
+function sameObj(a,b){
+ if(!a||!b) return false;
+ for(var k in b) if(String(a[k])!==String(b[k])) return false;
+ return true;
+}
+function feedSentences(a,b){
+ var out=[];
+ function keys(o){var r=[],k;for(k in o)r.push(k);return r}
+ keys(b.sc).forEach(function(id){
+  var p=a.sc[id], q=b.sc[id];
+  if(!p){ out.push({t:"הוסיף סצנה "+id+", "+q.t,go:"scene",id:id}); return }
+  if(sameObj(p,q)) return;
+  var ch=[];
+  if(p.t!==q.t) ch.push('שינה את הכותרת ל"'+q.t+'"');
+  if(p.s!==q.s) ch.push("סימן "+(STATUS[q.s]?STATUS[q.s].l:q.s));
+  if(String(p.e)!==String(q.e)) ch.push("העביר לפרק "+q.e);
+  if(p.c!==q.c) ch.push("שייך ל"+((charOf(q.c)||{}).name||"דמות אחרת"));
+  if(p.l!==q.l) ch.push("שייך לליין "+(q.l?lineName(q.l):"בלי ליין"));
+  if(p.h!==q.h) ch.push("עדכן את התקציר");
+  if(p.v!==q.v) ch.push("עדכן את מה שיש ביד");
+  if(p.n!==q.n) ch.push("עדכן את מה שחסר");
+  if(p.o!==q.o) ch.push("כתב הערת עריכה");
+  if(ch.length) out.push({t:"בסצנה "+id+", "+q.t+": "+joinHe(ch),go:"scene",id:id});
+ });
+ keys(a.sc).forEach(function(id){
+  if(!b.sc[id]) out.push({t:"מחק את סצנה "+id+", "+a.sc[id].t});
+ });
+ keys(b.ln).forEach(function(k){
+  if(!a.ln[k]) out.push({t:"פתח ליין חדש, "+b.ln[k].n,go:"line",id:k});
+  else if(!sameObj(a.ln[k],b.ln[k])) out.push({t:"ערך את הליין "+b.ln[k].n,go:"line",id:k});
+ });
+ keys(a.ln).forEach(function(k){
+  if(!b.ln[k]) out.push({t:"מחק את הליין "+a.ln[k].n});
+ });
+ keys(b.dy).forEach(function(k){
+  var q=b.dy[k];
+  if(!a.dy[k]) out.push({t:"רשם יום צילום, "+dayLabel(q.d)+(q.l?" ב"+q.l:""),go:"day",id:k});
+  else if(!sameObj(a.dy[k],q)) out.push({t:"עדכן את יום הצילום של "+dayLabel(q.d),go:"day",id:k});
+ });
+ keys(a.dy).forEach(function(k){ if(!b.dy[k]) out.push({t:"מחק יום צילום"}) });
+ keys(b.id).forEach(function(t){ if(!a.id[t]) out.push({t:'הוסיף רעיון, "'+t+'"'}) });
+ keys(b.sh).forEach(function(k){
+  if(!a.sh[k]) out.push({t:"רשם משמרת ל"+b.sh[k].w+" ב"+dayLabel(b.sh[k].d),go:"shifts"});
+ });
+ keys(a.sh).forEach(function(k){ if(!b.sh[k]) out.push({t:"מחק משמרת של "+a.sh[k].w}) });
+ return out;
+}
+var lastSnap=null;
+function feedTick(){
+ if(RO) return;
+ var now=feedSnap(), base=lastSnap;
+ lastSnap=now;
+ if(!base||!state.me||state.viewUser!==state.me) return;
+ var sn=feedSentences(base,now);
+ if(!sn.length) return;
+ var f=FEED(), t=Date.now();
+ sn.slice(0,25).forEach(function(x,i){
+  f.items.push({k:"f"+t+"_"+i+"_"+Math.floor(Math.random()*999),who:state.me,at:t,t:x.t,go:x.go||"",id:x.id||""});
+ });
+ if(f.items.length>300) f.items=f.items.slice(f.items.length-300);
+}
+function feedSorted(){ return FEED().items.slice().sort(function(a,b){return b.at-a.at}) }
+function feedSeen(){
+ try{var v=localStorage.getItem(FEEDKEY+":"+state.me);return Number(v)||0}catch(_){return 0}
+}
+function feedMark(){
+ try{localStorage.setItem(FEEDKEY+":"+state.me,String(Date.now()))}catch(_){}
+}
+function feedUnread(){
+ if(!state.me) return 0;
+ var s=feedSeen();
+ return FEED().items.filter(function(x){return x.who!==state.me&&x.at>s}).length;
+}
+function agoTxt(t){
+ var d=Math.max(0,Date.now()-Number(t)), m=Math.round(d/60000);
+ if(m<1) return "עכשיו";
+ if(m<60) return "לפני "+m+" דק׳";
+ var h=Math.round(m/60);
+ if(h<24) return "לפני "+h+" שעות";
+ var dd=Math.round(h/24);
+ return dd===1?"אתמול":"לפני "+dd+" ימים";
+}
+function bellBtn(){
+ var n=feedUnread();
+ return '<button class="bell'+(n?" on":"")+'" data-act="feedopen" title="מה השתנה אצל האחרים">'+
+  '<i>◉</i>'+(n?'<span class="n">'+n+'</span>':'')+'</button>';
+}
+function feedPanel(){
+ var list=feedSorted(), seen=state.feedSeenAt||0;
+ var h='<div class="modal" data-act="feedclose"><div class="box fdbox" data-stop="1">';
+ h+='<div class="mhead"><span>מה השתנה</span><button data-act="feedclose" title="סגור">×</button></div>';
+ h+='<div class="fdbody">';
+ if(!list.length){
+  h+='<div class="lsempty"><b>עדיין שקט</b><p>ברגע שמישהו יוסיף או ישנה משהו בגרסה שלו, זה יופיע כאן עם הסבר מה בדיוק השתנה.</p></div>';
+ } else {
+  list.slice(0,150).forEach(function(x){
+   var u=userOf(x.who)||{}, mine=x.who===state.me;
+   var isNew=!mine&&x.at>seen;
+   var go=x.go?' data-act="feedgo" data-k="'+esc(x.go)+'" data-id="'+esc(x.id||"")+'"':'';
+   h+='<div class="fdrow'+(isNew?" new":"")+(x.go?" can":"")+(mine?" mine":"")+'"'+go+' style="--uc:'+esc(u.color||"#455160")+'">';
+   h+='<span class="fdwho"><i></i>'+esc(u.name||x.who)+'</span>';
+   h+='<span class="fdtxt">'+esc(x.t)+'</span>';
+   h+='<span class="fdago">'+esc(agoTxt(x.at))+'</span>';
+   h+='</div>';
+  });
+ }
+ h+='</div><div class="s-foot"><button class="btn ghost" data-act="feedclose">סגור</button>';
+ h+='<div class="spacer"></div><span class="trhint">כל שינוי שמישהו עושה בגרסה שלו נרשם כאן. הגרסה שלך לא משתנה מזה</span></div>';
+ return h+'</div></div>';
 }
 function catBar(){
  var cur=curCat();
@@ -5970,6 +6147,7 @@ function paint(h){
  if(state.showUsers) h+=userPanel();
  if(state.charPanel) h+=charPanelHtml();
  if(state.lsOpen) h+=suggPanel();
+ if(state.feedOpen) h+=feedPanel();
  if(state.mergeSrc!==null&&state.mergeSrc!==undefined) h+=mergePanel();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
@@ -6006,18 +6184,18 @@ function pushHist(){
 }
 function undo(){
  if(!hist.length){toast("אין לאן לחזור",true);return}
- var _tr=STORE.tr;
+ var _tr=STORE.tr, _sh=STORE.shifts, _fd=STORE.feed;
  var _s=snapStr(); if(_s!==null) future.push(_s);
- STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;useView();
+ STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;STORE.shifts=_sh;STORE.feed=_fd;useView();resetSnap();
  skipHist=true;
  state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;state.editEp=null;state.editMeta=false;
  render();save();toast("הפעולה בוטלה");
 }
 function redo(){
  if(!future.length){toast("אין לאן להתקדם",true);return}
- var _tr2=STORE.tr;
+ var _tr2=STORE.tr, _sh2=STORE.shifts, _fd2=STORE.feed;
  var _s2=snapStr(); if(_s2!==null) hist.push(_s2);
- STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;useView();
+ STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;STORE.shifts=_sh2;STORE.feed=_fd2;useView();resetSnap();
  skipHist=true;render();save();toast("הפעולה שוחזרה");
 }
 var SNAPDATE="";
@@ -6030,12 +6208,16 @@ function rowsOf(){
  var r={users:STORE.users,base:STORE.base};
  Object.keys(STORE.layers||{}).forEach(function(k){r["layer:"+k]=STORE.layers[k]});
  Object.keys(STORE.tr||{}).forEach(function(k){r["tr:"+k]=STORE.tr[k]});
+ if(STORE.shifts&&STORE.shifts.list) r["shifts"]=STORE.shifts;
+ if(STORE.feed&&STORE.feed.items&&STORE.feed.items.length) r["feed"]=STORE.feed;
  return r;
 }
 function applyRows(list){
- var users=null,base=null,layers={},tr={},seen=false;
+ var users=null,base=null,layers={},tr={},sh=null,fd=null,seen=false;
  list.forEach(function(row){
   if(row.id==="users")users=row.data;
+  else if(row.id==="shifts")sh=row.data;
+  else if(row.id==="feed")fd=row.data;
   else if(row.id==="base")base=row.data;
   else if(row.id.indexOf("layer:")===0)layers[row.id.slice(6)]=row.data;
   else if(row.id.indexOf("tr:")===0)tr[row.id.slice(3)]=row.data;
@@ -6046,6 +6228,8 @@ function applyRows(list){
  if(base)STORE.base=base;
  STORE.layers=layers;
  STORE.tr=tr;
+ if(sh&&sh.list) STORE.shifts=sh;
+ if(fd&&fd.items) STORE.feed=fd;
  return true;
 }
 function pull(initial){
@@ -6065,6 +6249,7 @@ function pull(initial){
      if(changed){
       list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
       useView();
+      resetSnap();
       if(editorOpen()){ pendingRender=true; }
       else { pendingRender=false; render(); }
      }
@@ -6470,7 +6655,7 @@ function restore(){
     var o=JSON.parse(String(r.result));
     var st=o&&o.store?o.store:(o&&o.data?o.data:o);
     if(!st||(!st.base&&!st.scenes)) throw new Error("bad");
-    STORE=normStore(st);useView();reindex();render();save();toast("הגיבוי נטען");
+    STORE=normStore(st);useView();resetSnap();reindex();render();save();toast("הגיבוי נטען");
    }catch(_){toast("הקובץ אינו גיבוי תקין של היומן",true)}
   };
   r.onerror=function(){toast("לא הצלחתי לקרוא את הקובץ",true)};
@@ -6481,6 +6666,7 @@ function restore(){
 var pushT=null;
 function save(){
  if(RO)return;
+ try{feedTick()}catch(_){}
  pushHist();
  setSave("saving");
  clearTimeout(pushT);
@@ -6581,8 +6767,8 @@ document.addEventListener("click",function(e){
   state.showUsers=false;render();return}
  if(act==="pickview"){
   var k=b.getAttribute("data-k")||"";
-  if(!state.me&&!RO&&k){setMe(k);state.showUsers=false;render();toast("שלום "+userName(k));return}
-  state.viewUser=k;state.showUsers=false;render();
+  if(!state.me&&!RO&&k){setMe(k);state.showUsers=false;useView();resetSnap();render();toast("שלום "+userName(k));return}
+  state.viewUser=k;state.showUsers=false;useView();resetSnap();render();
   toast(k?("צופה בגרסה של "+userName(k)):"צופה במקור המשותף");return}
  if(act==="switchme"){state.me="";state.viewUser="";try{localStorage.removeItem(MEKEY)}catch(_){}
   state.showUsers=true;render();return}
@@ -6603,7 +6789,7 @@ document.addEventListener("click",function(e){
   STORE.base=JSON.parse(JSON.stringify(STORE.layers[state.me]));
   STORE.layers={};
   state.viewUser=state.me;state.confirmPromote=false;state.showUsers=false;
-  useView();render();save();
+  useView();resetSnap();render();save();
   toast("הגרסה שלך היא עכשיו המקור לכולם");return}
  if(act==="resetme"){
   if(!state.me||RO)return;
@@ -6611,10 +6797,14 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
- if(MUT[act]&&!ensureEdit())return;
+ var SHARED={addshift:1,delshift:1,savesset:1};
+ if(SHARED[act]){
+  if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
+  if(!state.me){state.showUsers=true;render();return}
+ } else if(MUT[act]&&!ensureEdit())return;
  if(act==="undo"){undo();return}
  if(act==="redo"){redo();return}
  if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
@@ -6773,6 +6963,18 @@ document.addEventListener("click",function(e){
   return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
  if(act==="qclear"){state.q="";state.qFocus=false;render();return}
+ if(act==="feedopen"){state.feedSeenAt=feedSeen();state.feedOpen=true;feedMark();render();return}
+ if(act==="feedclose"){
+  if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="feedclose"]'))return;
+  state.feedOpen=false;render();return}
+ if(act==="feedgo"){
+  var fk=b.getAttribute("data-k"), fi=b.getAttribute("data-id");
+  state.feedOpen=false;state.q="";
+  if(fk==="scene"){state.group="board";state.cat="";state.filter="all";state.editing=fi}
+  else if(fk==="line"){state.group="lines";state.editLine=fi}
+  else if(fk==="day"){state.group="days";state.editDay=fi}
+  else if(fk==="shifts"){state.group="shifts"}
+  render();return}
  if(act==="theme"){
   var i=0,j;
   for(j=0;j<THEMES.length;j++) if(THEMES[j][0]===(state.theme||"")) i=j;
@@ -6793,9 +6995,9 @@ document.addEventListener("click",function(e){
  if(act==="cancelsset"){state.shiftSet=false;render();return}
  if(act==="savesset"){
   var tv=Number(fval("__sset__","target"))||shiftTarget();
-  DATA.shiftTarget=Math.max(1,Math.round(tv));
+  SH().target=Math.max(1,Math.round(tv));
   var pl=fval("__sset__","people").split(",").map(function(x){return x.trim()}).filter(Boolean);
-  if(pl.length) DATA.shiftPeople=pl;
+  if(pl.length) SH().people=pl;
   state.shiftSet=false;render();save();toast("ההגדרות נשמרו");return}
  if(act==="addshift"){
   var sd=fval("__shift__","date")||todayISO();
@@ -6807,7 +7009,7 @@ document.addEventListener("click",function(e){
   toast("נרשמה משמרת ל"+sw+" ב-"+dayLabel(sd)+". נשארו "+Math.max(shiftTarget()-SHIFTS().length,0));
   return}
  if(act==="delshift"){
-  DATA.shifts=SHIFTS().filter(function(x){return x.k!==id});
+  SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה. Ctrl+Z מחזיר");return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
  if(act==="saveday"){
@@ -6915,6 +7117,7 @@ document.addEventListener("keydown",function(e){
  if(mod&&(e.key==="y"||e.key==="Y")&&!inField){e.preventDefault();redo();return}
  if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
  if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
+ if(e.key==="Escape"&&state.feedOpen){state.feedOpen=false;render();return}
  if(e.key==="Escape"&&(state.q||"").trim()&&!state.editing&&!state.editDay&&!state.editLine){state.q="";render();return}
  if(e.key==="Escape"&&state.mergeSrc!==null&&state.mergeSrc!==undefined){state.mergeSrc=null;render();return}
  if(e.key==="Escape"&&state.lsOpen){state.lsOpen=false;state.lsChat=false;render();return}
@@ -6962,6 +7165,7 @@ if(!state.me&&!RO) state.showUsers=true;
 useView();
 state.writable=true;
 render();
+try{feedTick()}catch(_){}
 pull(true).then(function(n){
  if(n===0){ sent={}; pushRows().then(function(){toast("הפלטפורמה אותחלה עם התוכן הנוכחי")}); }
  startPoll();
