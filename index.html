@@ -594,6 +594,29 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .umerge:hover{border-color:var(--accent);color:var(--ink)}
 .umerge.off{opacity:.4}
 .umerge .n{background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:1px 5px;font-size:10px}
+.views button .vn{display:inline-block;margin-inline-start:6px;background:#B0472B;color:#fff;font-family:"Heebo",sans-serif;font-size:10px;font-weight:700;border-radius:999px;min-width:16px;padding:1px 5px;line-height:1.4}
+.views button[aria-pressed="true"] .vn{background:var(--accent-ink);color:var(--accent)}
+.chatgrp{display:flex;flex-direction:column}
+.chatwrap{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:14px 16px;max-height:min(60vh,560px);overflow:auto;display:flex;flex-direction:column;gap:3px}
+.chday{display:flex;align-items:center;justify-content:center;margin:12px 0 8px}
+.chday span{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+.chnewline{display:flex;align-items:center;gap:9px;margin:10px 0 6px;color:#B0472B}
+.chnewline:before,.chnewline:after{content:"";flex:1;height:1px;background:currentColor;opacity:.45}
+.chnewline span{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em}
+.chmsg{display:flex;flex-direction:column;align-items:flex-start;max-width:76%;margin-top:8px}
+.chmsg.cont{margin-top:2px}
+.chmsg.me{align-self:flex-end;align-items:flex-end}
+.chwho{display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;color:var(--ink-3);margin-bottom:3px}
+.chwho i{width:8px;height:8px;border-radius:50%;background:var(--uc,#455160)}
+.chbub{position:relative;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--uc,#455160);border-radius:11px;padding:9px 13px 20px;font-size:14.2px;line-height:1.5;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.chmsg.me .chbub{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);border-inline-start:0;border-inline-end:3px solid rgba(255,255,255,.35)}
+.chbub a{color:inherit;text-decoration:underline}
+.chtime{position:absolute;bottom:5px;inset-inline-start:11px;font-family:"Heebo",sans-serif;font-size:10px;font-weight:600;opacity:.6}
+.chsend{display:flex;gap:8px;align-items:flex-end;margin-top:11px}
+.chsend textarea{flex:1;min-height:52px;max-height:180px;font-family:"Assistant",sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink);resize:vertical}
+.chsend textarea:focus{outline:none;border-color:var(--accent)}
+.chsend .btn{height:52px;padding:0 22px}
+.chhint{margin-top:7px}
 .bell{position:relative;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 11px;color:var(--ink-3);cursor:pointer;margin-inline-start:8px;transition:.15s}
 .bell i{font-style:normal;font-size:13px;line-height:1}
 .bell:hover{border-color:var(--accent);color:var(--ink)}
@@ -3228,6 +3251,7 @@ function normStore(o){
  if(!o.tr) o.tr={};
  if(!o.shifts||typeof o.shifts!=="object"||o.shifts.constructor===Array) o.shifts={list:null,people:null,target:0};
  if(!o.feed||!o.feed.items) o.feed={items:[]};
+ if(!o.chat) o.chat={};
  return o;
 }
 var STORE=normStore(JSON.parse(document.getElementById("scene-data").textContent));
@@ -3265,7 +3289,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,feedOpen:false,feedSeenAt:0,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3438,6 +3462,16 @@ function render(){
   paint(h);
   var _gq=document.getElementById("gq");
   if(_gq&&state.qFocus){try{_gq.focus();_gq.setSelectionRange(_gq.value.length,_gq.value.length)}catch(_){}}
+  return;
+ }
+ if(state.group==="chat"){
+  h+=chatView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  var _cw=document.getElementById("chatwrap");
+  if(_cw) _cw.scrollTop=_cw.scrollHeight;
+  var _ci=document.getElementById("chin");
+  if(_ci&&state.chatFocus){try{_ci.focus();_ci.setSelectionRange(_ci.value.length,_ci.value.length)}catch(_){}}
   return;
  }
  if(state.group==="ideas"){
@@ -5681,9 +5715,9 @@ function legendStrip(){
  return h+'</div></div>';
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"]]},
- {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]}
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"],["chat","צ׳אט"]]},
+ {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"],["chat","צ׳אט"]]},
+ {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"],["chat","צ׳אט"]]}
 ];
 function catOf(g){
  for(var i=0;i<CATS.length;i++){
@@ -5969,6 +6003,82 @@ function feedPanel(){
  h+='<div class="spacer"></div><span class="trhint">כל שינוי שמישהו עושה בגרסה שלו נרשם כאן. הגרסה שלך לא משתנה מזה</span></div>';
  return h+'</div></div>';
 }
+
+/* ===== צ׳אט צוות ===== */
+var CHATSEEN="marhav-eilat-chatseen-v1", CHUNK=300;
+function CHATB(){ if(!STORE.chat) STORE.chat={}; return STORE.chat }
+function chatAll(){
+ var b=CHATB(), out=[];
+ Object.keys(b).sort(function(x,y){return Number(x)-Number(y)}).forEach(function(k){
+  ((b[k]&&b[k].items)||[]).forEach(function(m){ out.push(m) });
+ });
+ return out.sort(function(a,c){return a.at-c.at});
+}
+function chatPush(txt){
+ var b=CHATB(), ks=Object.keys(b).map(Number).sort(function(x,y){return x-y});
+ var last=ks.length?ks[ks.length-1]:0;
+ if(!b[last]) b[last]={items:[]};
+ if(b[last].items.length>=CHUNK){ last=last+1; b[last]={items:[]} }
+ b[last].items.push({k:"m"+Date.now()+"_"+Math.floor(Math.random()*9999),who:state.me,at:Date.now(),t:txt});
+}
+function chatSeen(){
+ try{return Number(localStorage.getItem(CHATSEEN+":"+state.me))||0}catch(_){return 0}
+}
+function chatMark(){
+ try{localStorage.setItem(CHATSEEN+":"+state.me,String(Date.now()))}catch(_){}
+}
+function chatUnread(){
+ if(!state.me) return 0;
+ var s=chatSeen();
+ return chatAll().filter(function(m){return m.who!==state.me&&m.at>s}).length;
+}
+function chatDayLabel(t){
+ var d=new Date(Number(t)), today=new Date();
+ var same=function(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()};
+ if(same(d,today)) return "היום";
+ var y=new Date(today.getTime()-86400000);
+ if(same(d,y)) return "אתמול";
+ try{return d.toLocaleDateString("he-IL",{day:"numeric",month:"long",year:"numeric"})}catch(_){return d.toDateString()}
+}
+function chatTime(t){
+ var d=new Date(Number(t)), p=function(n){return n<10?"0"+n:""+n};
+ return p(d.getHours())+":"+p(d.getMinutes());
+}
+function linkify(s){
+ var t=esc(String(s==null?"":s));
+ return t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,"<br>");
+}
+function chatView(){
+ var msgs=chatAll(), seen=state.chatSeenAt||0;
+ var h='<section class="grp chatgrp"><div class="grp-h"><h2>צ׳אט הצוות</h2><span class="role">הכול נשמר, שום הודעה לא נמחקת</span>';
+ h+='<span class="meta">'+msgs.length+' הודעות</span></div>';
+ h+='<div class="chatwrap" id="chatwrap">';
+ if(!msgs.length){
+  h+='<div class="dempty"><b>עוד לא נכתב כלום</b><p>תכתוב את ההודעה הראשונה למטה. כל מה שנכתב כאן נשמר לתמיד ונראה לכל מי שנכנס.</p></div>';
+ } else {
+  var lastDay="", lastWho="", firstNew=true;
+  msgs.forEach(function(m){
+   var dk=chatDayLabel(m.at);
+   if(dk!==lastDay){ lastDay=dk; lastWho=""; h+='<div class="chday"><span>'+esc(dk)+'</span></div>' }
+   var mine=m.who===state.me;
+   if(!mine&&m.at>seen&&firstNew){ firstNew=false; h+='<div class="chnewline"><span>הודעות חדשות</span></div>' }
+   var u=userOf(m.who)||{};
+   var cont=(m.who===lastWho);
+   lastWho=m.who;
+   h+='<div class="chmsg'+(mine?" me":"")+(cont?" cont":"")+'" style="--uc:'+esc(u.color||"#455160")+'">';
+   if(!cont) h+='<div class="chwho"><i></i>'+esc(u.name||m.who)+'</div>';
+   h+='<div class="chbub">'+linkify(m.t)+'<span class="chtime">'+esc(chatTime(m.at))+'</span></div>';
+   h+='</div>';
+  });
+ }
+ h+='</div>';
+ if(!RO){
+  h+='<div class="chsend"><textarea id="chin" placeholder="תכתוב הודעה. אנטר שולח, שיפט ואנטר יורד שורה">'+esc(state.chatDraft||"")+'</textarea>';
+  h+='<button class="btn" data-act="chatsend">שלח</button></div>';
+  h+='<p class="hint chhint">ההודעות משותפות לכל המשתמשים ונשמרות לצמיתות. אין מחיקה ואין עריכה.</p>';
+ }
+ return h+'</section>';
+}
 function catBar(){
  var cur=curCat();
  var h='<div class="cats">';
@@ -5978,7 +6088,9 @@ function catBar(){
  return h+'</div>';
 }
 function vbtn(k,label){
- return '<button data-act="group" data-k="'+k+'" aria-pressed="'+(state.group===k)+'">'+esc(label)+'</button>';
+ var extra="";
+ if(k==="chat"){ var cu=chatUnread(); if(cu) extra='<span class="vn">'+cu+'</span>' }
+ return '<button data-act="group" data-k="'+k+'" aria-pressed="'+(state.group===k)+'">'+esc(label)+extra+'</button>';
 }
 function chip(kind,k,label,n){
  var on = kind==="group" ? state.group===k : state.filter===k;
@@ -6175,7 +6287,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editMeta||state.lsOpen||(state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null);
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editMeta||state.lsOpen||(state.chatDraft||"").trim()||(state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null);
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
 function snapStr(){try{return JSON.stringify({users:STORE.users,base:STORE.base,layers:STORE.layers})}catch(_){return null}}
@@ -6190,18 +6302,18 @@ function pushHist(){
 }
 function undo(){
  if(!hist.length){toast("אין לאן לחזור",true);return}
- var _tr=STORE.tr, _sh=STORE.shifts, _fd=STORE.feed;
+ var _tr=STORE.tr, _sh=STORE.shifts, _fd=STORE.feed, _ch=STORE.chat;
  var _s=snapStr(); if(_s!==null) future.push(_s);
- STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;STORE.shifts=_sh;STORE.feed=_fd;useView();resetSnap();
+ STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;STORE.shifts=_sh;STORE.feed=_fd;STORE.chat=_ch;useView();resetSnap();
  skipHist=true;
  state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;state.editEp=null;state.editMeta=false;
  render();save();toast("הפעולה בוטלה");
 }
 function redo(){
  if(!future.length){toast("אין לאן להתקדם",true);return}
- var _tr2=STORE.tr, _sh2=STORE.shifts, _fd2=STORE.feed;
+ var _tr2=STORE.tr, _sh2=STORE.shifts, _fd2=STORE.feed, _ch2=STORE.chat;
  var _s2=snapStr(); if(_s2!==null) hist.push(_s2);
- STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;STORE.shifts=_sh2;STORE.feed=_fd2;useView();resetSnap();
+ STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;STORE.shifts=_sh2;STORE.feed=_fd2;STORE.chat=_ch2;useView();resetSnap();
  skipHist=true;render();save();toast("הפעולה שוחזרה");
 }
 var SNAPDATE="";
@@ -6216,14 +6328,16 @@ function rowsOf(){
  Object.keys(STORE.tr||{}).forEach(function(k){r["tr:"+k]=STORE.tr[k]});
  if(STORE.shifts&&STORE.shifts.list) r["shifts"]=STORE.shifts;
  if(STORE.feed&&STORE.feed.items&&STORE.feed.items.length) r["feed"]=STORE.feed;
+ Object.keys(STORE.chat||{}).forEach(function(k){ if((STORE.chat[k].items||[]).length) r["chat:"+k]=STORE.chat[k] });
  return r;
 }
 function applyRows(list){
- var users=null,base=null,layers={},tr={},sh=null,fd=null,seen=false;
+ var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,seen=false;
  list.forEach(function(row){
   if(row.id==="users")users=row.data;
   else if(row.id==="shifts")sh=row.data;
   else if(row.id==="feed")fd=row.data;
+  else if(row.id.indexOf("chat:")===0){ch=ch||{};ch[row.id.slice(5)]=row.data}
   else if(row.id==="base")base=row.data;
   else if(row.id.indexOf("layer:")===0)layers[row.id.slice(6)]=row.data;
   else if(row.id.indexOf("tr:")===0)tr[row.id.slice(3)]=row.data;
@@ -6236,6 +6350,7 @@ function applyRows(list){
  STORE.tr=tr;
  if(sh&&sh.list) STORE.shifts=sh;
  if(fd&&fd.items) STORE.feed=fd;
+ if(ch) STORE.chat=ch;
  return true;
 }
 function pull(initial){
@@ -6816,6 +6931,7 @@ document.addEventListener("click",function(e){
  if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
  if(act==="group"){
   state.group=b.getAttribute("data-k");
+  if(state.group==="chat"){ state.chatSeenAt=chatSeen(); chatMark(); }
   if(!state.cat||!catHas(state.cat,state.group)) state.cat=catOf(state.group);
   state.catLast=state.catLast||{};state.catLast[state.cat]=state.group;
   render();return}
@@ -6969,6 +7085,15 @@ document.addEventListener("click",function(e){
   return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
  if(act==="qclear"){state.q="";state.qFocus=false;render();return}
+ if(act==="chatsend"){
+  if(RO)return;
+  if(!state.me){state.showUsers=true;render();return}
+  var ci=document.getElementById("chin");
+  var tx=(ci?ci.value:(state.chatDraft||"")).replace(/\s+$/,"");
+  if(!tx.trim()){toast("אין מה לשלוח",true);return}
+  chatPush(tx);
+  state.chatDraft="";state.chatFocus=true;chatMark();state.chatSeenAt=Date.now();
+  render();save();return}
  if(act==="feedopen"){state.feedSeenAt=feedSeen();state.feedOpen=true;feedMark();render();return}
  if(act==="feedclose"){
   if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="feedclose"]'))return;
@@ -7123,6 +7248,12 @@ document.addEventListener("keydown",function(e){
  if(mod&&(e.key==="y"||e.key==="Y")&&!inField){e.preventDefault();redo();return}
  if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
  if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
+ if(e.target&&e.target.id==="chin"&&e.key==="Enter"&&!e.shiftKey){
+  e.preventDefault();
+  var sb=document.querySelector('[data-act="chatsend"]');
+  if(sb)sb.click();
+  return;
+ }
  if(e.key==="Escape"&&state.feedOpen){state.feedOpen=false;render();return}
  if(e.key==="Escape"&&(state.q||"").trim()&&!state.editing&&!state.editDay&&!state.editLine){state.q="";render();return}
  if(e.key==="Escape"&&state.mergeSrc!==null&&state.mergeSrc!==undefined){state.mergeSrc=null;render();return}
@@ -7134,6 +7265,7 @@ document.addEventListener("keydown",function(e){
  }
 });
 document.addEventListener("input",function(e){
+ if(e.target&&e.target.id==="chin"){ state.chatDraft=e.target.value; state.chatFocus=true; return }
  if(e.target&&e.target.id==="gq"){
   state.q=e.target.value; state.qFocus=true;
   clearTimeout(window.__gqT);
