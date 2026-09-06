@@ -590,6 +590,26 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .lleg s.l-empty{background:rgba(120,128,138,.16);color:#8A93A0}
 .lleg:hover{border-color:var(--cc,#455160);color:var(--ink);transform:translateY(-1px)}
 .lleg.none{border-style:dashed}
+.dulist{display:grid;gap:8px;margin-top:16px}
+.durow{display:grid;grid-template-columns:132px 1fr auto;gap:14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--line-2);border-radius:11px;padding:12px 15px;box-shadow:var(--shadow)}
+.durow.edit{display:block;border-inline-start-color:var(--accent)}
+.durow.s-late{border-inline-start-color:#B0472B;background:rgba(176,71,43,.05)}
+.durow.s-soon{border-inline-start-color:#A8791E}
+.durow.s-sent{border-inline-start-color:#146B3A;opacity:.72}
+.dudate b{display:block;font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:700;color:var(--ink)}
+.dudate em{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:600;color:var(--ink-3);margin-top:2px}
+.durow.s-late .dudate em{color:#B0472B}
+.durow.s-soon .dudate em{color:#A8791E}
+.dumain h4{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:17px;font-weight:700;margin:0;line-height:1.25}
+.dutags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.dutags span{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--ink-3)}
+.dutags .dukind{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.dumain p{margin:7px 0 0;font-size:13.4px;color:var(--ink-2);line-height:1.5}
+.dufoot{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.dustat{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.dustat:hover{border-color:var(--accent);color:var(--ink)}
+.durow.s-sent .dustat{background:var(--shot-soft);color:var(--shot);border-color:var(--shot)}
+@media (max-width:700px){.durow{grid-template-columns:1fr}.dufoot{flex-direction:row;align-items:center}}
 .dclock{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px;margin-top:16px}
 .dcrew{background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--cc,#455160);border-radius:11px;padding:12px 14px 13px;box-shadow:var(--shadow)}
 .dcrew.all{--cc:#8A93A0;background:var(--surface-2)}
@@ -807,7 +827,8 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .pnote.segmode .reddot{top:3px;inset-inline-end:3px;font-size:8.5px;padding:2px 4px}
 .mchip .reddot{position:static;display:inline-block;margin-inline-end:5px;font-size:8.5px;padding:2px 5px;box-shadow:none;vertical-align:1px}
 .scene .reddot{position:static;flex:none;margin-top:5px;align-self:flex-start}
-.dot-key{display:inline-block;background:var(--reddot);color:#fff;font-family:"Heebo",sans-serif;font-size:9.5px;font-weight:700;border-radius:5px;padding:2px 6px;vertical-align:-1px;margin-inline-end:7px}
+.legend .lgkey{display:inline-flex;align-items:center;gap:9px}
+.dot-key{display:inline-flex;align-items:center;justify-content:center;width:auto;height:auto;background:var(--reddot);color:#fff;font-family:"Heebo",sans-serif;font-size:9.5px;font-weight:700;line-height:1;border-radius:5px;padding:4px 7px;margin:0;vertical-align:middle;white-space:nowrap;flex:0 0 auto}
 .nfoot{display:flex;gap:6px;align-items:center;margin-top:9px;flex-wrap:wrap}
 .nedit.ndel{color:#8B2440}
 .nmove{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.05em;background:rgba(0,0,0,.07);border:0;border-radius:4px;padding:3px 7px;color:inherit;cursor:pointer;margin-inline-start:auto}
@@ -3279,6 +3300,7 @@ function normStore(o){
  if(!o.shifts||typeof o.shifts!=="object"||o.shifts.constructor===Array) o.shifts={list:null,people:null,target:0};
  if(!o.feed||!o.feed.items) o.feed={items:[]};
  if(!o.chat) o.chat={};
+ if(!o.dues||!o.dues.list) o.dues={list:[]};
  return o;
 }
 var STORE=normStore(JSON.parse(document.getElementById("scene-data").textContent));
@@ -3316,7 +3338,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3483,6 +3505,12 @@ function render(){
   paint(h);
   var _gq=document.getElementById("gq");
   if(_gq&&state.qFocus){try{_gq.focus();_gq.setSelectionRange(_gq.value.length,_gq.value.length)}catch(_){}}
+  return;
+ }
+ if(state.group==="dues"){
+  h+=duesView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
   return;
  }
  if(state.group==="chat"){
@@ -3657,7 +3685,7 @@ function board(){
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
- h+='<span><i class="dot-key">לא צולם</i>התווית על כל פתק אומרת אם הסצנה צולמה או לא</span>';
+ h+='<span class="lgkey"><b class="dot-key">לא צולם</b>התווית על כל פתק אומרת אם הסצנה צולמה או לא</span>';
  h+='<span style="color:var(--ink-3)">'+(mode==="notes"?"גרור פתק כדי לסדר, או בחר פרק בתפריט שעל הפתק":mode==="list"?"סדר הצפייה של הפרק. גרור שורה כדי לשנות את הסדר":"כל סצנה היא שתי דקות. הצבע הוא הדמות, הפס למטה הוא הסטטוס")+'</span></div>';
 
  if(mode==="notes"){
@@ -5676,7 +5704,7 @@ function arcTable(){
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
- h+='<span><i class="dot-key">לא צולם</i>התווית על כל פתק אומרת אם הסצנה צולמה או לא</span>';
+ h+='<span class="lgkey"><b class="dot-key">לא צולם</b>התווית על כל פתק אומרת אם הסצנה צולמה או לא</span>';
  h+='<span style="color:var(--ink-3)">גרור פתק לתא כדי לשנות דמות ופרק, או על שם הדמות בעמודה הראשונה כדי לשנות רק דמות</span></div>';
  h+='<div class="tscroll"><table class="arc"><thead><tr><th class="c0">דמות</th>';
  DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
@@ -5739,6 +5767,7 @@ var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"]]},
  {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
+ {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
 ];
 function catOf(g){
@@ -6163,6 +6192,105 @@ function chatView(){
  }
  return h+'</section>';
 }
+
+/* ===== לוח הגשות ===== */
+var DKIND=[["assembly","אסמבלי"],["rough","ראף קאט"],["fine","פיין קאט"],["lock","נעילת עריכה"],
+ ["sound","מיקס סאונד"],["color","תיקון צבע"],["final","הגשה סופית"],["other","אחר"]];
+var DSTAT=[["todo","לא התחיל"],["work","בעבודה"],["sent","הוגש"]];
+function DUES(){
+ if(!STORE.dues||!STORE.dues.list) STORE.dues={list:[]};
+ return STORE.dues.list;
+}
+function dueKind(k){var a=DKIND.filter(function(x){return x[0]===k});return a.length?a[0][1]:"אחר"}
+function dueStat(k){var a=DSTAT.filter(function(x){return x[0]===k});return a.length?a[0][1]:"לא התחיל"}
+function daysTo(iso){
+ var p=dparts(iso); if(!p) return null;
+ var t=new Date(); t.setHours(0,0,0,0);
+ return Math.round((p.t-t.getTime())/86400000);
+}
+function dueWhen(iso){
+ var d=daysTo(iso);
+ if(d===null) return "בלי תאריך";
+ if(d===0) return "היום";
+ if(d===1) return "מחר";
+ if(d===-1) return "אתמול";
+ if(d<0) return "באיחור של "+Math.abs(d)+" ימים";
+ if(d<=7) return "בעוד "+d+" ימים";
+ if(d<=31) return "בעוד "+Math.round(d/7)+" שבועות";
+ return "בעוד "+Math.round(d/30)+" חודשים";
+}
+function dueState(x){
+ if(x.status==="sent") return "sent";
+ var d=daysTo(x.date);
+ if(d===null) return "none";
+ if(d<0) return "late";
+ if(d<=7) return "soon";
+ return "open";
+}
+function duesSorted(){
+ return DUES().slice().sort(function(a,b){
+  var pa=dparts(a.date),pb=dparts(b.date);
+  if(pa&&pb) return pa.t-pb.t;
+  if(pa) return -1; if(pb) return 1; return 0;
+ });
+}
+function dueForm(x){
+ var h='<div class="grpform" data-form="__due__">';
+ h+='<div class="row"><div class="f"><label>מה מגישים</label><input name="title" value="'+esc(x.title||"")+'" placeholder="למשל: ראף קאט פרק 1"></div>';
+ h+='<div class="f"><label>סוג</label><select name="kind">'+DKIND.map(function(p){
+  return '<option value="'+p[0]+'"'+((x.kind||"rough")===p[0]?" selected":"")+'>'+esc(p[1])+'</option>'}).join("")+'</select></div></div>';
+ h+='<div class="row"><div class="f"><label>תאריך יעד</label><input name="date" type="date" value="'+esc(x.date||"")+'"></div>';
+ h+='<div class="f"><label>פרק</label><select name="ep"><option value="0"'+(!x.ep?" selected":"")+'>כל הסדרה</option>'+
+  DATA.eps.map(function(e){return '<option value="'+e.n+'"'+(Number(x.ep)===e.n?" selected":"")+'>פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select></div></div>';
+ h+='<div class="row"><div class="f"><label>אחראי</label><input name="who" value="'+esc(x.who||"")+'" placeholder="מי מגיש"></div>';
+ h+='<div class="f"><label>סטטוס</label><select name="status">'+DSTAT.map(function(p){
+  return '<option value="'+p[0]+'"'+((x.status||"todo")===p[0]?" selected":"")+'>'+esc(p[1])+'</option>'}).join("")+'</select></div></div>';
+ h+='<div class="f"><label>למי מגישים ומה חשוב</label><textarea name="note" style="min-height:70px" placeholder="הפקה, ערוץ, מה צריך להיות מוכן">'+esc(x.note||"")+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="savedue" data-id="'+esc(x.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="canceldue">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="deldue" data-id="'+esc(x.k)+'">מחק</button></div>';
+ return h+'</div>';
+}
+function duesView(){
+ var all=duesSorted();
+ var open=all.filter(function(x){return x.status!=="sent"});
+ var late=open.filter(function(x){return dueState(x)==="late"});
+ var next=open.filter(function(x){return dparts(x.date)&&daysTo(x.date)>=0})[0];
+ var h='<section class="grp"><div class="grp-h"><h2>לוח הגשות</h2><span class="role">מה מגישים, למי ומתי</span>';
+ h+='<span class="meta">'+open.length+' פתוחות</span></div>';
+ h+='<p class="grp-note">כל אסמבלי, ראף קאט, פיין קאט ונעילה עם תאריך היעד שלו. אדום הוא עבר את התאריך, כתום הוא בשבוע הקרוב.</p>';
+ if(!RO) h+='<div class="s-foot" style="border:0;padding:0;margin-top:12px"><button class="btn" data-act="adddue">הוסף הגשה</button></div>';
+ h+='<div class="dstats" style="margin-top:14px">';
+ h+='<div class="dstat"><b>'+open.length+'</b><span>הגשות פתוחות</span></div>';
+ h+='<div class="dstat"><b>'+late.length+'</b><span>באיחור</span></div>';
+ h+='<div class="dstat"><b>'+(all.length-open.length)+'</b><span>הוגשו</span></div>';
+ if(next) h+='<div class="dstat wide"><b class="sm">'+esc(next.title||dueKind(next.kind))+' · '+esc(dueWhen(next.date))+'</b><span>ההגשה הבאה</span></div>';
+ h+='</div>';
+ if(!all.length){
+  h+='<div class="dempty"><b>עוד לא נקבעה אף הגשה</b><p>לחץ על הוסף הגשה ותכתוב את הראף קאט הראשון עם התאריך שלו.</p></div>';
+  return h+'</section>';
+ }
+ h+='<div class="dulist">';
+ all.forEach(function(x){
+  if(state.editDue===x.k){ h+='<div class="durow edit">'+dueForm(x)+'</div>'; return }
+  var st=dueState(x);
+  h+='<div class="durow s-'+st+'">';
+  h+='<div class="dudate"><b>'+esc(x.date?dayLabel(x.date):"בלי תאריך")+'</b><em>'+esc(dueWhen(x.date))+'</em></div>';
+  h+='<div class="dumain"><h4>'+esc(x.title||dueKind(x.kind))+'</h4>';
+  h+='<div class="dutags"><span class="dukind">'+esc(dueKind(x.kind))+'</span>';
+  if(Number(x.ep)) h+='<span>פרק '+Number(x.ep)+'</span>';
+  if(x.who) h+='<span>'+esc(x.who)+'</span>';
+  h+='</div>';
+  if(x.note) h+='<p>'+esc(x.note)+'</p>';
+  h+='</div>';
+  h+='<div class="dufoot"><button class="dustat" data-act="duecycle" data-id="'+esc(x.k)+'" title="לחיצה מחליפה סטטוס">'+esc(dueStat(x.status))+'</button>';
+  if(!RO) h+='<button class="tinyedit" data-act="editdue" data-id="'+esc(x.k)+'">ערוך</button>';
+  h+='</div>';
+  h+='</div>';
+ });
+ h+='</div>';
+ return h+'</section>';
+}
 function catBar(){
  var cur=curCat();
  var h='<div class="cats">';
@@ -6376,7 +6504,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editMeta||state.lsOpen||(state.chatDraft||"").trim()||(state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null);
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.lsOpen||(state.chatDraft||"").trim()||(state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null);
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
 function snapStr(){try{return JSON.stringify({users:STORE.users,base:STORE.base,layers:STORE.layers})}catch(_){return null}}
@@ -6391,18 +6519,18 @@ function pushHist(){
 }
 function undo(){
  if(!hist.length){toast("אין לאן לחזור",true);return}
- var _tr=STORE.tr, _sh=STORE.shifts, _fd=STORE.feed, _ch=STORE.chat;
+ var _tr=STORE.tr, _sh=STORE.shifts, _fd=STORE.feed, _ch=STORE.chat, _du=STORE.dues;
  var _s=snapStr(); if(_s!==null) future.push(_s);
- STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;STORE.shifts=_sh;STORE.feed=_fd;STORE.chat=_ch;useView();resetSnap();
+ STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;STORE.shifts=_sh;STORE.feed=_fd;STORE.chat=_ch;STORE.dues=_du;useView();resetSnap();
  skipHist=true;
  state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;state.editEp=null;state.editMeta=false;
  render();save();toast("הפעולה בוטלה");
 }
 function redo(){
  if(!future.length){toast("אין לאן להתקדם",true);return}
- var _tr2=STORE.tr, _sh2=STORE.shifts, _fd2=STORE.feed, _ch2=STORE.chat;
+ var _tr2=STORE.tr, _sh2=STORE.shifts, _fd2=STORE.feed, _ch2=STORE.chat, _du2=STORE.dues;
  var _s2=snapStr(); if(_s2!==null) hist.push(_s2);
- STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;STORE.shifts=_sh2;STORE.feed=_fd2;STORE.chat=_ch2;useView();resetSnap();
+ STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;STORE.shifts=_sh2;STORE.feed=_fd2;STORE.chat=_ch2;STORE.dues=_du2;useView();resetSnap();
  skipHist=true;render();save();toast("הפעולה שוחזרה");
 }
 var SNAPDATE="";
@@ -6418,14 +6546,16 @@ function rowsOf(){
  if(STORE.shifts&&STORE.shifts.list) r["shifts"]=STORE.shifts;
  if(STORE.feed&&STORE.feed.items&&STORE.feed.items.length) r["feed"]=STORE.feed;
  Object.keys(STORE.chat||{}).forEach(function(k){ if((STORE.chat[k].items||[]).length) r["chat:"+k]=STORE.chat[k] });
+ if(STORE.dues&&(STORE.dues.list||[]).length) r["dues"]=STORE.dues;
  return r;
 }
 function applyRows(list){
- var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,seen=false;
+ var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,seen=false;
  list.forEach(function(row){
   if(row.id==="users")users=row.data;
   else if(row.id==="shifts")sh=row.data;
   else if(row.id==="feed")fd=row.data;
+  else if(row.id==="dues")du=row.data;
   else if(row.id.indexOf("chat:")===0){ch=ch||{};ch[row.id.slice(5)]=row.data}
   else if(row.id==="base")base=row.data;
   else if(row.id.indexOf("layer:")===0)layers[row.id.slice(6)]=row.data;
@@ -6440,6 +6570,7 @@ function applyRows(list){
  if(sh&&sh.list) STORE.shifts=sh;
  if(fd&&fd.items) STORE.feed=fd;
  if(ch) STORE.chat=ch;
+ if(du&&du.list) STORE.dues=du;
  return true;
 }
 function pull(initial){
@@ -7015,7 +7146,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
- var SHARED={addshift:1,delshift:1,savesset:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,adddue:1,savedue:1,deldue:1,duecycle:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -7181,6 +7312,32 @@ document.addEventListener("click",function(e){
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
  if(act==="moremenu"){state.moreOpen=!state.moreOpen;render();return}
  if(act==="qclear"){state.q="";state.qFocus=false;render();return}
+ if(act==="adddue"){
+  var dk2="q"+Date.now()+"_"+Math.floor(Math.random()*999);
+  DUES().push({k:dk2,title:"",kind:"rough",date:todayISO(),ep:0,who:"",status:"todo",note:""});
+  state.editDue=dk2;state.group="dues";render();save();return}
+ if(act==="editdue"){state.editDue=id;render();return}
+ if(act==="canceldue"){state.editDue=null;render();return}
+ if(act==="savedue"){
+  DUES().forEach(function(x){if(x.k===id){
+   x.title=fval("__due__","title").trim();
+   x.kind=fval("__due__","kind")||x.kind;
+   x.date=fval("__due__","date");
+   x.ep=Number(fval("__due__","ep"))||0;
+   x.who=fval("__due__","who").trim();
+   x.status=fval("__due__","status")||"todo";
+   x.note=fval("__due__","note").trim();
+  }});
+  state.editDue=null;render();save();toast("ההגשה נשמרה");return}
+ if(act==="deldue"){
+  STORE.dues.list=DUES().filter(function(x){return x.k!==id});
+  state.editDue=null;render();save();toast("ההגשה נמחקה");return}
+ if(act==="duecycle"){
+  DUES().forEach(function(x){if(x.k===id){
+   var i=0,j; for(j=0;j<DSTAT.length;j++) if(DSTAT[j][0]===(x.status||"todo")) i=j;
+   x.status=DSTAT[(i+1)%DSTAT.length][0];
+  }});
+  render();save();return}
  if(act==="chatsend"){
   if(RO)return;
   if(!state.me){state.showUsers=true;render();return}
