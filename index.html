@@ -49,7 +49,16 @@
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px 110px}
 .mast{border-bottom:1px solid var(--line);background:var(--surface)}
-.mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0}
+.mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0;position:relative}
+.chatfab{position:absolute;top:26px;inset-inline-end:20px;z-index:6;display:inline-flex;align-items:center;gap:9px;
+ background:#8A3A22;color:#fff;border:1px solid #8A3A22;border-radius:12px;padding:11px 18px;cursor:pointer;
+ font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 3px 12px rgba(138,58,34,.32);transition:.15s}
+.chatfab i{font-style:normal;font-size:17px;line-height:1}
+.chatfab:hover{background:#A0472B;border-color:#A0472B;transform:translateY(-1px);box-shadow:0 5px 16px rgba(138,58,34,.42)}
+.chatfab .n{background:#fff;color:#8A3A22;border-radius:999px;min-width:20px;padding:2px 7px;font-size:12px;line-height:1.35}
+.chatfab.on{animation:chatpulse 1.5s ease-in-out infinite}
+@keyframes chatpulse{0%,100%{box-shadow:0 3px 12px rgba(138,58,34,.32),0 0 0 0 rgba(176,71,43,.5)}50%{box-shadow:0 3px 12px rgba(138,58,34,.32),0 0 0 9px rgba(176,71,43,0)}}
+@media (max-width:760px){.chatfab{position:static;margin-bottom:14px}}
 .eyebrow{font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;letter-spacing:.16em;color:var(--accent);margin:0 0 8px}
 h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(22px,3.2vw,31px);line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-.01em}
 .sub{color:var(--ink-2);margin:10px 0 0;max-width:62ch;font-size:15.5px}
@@ -590,6 +599,7 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .dcrewtag.can:hover{border-color:var(--cc,#455160);color:var(--ink)}
 .urowwrap{display:flex;align-items:stretch;gap:6px}
 .urowwrap .urow{flex:1}
+.umsg{display:inline-flex;align-items:center;gap:4px;background:#8A3A22;color:#fff;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 8px;margin-inline-start:6px}
 .umerge{flex:0 0 auto;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:0 12px;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:.15s}
 .umerge:hover{border-color:var(--accent);color:var(--ink)}
 .umerge.off{opacity:.4}
@@ -598,9 +608,6 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .views button[aria-pressed="true"] .vn{background:var(--accent-ink);color:var(--accent)}
 .chatgrp{display:flex;flex-direction:column}
 .chatwrap{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:14px 16px;max-height:min(60vh,560px);overflow:auto;display:flex;flex-direction:column;gap:3px}
-.bell.chatb i{font-size:15px}
-.bell.chatb.on{border-color:#B0472B;color:#B0472B;animation:chatpulse 1.6s ease-in-out infinite}
-@keyframes chatpulse{0%,100%{box-shadow:0 0 0 0 rgba(176,71,43,.35)}50%{box-shadow:0 0 0 5px rgba(176,71,43,0)}}
 .chtabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
 .chtab{position:relative;display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--ink-2);cursor:pointer;transition:.15s}
 .chtab i{width:8px;height:8px;border-radius:50%;background:var(--uc,#455160)}
@@ -3379,6 +3386,7 @@ function render(){
  var c=counts(),n=DATA.scenes.length,tot=Math.max(n,TARGET);
  var h="";
  h+='<div class="mast"><div class="mast-in">';
+ h+=chatBtn();
  var mt=M();
  if(state.editMeta){
   h+='<div class="metaform" data-form="__meta__">';
@@ -3410,7 +3418,7 @@ function render(){
  else if(!state.writable) h+='<div class="ro">העמוד במצב קריאה בלבד בתצוגה הזו. שינויים שתעשה כאן לא יישמרו.</div>';
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
- h+=searchBox()+themeBtn()+chatBtn()+bellBtn()+'<div class="sep"></div>';
+ h+=searchBox()+themeBtn()+bellBtn()+'<div class="sep"></div>';
  h+=catBar();
  h+='<div class="views">';
  catObj(curCat()).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
@@ -5988,8 +5996,8 @@ function agoTxt(t){
 }
 function chatBtn(){
  var n=chatUnread();
- return '<button class="bell chatb'+(n?" on":"")+'" data-act="gochat" title="'+(n?n+" הודעות חדשות בצ׳אט":"צ׳אט הצוות")+'">'+
-  '<i>\u2709</i>'+(n?'<span class="n">'+n+'</span>':'')+'</button>';
+ return '<button class="chatfab'+(n?" on":"")+'" data-act="gochat" title="'+(n?n+" הודעות חדשות בצ׳אט":"צ׳אט הצוות")+'">'+
+  '<i>\u2709</i><b>צ׳אט</b>'+(n?'<span class="n">'+n+'</span>':'')+'</button>';
 }
 function bellBtn(){
  var n=feedUnread();
@@ -6604,6 +6612,8 @@ function userPanel(){
   var n=hasLayer(u.k)?(STORE.layers[u.k].scenes||[]).length:(STORE.base.scenes||[]).length;
   h+='<div class="urowwrap"><button class="urow" data-act="pickview" data-k="'+esc(u.k)+'" aria-current="'+(state.viewUser===u.k)+'" style="--uc:'+esc(u.color||"#455160")+'"><i></i>';
   h+='<b>'+esc(u.name)+'</b>';
+  var _cn=(state.me&&u.k!==state.me)?chatUnreadIn(u.k):0;
+  if(_cn) h+='<span class="umsg" title="הודעות חדשות ממנו בצ׳אט">✉ '+_cn+'</span>';
   if(state.me===u.k) h+='<span class="tagi">אני</span>';
   else if(!hasLayer(u.k)) h+='<span class="tagi" style="color:var(--ink-3);border-color:var(--line-2)">עוד לא ערך</span>';
   h+='<span>'+n+' סצנות</span></button>'+mgbtn(u.k)+'</div>';
