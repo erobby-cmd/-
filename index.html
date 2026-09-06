@@ -50,9 +50,16 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px 110px}
 .mast{border-bottom:1px solid var(--line);background:var(--surface)}
 .mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0;position:relative}
-.today{position:absolute;top:30px;inset-inline-end:20px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 14px}
-.today b{font-weight:700}
-@media (max-width:760px){.today{position:static;display:inline-block;margin-bottom:12px}}
+.topstrip{position:absolute;top:26px;inset-inline-end:20px;z-index:7;display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.today{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 13px;white-space:nowrap}
+.topstrip .thbtn,.topstrip .bell{margin-inline-start:0}
+.tmore{background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 12px;font-size:15px;line-height:1;color:var(--ink-3);cursor:pointer;letter-spacing:.06em}
+.tmore:hover,.tmore[aria-pressed="true"]{border-color:var(--accent);color:var(--ink)}
+.tmenu{position:absolute;top:46px;inset-inline-end:0;background:var(--surface);border:1px solid var(--line-2);border-radius:11px;box-shadow:0 12px 34px rgba(0,0,0,.28);padding:6px;display:grid;gap:2px;min-width:190px;z-index:9}
+.tmenu button{text-align:start;background:transparent;border:0;border-radius:7px;padding:9px 12px;font-family:"Heebo",sans-serif;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.tmenu button:hover{background:var(--surface-2);color:var(--ink)}
+.tmenu button[disabled]{opacity:.4;cursor:default}
+@media (max-width:900px){.topstrip{position:static;justify-content:flex-start;margin-bottom:14px}.tmenu{position:static;box-shadow:none;margin-top:6px}}
 .cats button.catchat{background:transparent;color:#C9598A}
 .cats button.catchat span{background:#C9598A;color:#fff;opacity:1}
 .cats button.catchat:hover{background:transparent;color:#E07AA5}
@@ -3308,7 +3315,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3387,7 +3394,7 @@ function render(){
  var c=counts(),n=DATA.scenes.length,tot=Math.max(n,TARGET);
  var h="";
  h+='<div class="mast"><div class="mast-in">';
- h+=todayLine();
+ h+=topStrip();
  var mt=M();
  if(state.editMeta){
   h+='<div class="metaform" data-form="__meta__">';
@@ -3419,7 +3426,7 @@ function render(){
  else if(!state.writable) h+='<div class="ro">העמוד במצב קריאה בלבד בתצוגה הזו. שינויים שתעשה כאן לא יישמרו.</div>';
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
- h+=searchBox()+themeBtn()+bellBtn()+'<div class="sep"></div>';
+ h+=searchBox()+'<div class="sep"></div>';
  h+=catBar();
  var _cv=catObj(curCat()).views;
  if(_cv.length>1){
@@ -3427,20 +3434,10 @@ function render(){
   _cv.forEach(function(v){ h+=vbtn(v[0],v[1]) });
   h+='</div>';
  }
- if(!RO){
-  h+='<div class="sep"></div>';
-  h+='<button class="btn ghost'+(hist.length?"":" off")+'" data-act="undo" title="ביטול הפעולה האחרונה (Ctrl+Z)">↷ בטל'+(hist.length?' <span class="n">'+hist.length+'</span>':'')+'</button>';
-  h+='<button class="btn ghost'+(future.length?"":" off")+'" data-act="redo" title="ביצוע חוזר (Ctrl+Shift+Z)">בצע שוב ↶</button>';
- }
  h+='<div class="sep"></div>'+chip("filter","all","הכול",n);
  ORDER.forEach(function(k){if(k==="dropped"&&!c.dropped)return;h+=chip("filter",k,STATUS[k].l,c[k]||0)});
  h+='<div class="spacer"></div>';
  if(!RO){
-  h+=saveBadge();
-  h+='<button class="btn" data-act="saveNow" title="שמירה עכשיו">שמור</button>';
-  h+='<button class="btn ghost" data-act="restore" title="טעינת גיבוי מהמחשב">טען גיבוי</button>';
-  h+='<button class="btn ghost" data-act="backup" title="שמירת עותק של כל היומן למחשב">שמור למחשב</button>';
-   if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button class="btn ghost" data-act="drive" title="שמירת עותק בגוגל דרייב, בתיקייה מרחב אילת">שמור לדרייב</button>';
   var addx="";
   if(state.group==="lines") addx='<button class="btn ghost" data-act="mineopen">שלוף ליינים</button><button class="btn" data-act="addline">הוסף ליין</button>';
   else if(state.group==="days") addx='<button class="btn" data-act="addday">הוסף יום צילום</button>';
@@ -5999,6 +5996,28 @@ function agoTxt(t){
  var dd=Math.round(h/24);
  return dd===1?"אתמול":"לפני "+dd+" ימים";
 }
+function topStrip(){
+ var d=new Date(), t="";
+ try{ t=d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) }
+ catch(_){ t=d.toDateString() }
+ var h='<div class="topstrip"><span class="today">'+esc(t)+'</span>';
+ h+=themeBtn()+bellBtn();
+ if(!RO){
+  h+=saveBadge();
+  h+='<button class="btn" data-act="saveNow" title="שמירה עכשיו">שמור</button>';
+  h+='<button class="tmore" data-act="moremenu" aria-pressed="'+(!!state.moreOpen)+'" title="עוד">···</button>';
+  if(state.moreOpen){
+   h+='<div class="tmenu" data-stop="1">';
+   h+='<button data-act="backup">שמור עותק למחשב</button>';
+   h+='<button data-act="restore">טען גיבוי מהמחשב</button>';
+   if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button data-act="drive">שמור לגוגל דרייב</button>';
+   h+='<button data-act="undo"'+(hist.length?"":" disabled")+'>בטל פעולה'+(hist.length?" ("+hist.length+")":"")+'</button>';
+   h+='<button data-act="redo"'+(future.length?"":" disabled")+'>בצע שוב</button>';
+   h+='</div>';
+  }
+ }
+ return h+'</div>';
+}
 function todayLine(){
  var d=new Date(), t="";
  try{ t=d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) }
@@ -7158,6 +7177,7 @@ document.addEventListener("click",function(e){
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
   return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
+ if(act==="moremenu"){state.moreOpen=!state.moreOpen;render();return}
  if(act==="qclear"){state.q="";state.qFocus=false;render();return}
  if(act==="chatsend"){
   if(RO)return;
