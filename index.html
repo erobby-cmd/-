@@ -50,8 +50,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px 110px}
 .mast{border-bottom:1px solid var(--line);background:var(--surface)}
 .mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0;position:relative}
-.topstrip{position:absolute;top:26px;inset-inline-end:20px;z-index:7;display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
-.today{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 13px;white-space:nowrap}
+.topstrip{position:absolute;top:26px;inset-inline-end:20px;z-index:7;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.tsrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.today{font-family:"Heebo",sans-serif;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--ink-3);white-space:nowrap;padding-inline-end:3px}
 .topstrip .thbtn,.topstrip .bell{margin-inline-start:0}
 .tmore{background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 12px;font-size:15px;line-height:1;color:var(--ink-3);cursor:pointer;letter-spacing:.06em}
 .tmore:hover,.tmore[aria-pressed="true"]{border-color:var(--accent);color:var(--ink)}
@@ -59,7 +60,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .tmenu button{text-align:start;background:transparent;border:0;border-radius:7px;padding:9px 12px;font-family:"Heebo",sans-serif;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
 .tmenu button:hover{background:var(--surface-2);color:var(--ink)}
 .tmenu button[disabled]{opacity:.4;cursor:default}
-@media (max-width:900px){.topstrip{position:static;justify-content:flex-start;margin-bottom:14px}.tmenu{position:static;box-shadow:none;margin-top:6px}}
+@media (max-width:900px){.topstrip{position:static;align-items:flex-start;margin-bottom:14px}.tmenu{position:static;box-shadow:none;margin-top:6px}}
 .cats button.catchat{background:transparent;color:#C9598A}
 .cats button.catchat span{background:#C9598A;color:#fff;opacity:1}
 .cats button.catchat:hover{background:transparent;color:#E07AA5}
@@ -6000,7 +6001,7 @@ function topStrip(){
  var d=new Date(), t="";
  try{ t=d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) }
  catch(_){ t=d.toDateString() }
- var h='<div class="topstrip"><span class="today">'+esc(t)+'</span>';
+ var h='<div class="topstrip"><div class="tsrow">';
  h+=themeBtn()+bellBtn();
  if(!RO){
   h+=saveBadge();
@@ -6016,6 +6017,8 @@ function topStrip(){
    h+='</div>';
   }
  }
+ h+='</div>';
+ h+='<div class="today">'+esc(t)+'</div>';
  return h+'</div>';
 }
 function todayLine(){
