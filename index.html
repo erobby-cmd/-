@@ -6127,7 +6127,7 @@ function chatView(){
  if(th&&!ths.some(function(x){return x.k===th})){ th=""; state.chatTo="" }
  var msgs=chatFor(th), seen=state.chatSeenAt||0;
  var tho=ths.filter(function(x){return x.k===th})[0]||ths[0];
- var h='<section class="grp chatgrp"><div class="grp-h"><h2>צ׳אט הצוות</h2><span class="role">הכול נשמר, שום הודעה לא נמחקת</span>';
+ var h='<section class="grp chatgrp"><div class="grp-h"><h2>צ׳אט הצוות</h2>';
  h+='<span class="meta">'+msgs.length+' הודעות</span></div>';
  h+='<div class="chtabs">';
  ths.forEach(function(t){
@@ -6160,7 +6160,6 @@ function chatView(){
  if(!RO){
   h+='<div class="chsend"><textarea id="chin" placeholder="'+(th?('הודעה ל'+esc(tho.name)):'הודעה לכל הצוות')+'. אנטר שולח, שיפט ואנטר יורד שורה">'+esc(state.chatDraft||"")+'</textarea>';
   h+='<button class="btn" data-act="chatsend">שלח'+(th?' ל'+esc(tho.name):' לכולם')+'</button></div>';
-  h+='<p class="hint chhint">ההודעות נשמרות לצמיתות. אין מחיקה ואין עריכה.</p>';
  }
  return h+'</section>';
 }
