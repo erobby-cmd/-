@@ -5072,7 +5072,13 @@ function shiftMigrate(){
  function take(d){
   ((d&&d.shifts)||[]).forEach(function(x){
    var k=(x.date||"")+"|"+(x.who||"");
-   if(seen[k]) return; seen[k]=1; all.push(x);
+   var old=seen[k];
+   if(old){
+    if(String(x.note||"").length>String(old.note||"").length) old.note=x.note;
+    return;
+   }
+   var c={k:x.k,date:x.date,who:x.who,note:x.note||""};
+   seen[k]=c; all.push(c);
   });
  }
  take(STORE.base);
