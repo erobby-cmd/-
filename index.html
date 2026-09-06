@@ -6605,7 +6605,7 @@ function mgApply(){
 function userPanel(){
  var h='<div class="upanel" data-act="closeusers"><div class="ubox" data-stop="1">';
  h+='<div class="uhead"><h3>'+(state.me?"משתמשים":"מי אתה?")+'</h3>';
- h+='<p>'+(state.me?"לחיצה על שם פותחת את הגרסה שלו. עורכים רק את הגרסה שלך.":"בחר את השם שלך. כל אחד עובד על הגרסה שלו, ורואה את של כולם.")+'</p></div>';
+ h+='<p>'+(state.me?"המקור המשותף הוא הגרסה של רובי. כל אחד משחק על עותק משלו, ורובי מחזיר את המקור לשלו בלחיצת כפתור.":"בחר את השם שלך. כל אחד עובד על עותק משלו, ורואה את של כולם.")+'</p></div>';
  h+='<div class="ulist">';
  function mgbtn(k){
   if(RO||!state.me||k===state.me) return "";
@@ -6613,7 +6613,7 @@ function userPanel(){
   return '<button class="umerge'+(c?"":" off")+'" data-act="mgopen" data-k="'+esc(k||"")+'" title="לראות מה יש שם ולמשוך לגרסה שלך">מזג אליי'+(c?'<span class="n">'+c+'</span>':'')+'</button>';
  }
  h+='<div class="urowwrap"><button class="urow" data-act="pickview" data-k="" aria-current="'+(!state.viewUser)+'" style="--uc:#5A6472"><i></i>';
- h+='<b>המקור המשותף</b><span class="tagi">בסיס</span><span>'+(STORE.base.scenes||[]).length+' סצנות</span></button>'+mgbtn("")+'</div>';
+ h+='<b>המקור המשותף</b><span class="tagi">הגרסה של רובי</span><span>'+(STORE.base.scenes||[]).length+' סצנות</span></button>'+mgbtn("")+'</div>';
  users().forEach(function(u){
   var n=hasLayer(u.k)?(STORE.layers[u.k].scenes||[]).length:(STORE.base.scenes||[]).length;
   h+='<div class="urowwrap"><button class="urow" data-act="pickview" data-k="'+esc(u.k)+'" aria-current="'+(state.viewUser===u.k)+'" style="--uc:'+esc(u.color||"#455160")+'"><i></i>';
@@ -6630,14 +6630,14 @@ function userPanel(){
   h+='<button class="btn" data-act="adduser">הוסף</button></div>';
   h+='<div class="ufoot">';
   if(state.me){
-   if(hasLayer(state.me)) h+='<button class="btn" data-act="promote" title="הגרסה שלך הופכת למקור המשותף של כולם">הפוך את הגרסה שלי למקור לכולם</button>';
+   h+='<button class="btn" data-act="promote" title="המקור המשותף מתעדכן לגרסה שלך. אף אחד לא מאבד את מה שהוא עשה">החזר את המקור המשותף לגרסה שלי</button>';
    if(!FORCE_ME) h+='<button class="btn ghost" data-act="switchme">אני לא '+esc(userName(state.me))+'</button>';
-   if(hasLayer(state.me)) h+='<button class="btn danger" data-act="resetme">אפס את הגרסה שלי למקור</button>';
+   if(hasLayer(state.me)) h+='<button class="btn danger" data-act="resetme" title="מוחק את העותק שלך וחוזר למקור המשותף">אפס את העותק שלי וחזור למקור</button>';
   }
   if(state.confirmPromote){
    h+='<div style="flex:1 0 100%;font-family:\'Heebo\',sans-serif;font-size:13px;color:var(--partial);padding-top:6px">';
-   h+='זה מחליף את המקור המשותף בגרסה שלך, ומוחק את כל השכבות של האחרים. בטוח?';
-   h+='<button class="btn danger" style="margin-inline-start:10px" data-act="promoteYes">כן, החלף</button>';
+   h+='המקור המשותף יוחלף בגרסה שלך. מי שעוד לא ערך יראה אותה מיד, ומי שכן ערך ימשיך לראות את שלו עד שיאפס. בטוח?';
+   h+='<button class="btn" style="margin-inline-start:10px" data-act="promoteYes">כן, זה המקור</button>';
    h+='<button class="btn ghost" style="margin-inline-start:6px" data-act="promoteNo">ביטול</button></div>';
   }
   h+='<div class="spacer"></div><button class="btn ghost" data-act="closeusers">סגור</button></div>';
@@ -6966,12 +6966,15 @@ document.addEventListener("click",function(e){
  if(act==="promote"){state.confirmPromote=true;render();return}
  if(act==="promoteNo"){state.confirmPromote=false;render();return}
  if(act==="promoteYes"){
-  if(!state.me||RO||!hasLayer(state.me))return;
-  STORE.base=JSON.parse(JSON.stringify(STORE.layers[state.me]));
-  STORE.layers={};
+  if(!state.me||RO)return;
+  var src=hasLayer(state.me)?STORE.layers[state.me]:STORE.base;
+  STORE.base=JSON.parse(JSON.stringify(src));
+  delete STORE.layers[state.me];
   state.viewUser=state.me;state.confirmPromote=false;state.showUsers=false;
   useView();resetSnap();render();save();
-  toast("הגרסה שלך היא עכשיו המקור לכולם");return}
+  var others=Object.keys(STORE.layers||{}).length;
+  toast("המקור המשותף הוא עכשיו הגרסה שלך"+(others?". "+others+" משתמשים עדיין על העותק שלהם, הם יכולים לאפס אותו":""));
+  return}
  if(act==="resetme"){
   if(!state.me||RO)return;
   delete STORE.layers[state.me];
