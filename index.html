@@ -50,6 +50,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px 110px}
 .mast{border-bottom:1px solid var(--line);background:var(--surface)}
 .mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0;position:relative}
+.today{position:absolute;top:30px;inset-inline-end:20px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 14px}
+.today b{font-weight:700}
+@media (max-width:760px){.today{position:static;display:inline-block;margin-bottom:12px}}
 .cats button.catchat{background:transparent;color:#C9598A}
 .cats button.catchat span{background:#C9598A;color:#fff;opacity:1}
 .cats button.catchat:hover{background:transparent;color:#E07AA5}
@@ -3384,6 +3387,7 @@ function render(){
  var c=counts(),n=DATA.scenes.length,tot=Math.max(n,TARGET);
  var h="";
  h+='<div class="mast"><div class="mast-in">';
+ h+=todayLine();
  var mt=M();
  if(state.editMeta){
   h+='<div class="metaform" data-form="__meta__">';
@@ -5994,6 +5998,12 @@ function agoTxt(t){
  if(h<24) return "לפני "+h+" שעות";
  var dd=Math.round(h/24);
  return dd===1?"אתמול":"לפני "+dd+" ימים";
+}
+function todayLine(){
+ var d=new Date(), t="";
+ try{ t=d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) }
+ catch(_){ t=d.toDateString() }
+ return '<div class="today"><b>'+esc(t)+'</b></div>';
 }
 function chatBtn(){
  var n=chatUnread();
