@@ -50,15 +50,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px 110px}
 .mast{border-bottom:1px solid var(--line);background:var(--surface)}
 .mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0;position:relative}
-.chatfab{position:absolute;top:26px;inset-inline-end:20px;z-index:6;display:inline-flex;align-items:center;gap:9px;
- background:#8A3A22;color:#fff;border:1px solid #8A3A22;border-radius:12px;padding:11px 18px;cursor:pointer;
- font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 3px 12px rgba(138,58,34,.32);transition:.15s}
-.chatfab i{font-style:normal;font-size:17px;line-height:1}
-.chatfab:hover{background:#A0472B;border-color:#A0472B;transform:translateY(-1px);box-shadow:0 5px 16px rgba(138,58,34,.42)}
-.chatfab .n{background:#fff;color:#8A3A22;border-radius:999px;min-width:20px;padding:2px 7px;font-size:12px;line-height:1.35}
-.chatfab.on{animation:chatpulse 1.5s ease-in-out infinite}
-@keyframes chatpulse{0%,100%{box-shadow:0 3px 12px rgba(138,58,34,.32),0 0 0 0 rgba(176,71,43,.5)}50%{box-shadow:0 3px 12px rgba(138,58,34,.32),0 0 0 9px rgba(176,71,43,0)}}
-@media (max-width:760px){.chatfab{position:static;margin-bottom:14px}}
+.cats button.catchat{background:transparent;color:#C9598A}
+.cats button.catchat span{background:#C9598A;color:#fff;opacity:1}
+.cats button.catchat:hover{background:transparent;color:#E07AA5}
+.cats button.catchat[aria-pressed="true"]{background:var(--surface);color:#C9598A;box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.cats button.catchat[aria-pressed="true"] span{background:#C9598A;color:#fff}
+.cats button.catchat.on{animation:chatpulse 1.6s ease-in-out infinite}
+@keyframes chatpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,89,138,.55)}50%{box-shadow:0 0 0 7px rgba(201,89,138,0)}}
 .eyebrow{font-family:"Heebo",sans-serif;font-size:12px;font-weight:500;letter-spacing:.16em;color:var(--accent);margin:0 0 8px}
 h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(22px,3.2vw,31px);line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-.01em}
 .sub{color:var(--ink-2);margin:10px 0 0;max-width:62ch;font-size:15.5px}
@@ -3386,7 +3384,6 @@ function render(){
  var c=counts(),n=DATA.scenes.length,tot=Math.max(n,TARGET);
  var h="";
  h+='<div class="mast"><div class="mast-in">';
- h+=chatBtn();
  var mt=M();
  if(state.editMeta){
   h+='<div class="metaform" data-form="__meta__">';
@@ -3420,9 +3417,12 @@ function render(){
  h+=userBtn()+'<div class="sep"></div>';
  h+=searchBox()+themeBtn()+bellBtn()+'<div class="sep"></div>';
  h+=catBar();
- h+='<div class="views">';
- catObj(curCat()).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
- h+='</div>';
+ var _cv=catObj(curCat()).views;
+ if(_cv.length>1){
+  h+='<div class="views">';
+  _cv.forEach(function(v){ h+=vbtn(v[0],v[1]) });
+  h+='</div>';
+ }
  if(!RO){
   h+='<div class="sep"></div>';
   h+='<button class="btn ghost'+(hist.length?"":" off")+'" data-act="undo" title="ביטול הפעולה האחרונה (Ctrl+Z)">↷ בטל'+(hist.length?' <span class="n">'+hist.length+'</span>':'')+'</button>';
@@ -5734,9 +5734,10 @@ function legendStrip(){
  return h+'</div></div>';
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"],["chat","צ׳אט"]]},
- {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"],["chat","צ׳אט"]]},
- {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"],["chat","צ׳אט"]]}
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"]]},
+ {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
+ {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
 ];
 function catOf(g){
  for(var i=0;i<CATS.length;i++){
@@ -6135,6 +6136,11 @@ function catBar(){
  var cur=curCat();
  var h='<div class="cats">';
  CATS.forEach(function(c){
+  if(c.k==="chat"){
+   var cn=chatUnread();
+   h+='<button class="catchat'+(cn?" on":"")+'" data-act="cat" data-k="chat" aria-pressed="'+(cur==="chat")+'">✉ '+esc(c.name)+(cn?'<span>'+cn+'</span>':'')+'</button>';
+   return;
+  }
   h+='<button data-act="cat" data-k="'+c.k+'" aria-pressed="'+(cur===c.k)+'">'+esc(c.name)+'<span>'+c.views.length+'</span></button>';
  });
  return h+'</div>';
@@ -6991,6 +6997,7 @@ document.addEventListener("click",function(e){
   render();return}
  if(act==="cat"){
   var ck=b.getAttribute("data-k"), co=catObj(ck);
+  if(ck==="chat"){ state.chatSeenAt=chatSeen(state.chatTo||""); chatMark(state.chatTo||""); }
   state.catLast=state.catLast||{};
   var want=state.catLast[ck];
   state.cat=ck;
