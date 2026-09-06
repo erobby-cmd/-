@@ -572,6 +572,22 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .lleg s.l-empty{background:rgba(120,128,138,.16);color:#8A93A0}
 .lleg:hover{border-color:var(--cc,#455160);color:var(--ink);transform:translateY(-1px)}
 .lleg.none{border-style:dashed}
+.dclock{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px;margin-top:16px}
+.dcrew{background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--cc,#455160);border-radius:11px;padding:12px 14px 13px;box-shadow:var(--shadow)}
+.dcrew.all{--cc:#8A93A0;background:var(--surface-2)}
+.dcrew-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dcrew-h b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:17px;font-weight:700}
+.dcrew-h span{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.dcbar{height:7px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin:9px 0 7px;border:1px solid var(--line)}
+.dcrew.all .dcbar{background:var(--surface)}
+.dcbar i{display:block;height:100%;background:var(--cc,#455160)}
+.dcfoot{display:flex;align-items:center;gap:8px}
+.dcfoot em{font-style:normal;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.dcfoot .tinyedit{margin-inline-start:auto}
+.dcrewtag{display:inline-flex;align-items:center;gap:5px;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--ink-2);white-space:nowrap}
+.dcrewtag i{width:8px;height:8px;border-radius:50%;background:var(--cc,#455160)}
+.dcrewtag.can{cursor:pointer}
+.dcrewtag.can:hover{border-color:var(--cc,#455160);color:var(--ink)}
 .modal .box.lsbox{max-width:1120px}
 .lsbody{padding:16px 20px 20px;overflow:auto}
 .lsnote{margin:0 0 14px;font-size:13.6px;color:var(--ink-3);line-height:1.55}
@@ -3178,7 +3194,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",crewSet:false,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3995,10 +4011,59 @@ function daysSorted(){
   return 0;
  });
 }
+
+/* ===== שעון ימי צילום ===== */
+function CREWS(){
+ if(!DATA.crews||!DATA.crews.length) DATA.crews=[
+  {k:"us",name:"אנחנו",target:25,color:"#0C6B75"},
+  {k:"tal",name:"טל",target:10,color:"#A8791E"}
+ ];
+ return DATA.crews;
+}
+function crewOf(d){
+ var k=d.crew||"us";
+ return CREWS().some(function(c){return c.k===k})?k:CREWS()[0].k;
+}
+function crewObj(k){var a=CREWS().filter(function(c){return c.k===k});return a[0]||CREWS()[0]}
+function crewCount(k){ return DAYS().filter(function(d){return crewOf(d)===k}).length }
+function nDay(n){return n===1?"יום אחד":n+" ימים"}
+function daysClock(){
+ var cs=CREWS();
+ var h='<div class="dclock">';
+ cs.forEach(function(c){
+  var done=crewCount(c.k), tgt=Number(c.target)||0, left=Math.max(tgt-done,0);
+  var pct=tgt?Math.min(done/tgt*100,100):0;
+  h+='<div class="dcrew" style="--cc:'+esc(c.color||"#455160")+'">';
+  h+='<div class="dcrew-h"><b>'+esc(c.name)+'</b><span>'+done+' מתוך '+tgt+'</span></div>';
+  h+='<div class="dcbar"><i style="width:'+pct.toFixed(1)+'%"></i></div>';
+  h+='<div class="dcfoot"><em>'+(left?nDay(left)+" נשארו":"המכסה נגמרה")+'</em></div>';
+  h+='</div>';
+ });
+ var tot=cs.reduce(function(a,c){return a+(Number(c.target)||0)},0);
+ var don=cs.reduce(function(a,c){return a+crewCount(c.k)},0);
+ h+='<div class="dcrew all"><div class="dcrew-h"><b>סך הכול</b><span>'+don+' מתוך '+tot+'</span></div>';
+ h+='<div class="dcbar"><i style="width:'+(tot?Math.min(don/tot*100,100).toFixed(1):0)+'%"></i></div>';
+ h+='<div class="dcfoot"><em>'+nDay(Math.max(tot-don,0))+' נשארו בסך הכול</em>'+(RO?"":'<button class="tinyedit" data-act="crewset">הגדרות</button>')+'</div>';
+ h+='</div>';
+ h+='</div>';
+ if(state.crewSet&&!RO){
+  h+='<div class="grpform" data-form="__crews__" style="margin-top:12px">';
+  CREWS().forEach(function(c,i){
+   h+='<div class="row"><div class="f"><label>שם צוות '+(i+1)+'</label><input name="n'+i+'" value="'+esc(c.name)+'"></div>';
+   h+='<div class="f"><label>כמה ימים במכסה</label><input name="t'+i+'" type="number" min="0" value="'+(Number(c.target)||0)+'"></div></div>';
+  });
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="savecrews">שמור</button>';
+  h+='<button class="btn ghost" data-act="crewset">סגור</button></div></div>';
+ }
+ return h;
+}
 function dayForm(d){
  var h='<div class="grpform" data-form="__day__">';
  h+='<div class="row"><div class="f"><label>תאריך</label><input name="date" type="date" value="'+esc(d.date||"")+'"></div>';
  h+='<div class="f"><label>מיקום</label><input name="loc" value="'+esc(d.loc||"")+'" placeholder="איפה צילמנו"></div></div>';
+ h+='<div class="f"><label>מי צילם</label><select name="crew">'+CREWS().map(function(c){
+  return '<option value="'+esc(c.k)+'"'+(crewOf(d)===c.k?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select>'+
+  '<p class="hint">היום הזה יורד מהמכסה של הצוות שנבחר</p></div>';
  h+='<div class="f"><label>מי צולם</label><div class="tagbox">'+DATA.chars.map(function(c){
   return '<label><input type="checkbox" name="ch_'+c.k+'"'+(((d.chars||[]).indexOf(c.k)>-1)?" checked":"")+'>'+esc(c.name)+'</label>';
  }).join("")+'</div></div>';
@@ -4016,9 +4081,11 @@ function daysView(){
  h+='<span class="meta">'+all.length+' ימי צילום</span></div>';
  h+='<p class="grp-note">יומן של החומר שכבר בקופסה. כל יום צילום עם התאריך, המיקום, מי צולם, והרגעים שכדאי לזכור כשחוזרים לחומר הגלם. זה המקום לרשום את מה שראית במצלמה ולא נכנס עדיין לשום סצנה.</p>';
  if(!all.length){
+  h+=daysClock();
   h+='<div class="dempty"><b>עוד לא נרשם אף יום צילום</b><p>לחץ על "הוסף יום צילום" למעלה כדי לפתוח את הראשון.</p></div>';
   return h+'</section>';
  }
+ h+=daysClock();
  var moments=0,minT=null,maxT=null,perChar={};
  all.forEach(function(d){
   moments+=(d.moments||[]).length;
@@ -4062,6 +4129,8 @@ function daysView(){
   if(d.people) h+='<span class="dppl">'+esc(d.people)+'</span>';
   if(!who.length&&!d.people) h+='<span class="dppl none">לא נרשם מי צולם</span>';
   h+='</div></div>';
+  var _cw=crewObj(crewOf(d));
+  h+='<span class="dcrewtag'+(RO?"":' can')+'" style="--cc:'+esc(_cw.color||"#455160")+'"'+(RO?"":' data-act="daycrew" data-id="'+esc(d.k)+'" title="לחיצה מעבירה לצוות הבא"')+'><i></i>'+esc(_cw.name)+'</span>';
   if(!RO) h+='<button class="tinyedit" data-act="editday" data-id="'+esc(d.k)+'">ערוך</button>';
   h+='</div>';
   if((d.moments||[]).length){
@@ -6151,7 +6220,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
  if(MUT[act]&&!ensureEdit())return;
@@ -6352,9 +6421,25 @@ document.addEventListener("click",function(e){
    d.people=fval("__day__","people").trim();
    d.moments=toArr(fval("__day__","moments"));
    d.note=fval("__day__","note").trim();
+   d.crew=fval("__day__","crew")||d.crew||"us";
    d.chars=DATA.chars.filter(function(c){var f=dform&&dform.querySelector('[name="ch_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
   }});
   state.editDay=null;render();save();toast("יום הצילום נשמר");return}
+ if(act==="daycrew"){
+  var cs=CREWS();
+  DAYS().forEach(function(d){if(d.k===id){
+   var i=0,j;
+   for(j=0;j<cs.length;j++) if(cs[j].k===crewOf(d)) i=j;
+   d.crew=cs[(i+1)%cs.length].k;
+  }});
+  render();save();return}
+ if(act==="crewset"){state.crewSet=!state.crewSet;render();return}
+ if(act==="savecrews"){
+  CREWS().forEach(function(c,i){
+   c.name=fval("__crews__","n"+i).trim()||c.name;
+   var t=Number(fval("__crews__","t"+i)); if(t>=0) c.target=t;
+  });
+  state.crewSet=false;render();save();toast("המכסות נשמרו");return}
  if(act==="delday"){
   DATA.days=DAYS().filter(function(d){return d.k!==id});
   state.editDay=null;render();save();toast("יום הצילום נמחק");return}
