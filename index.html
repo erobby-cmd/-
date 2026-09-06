@@ -588,6 +588,24 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .dcrewtag i{width:8px;height:8px;border-radius:50%;background:var(--cc,#455160)}
 .dcrewtag.can{cursor:pointer}
 .dcrewtag.can:hover{border-color:var(--cc,#455160);color:var(--ink)}
+.urowwrap{display:flex;align-items:stretch;gap:6px}
+.urowwrap .urow{flex:1}
+.umerge{flex:0 0 auto;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:0 12px;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:.15s}
+.umerge:hover{border-color:var(--accent);color:var(--ink)}
+.umerge.off{opacity:.4}
+.umerge .n{background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:1px 5px;font-size:10px}
+.modal .box.mgbox{max-width:900px}
+.mgbody{padding:16px 20px 18px;overflow:auto}
+.mgnote{margin:0 0 14px;font-size:13.4px;color:var(--ink-3);line-height:1.55}
+.mgsec{margin-bottom:16px}
+.mgsec h4{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;letter-spacing:.07em;color:var(--ink-3);margin:0 0 7px;display:flex;align-items:center;gap:7px}
+.mgsec h4 span{background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:10.5px;color:var(--ink-2)}
+.mgrow{display:flex;gap:9px;align-items:flex-start;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);margin-bottom:5px;cursor:pointer}
+.mgrow:hover{border-color:var(--line-2)}
+.mgrow input{margin-top:3px;flex:0 0 auto}
+.mgtxt{display:block}
+.mgtxt b{display:block;font-family:"Assistant",sans-serif;font-size:14px;font-weight:700;line-height:1.3}
+.mgtxt em{display:block;font-style:normal;font-size:12.3px;color:var(--ink-3);margin-top:3px;line-height:1.5}
 .modal .box.lsbox{max-width:1120px}
 .lsbody{padding:16px 20px 20px;overflow:auto}
 .lsnote{margin:0 0 14px;font-size:13.6px;color:var(--ink-3);line-height:1.55}
@@ -3194,7 +3212,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",crewSet:false,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -5721,6 +5739,7 @@ function paint(h){
  if(state.showUsers) h+=userPanel();
  if(state.charPanel) h+=charPanelHtml();
  if(state.lsOpen) h+=suggPanel();
+ if(state.mergeSrc!==null&&state.mergeSrc!==undefined) h+=mergePanel();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
  var x=bd0?bd0.scrollLeft:0;
@@ -5741,7 +5760,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editMeta||state.lsOpen||state.editEp!==null);
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editMeta||state.lsOpen||(state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null);
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
 function snapStr(){try{return JSON.stringify({users:STORE.users,base:STORE.base,layers:STORE.layers})}catch(_){return null}}
@@ -5852,20 +5871,142 @@ function startPoll(){
 
 var saveState="saved", lastSaved="";
 function clock(){try{var d=new Date();return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}catch(_){return ""}}
+
+/* ===== מיזוג בין גרסאות ===== */
+function srcData(k){
+ if(!k) return STORE.base;
+ return (STORE.layers&&STORE.layers[k])?STORE.layers[k]:STORE.base;
+}
+function srcName(k){ return k?userName(k):"המקור המשותף" }
+function scSig(s){
+ return [s.title||"",s.status||"",s.ep||"",s.char||"",s.unit||"",s.line||"",s.short||"",s.min||"",
+  (s.have||[]).join("~"),(s.need||[]).join("~"),s.note||""].join("|");
+}
+function mergeDiff(k){
+ var A=srcData(k), B=hasLayer(state.me)?STORE.layers[state.me]:STORE.base;
+ var out={newSc:[],chgSc:[],newLine:[],newDay:[],newIdea:[],src:k};
+ var mine={}; (B.scenes||[]).forEach(function(s){mine[s.id]=s});
+ var mineT={}; (B.scenes||[]).forEach(function(s){mineT[String(s.title||"").replace(/\s+/g," ").trim()]=1});
+ (A.scenes||[]).forEach(function(s){
+  var t=String(s.title||"").replace(/\s+/g," ").trim();
+  var m=mine[s.id];
+  if(!m){ if(!mineT[t]) out.newSc.push(s); return }
+  if(scSig(s)!==scSig(m)) out.chgSc.push({a:s,b:m});
+ });
+ var mineL={}; (B.lines||[]).forEach(function(l){mineL[l.name.trim()]=1});
+ (A.lines||[]).forEach(function(l){ if(!mineL[l.name.trim()]) out.newLine.push(l) });
+ var mineD={}; (B.days||[]).forEach(function(d){mineD[(d.date||"")+"|"+(d.loc||"")]=1});
+ (A.days||[]).forEach(function(d){ if(!mineD[(d.date||"")+"|"+(d.loc||"")]) out.newDay.push(d) });
+ var mineI={}; (B.ideas||[]).forEach(function(i){mineI[String(i.title||"").trim()]=1});
+ (A.ideas||[]).forEach(function(i){ if(!mineI[String(i.title||"").trim()]) out.newIdea.push(i) });
+ return out;
+}
+function mergeCount(k){
+ var d=mergeDiff(k);
+ return d.newSc.length+d.chgSc.length+d.newLine.length+d.newDay.length+d.newIdea.length;
+}
+function mgRow(id,head,body,on){
+ return '<label class="mgrow"><input type="checkbox" class="mgpick" data-mg="'+esc(id)+'"'+(on?" checked":"")+'>'+
+  '<span class="mgtxt"><b>'+head+'</b>'+(body?'<em>'+body+'</em>':'')+'</span></label>';
+}
+function mergePanel(){
+ var k=state.mergeSrc, d=mergeDiff(k), n=mergeCount(k);
+ var h='<div class="modal" data-act="mgclose"><div class="box mgbox" data-stop="1">';
+ h+='<div class="mhead"><span>מיזוג מהגרסה של '+esc(srcName(k))+'</span><button data-act="mgclose" title="סגור">×</button></div>';
+ h+='<div class="mgbody">';
+ h+='<p class="mgnote">אתה לא נוגע בגרסה שלו. כל מה שתסמן כאן נכנס לגרסה שלך בלבד. סצנות חדשות מסומנות מראש, שינויים על סצנות קיימות לא.</p>';
+ if(!n){
+  h+='<div class="lsempty"><b>אין מה למזג</b><p>הגרסה שלך כבר מכילה את כל מה שיש אצל '+esc(srcName(k))+'.</p></div>';
+ } else {
+  if(d.newSc.length){
+   h+='<div class="mgsec"><h4>סצנות שאין אצלך <span>'+d.newSc.length+'</span></h4>';
+   d.newSc.forEach(function(s,i){
+    var ch=charOf(s.char);
+    h+=mgRow("ns:"+i,esc(s.id+" · "+s.title),esc("פרק "+(s.ep||1)+(ch?" · "+ch.name:"")+" · "+STATUS[s.status].l),true);
+   });
+   h+='</div>';
+  }
+  if(d.chgSc.length){
+   h+='<div class="mgsec"><h4>סצנות שהוא שינה <span>'+d.chgSc.length+'</span></h4>';
+   d.chgSc.forEach(function(p,i){
+    h+=mgRow("cs:"+i,esc(p.a.id+" · "+p.a.title),
+      'אצלך: '+esc(p.b.title+" · פרק "+(p.b.ep||1)+" · "+STATUS[p.b.status].l)+
+      '<br>אצלו: '+esc(p.a.title+" · פרק "+(p.a.ep||1)+" · "+STATUS[p.a.status].l),false);
+   });
+   h+='</div>';
+  }
+  if(d.newLine.length){
+   h+='<div class="mgsec"><h4>ליינים שאין אצלך <span>'+d.newLine.length+'</span></h4>';
+   d.newLine.forEach(function(l,i){ h+=mgRow("nl:"+i,esc(l.name),esc(l.what||""),true) });
+   h+='</div>';
+  }
+  if(d.newDay.length){
+   h+='<div class="mgsec"><h4>ימי צילום שאין אצלך <span>'+d.newDay.length+'</span></h4>';
+   d.newDay.forEach(function(x,i){ h+=mgRow("nd:"+i,esc(dayLabel(x.date)),esc(x.loc||"בלי מיקום"),true) });
+   h+='</div>';
+  }
+  if(d.newIdea.length){
+   h+='<div class="mgsec"><h4>רעיונות שאין אצלך <span>'+d.newIdea.length+'</span></h4>';
+   d.newIdea.forEach(function(x,i){ h+=mgRow("ni:"+i,esc(x.title),esc(x.why||""),true) });
+   h+='</div>';
+  }
+ }
+ h+='</div>';
+ h+='<div class="s-foot">';
+ if(n) h+='<button class="btn" data-act="mgapply">מזג את המסומן לגרסה שלי</button>';
+ h+='<button class="btn ghost" data-act="mgclose">סגור</button>';
+ h+='<div class="spacer"></div><span class="trhint">'+esc(srcName(k))+' לא מושפע משום דבר כאן</span></div>';
+ h+='</div></div>';
+ return h;
+}
+function mgApply(){
+ var k=state.mergeSrc, d=mergeDiff(k), me=myLayer(), n=0;
+ var picked={};
+ var els=document.querySelectorAll(".mgpick");
+ for(var i=0;i<els.length;i++) if(els[i].checked) picked[els[i].getAttribute("data-mg")]=1;
+ function cp(x){return JSON.parse(JSON.stringify(x))}
+ d.newLine.forEach(function(l,i){ if(picked["nl:"+i]){ me.lines=me.lines||[]; me.lines.push(cp(l)); n++ } });
+ d.newSc.forEach(function(s,i){
+  if(!picked["ns:"+i]) return;
+  var c=cp(s);
+  if(me.scenes.some(function(x){return x.id===c.id})) c.id=c.id+"m"+Math.floor(Math.random()*99);
+  me.scenes.push(c); n++;
+ });
+ d.chgSc.forEach(function(p,i){
+  if(!picked["cs:"+i]) return;
+  me.scenes.forEach(function(x){ if(x.id===p.b.id){
+   ["title","status","ep","char","unit","line","short","min","have","need","note","people","chars"].forEach(function(f){
+    if(p.a[f]!==undefined) x[f]=cp(p.a[f]);
+   });
+  }});
+  n++;
+ });
+ d.newDay.forEach(function(x,i){ if(picked["nd:"+i]){ me.days=me.days||[]; me.days.push(cp(x)); n++ } });
+ d.newIdea.forEach(function(x,i){ if(picked["ni:"+i]){ me.ideas=me.ideas||[]; me.ideas.unshift(cp(x)); n++ } });
+ if(!n){toast("לא סימנת כלום",true);return}
+ state.mergeSrc=null;
+ useView();render();save();
+ toast("מוזגו "+n+" פריטים לגרסה שלך");
+}
 function userPanel(){
  var h='<div class="upanel" data-act="closeusers"><div class="ubox" data-stop="1">';
  h+='<div class="uhead"><h3>'+(state.me?"משתמשים":"מי אתה?")+'</h3>';
  h+='<p>'+(state.me?"לחיצה על שם פותחת את הגרסה שלו. עורכים רק את הגרסה שלך.":"בחר את השם שלך. כל אחד עובד על הגרסה שלו, ורואה את של כולם.")+'</p></div>';
  h+='<div class="ulist">';
- h+='<button class="urow" data-act="pickview" data-k="" aria-current="'+(!state.viewUser)+'" style="--uc:#5A6472"><i></i>';
- h+='<b>המקור המשותף</b><span class="tagi">בסיס</span><span>'+(STORE.base.scenes||[]).length+' סצנות</span></button>';
+ function mgbtn(k){
+  if(RO||!state.me||k===state.me) return "";
+  var c=mergeCount(k);
+  return '<button class="umerge'+(c?"":" off")+'" data-act="mgopen" data-k="'+esc(k||"")+'" title="לראות מה יש שם ולמשוך לגרסה שלך">מזג אליי'+(c?'<span class="n">'+c+'</span>':'')+'</button>';
+ }
+ h+='<div class="urowwrap"><button class="urow" data-act="pickview" data-k="" aria-current="'+(!state.viewUser)+'" style="--uc:#5A6472"><i></i>';
+ h+='<b>המקור המשותף</b><span class="tagi">בסיס</span><span>'+(STORE.base.scenes||[]).length+' סצנות</span></button>'+mgbtn("")+'</div>';
  users().forEach(function(u){
   var n=hasLayer(u.k)?(STORE.layers[u.k].scenes||[]).length:(STORE.base.scenes||[]).length;
-  h+='<button class="urow" data-act="pickview" data-k="'+esc(u.k)+'" aria-current="'+(state.viewUser===u.k)+'" style="--uc:'+esc(u.color||"#455160")+'"><i></i>';
+  h+='<div class="urowwrap"><button class="urow" data-act="pickview" data-k="'+esc(u.k)+'" aria-current="'+(state.viewUser===u.k)+'" style="--uc:'+esc(u.color||"#455160")+'"><i></i>';
   h+='<b>'+esc(u.name)+'</b>';
   if(state.me===u.k) h+='<span class="tagi">אני</span>';
   else if(!hasLayer(u.k)) h+='<span class="tagi" style="color:var(--ink-3);border-color:var(--line-2)">עוד לא ערך</span>';
-  h+='<span>'+n+' סצנות</span></button>';
+  h+='<span>'+n+' סצנות</span></button>'+mgbtn(u.k)+'</div>';
  });
  h+='</div>';
  if(!RO){
@@ -6220,7 +6361,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,addshift:1,delshift:1,savesset:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
  if(MUT[act]&&!ensureEdit())return;
@@ -6425,6 +6566,11 @@ document.addEventListener("click",function(e){
    d.chars=DATA.chars.filter(function(c){var f=dform&&dform.querySelector('[name="ch_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
   }});
   state.editDay=null;render();save();toast("יום הצילום נשמר");return}
+ if(act==="mgopen"){state.mergeSrc=b.getAttribute("data-k")||"";state.showUsers=false;render();return}
+ if(act==="mgclose"){
+  if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="mgclose"]'))return;
+  state.mergeSrc=null;render();return}
+ if(act==="mgapply"){mgApply();return}
  if(act==="daycrew"){
   var cs=CREWS();
   DAYS().forEach(function(d){if(d.k===id){
@@ -6513,6 +6659,7 @@ document.addEventListener("keydown",function(e){
  if(mod&&(e.key==="y"||e.key==="Y")&&!inField){e.preventDefault();redo();return}
  if(e.key==="Enter"&&state.newAt&&e.target&&e.target.name==="title"){e.preventDefault();createAt("todo");return}
  if(e.key==="Escape"&&state.showUsers&&(state.me||RO)){state.showUsers=false;render();return}
+ if(e.key==="Escape"&&state.mergeSrc!==null&&state.mergeSrc!==undefined){state.mergeSrc=null;render();return}
  if(e.key==="Escape"&&state.lsOpen){state.lsOpen=false;state.lsChat=false;render();return}
  if(e.key==="Escape"&&state.charPanel){state.charPanel="";render();return}
  if(e.key==="Escape"&&state.newAt){state.newAt=null;render();return}
