@@ -201,6 +201,12 @@ section.grp.dropok{outline:3px dashed var(--accent);outline-offset:10px;border-r
 .f input,.f select,.f textarea{width:100%;font-family:"Assistant",sans-serif;font-size:14.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:8px 11px}
 .f textarea{min-height:78px;resize:vertical;line-height:1.5}
 .hint{font-size:12px;color:var(--ink-3);margin:4px 0 0}
+.cats{display:inline-flex;gap:4px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:10px;padding:3px;margin-inline-end:8px}
+.cats button{font-family:"Heebo",sans-serif;font-size:13px;font-weight:700;letter-spacing:.04em;padding:7px 15px;border:0;border-radius:7px;background:transparent;color:var(--ink-3);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.cats button span{font-size:10px;font-weight:700;opacity:.65;background:rgba(0,0,0,.08);border-radius:4px;padding:1px 5px}
+.cats button:hover{color:var(--ink)}
+.cats button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.cats button[aria-pressed="true"] span{background:var(--accent);color:var(--accent-ink);opacity:1}
 .views{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
 .views button{font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:500;padding:8px 17px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;border-inline-start:1px solid var(--line-2);transition:.15s}
 .views button:first-child{border-inline-start:0}
@@ -3172,7 +3178,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3282,8 +3288,9 @@ function render(){
  else if(!state.writable) h+='<div class="ro">העמוד במצב קריאה בלבד בתצוגה הזו. שינויים שתעשה כאן לא יישמרו.</div>';
  h+='<div class="bar"><div class="bar-in">';
  h+=userBtn()+'<div class="sep"></div>';
+ h+=catBar();
  h+='<div class="views">';
- h+=vbtn("days","לוג ימי צילום")+vbtn("unit","סצנות לפי מחלקה")+vbtn("char","סצנות לפי דמות")+vbtn("lines","מפת הליינים")+vbtn("board","מפת הפרקים")+vbtn("ideas","רעיונות לסצנות")+vbtn("need","צריך לצלם")+vbtn("shifts","שעון משמרות")+vbtn("tr","תמלולים");
+ catObj(catOf(state.group)).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
  h+='</div>';
  if(!RO){
   h+='<div class="sep"></div>';
@@ -5465,6 +5472,26 @@ function legendStrip(){
  h+='<button class="clegtog" data-act="legtog">'+(state.legOpen?"הסתר":"הצג")+'</button>';
  return h+'</div></div>';
 }
+var CATS=[
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"]]},
+ {k:"post",name:"פוסט",views:[["board","מפת הפרקים"],["tr","תמלולים"]]}
+];
+function catOf(g){
+ for(var i=0;i<CATS.length;i++){
+  for(var j=0;j<CATS[i].views.length;j++) if(CATS[i].views[j][0]===g) return CATS[i].k;
+ }
+ return CATS[0].k;
+}
+function catObj(k){var a=CATS.filter(function(c){return c.k===k});return a[0]||CATS[0]}
+function catBar(){
+ var cur=catOf(state.group);
+ var h='<div class="cats">';
+ CATS.forEach(function(c){
+  h+='<button data-act="cat" data-k="'+c.k+'" aria-pressed="'+(cur===c.k)+'">'+esc(c.name)+'<span>'+c.views.length+'</span></button>';
+ });
+ return h+'</div>';
+}
 function vbtn(k,label){
  return '<button data-act="group" data-k="'+k+'" aria-pressed="'+(state.group===k)+'">'+esc(label)+'</button>';
 }
@@ -6126,7 +6153,14 @@ document.addEventListener("click",function(e){
  if(act==="undo"){undo();return}
  if(act==="redo"){redo();return}
  if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
- if(act==="group"){state.group=b.getAttribute("data-k");render();return}
+ if(act==="group"){state.group=b.getAttribute("data-k");state.catLast=state.catLast||{};state.catLast[catOf(state.group)]=state.group;render();return}
+ if(act==="cat"){
+  var ck=b.getAttribute("data-k"), co=catObj(ck);
+  state.catLast=state.catLast||{};
+  var want=state.catLast[ck];
+  var ok=co.views.some(function(v){return v[0]===want});
+  state.group=ok?want:co.views[0][0];
+  render();return}
  if(act==="buildask"){
   state.askWho=fval("__ask__","who");state.askExtra=fval("__ask__","extra");
   var fk=state.askWho||"", lbl="";
