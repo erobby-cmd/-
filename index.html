@@ -3178,7 +3178,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3290,7 +3290,7 @@ function render(){
  h+=userBtn()+'<div class="sep"></div>';
  h+=catBar();
  h+='<div class="views">';
- catObj(catOf(state.group)).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
+ catObj(curCat()).views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
  h+='</div>';
  if(!RO){
   h+='<div class="sep"></div>';
@@ -5475,7 +5475,7 @@ function legendStrip(){
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"]]},
- {k:"post",name:"פוסט",views:[["board","מפת הפרקים"],["tr","תמלולים"]]}
+ {k:"post",name:"פוסט",views:[["board","מפת הפרקים"],["tr","תמלולים"],["shifts","שעון משמרות"]]}
 ];
 function catOf(g){
  for(var i=0;i<CATS.length;i++){
@@ -5484,8 +5484,13 @@ function catOf(g){
  return CATS[0].k;
 }
 function catObj(k){var a=CATS.filter(function(c){return c.k===k});return a[0]||CATS[0]}
+function catHas(k,g){return catObj(k).views.some(function(v){return v[0]===g})}
+function curCat(){
+ if(state.cat&&catHas(state.cat,state.group)) return state.cat;
+ return catOf(state.group);
+}
 function catBar(){
- var cur=catOf(state.group);
+ var cur=curCat();
  var h='<div class="cats">';
  CATS.forEach(function(c){
   h+='<button data-act="cat" data-k="'+c.k+'" aria-pressed="'+(cur===c.k)+'">'+esc(c.name)+'<span>'+c.views.length+'</span></button>';
@@ -6153,13 +6158,17 @@ document.addEventListener("click",function(e){
  if(act==="undo"){undo();return}
  if(act==="redo"){redo();return}
  if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
- if(act==="group"){state.group=b.getAttribute("data-k");state.catLast=state.catLast||{};state.catLast[catOf(state.group)]=state.group;render();return}
+ if(act==="group"){
+  state.group=b.getAttribute("data-k");
+  if(!state.cat||!catHas(state.cat,state.group)) state.cat=catOf(state.group);
+  state.catLast=state.catLast||{};state.catLast[state.cat]=state.group;
+  render();return}
  if(act==="cat"){
   var ck=b.getAttribute("data-k"), co=catObj(ck);
   state.catLast=state.catLast||{};
   var want=state.catLast[ck];
-  var ok=co.views.some(function(v){return v[0]===want});
-  state.group=ok?want:co.views[0][0];
+  state.cat=ck;
+  state.group=(want&&catHas(ck,want))?want:co.views[0][0];
   render();return}
  if(act==="buildask"){
   state.askWho=fval("__ask__","who");state.askExtra=fval("__ask__","extra");
