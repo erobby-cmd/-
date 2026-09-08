@@ -5374,7 +5374,18 @@ function LINES(){
  return DATA.lines;
 }
 function lineObj(k){var a=LINES().filter(function(l){return l.k===k});return a[0]||null}
-function lineOf(s){var k=s.line||AUTO_LINE[s.id]||"";return lineObj(k)?k:""}
+function lineOf(s){var k=(s.line&&s.line!=="-")?s.line:(AUTO_LINE[s.id]||"");return lineObj(k)?k:""}
+function charTopLine(ck){
+ if(!ck) return "";
+ var c={}, best="", n=0;
+ DATA.scenes.forEach(function(x){
+  if(x.char!==ck) return;
+  var k=lineOf(x); if(!k) return;
+  c[k]=(c[k]||0)+1;
+  if(c[k]>n){n=c[k];best=k}
+ });
+ return n>=2?best:"";
+}
 function lineName(k){var l=lineObj(k);return l?l.name:"בלי ליין"}
 function lineColor(k){var l=lineObj(k);return (l&&l.color)?l.color:"#8A93A0"}
 function lineStat(k){
@@ -7659,7 +7670,11 @@ document.addEventListener("click",function(e){
  if(act==="save"){var d=readForm(id);if(!d)return;
   if(id==="__new__"){
    if(DATA.scenes.some(function(x){return String(x.id).toUpperCase()===String(d.id).toUpperCase()})) d.id=newSceneId();
-   d.ord=999;DATA.scenes.push(d);state.adding=false}
+   var _autoL="";
+   if(!d.line||d.line==="-"){ _autoL=charTopLine(d.char); if(_autoL) d.line=_autoL; }
+   d.ord=999;DATA.scenes.push(d);state.adding=false;
+   if(_autoL) setTimeout(function(){toast("הסצנה שויכה אוטומטית לליין "+lineName(_autoL)+". אפשר לשנות בתפריט העבר אל")},420);
+  }
   else{
    var clash=DATA.scenes.some(function(x){return x.id!==id&&String(x.id).toUpperCase()===String(d.id).toUpperCase()});
    if(clash){toast("הקוד "+d.id+" כבר תפוס בסצנה אחרת. בחר קוד אחר",true);return}
