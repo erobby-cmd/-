@@ -3338,7 +3338,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3657,7 +3657,16 @@ function render(){
   h+='</section>';
  });
  h+=unitMap();
- h+='</div><div class="toast" id="toast"></div>';
+ h+='</div>';
+ if(state.editing&&state.editModal){
+  var cs=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
+  if(cs){
+   h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+   h+='<div class="mhead"><span>עריכת סצנה '+esc(cs.id)+'</span><button data-act="cancel" title="סגור">\u00d7</button></div>';
+   h+=form(cs)+'</div></div>';
+  }
+ }
+ h+='<div class="toast" id="toast"></div>';
  paint(h);
 }
 
@@ -6315,7 +6324,7 @@ function chip(kind,k,label,n){
 }
 
 function card(s){
- if(state.editing===s.id) return '<article class="scene" data-s="'+s.status+'">'+form(s)+'</article>';
+ if(state.editing===s.id&&!state.editModal) return '<article class="scene" data-s="'+s.status+'">'+form(s)+'</article>';
  var h='<article class="scene" data-s="'+s.status+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(s.id)+'">';
  h+='<div class="s-head">'+(RO?"":'<div class="grip" title="גרור מכאן">⠿</div>')+reddot(s.status)+'<div class="code">'+esc(s.id)+'</div><div class="s-title"><h3>'+esc(s.title)+(s.mine?'<span class="tag">הצעה</span>':'')+'</h3><div class="people">';
  if(s.unit) h+='<span class="person unit">'+esc(unitName(s.unit))+'</span>';
@@ -7471,7 +7480,7 @@ document.addEventListener("click",function(e){
   if(e.target.closest("[data-stop]"))return;
   if(document.querySelector('.modal [data-form][data-dirty]')){
    toast("יש שינויים שלא נשמרו. לחץ שמור, או ביטול כדי לצאת",true);return}
-  state.editing=null;state.editLine=null;state.editDay=null;render();return}
+  state.editing=null;state.editModal=false;state.editLine=null;state.editDay=null;render();return}
  if(act==="editmeta"){state.editMeta=true;render();return}
  if(act==="cancelmeta"){state.editMeta=false;render();return}
  if(act==="savemeta"){
@@ -7491,8 +7500,11 @@ document.addEventListener("click",function(e){
  if(act==="backup"){backup();return}
  if(act==="restore"){restore();return}
  if(act==="add"){state.adding=true;state.editing=null;render();window.scrollTo({top:0,behavior:"smooth"});return}
- if(act==="edit"){state.editing=id;state.adding=false;render();return}
- if(act==="cancel"){state.editing=null;state.adding=false;render();return}
+ if(act==="edit"){
+  state.editing=id;state.adding=false;
+  state.editModal=!!(e.target&&e.target.closest&&e.target.closest(".mchip"));
+  render();return}
+ if(act==="cancel"){state.editing=null;state.adding=false;state.editModal=false;render();return}
  if(act==="cycle"){var s=DATA.scenes.filter(function(x){return x.id===id})[0];if(!s)return;
   s.status=ORDER[(ORDER.indexOf(s.status)+1)%ORDER.length];render();save();return}
  if(act==="del"){DATA.scenes=DATA.scenes.filter(function(x){return x.id!==id});state.editing=null;reindex();render();save();return}
@@ -7500,7 +7512,7 @@ document.addEventListener("click",function(e){
   if(id==="__new__"){d.ord=999;DATA.scenes.push(d);state.adding=false}
   else{var i=-1;DATA.scenes.forEach(function(x,j){if(x.id===id)i=j});
    if(i>-1){d.ord=DATA.scenes[i].ord;if(DATA.scenes[i].mine)d.mine=true;DATA.scenes[i]=d}
-   state.editing=null}
+   state.editing=null;state.editModal=false}
   reindex();render();save();return}
 });
 document.addEventListener("keydown",function(e){
