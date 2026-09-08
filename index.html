@@ -824,6 +824,9 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .grp-h h2 .cdot{width:16px;height:16px}
 .arc th.c0{border-inline-end:0}
 .arc tbody th.c0{border-inline-start:5px solid var(--ccol,transparent)}
+.arc tbody tr td{background:color-mix(in srgb,var(--ccol,transparent) 7%,transparent)}
+.arc tbody tr td.void,.arc tbody tr td.hole{background:color-mix(in srgb,var(--ccol,transparent) 4%,transparent)}
+.arc tbody tr:hover td{background:color-mix(in srgb,var(--ccol,transparent) 12%,transparent)}
 .arc th.c0 b{color:var(--ccol,inherit)}
 .addslot{height:15px;margin:-7px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:5px;color:var(--ink-3);font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;opacity:.3;transition:.13s;border:1px dashed var(--line-2)}
 .addslot:hover{opacity:1;height:26px;margin:0;background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -3833,6 +3836,31 @@ function note(x,extra){
  }
  return h+'</div>';
 }
+function newSceneId(){
+ var used={};
+ (DATA.scenes||[]).forEach(function(x){used[String(x.id||"").toUpperCase()]=1});
+ var n=(DATA.scenes||[]).length+1, id;
+ do{ id="X-"+n; n++ } while(used[id]&&n<99999);
+ return id;
+}
+function fixAllDupIds(){
+ var n=0, keep=DATA;
+ function run(d){ if(!d||!d.scenes)return; DATA=d; n+=fixDupIds().length; }
+ run(STORE.base);
+ Object.keys(STORE.layers||{}).forEach(function(k){ run(STORE.layers[k]) });
+ DATA=keep;
+ return n;
+}
+function fixDupIds(){
+ var seen={}, fixed=[];
+ (DATA.scenes||[]).forEach(function(x){
+  var k=String(x.id||"").toUpperCase();
+  if(!k){ x.id=newSceneId(); fixed.push("(ריק) -> "+x.id); return }
+  if(seen[k]){ var old=x.id; x.id=newSceneId(); fixed.push(old+" -> "+x.id) }
+  else seen[k]=1;
+ });
+ return fixed;
+}
 function reindex(){
  DATA.eps.forEach(function(e){
   DATA.scenes.filter(function(x){return x.ep===e.n})
@@ -4177,7 +4205,7 @@ function fillTable(){
  DATA.chars.forEach(function(c){
   var mine=DATA.scenes.filter(function(x){return x.char===c.k});
   var score=0;
-  h+='<tr><th class="c0" style="--ccol:'+esc(c.color||"#455160")+'"><b>'+esc(c.name)+'</b><em>'+esc(c.role||"")+'</em></th>';
+  h+='<tr style="--ccol:'+esc(c.color||"#455160")+'"><th class="c0"><b>'+esc(c.name)+'</b><em>'+esc(c.role||"")+'</em></th>';
   TD.forEach(function(t){
    var hit=mine.filter(function(x){return (x.tags||[]).indexOf(t.k)>-1});
    var shot=hit.filter(function(x){return x.status==="shot"});
@@ -5342,7 +5370,7 @@ var AUTO_LINE={"B-01":"hunt","B-02":"hunt","B-03":"hunt","B-04":"hunt","B-05":"h
 "Y-01":"yuval","Y-02":"yuval","L-01":"lauren"};
 var LKIND={ok:{l:"רץ לאורך העונה",c:"ok"},end:{l:"נגמר לפני הסוף",c:"end"},gap:{l:"נשמט באמצע",c:"gap"},drop:{l:"יושב בפרק אחד",c:"drop"},thin:{l:"דק מדי",c:"thin"},empty:{l:"ריק",c:"empty"}};
 function LINES(){
- if(!DATA.lines||!DATA.lines.length) DATA.lines=JSON.parse(JSON.stringify(DEFAULT_LINES));
+ if(!DATA.lines) DATA.lines=JSON.parse(JSON.stringify(DEFAULT_LINES));
  return DATA.lines;
 }
 function lineObj(k){var a=LINES().filter(function(l){return l.k===k});return a[0]||null}
@@ -5687,7 +5715,7 @@ function linesView(){
  h+='<th class="tot">המהלך</th></tr></thead><tbody>';
  LS.forEach(function(l){
   var s=ST[l.k];
-  h+='<tr data-line="'+esc(l.k)+'"><th class="c0"'+(RO?"":' data-cell="l:'+esc(l.k)+':0" title="גרור לכאן כדי להעביר לליין הזה בלי לשנות פרק"')+' style="--ccol:'+esc(l.color||"#455160")+'"><b>'+(RO?"":'<span class="rgrip" draggable="true" data-line="'+esc(l.k)+'" title="גרור כדי לשנות את סדר הליינים">⠿</span>')+esc(l.name)+'</b>';
+  h+='<tr data-line="'+esc(l.k)+'" style="--ccol:'+esc(l.color||"#455160")+'"><th class="c0"'+(RO?"":' data-cell="l:'+esc(l.k)+':0" title="גרור לכאן כדי להעביר לליין הזה בלי לשנות פרק"')+'><b>'+(RO?"":'<span class="rgrip" draggable="true" data-line="'+esc(l.k)+'" title="גרור כדי לשנות את סדר הליינים">⠿</span>')+esc(l.name)+'</b>';
   if(l.what) h+='<em>'+esc(l.what)+'</em>';
   h+='<span class="ldots">';
   DATA.eps.forEach(function(e){
@@ -5716,7 +5744,7 @@ function linesView(){
   h+='<em>'+s.shot+' צולמו · '+s.min+' דק׳</em></td></tr>';
  });
  var unv=un.filter(function(x){return state.filter==="all"||x.status===state.filter});
- h+='<tr class="norow" data-line="__none__"><th class="c0"'+(RO?"":' data-cell="l:__none__:0" title="גרור לכאן כדי להוציא מכל ליין"')+' style="--ccol:#8A93A0"><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
+ h+='<tr class="norow" data-line="__none__" style="--ccol:#8A93A0"><th class="c0"'+(RO?"":' data-cell="l:__none__:0" title="גרור לכאן כדי להוציא מכל ליין"')+'><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
  DATA.eps.forEach(function(e){
   var cell=unv.filter(function(x){return x.ep===e.n});
   var cattr=RO?"":' data-cell="l:__none__:'+e.n+'"';
@@ -5757,7 +5785,7 @@ function arcTable(){
  h+='<th class="tot">סה״כ</th></tr></thead><tbody>';
  DATA.chars.forEach(function(c){
   var all=DATA.scenes.filter(function(x){return inScene(x,c.k)});
-  h+='<tr><th class="c0"'+(RO?"":' data-cell="c:'+esc(c.k)+':0" title="גרור לכאן כדי לשייך לדמות הזו בלי לשנות פרק"')+' style="--ccol:'+esc(c.color||"#455160")+'"><b>'+esc(c.name)+'</b><em>'+esc(c.role)+'</em></th>';
+  h+='<tr style="--ccol:'+esc(c.color||"#455160")+'"><th class="c0"'+(RO?"":' data-cell="c:'+esc(c.k)+':0" title="גרור לכאן כדי לשייך לדמות הזו בלי לשנות פרק"')+'><b>'+esc(c.name)+'</b><em>'+esc(c.role)+'</em></th>';
   DATA.eps.forEach(function(e){
    var cell=all.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
    var ck='c:'+c.k+':'+e.n;
@@ -6419,7 +6447,7 @@ function card(s){
   h+='<span class="person pchar" style="--cc:'+esc(cc.color||"#455160")+'"><i></i>'+esc(cc.name)+'</span>'});
  (s.people||[]).forEach(function(p){h+='<span class="person">'+esc(p)+'</span>'});
  h+='</div></div><div class="mins">'+(Number(s.min)||0)+' דק׳</div>';
- h+='<button class="pill" data-s="'+s.status+'"'+(RO?"":' data-act="cycle"')+' data-id="'+esc(s.id)+'" title="לחיצה מחליפה סטטוס">'+STATUS[s.status].l+'</button></div>';
+ h+='<button class="pill" data-s="'+s.status+'"'+(RO?"":' data-act="cycle"')+' data-id="'+esc(s.id)+'" title="לחיצה מחליפה סטטוס">'+(STATUS[s.status]?STATUS[s.status].l:esc(s.status||""))+'</button></div>';
  if(s.short) h+='<div class="cardshort">'+esc(s.short)+'</div>';
  h+='<div class="cols"><div class="col have"><h4>יש ביד</h4>'+list(s.have,"אין עדיין כלום")+'</div>';
  h+='<div class="col need"><h4>חסר כדי לסגור</h4>'+list(s.need,"הסצנה סגורה")+'</div></div>';
@@ -6495,7 +6523,7 @@ function readForm(key){
  var el=document.querySelector('[data-form="'+(window.CSS&&CSS.escape?CSS.escape(key):key)+'"]');
  if(!el) return null;
  function v(n){var f=el.querySelector('[name="'+n+'"]');return f?f.value:""}
- var _o={id:v("id").trim()||("X-"+(DATA.scenes.length+1)),title:v("title").trim()||"סצנה ללא שם",
+ var _o={id:v("id").trim()||newSceneId(),title:v("title").trim()||"סצנה ללא שם",
   char:v("char"),unit:v("unit"),status:v("status"),min:Number(v("min"))||MIN_PER,ep:Number(v("ep"))||1,
   people:v("people").split(",").map(function(x){return x.trim()}).filter(Boolean),
   have:toArr(v("have")),need:toArr(v("need")),short:v("short").trim(),note:v("note").trim(),
@@ -6604,7 +6632,10 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.lsOpen||(state.chatDraft||"").trim()||(state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null);
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.lsOpen||
+   state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
+   (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||
+   !!document.querySelector('[data-form][data-dirty]'));
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
 function snapStr(){try{return JSON.stringify({users:STORE.users,base:STORE.base,layers:STORE.layers})}catch(_){return null}}
@@ -6643,10 +6674,10 @@ function rowsOf(){
  var r={users:STORE.users,base:STORE.base};
  Object.keys(STORE.layers||{}).forEach(function(k){r["layer:"+k]=STORE.layers[k]});
  Object.keys(STORE.tr||{}).forEach(function(k){r["tr:"+k]=STORE.tr[k]});
- if(STORE.shifts&&STORE.shifts.list) r["shifts"]=STORE.shifts;
- if(STORE.feed&&STORE.feed.items&&STORE.feed.items.length) r["feed"]=STORE.feed;
- Object.keys(STORE.chat||{}).forEach(function(k){ if((STORE.chat[k].items||[]).length) r["chat:"+k]=STORE.chat[k] });
- if(STORE.dues&&((STORE.dues.list||[]).length||(STORE.dues.next&&(STORE.dues.next.from||STORE.dues.next.label)))) r["dues"]=STORE.dues;
+ if(STORE.shifts) r["shifts"]=STORE.shifts;
+ if(STORE.feed&&STORE.feed.items) r["feed"]=STORE.feed;
+ Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r["chat:"+k]=STORE.chat[k] });
+ if(STORE.dues) r["dues"]=STORE.dues;
  return r;
 }
 function applyRows(list){
@@ -6665,6 +6696,12 @@ function applyRows(list){
  if(!seen)return false;
  if(users)STORE.users=users;
  if(base)STORE.base=base;
+ Object.keys(STORE.layers||{}).forEach(function(k){
+  if(!layers[k]&&sent["layer:"+k]===undefined) layers[k]=STORE.layers[k];
+ });
+ Object.keys(STORE.tr||{}).forEach(function(k){
+  if(!tr[k]&&sent["tr:"+k]===undefined) tr[k]=STORE.tr[k];
+ });
  STORE.layers=layers;
  STORE.tr=tr;
  if(sh&&sh.list) STORE.shifts=sh;
@@ -6691,8 +6728,10 @@ function pull(initial){
       list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
       useView();
       resetSnap();
+      var _fx=0; try{_fx=fixAllDupIds()}catch(_){}
       if(editorOpen()){ pendingRender=true; }
       else { pendingRender=false; render(); }
+      if(_fx){ toast("תוקנו "+_fx+" קודים כפולים של סצנות"); save(); }
      }
      netStatus("ok");
      return list.length;
@@ -6722,7 +6761,11 @@ function netStatus(st){
 }
 function startPoll(){
  clearInterval(pollT);
- pollT=setInterval(function(){if(document.hidden)return;pull(false)},6000);
+ pollT=setInterval(function(){
+  if(document.hidden)return;
+  if(pendingRender&&!editorOpen()){pendingRender=false;render()}
+  pull(false);
+ },6000);
  document.addEventListener("visibilitychange",function(){if(!document.hidden)pull(false)});
 }
 
@@ -7243,14 +7286,15 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,trpaste:1,trdel:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,saveNow:1};
- var SHARED={addshift:1,delshift:1,savesset:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1};
+  edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
  } else if(MUT[act]&&!ensureEdit())return;
+ if(act==="saveNow"){if(RO)return;save();return}
  if(act==="undo"){undo();return}
  if(act==="redo"){redo();return}
  if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
@@ -7516,7 +7560,7 @@ document.addEventListener("click",function(e){
   return}
  if(act==="delshift"){
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
-  render();save();toast("המשמרת נמחקה. Ctrl+Z מחזיר");return}
+  render();save();toast("המשמרת נמחקה");return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
  if(act==="saveday"){
   var dform=document.querySelector('[data-form="__day__"]');
@@ -7613,8 +7657,13 @@ document.addEventListener("click",function(e){
   s.status=ORDER[(ORDER.indexOf(s.status)+1)%ORDER.length];render();save();return}
  if(act==="del"){DATA.scenes=DATA.scenes.filter(function(x){return x.id!==id});state.editing=null;reindex();render();save();return}
  if(act==="save"){var d=readForm(id);if(!d)return;
-  if(id==="__new__"){d.ord=999;DATA.scenes.push(d);state.adding=false}
-  else{var i=-1;DATA.scenes.forEach(function(x,j){if(x.id===id)i=j});
+  if(id==="__new__"){
+   if(DATA.scenes.some(function(x){return String(x.id).toUpperCase()===String(d.id).toUpperCase()})) d.id=newSceneId();
+   d.ord=999;DATA.scenes.push(d);state.adding=false}
+  else{
+   var clash=DATA.scenes.some(function(x){return x.id!==id&&String(x.id).toUpperCase()===String(d.id).toUpperCase()});
+   if(clash){toast("הקוד "+d.id+" כבר תפוס בסצנה אחרת. בחר קוד אחר",true);return}
+   var i=-1;DATA.scenes.forEach(function(x,j){if(x.id===id)i=j});
    if(i>-1){d.ord=DATA.scenes[i].ord;if(DATA.scenes[i].mine)d.mine=true;DATA.scenes[i]=d}
    state.editing=null;state.editModal=false}
   reindex();render();save();return}
