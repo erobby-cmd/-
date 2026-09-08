@@ -342,18 +342,10 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .mchip.m-dropped{background:#D6D6D6;color:#444}
 .mchip em{font-family:"Heebo",sans-serif;font-size:9.8px;letter-spacing:.07em;opacity:.62;display:block;font-style:normal;font-weight:700}
 
-/* צבע הפתק לפי צבע הדמות */
-.pnote{background:color-mix(in srgb,var(--cc) 17%,var(--surface));color:var(--ink);border-inline-start:4px solid var(--cc)}
-.pnote.n-todo{background:color-mix(in srgb,var(--cc) 8%,var(--surface));color:var(--ink);border-inline-start-style:dashed}
-.pnote.n-partial{background:color-mix(in srgb,var(--cc) 17%,var(--surface));color:var(--ink);box-shadow:inset 0 0 0 2px var(--cc),0 1px 1px rgba(0,0,0,.14),0 6px 14px rgba(0,0,0,.13)}
-.pnote.n-dropped{background:color-mix(in srgb,var(--cc) 6%,var(--surface));color:var(--ink-3);opacity:.6}
-.pnote h4,.pnote p,.pnote .c{color:inherit}
-.mchip{background:color-mix(in srgb,var(--cc) 17%,var(--surface));color:var(--ink);border-inline-start:3px solid var(--cc)}
-.mchip.m-todo{background:color-mix(in srgb,var(--cc) 8%,var(--surface));color:var(--ink);border-inline-start-style:dashed}
-.mchip.m-partial{background:color-mix(in srgb,var(--cc) 17%,var(--surface));color:var(--ink);box-shadow:inset 0 0 0 2px var(--cc)}
-.mchip.m-dropped{background:var(--surface-2);color:var(--ink-3);border-inline-start-color:var(--line-2)}
+/* פס צבע הדמות על שפת הפתק, הרקע נשאר לפי סטטוס */
+.pnote{border-inline-start:4px solid var(--cc)}
+.mchip{border-inline-start:3px solid var(--cc)}
 .scene{border-inline-start:4px solid var(--cc,var(--line))}
-.scene[data-s="todo"]{border-inline-start-style:dashed}
 .pnote.multi,.mchip.multi,.scene.multi{border-inline-start:0;position:relative}
 .pnote.multi{padding-inline-start:17px}
 .mchip.multi{padding-inline-start:12px}
@@ -3517,7 +3509,7 @@ function render(){
   h+='<span class="savebadge s-ok"><i></i>עותק צפייה · '+esc(SNAPDATE)+'</span>';
  }
  h+='</div>'+legendStrip()+'</div><div class="wrap'+(state.group==="board"?" boardmode":"")+'">';
- if(state.adding) h+='<div class="scene" data-s="todo" style="margin-top:24px">'+form(null)+'</div>';
+ if(state.adding&&state.group!=="char"&&state.group!=="unit") h+='<div class="scene" data-s="todo" style="margin-top:24px">'+form(null)+'</div>';
 
  if((state.q||"").trim()){
   h+=searchView();
@@ -3703,6 +3695,11 @@ function render(){
  });
  h+=unitMap();
  h+='</div>';
+ if(state.adding){
+  h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+  h+='<div class="mhead"><span>סצנה חדשה</span><button data-act="cancel" title="סגור">\u00d7</button></div>';
+  h+=form(null)+'</div></div>';
+ }
  if(state.editing&&state.editModal){
   var cs=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
   if(cs){
@@ -6650,7 +6647,7 @@ function rowsOf(){
  if(STORE.shifts&&STORE.shifts.list) r["shifts"]=STORE.shifts;
  if(STORE.feed&&STORE.feed.items&&STORE.feed.items.length) r["feed"]=STORE.feed;
  Object.keys(STORE.chat||{}).forEach(function(k){ if((STORE.chat[k].items||[]).length) r["chat:"+k]=STORE.chat[k] });
- if(STORE.dues&&(STORE.dues.list||[]).length) r["dues"]=STORE.dues;
+ if(STORE.dues&&((STORE.dues.list||[]).length||(STORE.dues.next&&(STORE.dues.next.from||STORE.dues.next.label)))) r["dues"]=STORE.dues;
  return r;
 }
 function applyRows(list){
@@ -6674,7 +6671,7 @@ function applyRows(list){
  if(sh&&sh.list) STORE.shifts=sh;
  if(fd&&fd.items) STORE.feed=fd;
  if(ch) STORE.chat=ch;
- if(du&&du.list) STORE.dues=du;
+ if(du&&(du.list||du.next)){ du.list=du.list||[]; STORE.dues=du; }
  return true;
 }
 function pull(initial){
