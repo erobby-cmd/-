@@ -608,6 +608,11 @@ mark{background:var(--partial-soft);color:var(--ink);padding:0 2px;border-radius
 .lleg s.l-empty{background:rgba(120,128,138,.16);color:#8A93A0}
 .lleg:hover{border-color:var(--cc,#455160);color:var(--ink);transform:translateY(-1px)}
 .lleg.none{border-style:dashed}
+li.gdone{opacity:.75}
+li.gdone s{text-decoration-thickness:1px}
+li.gdone em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;color:var(--shot);background:var(--shot-soft);border-radius:5px;padding:1px 6px;margin-inline-start:6px;white-space:nowrap}
+.gapx{background:transparent;border:1px solid var(--line-2);border-radius:5px;font-family:"Heebo",sans-serif;font-size:10px;font-weight:700;color:var(--ink-3);padding:1px 6px;margin-inline-start:6px;cursor:pointer}
+.gapx:hover{border-color:var(--accent);color:var(--ink)}
 .dulist{display:grid;gap:8px;margin-top:16px}
 .durow{display:grid;grid-template-columns:132px 1fr auto;gap:14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--line-2);border-radius:11px;padding:12px 15px;box-shadow:var(--shadow)}
 .durow.edit{display:block;border-inline-start-color:var(--accent)}
@@ -3422,6 +3427,52 @@ function extraChars(s){
 }
 function inScene(s,k){ return s.char===k||extraChars(s).indexOf(k)>-1 }
 function extraNames(s){ return extraChars(s).map(function(k){return (charOf(k)||{}).name||""}).filter(Boolean) }
+var GAPSTOP={"של":1,"את":1,"עם":1,"על":1,"אין":1,"יש":1,"מה":1,"זה":1,"הוא":1,"היא":1,"לא":1,"כבר":1,"עוד":1,"אחד":1,"אחת":1,"בכלל":1,"כדי":1,"בין":1,"אצל":1,"וגם":1,"הכול":1,"הכל":1,"צריך":1,"אולי":1,"אף":1,"בו":1,"בה":1,"שלו":1,"שלה":1,"שבו":1,"שבה":1};
+function gapWords(t){
+ return String(t||"").replace(/[.,:;!?"'׳״()\[\]]/g," ").split(/\s+/)
+  .map(function(w){return w.replace(/^[והבלכמש]/,"")})
+  .filter(function(w){return w.length>=3&&!GAPSTOP[w]});
+}
+var _wfCache=null,_wfLen=-1;
+function wordFreq(w){
+ if(_wfCache===null||_wfLen!==DATA.scenes.length){
+  _wfCache={};_wfLen=DATA.scenes.length;
+  DATA.scenes.forEach(function(s){
+   var seen={};
+   gapWords((s.title||"")+" "+(s.short||"")).forEach(function(x){
+    if(seen[x])return;seen[x]=1;_wfCache[x]=(_wfCache[x]||0)+1;
+   });
+  });
+ }
+ return _wfCache[w]||0;
+}
+function gapCovered(ck,gap){
+ var ws=gapWords(gap);
+ if(!ws.length) return null;
+ var best=null,bs=0;
+ DATA.scenes.forEach(function(s){
+  if(!inScene(s,ck)) return;
+  if(s.status!=="shot"&&s.status!=="partial") return;
+  var hay=((s.title||"")+" "+(s.short||"")+" "+((s.have||[]).join(" ")));
+  var sc=0;
+  ws.forEach(function(w){
+   if(hay.indexOf(w)<0) return;
+   sc+= (wordFreq(w)<=3?2:1);
+  });
+  if(sc>bs){bs=sc;best=s}
+ });
+ var need=ws.length<=3?2:3;
+ return bs>=need?best:null;
+}
+function gapList(ck,gaps){
+ if(!(gaps||[]).length) return "";
+ return gaps.map(function(x,i){
+  var cov=gapCovered(ck,x);
+  if(!cov) return '<li>'+esc(x)+'</li>';
+  return '<li class="gdone"><s>'+esc(x)+'</s><em>אולי כבר צולם, '+esc(cov.id)+'</em>'+
+   (RO?"":'<button class="gapx" data-act="gapdone" data-id="'+esc(ck)+'" data-i="'+i+'" title="הסר מהרשימה">הסר</button>')+'</li>';
+ }).join("");
+}
 function charColor(k){var c=charOf(k);return (c&&c.color)?c.color:"#455160"}
 function sceneColors(s){
  var out=[], seen={};
@@ -3679,7 +3730,7 @@ function render(){
     h+='<div class="cpanel">';
     h+='<div class="want"><h5>מה היא רוצה</h5><p>'+esc(g.obj.want)+'</p></div>';
     h+='<div class="wound"><h5>מה הפצע</h5><p>'+esc(g.obj.wound)+'</p></div>';
-    h+='<div class="gap"><h5>מה חסר לדמות</h5><ul>'+(g.obj.gaps||[]).map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+    h+='<div class="gap"><h5>מה חסר לדמות</h5><ul>'+gapList(g.obj.k,g.obj.gaps)+'</ul></div>';
     h+='</div>';
    }
   } else if(g.uobj && state.editUnit===g.uobj.k){ h+=unitForm(g.uobj); }
@@ -4423,7 +4474,7 @@ function needGroups(mode){
    f:function(s){return s.ep===e.n}})});
  } else {
   DATA.chars.forEach(function(c){g.push({k:"c:"+c.k,name:c.name,sub:c.role||"",color:c.color||"#455160",
-   gaps:c.gaps||[],f:function(s){return inScene(s,c.k)}})});
+   gaps:c.gaps||[],ck:c.k,f:function(s){return inScene(s,c.k)}})});
   g.push({k:"c:none",name:"בלי דמות",sub:"",color:"#8A93A0",f:function(s){return !charOf(s.char)}});
  }
  return g;
@@ -4461,7 +4512,7 @@ function needView(){
   if(g.sub) h+='<em>'+esc(g.sub)+'</em>';
   h+='<span class="ncount">'+rows.length+' סצנות · '+gm+' דק׳</span></div>';
   if(gaps.length){
-   h+='<div class="ngaps"><b>מה חסר לדמות</b><ul>'+gaps.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+   h+='<div class="ngaps"><b>מה חסר לדמות</b><ul>'+gapList(g.ck||"",gaps)+'</ul></div>';
   }
   rows.forEach(function(s){
    var ch=charOf(s.char), ln=lineObj(lineOf(s));
@@ -4524,8 +4575,7 @@ function charPanelHtml(){
   h+='</div>';
  }
  if((c.gaps||[]).length){
-  h+='<div class="ngaps" style="border-radius:9px;border-bottom:0;margin-top:12px"><b>מה חסר לדמות</b><ul>'+
-   c.gaps.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+  h+='<div class="ngaps" style="border-radius:9px;border-bottom:0;margin-top:12px"><b>מה חסר לדמות</b><ul>'+gapList(c.k,c.gaps)+'</ul></div>';
  }
  if(!all.length){
   h+='<div class="dempty" style="margin-top:14px"><b>אין לה עדיין אף סצנה</b><p>אפשר להוסיף סצנה ולשייך אותה אליה.</p></div>';
@@ -7299,7 +7349,7 @@ document.addEventListener("click",function(e){
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1};
+  edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
@@ -7444,6 +7494,10 @@ document.addEventListener("click",function(e){
   render();save();
   toast("נוצרו "+r2.made.length+" ליינים, שויכו "+r2.assigned+" סצנות"+(r2.unknown.length?", "+r2.unknown.length+" קודים לא נמצאו":""));
   return}
+ if(act==="gapdone"){
+  var gi=Number(b.getAttribute("data-i"));
+  DATA.chars.forEach(function(c){ if(c.k===id&&c.gaps) c.gaps=c.gaps.filter(function(x,j){return j!==gi}) });
+  render();save();toast("הפריט הוסר מהרשימה");return}
  if(act==="charopen"){state.charPanel=id;render();return}
  if(act==="charclose"){if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="charclose"]'))return;state.charPanel="";render();return}
  if(act==="gotoscene"){
