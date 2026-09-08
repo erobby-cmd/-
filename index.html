@@ -3509,7 +3509,6 @@ function render(){
   h+='<span class="savebadge s-ok"><i></i>עותק צפייה · '+esc(SNAPDATE)+'</span>';
  }
  h+='</div>'+legendStrip()+'</div><div class="wrap'+(state.group==="board"?" boardmode":"")+'">';
- if(state.adding&&state.group!=="char"&&state.group!=="unit") h+='<div class="scene" data-s="todo" style="margin-top:24px">'+form(null)+'</div>';
 
  if((state.q||"").trim()){
   h+=searchView();
@@ -3695,11 +3694,6 @@ function render(){
  });
  h+=unitMap();
  h+='</div>';
- if(state.adding){
-  h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
-  h+='<div class="mhead"><span>סצנה חדשה</span><button data-act="cancel" title="סגור">\u00d7</button></div>';
-  h+=form(null)+'</div></div>';
- }
  if(state.editing&&state.editModal){
   var cs=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
   if(cs){
@@ -6579,6 +6573,11 @@ function saveUI(){
  },300);
 }
 function paint(h){
+ if(state.adding){
+  h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+  h+='<div class="mhead"><span>סצנה חדשה</span><button data-act="cancel" title="סגור">\u00d7</button></div>';
+  h+=form(null)+'</div></div>';
+ }
  if(state.showUsers) h+=userPanel();
  if(state.charPanel) h+=charPanelHtml();
  if(state.lsOpen) h+=suggPanel();
