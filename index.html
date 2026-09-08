@@ -5424,7 +5424,12 @@ function LINES(){
  return DATA.lines;
 }
 function lineObj(k){var a=LINES().filter(function(l){return l.k===k});return a[0]||null}
-function lineOf(s){var k=(s.line&&s.line!=="-")?s.line:(AUTO_LINE[s.id]||"");return lineObj(k)?k:""}
+function lineOf(s){
+ var k;
+ if(s.line) k=(s.line==="-")?"":s.line;
+ else k=AUTO_LINE[s.id]||"";
+ return lineObj(k)?k:"";
+}
 function charTopLine(ck){
  if(!ck) return "";
  var c={}, best="", n=0;
