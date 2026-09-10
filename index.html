@@ -6786,6 +6786,7 @@ function saveUI(){
  },300);
 }
 function paint(h){
+ try{ var _t=M().title; if(_t&&document.title!==_t) document.title=_t }catch(_){}
  if(state.adding){
   h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
   h+='<div class="mhead"><span>סצנה חדשה</span><button data-act="cancel" title="סגור">\u00d7</button></div>';
@@ -6858,6 +6859,10 @@ var SB_URL="https://auhzumbvgjmwggurgkzn.supabase.co", SB_KEY="sb_publishable_Fc
 var REST=SB_URL.replace(/\/+$/,"")+"/rest/v1/docs";
 var HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
 var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false, pulledOnce=false;
+function qsel(cols){
+ if(PROJ) return "?select="+cols+"&or=(id.eq.projects,id.like.p:"+encodeURIComponent(PROJ)+":*)";
+ return "?select="+cols+"&id=not.like.p:*&id=not.like.bk:*";
+}
 var PROJKEY="marhav-eilat-proj-v1", PROJ="";
 function loadProj(){ try{PROJ=localStorage.getItem(PROJKEY)||""}catch(_){PROJ=""} }
 function pfx(){ return PROJ?("p:"+PROJ+":"):"" }
@@ -6974,13 +6979,13 @@ function applyRows(list){
 function pull(initial){
  if(pulling)return Promise.resolve(false);
  pulling=true;
- return fetch(REST+"?select=id,updated_at&id=not.like.bk:*",{headers:HDR})
+ return fetch(REST+qsel("id,updated_at"),{headers:HDR})
   .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
   .then(function(meta){
    var incoming=JSON.stringify(meta.map(function(x){return [x.id,x.updated_at]}).sort());
    if(!initial&&incoming===lastPull){pulling=false;netStatus("ok");return meta.length}
    lastPull=incoming;
-   return fetch(REST+"?select=id,data,updated_at&id=not.like.bk:*",{headers:HDR})
+   return fetch(REST+qsel("id,data,updated_at"),{headers:HDR})
     .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
     .then(function(list){
      pulling=false;
@@ -7004,12 +7009,34 @@ function pull(initial){
   })
   .catch(function(e){pulling=false;netStatus("err");return -1});
 }
+var SHRINKOK={};
+function listLen(v){
+ if(!v||typeof v!=="object") return -1;
+ if(v.list&&v.list.length!==undefined) return v.list.length;
+ if(v.items&&v.items.length!==undefined) return v.items.length;
+ return -1;
+}
+function guardRow(id,val){
+ var sid=stripId(id);
+ if(sid!=="dues"&&sid!=="shifts"&&String(sid).indexOf("chat:")!==0) return true;
+ if(SHRINKOK[id]) return true;
+ var prev=sent[id];
+ if(prev===undefined) return true;
+ try{
+  var pv=JSON.parse(prev), a=listLen(pv), b=listLen(val);
+  if(a>0&&b>=0&&b<a){ lastPull=0; return false }
+ }catch(_){}
+ return true;
+}
 function pushRows(){
- var r=rowsOf(), out=[];
+ var r=rowsOf(), out=[], blocked=0;
  Object.keys(r).forEach(function(id){
   var j=JSON.stringify(r[id]);
-  if(sent[id]!==j){out.push({id:id,data:r[id]});sent[id]=j}
+  if(sent[id]===j) return;
+  if(!guardRow(id,r[id])){blocked++;return}
+  out.push({id:id,data:r[id]});sent[id]=j;
  });
+ if(blocked&&!out.length){ netStatus("ok"); pull(false); return Promise.resolve() }
  if(!out.length){netStatus("ok");return Promise.resolve()}
  netStatus("saving");
  return fetch(REST+"?on_conflict=id",{
@@ -7946,7 +7973,7 @@ document.addEventListener("click",function(e){
    x.note=fval("__due__","note").trim();
   }});
   state.editDue=null;render();save();toast("ההגשה נשמרה");return}
- if(act==="deldue"){
+ if(act==="deldue"){ SHRINKOK[rid("dues")]=1; setTimeout(function(){delete SHRINKOK[rid("dues")]},4000);
   STORE.dues.list=DUES().filter(function(x){return x.k!==id});
   state.editDue=null;render();save();toast("ההגשה נמחקה");return}
  if(act==="duecycle"){
@@ -8033,7 +8060,7 @@ document.addEventListener("click",function(e){
   render();save();
   toast("נרשמה משמרת ל"+sw+" ב-"+dayLabel(sd)+". נשארו "+Math.max(shiftTarget()-SHIFTS().length,0));
   return}
- if(act==="delshift"){
+ if(act==="delshift"){ SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה");return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
