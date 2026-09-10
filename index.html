@@ -704,6 +704,15 @@ li.gdone em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10.5px;fo
 .fdtxt{font-size:13.8px;line-height:1.45;color:var(--ink)}
 .fdago{font-family:"Heebo",sans-serif;font-size:11px;font-weight:600;color:var(--ink-3);white-space:nowrap}
 @media (max-width:700px){.fdrow{grid-template-columns:1fr;gap:3px}}
+.projbtn{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 13px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:.15s;max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.projbtn i{font-style:normal;font-size:12px;opacity:.7}
+.projbtn:hover{border-color:var(--accent);color:var(--ink)}
+.prow{display:flex;gap:8px;align-items:stretch;margin-bottom:6px}
+.prname{flex:1;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px 13px;cursor:pointer}
+.prow.on .prname{border-color:var(--accent);background:var(--surface-2)}
+.prname b{display:block;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16px;font-weight:700}
+.prname em{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px}
+.prow.on .prname em{color:var(--accent)}
 .thbtn{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 12px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:.15s;margin-inline-start:8px}
 .thbtn i{font-style:normal;font-size:14px;line-height:1}
 .thbtn:hover{border-color:var(--accent);color:var(--ink)}
@@ -3364,7 +3373,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3413,7 +3422,7 @@ function createAt(status){
  var parts=String(state.newAt).split("|");
  var ep=Number(parts[0]), before=parts[1]==="end"?null:parts[1];
  var t=fval("__new2__","title").trim()||"סצנה חדשה";
- var ck=fval("__new2__","char")||DATA.chars[0].k;
+ var ck=fval("__new2__","char")||((DATA.chars[0]||{}).k||"");
  var id=nextId(ck);
  DATA.scenes.push({id:id,title:t,char:ck,unit:unitGuess(ck),status:status,min:MIN_PER,
   ep:ep,ord:999,people:[],have:[],need:[],short:"",note:"",tags:[]});
@@ -6208,12 +6217,40 @@ function nextForm(){
  h+='<div class="spacer"></div><button class="btn danger" data-act="nextclear">נקה</button></div>';
  return h+'</div></div></div>';
 }
+function projBtn(){
+ return '<button class="projbtn" data-act="projopen" title="מעבר בין פרויקטים"><i>▤</i>'+esc(projName(PROJ))+'</button>';
+}
+function projLink(k){
+ var u=location.origin+location.pathname;
+ return u+(k?("?p="+encodeURIComponent(k)):"");
+}
+function projPanel(){
+ var h='<div class="modal" data-act="projclose"><div class="box" data-stop="1" style="max-width:640px">';
+ h+='<div class="mhead"><span>פרויקטים</span><button data-act="projclose" title="סגור">×</button></div>';
+ h+='<div class="fdbody">';
+ h+='<p class="mgnote">כל פרויקט הוא יומן נפרד לגמרי: סצנות, דמויות, ליינים, ימי צילום, משמרות, תמלולים, הגשות וצ׳אט משלו. המשתמשים משותפים לכל הפרויקטים.</p>';
+ PROJECTS().forEach(function(x){
+  var on=(x.k||"")===(PROJ||"");
+  h+='<div class="prow'+(on?" on":"")+'">';
+  h+='<button class="prname" data-act="projgo" data-k="'+esc(x.k||"")+'"><b>'+esc(x.name)+'</b>'+(on?'<em>הפרויקט הפתוח</em>':'<em>מעבר</em>')+'</button>';
+  h+='<button class="btn ghost" data-act="projcopy" data-k="'+esc(x.k||"")+'" title="העתקת קישור לפרויקט">העתק קישור</button>';
+  h+='</div>';
+ });
+ if(!RO){
+  h+='<div class="grpform" data-form="__proj__" style="margin-top:14px">';
+  h+='<div class="f"><label>שם הפרויקט החדש</label><input name="name" placeholder="למשל: סדרה על נמל חיפה"></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="projnew">פתח פרויקט חדש וריק</button></div></div>';
+ }
+ h+='</div><div class="s-foot"><button class="btn ghost" data-act="projclose">סגור</button>';
+ h+='<div class="spacer"></div><span class="trhint">הקישור שמעתיקים פותח את הפרויקט ישירות אצל מי שמקבל אותו</span></div>';
+ return h+'</div></div>';
+}
 function topStrip(){
  var d=new Date(), t="";
  try{ t=d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) }
  catch(_){ t=d.toDateString() }
  var h='<div class="topstrip"><div class="tsrow">';
- h+=themeBtn()+bellBtn();
+ h+=projBtn()+themeBtn()+bellBtn();
  if(!RO){
   h+=saveBadge();
   h+='<button class="btn" data-act="saveNow" title="שמירה עכשיו">שמור</button>';
@@ -6534,7 +6571,7 @@ function list(a,t){if(!(a||[]).length) return '<p class="none">'+esc(t)+'</p>';
  return '<ul>'+a.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>'}
 
 function form(s){
- var n=s||{id:"",title:"",char:DATA.chars[0].k,unit:DATA.units[0].k,status:"todo",min:MIN_PER,ep:1,people:[],have:[],need:[],note:""};
+ var n=s||{id:"",title:"",char:(DATA.chars[0]||{}).k||"",unit:(DATA.units[0]||{}).k||"",status:"todo",min:MIN_PER,ep:1,people:[],have:[],need:[],note:""};
  var h='<div class="form" data-form="'+(s?esc(s.id):"__new__")+'">';
  h+='<div class="row"><div class="f"><label>קוד סצנה</label><input name="id" value="'+esc(n.id)+'" placeholder="C-01"></div>';
  h+='<div class="f"><label>אורך מוערך בדקות</label><input name="min" type="number" min="0" step="1" value="'+(Number(n.min)||0)+'"></div></div>';
@@ -6677,6 +6714,7 @@ function paint(h){
  if(state.lsOpen) h+=suggPanel();
  if(state.feedOpen) h+=feedPanel();
  if(state.nextOpen) h+=nextForm();
+ if(state.projOpen) h+=projPanel();
  if(state.mergeSrc!==null&&state.mergeSrc!==undefined) h+=mergePanel();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
@@ -6698,13 +6736,13 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
-function snapStr(){try{return JSON.stringify({users:STORE.users,base:STORE.base,layers:STORE.layers})}catch(_){return null}}
+function snapStr(){try{return JSON.stringify({base:STORE.base,layers:STORE.layers})}catch(_){return null}}
 function snap(){preSnap=snapStr()}
 function pushHist(){
  if(skipHist){skipHist=false;preSnap=null;return}
@@ -6716,18 +6754,18 @@ function pushHist(){
 }
 function undo(){
  if(!hist.length){toast("אין לאן לחזור",true);return}
- var _tr=STORE.tr, _sh=STORE.shifts, _fd=STORE.feed, _ch=STORE.chat, _du=STORE.dues;
+ var _tr=STORE.tr, _sh=STORE.shifts, _fd=STORE.feed, _ch=STORE.chat, _du=STORE.dues, _us=STORE.users, _pj=STORE.projects;
  var _s=snapStr(); if(_s!==null) future.push(_s);
- STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;STORE.shifts=_sh;STORE.feed=_fd;STORE.chat=_ch;STORE.dues=_du;useView();resetSnap();
+ STORE=normStore(JSON.parse(hist.pop()));STORE.tr=_tr;STORE.shifts=_sh;STORE.feed=_fd;STORE.chat=_ch;STORE.dues=_du;STORE.users=_us;STORE.projects=_pj;useView();resetSnap();
  skipHist=true;
  state.editing=null;state.adding=false;state.newAt=null;state.editChar=null;state.editUnit=null;state.editLine=null;state.editDay=null;state.editEp=null;state.editMeta=false;
  render();save();toast("הפעולה בוטלה");
 }
 function redo(){
  if(!future.length){toast("אין לאן להתקדם",true);return}
- var _tr2=STORE.tr, _sh2=STORE.shifts, _fd2=STORE.feed, _ch2=STORE.chat, _du2=STORE.dues;
+ var _tr2=STORE.tr, _sh2=STORE.shifts, _fd2=STORE.feed, _ch2=STORE.chat, _du2=STORE.dues, _us2=STORE.users, _pj2=STORE.projects;
  var _s2=snapStr(); if(_s2!==null) hist.push(_s2);
- STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;STORE.shifts=_sh2;STORE.feed=_fd2;STORE.chat=_ch2;STORE.dues=_du2;useView();resetSnap();
+ STORE=normStore(JSON.parse(future.pop()));STORE.tr=_tr2;STORE.shifts=_sh2;STORE.feed=_fd2;STORE.chat=_ch2;STORE.dues=_du2;STORE.users=_us2;STORE.projects=_pj2;useView();resetSnap();
  skipHist=true;render();save();toast("הפעולה שוחזרה");
 }
 var SNAPDATE="";
@@ -6736,38 +6774,88 @@ var SB_URL="https://auhzumbvgjmwggurgkzn.supabase.co", SB_KEY="sb_publishable_Fc
 var REST=SB_URL.replace(/\/+$/,"")+"/rest/v1/docs";
 var HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
 var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false;
+var PROJKEY="marhav-eilat-proj-v1", PROJ="";
+function loadProj(){ try{PROJ=localStorage.getItem(PROJKEY)||""}catch(_){PROJ=""} }
+function pfx(){ return PROJ?("p:"+PROJ+":"):"" }
+function rid(n){ return pfx()+n }
+function stripId(id){
+ var p=pfx();
+ if(p) return id.indexOf(p)===0?id.slice(p.length):null;
+ return id.indexOf("p:")===0?null:id;
+}
+function PROJECTS(){
+ if(!STORE.projects||!STORE.projects.length) STORE.projects=[{k:"",name:"מרחב אילת"}];
+ if(!STORE.projects.some(function(x){return x.k===""})) STORE.projects.unshift({k:"",name:"מרחב אילת"});
+ return STORE.projects;
+}
+function projName(k){
+ var a=PROJECTS().filter(function(x){return x.k===(k||"")});
+ return a.length?a[0].name:"היומן הראשי";
+}
+function blankProject(title){
+ var eps=[],i;
+ for(i=1;i<=EPISODES;i++) eps.push({n:i,title:"פרק "+i,sub:""});
+ return {meta:{title:title||"יומן חדש",eyebrow:"סדרה חדשה",sub:"יומן ריק. אפשר להתחיל להוסיף פרקים, דמויות וסצנות."},
+  eps:eps,chars:[],units:[],scenes:[],lines:[],days:[],ideas:[],pool:[]};
+}
+var projLoading=false;
+function switchProj(k){
+ PROJ=k||"";
+ try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
+ sent={}; lastPull=0; projLoading=true;
+ STORE.base=blankProject("טוען את "+projName(PROJ)+"...");
+ STORE.layers={};STORE.tr={};STORE.shifts={list:[],people:["רובי","גבי"],target:150};
+ STORE.feed={items:[]};STORE.chat={};STORE.dues={list:[],next:{from:"",to:"",label:""}};
+ hist.length=0;future.length=0;
+ state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
+ useView(); render();
+ pull(true).then(function(n){
+  projLoading=false;
+  if(n===0){ STORE.base=blankProject(projName(PROJ)); useView(); }
+  if(n<0){ toast("לא הצלחתי לטעון את הפרויקט. בדוק חיבור ורענן",true); projLoading=true; }
+  resetSnap(); render();
+ });
+}
 function rowsOf(){
- var r={users:STORE.users,base:STORE.base};
- Object.keys(STORE.layers||{}).forEach(function(k){r["layer:"+k]=STORE.layers[k]});
- Object.keys(STORE.tr||{}).forEach(function(k){r["tr:"+k]=STORE.tr[k]});
- if(STORE.shifts) r["shifts"]=STORE.shifts;
- if(STORE.feed&&STORE.feed.items) r["feed"]=STORE.feed;
- Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r["chat:"+k]=STORE.chat[k] });
- if(STORE.dues) r["dues"]=STORE.dues;
+ var r={};
+ r["users"]=STORE.users;
+ if(STORE.projects&&STORE.projects.length) r["projects"]=STORE.projects;
+ r[rid("base")]=STORE.base;
+ Object.keys(STORE.layers||{}).forEach(function(k){r[rid("layer:"+k)]=STORE.layers[k]});
+ Object.keys(STORE.tr||{}).forEach(function(k){r[rid("tr:"+k)]=STORE.tr[k]});
+ if(STORE.shifts) r[rid("shifts")]=STORE.shifts;
+ if(STORE.feed&&STORE.feed.items) r[rid("feed")]=STORE.feed;
+ Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r[rid("chat:"+k)]=STORE.chat[k] });
+ if(STORE.dues) r[rid("dues")]=STORE.dues;
  return r;
 }
 function applyRows(list){
- var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,seen=false;
+ var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,pr=null,seen=false;
  list.forEach(function(row){
-  if(row.id==="users")users=row.data;
-  else if(row.id==="shifts")sh=row.data;
-  else if(row.id==="feed")fd=row.data;
-  else if(row.id==="dues")du=row.data;
-  else if(row.id.indexOf("chat:")===0){ch=ch||{};ch[row.id.slice(5)]=row.data}
-  else if(row.id==="base")base=row.data;
-  else if(row.id.indexOf("layer:")===0)layers[row.id.slice(6)]=row.data;
-  else if(row.id.indexOf("tr:")===0)tr[row.id.slice(3)]=row.data;
+  if(row.id==="users"){users=row.data;return}
+  if(row.id==="projects"){pr=row.data;return}
+  var sid=stripId(row.id);
+  if(sid===null) return;
+  if(sid==="shifts")sh=row.data;
+  else if(sid==="feed")fd=row.data;
+  else if(sid==="dues")du=row.data;
+  else if(sid.indexOf("chat:")===0){ch=ch||{};ch[sid.slice(5)]=row.data}
+  else if(sid==="base")base=row.data;
+  else if(sid.indexOf("layer:")===0)layers[sid.slice(6)]=row.data;
+  else if(sid.indexOf("tr:")===0)tr[sid.slice(3)]=row.data;
+  else return;
   seen=true;
  });
  if(!seen)return false;
  if(users)STORE.users=users;
  if(base)STORE.base=base;
  Object.keys(STORE.layers||{}).forEach(function(k){
-  if(!layers[k]&&sent["layer:"+k]===undefined) layers[k]=STORE.layers[k];
+  if(!layers[k]&&sent[rid("layer:"+k)]===undefined) layers[k]=STORE.layers[k];
  });
  Object.keys(STORE.tr||{}).forEach(function(k){
-  if(!tr[k]&&sent["tr:"+k]===undefined) tr[k]=STORE.tr[k];
+  if(!tr[k]&&sent[rid("tr:"+k)]===undefined) tr[k]=STORE.tr[k];
  });
+ if(pr) STORE.projects=pr;
  STORE.layers=layers;
  STORE.tr=tr;
  if(sh&&sh.list) STORE.shifts=sh;
@@ -7217,7 +7305,7 @@ function restore(){
 }
 var pushT=null;
 function save(){
- if(RO)return;
+ if(RO||projLoading)return;
  try{feedTick()}catch(_){}
  pushHist();
  setSave("saving");
@@ -7355,7 +7443,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -7406,7 +7494,7 @@ document.addEventListener("click",function(e){
  if(act==="addidea"){
   DATA.ideas=DATA.ideas||[];
   DATA.ideas.unshift({id:"m"+(DATA.ideas.length+1)+"_"+Math.floor(Math.random()*9999),
-   title:"רעיון חדש",why:"",char:DATA.chars[0].k,unit:DATA.units[0].k,ep:1,from:"me"});
+   title:"רעיון חדש",why:"",char:(DATA.chars[0]||{}).k||"",unit:(DATA.units[0]||{}).k||"",ep:1,from:"me"});
   render();save();toast("נוסף רעיון. לחץ הוסף ליומן כדי להפוך אותו לסצנה");return}
  if(act==="delidea"){
   DATA.ideas=(DATA.ideas||[]).filter(function(x){return x.id!==id});
@@ -7524,6 +7612,41 @@ document.addEventListener("click",function(e){
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
   return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
+ if(act==="projopen"){state.projOpen=true;render();return}
+ if(act==="projclose"){
+  if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="projclose"]'))return;
+  state.projOpen=false;render();return}
+ if(act==="projgo"){
+  var pk=b.getAttribute("data-k")||"";
+  if(pk===(PROJ||"")){state.projOpen=false;render();return}
+  state.projOpen=false;switchProj(pk);toast("עברת ל"+projName(pk));return}
+ if(act==="projcopy"){
+  var lk=projLink(b.getAttribute("data-k")||"");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+   navigator.clipboard.writeText(lk).then(function(){toast("הקישור הועתק")}).catch(function(){toast(lk,true)});
+  } else toast(lk,true);
+  return}
+ if(act==="projnew"){
+  if(RO)return;
+  if(!state.me){state.showUsers=true;render();return}
+  var nn=fval("__proj__","name").trim();
+  if(!nn){toast("תכתוב שם לפרויקט",true);return}
+  var nk="pr"+Date.now().toString(36);
+  PROJECTS().push({k:nk,name:nn});
+  var keepProjects=STORE.projects;
+  save();
+  setTimeout(function(){
+   PROJ=nk; try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
+   STORE.projects=keepProjects;
+   STORE.base=blankProject(nn); STORE.layers={}; STORE.tr={};
+   STORE.shifts={list:[],people:["רובי","גבי"],target:150};
+   STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}};
+   sent={}; lastPull=0;
+   state.projOpen=false; state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
+   useView(); resetSnap(); render(); save();
+   toast("נפתח פרויקט חדש: "+nn);
+  },300);
+  return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
  if(act==="nextclose"){
   if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="nextclose"]'))return;
@@ -7797,6 +7920,11 @@ window.addEventListener("scroll",saveUI,{passive:true});
 document.addEventListener("scroll",function(e){
  if(e.target&&e.target.classList&&e.target.classList.contains("board"))saveUI();
 },true);
+(function(){
+ var m=/[?&]p=([^&]*)/.exec(location.search);
+ if(m){ PROJ=decodeURIComponent(m[1]||""); try{localStorage.setItem(PROJKEY,PROJ)}catch(_){} }
+ else loadProj();
+})();
 loadTheme();
 loadUI();
 loadMe();
