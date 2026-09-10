@@ -296,6 +296,7 @@ html.linedrag .mchip{pointer-events:none}
 .wrap.boardmode{max-width:1560px}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
 .board>.bcol{scroll-snap-align:start}
+.shalf{font-family:"Heebo",sans-serif;font-size:11px;font-weight:600;color:var(--partial);border:1px solid var(--partial);border-radius:99px;padding:1px 8px;margin-inline-start:6px}
 .bcol.addep{display:flex;flex-direction:column;align-items:flex-start;gap:8px;justify-content:flex-start;padding-top:6px;min-width:180px;border:1px dashed var(--line-2);border-radius:10px;padding:14px;align-self:flex-start;background:transparent}
 .bcol.addep .bm{font-size:12px;color:var(--ink-3);line-height:1.5}
 .board::-webkit-scrollbar{height:10px}
@@ -5352,6 +5353,12 @@ function shiftPeople(){
  return sh.people;
 }
 function shiftTarget(){ var n=Number(shiftMigrate().target); return n>0?n:150 }
+function shiftVal(s){ return (s&&s.half)?0.5:1 }
+function shSum(arr){ var t=0; (arr||[]).forEach(function(x){t+=shiftVal(x)}); return t }
+function shNum(n){
+ n=Math.round(Number(n)*2)/2;
+ return (n%1)?String(Math.floor(n))+"½":String(n);
+}
 function todayISO(){var d=new Date(),p=function(n){return n<10?"0"+n:""+n};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
 function shiftsSorted(){
  return SHIFTS().slice().sort(function(a,b){
@@ -5374,6 +5381,7 @@ function shiftForm(s,ppl){
    return '<label><input type="checkbox" name="sh_'+esc(c.k)+'"'+(((s.chars||[]).indexOf(c.k)>-1)?" checked":"")+'><i class="cchip" style="background:'+esc(c.color||"#455160")+'"></i>'+esc(c.name)+'</label>';
   }).join("")+'</div></div>';
  }
+ h+='<div class="f"><label>היקף</label><select name="half"><option value="0"'+(s.half?"":" selected")+'>משמרת מלאה</option><option value="1"'+(s.half?" selected":"")+'>חצי משמרת</option></select></div>';
  h+='<div class="f"><label>מה היה במשמרת</label><textarea name="note" style="min-height:86px">'+esc(s.note||"")+'</textarea></div>';
  h+='<div class="f"><label>מחשבות לעריכה</label><textarea name="think" style="min-height:86px">'+esc(s.think||"")+'</textarea></div>';
  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveshift" data-id="'+esc(s.k)+'">שמור</button>';
@@ -5384,20 +5392,21 @@ function shiftForm(s,ppl){
 function shiftsView(){
  var ppl=shiftPeople(), all=SHIFTS(), tgt=shiftTarget();
  var per={},other=0;
- all.forEach(function(s){ if(ppl.indexOf(s.who)>-1) per[s.who]=(per[s.who]||0)+1; else other++; });
- var used=all.length, left=Math.max(tgt-used,0);
+ all.forEach(function(s){ var v=shiftVal(s); if(ppl.indexOf(s.who)>-1) per[s.who]=(per[s.who]||0)+v; else other+=v; });
+ var used=shSum(all), left=Math.max(tgt-used,0);
+ var halfN=all.filter(function(x){return x.half}).length;
  var h='<section class="grp"><div class="grp-h"><h2>שעון משמרות</h2><span class="role">כמה משמרות נשרפו מתוך המכסה</span>';
- h+='<span class="meta">'+used+' מתוך '+tgt+'</span></div>';
- h+='<p class="grp-note">יש '+tgt+' משמרות לכל הסדרה. כל מי שיוצא למשמרת רושם אותה כאן עם התאריך, והשעון יורד. זה המספר שקובע כמה עוד אפשר לצלם, ולא התחושה.</p>';
+ h+='<span class="meta">'+shNum(used)+' מתוך '+tgt+'</span></div>';
+ h+='<p class="grp-note">יש '+tgt+' משמרות לכל הסדרה. כל מי שיוצא למשמרת רושם אותה כאן עם התאריך, והשעון יורד. חצי משמרת נספרת כחצי. זה המספר שקובע כמה עוד אפשר לצלם, ולא התחושה.</p>';
 
  h+='<div class="sclock">';
- h+='<div class="sbig"><b>'+left+'</b><span>משמרות נשארו</span></div>';
+ h+='<div class="sbig"><b>'+shNum(left)+'</b><span>משמרות נשארו</span></div>';
  h+='<div class="sside">';
- h+='<div class="sline"><em>'+used+'</em> נוצלו · <em>'+tgt+'</em> במכסה'+(RO?"":' <button class="tinyedit" data-act="shiftset">הגדרות</button>')+'</div>';
+ h+='<div class="sline"><em>'+shNum(used)+'</em> נוצלו · <em>'+tgt+'</em> במכסה'+(halfN?' · '+halfN+' מהן חצאים':'')+(RO?"":' <button class="tinyedit" data-act="shiftset">הגדרות</button>')+'</div>';
  h+='<div class="sbar">';
  ppl.forEach(function(p,i){
   var n=per[p]||0;
-  if(n) h+='<i style="width:'+(n/tgt*100).toFixed(2)+'%;background:'+shiftColor(i)+'" title="'+esc(p)+' '+n+'"></i>';
+  if(n) h+='<i style="width:'+(n/tgt*100).toFixed(2)+'%;background:'+shiftColor(i)+'" title="'+esc(p)+' '+shNum(n)+'"></i>';
  });
  if(other) h+='<i style="width:'+(other/tgt*100).toFixed(2)+'%;background:#8A93A0"></i>';
  h+='</div>';
@@ -5405,10 +5414,10 @@ function shiftsView(){
  ppl.forEach(function(p,i){
   var n=per[p]||0;
   h+='<div class="sperson"><span class="sdot" style="background:'+shiftColor(i)+'"></span>';
-  h+='<b>'+n+'</b><span class="snm">'+esc(p)+'</span>';
+  h+='<b>'+shNum(n)+'</b><span class="snm">'+esc(p)+'</span>';
   h+='<em>'+(used?Math.round(n/used*100):0)+'% מהמשמרות</em></div>';
  });
- if(other) h+='<div class="sperson"><span class="sdot" style="background:#8A93A0"></span><b>'+other+'</b><span class="snm">אחרים</span><em>לא ברשימה</em></div>';
+ if(other) h+='<div class="sperson"><span class="sdot" style="background:#8A93A0"></span><b>'+shNum(other)+'</b><span class="snm">אחרים</span><em>לא ברשימה</em></div>';
  h+='</div></div></div>';
 
  if(state.shiftSet&&!RO){
@@ -5429,6 +5438,7 @@ function shiftsView(){
     return '<label><input type="checkbox" name="sh_'+esc(c.k)+'"><i class="cchip" style="background:'+esc(c.color||"#455160")+'"></i>'+esc(c.name)+'</label>';
    }).join("")+'</div></div>';
   }
+  h+='<div class="f"><label>היקף</label><select name="half"><option value="0" selected>משמרת מלאה</option><option value="1">חצי משמרת</option></select></div>';
   h+='<div class="f"><label>מה היה במשמרת</label><textarea name="note" style="min-height:74px" placeholder="איפה היינו, מה צילמנו, מה יצא ומה לא"></textarea></div>';
   h+='<div class="f"><label>מחשבות לעריכה</label><textarea name="think" style="min-height:74px" placeholder="מה עלה לך בראש. רגע שכדאי לחזור אליו, קשר לסצנה אחרת, מה חסר"></textarea></div>';
   h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="addshift">רשום משמרת</button></div>';
@@ -5443,14 +5453,15 @@ function shiftsView(){
   var mk=monthKey(s.date);
   if(mk!==lastM){
    lastM=mk;
-   var cnt=SHIFTS().filter(function(x){return monthKey(x.date)===mk}).length;
-   h+='<div class="dmonth">'+esc(monthLabel(s.date))+' <span class="mcount">'+cnt+' משמרות</span></div>';
+   var cnt=shSum(SHIFTS().filter(function(x){return monthKey(x.date)===mk}));
+   h+='<div class="dmonth">'+esc(monthLabel(s.date))+' <span class="mcount">'+shNum(cnt)+' משמרות</span></div>';
   }
   var i=ppl.indexOf(s.who);
   if(state.editShift===s.k&&!RO){ h+='<div class="srow edit">'+shiftForm(s,ppl)+'</div>'; return }
   h+='<div class="srow"><span class="sdot" style="background:'+(i>-1?shiftColor(i):"#8A93A0")+'"></span>';
   h+='<div class="sinfo"><div class="shead"><b class="sdate">'+esc(dayLabel(s.date))+'</b><em class="sday">'+esc(dayWeek(s.date))+'</em>';
   h+='<span class="swho">'+esc(s.who||"לא צוין")+'</span>';
+  if(s.half) h+='<span class="shalf">חצי משמרת</span>';
   if(!RO) h+='<button class="tinyedit" data-act="editshift" data-id="'+esc(s.k)+'">ערוך</button>';
   h+='</div>';
   if((s.chars||[]).length){
@@ -6156,7 +6167,7 @@ function feedSnap(){
  (d.lines||[]).forEach(function(x){ o.ln[x.k]={n:x.name||"",w:x.what||""} });
  (d.days||[]).forEach(function(x){ o.dy[x.k]={d:x.date||"",l:x.loc||"",c:x.crew||"us",m:(x.moments||[]).length} });
  (d.ideas||[]).forEach(function(x){ o.id[x.title||""]=1 });
- SHIFTS().forEach(function(x){ o.sh[x.k]={d:x.date||"",w:x.who||""} });
+ SHIFTS().forEach(function(x){ o.sh[x.k]={d:x.date||"",w:x.who||"",h:x.half?1:0,n:x.note||"",t:x.think||""} });
  try{ DUES().forEach(function(x){ o.du[x.k]={t:x.title||"",d:x.date||"",k:x.kind||"",s:x.status||"",w:x.who||"",n:x.note||"",e:x.ep||""} }) }catch(_){}
  return o;
 }
@@ -6202,7 +6213,8 @@ function feedSentences(a,b){
  keys(a.dy).forEach(function(k){ if(!b.dy[k]) out.push({t:"מחק יום צילום"}) });
  keys(b.id).forEach(function(t){ if(!a.id[t]) out.push({t:'הוסיף רעיון, "'+t+'"'}) });
  keys(b.sh).forEach(function(k){
-  if(!a.sh[k]) out.push({t:"רשם משמרת ל"+b.sh[k].w+" ב"+dayLabel(b.sh[k].d),go:"shifts"});
+  if(!a.sh[k]) out.push({t:"רשם "+(b.sh[k].h?"חצי משמרת":"משמרת")+" ל"+b.sh[k].w+" ב"+dayLabel(b.sh[k].d),go:"shifts"});
+  else if(!sameObj(a.sh[k],b.sh[k])) out.push({t:"עדכן את המשמרת של "+b.sh[k].w+" ב"+dayLabel(b.sh[k].d),go:"shifts"});
  });
  keys(a.sh).forEach(function(k){ if(!b.sh[k]) out.push({t:"מחק משמרת של "+a.sh[k].w}) });
  keys(b.du||{}).forEach(function(k){
@@ -8100,6 +8112,7 @@ document.addEventListener("click",function(e){
   SHIFTS().forEach(function(x){ if(x.k===id){
    x.date=fval("__sedit__","date")||x.date;
    x.who=fval("__sedit__","who")||x.who;
+   x.half=fval("__sedit__","half")==="1";
    x.note=fval("__sedit__","note").trim();
    x.think=fval("__sedit__","think").trim();
    x.chars=DATA.chars.filter(function(c){var f=sf&&sf.querySelector('[name="sh_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
@@ -8112,10 +8125,11 @@ document.addEventListener("click",function(e){
   var sn=fval("__shift__","note").trim();
   var sth=fval("__shift__","think").trim();
   var sch=DATA.chars.filter(function(c){var f=af&&af.querySelector('[name="sh_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
-  SHIFTS().push({k:"s"+Date.now()+"_"+Math.floor(Math.random()*999),date:sd,who:sw,note:sn,think:sth,chars:sch});
+  var shf=fval("__shift__","half")==="1";
+  SHIFTS().push({k:"s"+Date.now()+"_"+Math.floor(Math.random()*999),date:sd,who:sw,half:shf,note:sn,think:sth,chars:sch});
   state.shiftDate=sd;state.shiftWho=sw;
   render();save();
-  toast("נרשמה משמרת ל"+sw+" ב-"+dayLabel(sd)+". נשארו "+Math.max(shiftTarget()-SHIFTS().length,0));
+  toast("נרשמה "+(shf?"חצי משמרת":"משמרת")+" ל"+sw+" ב-"+dayLabel(sd)+". נשארו "+shNum(Math.max(shiftTarget()-shSum(SHIFTS()),0)));
   return}
  if(act==="delshift"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
