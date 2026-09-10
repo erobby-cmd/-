@@ -3370,15 +3370,16 @@ function ensureEdit(){
  myLayer();return true;
 }
 var FORCE_ME="";
+function meKey(){ return MEKEY+(PROJ?(":"+PROJ):"") }
 function loadMe(){
  if(FORCE_ME&&userOf(FORCE_ME)){state.me=FORCE_ME;state.viewUser=FORCE_ME;return}
- try{var v=localStorage.getItem(MEKEY);if(v&&userOf(v)){state.me=v;state.viewUser=v}}catch(_){}
+ try{var v=localStorage.getItem(meKey());if(v&&userOf(v)){state.me=v;state.viewUser=v}}catch(_){}
 }
 function setMe(k){
  state.me=k;state.viewUser=k;
- try{localStorage.setItem(MEKEY,k)}catch(_){}
+ try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3461,6 +3462,8 @@ function wordFreq(w){
  return _wfCache[w]||0;
 }
 function gapCovered(ck,gap){
+ var g=String(gap||"");
+ if(/(^|\s)(עוד|נוסף|נוספת|נוספים|נוספות|שוב)(\s|$)/.test(g)) return null;
  var ws=gapWords(gap);
  if(!ws.length) return null;
  var best=null,bs=0;
@@ -6318,6 +6321,7 @@ function topStrip(){
   h+='<button class="tmore" data-act="moremenu" aria-pressed="'+(!!state.moreOpen)+'" title="עוד">···</button>';
   if(state.moreOpen){
    h+='<div class="tmenu" data-stop="1">';
+   h+='<button data-act="bkopen">גיבויים בענן</button>';
    h+='<button data-act="backup">שמור עותק למחשב</button>';
    h+='<button data-act="restore">טען גיבוי מהמחשב</button>';
    if(DRIVE_ON&&window.claude&&window.claude.use) h+='<button data-act="drive">שמור לגוגל דרייב</button>';
@@ -6777,6 +6781,7 @@ function paint(h){
  if(state.nextOpen) h+=nextForm();
  if(state.projOpen) h+=projPanel();
  if(state.projNew) h+=projNewPanel();
+ if(state.bkOpen) h+=bkPanel();
  if(state.mergeSrc!==null&&state.mergeSrc!==undefined) h+=mergePanel();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
@@ -6798,7 +6803,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.editShift||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
@@ -6850,6 +6855,20 @@ function PROJECTS(){
  if(!STORE.projects.some(function(x){return x.k===""})) STORE.projects.unshift({k:"",name:"מרחב אילת"});
  return STORE.projects;
 }
+function projOwner(){
+ var a=PROJECTS().filter(function(x){return x.k===(PROJ||"")});
+ var o=a.length?(a[0].owner||""):"";
+ if(!o&&!PROJ) o="robi";
+ return userOf(o)?o:"";
+}
+function setProjOwner(k){
+ var a=PROJECTS();
+ for(var i=0;i<a.length;i++) if(a[i].k===(PROJ||"")){ a[i].owner=k; return }
+}
+function srcTag(){
+ var o=projOwner();
+ return o?("הגרסה של "+userName(o)):"הבסיס לכולם";
+}
 function projName(k){
  var a=PROJECTS().filter(function(x){return x.k===(k||"")});
  return a.length?a[0].name:"היומן הראשי";
@@ -6865,23 +6884,27 @@ function switchProj(k){
  PROJ=k||""; pulledOnce=false;
  try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
  sent={}; lastPull=0; projLoading=true;
- STORE.base=blankProject("טוען את "+projName(PROJ)+"...");
- STORE.layers={};STORE.tr={};STORE.shifts={list:[],people:[userName(state.me)||"אני"],target:0};
+ var _pn=projName(PROJ);
+ STORE.base=blankProject("טוען את "+_pn+"...");
+ STORE.users=[];
+ STORE.layers={};STORE.tr={};STORE.shifts={list:[],people:[],target:0};
  STORE.feed={items:[]};STORE.chat={};STORE.dues={list:[],next:{from:"",to:"",label:""}};
  hist.length=0;future.length=0;
  state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
  useView(); render();
  pull(true).then(function(n){
   projLoading=false; pulledOnce=true;
-  if(n>=0&&!lastHadBase){ STORE.base=blankProject(projName(PROJ)); useView(); save(); }
+  if(n>=0&&!lastHadBase){ STORE.base=blankProject(_pn); useView(); }
   if(n<0){ toast("לא הצלחתי לטעון את הפרויקט. בדוק חיבור ורענן",true); projLoading=true; }
-  resetSnap(); render();
+  state.me="";state.viewUser="";loadMe();
+  if(!state.me&&!RO) state.showUsers=true;
+  useView(); resetSnap(); render(); if(n>=0) save();
  });
 }
 function rowsOf(){
  var r={};
  if(pulledOnce){
-  r["users"]=STORE.users;
+  if(STORE.users&&STORE.users.length) r[rid("users")]=STORE.users;
   if(STORE.projects&&STORE.projects.length) r["projects"]=STORE.projects;
  }
  r[rid("base")]=STORE.base;
@@ -6898,10 +6921,10 @@ function rowsOf(){
 function applyRows(list){
  var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,pr=null,seen=false;
  list.forEach(function(row){
-  if(row.id==="users"){users=row.data;return}
   if(row.id==="projects"){pr=row.data;return}
   var sid=stripId(row.id);
   if(sid===null) return;
+  if(sid==="users"){users=row.data;return}
   if(sid==="shifts")sh=row.data;
   else if(sid==="feed")fd=row.data;
   else if(sid==="dues")du=row.data;
@@ -6933,13 +6956,13 @@ function applyRows(list){
 function pull(initial){
  if(pulling)return Promise.resolve(false);
  pulling=true;
- return fetch(REST+"?select=id,updated_at",{headers:HDR})
+ return fetch(REST+"?select=id,updated_at&id=not.like.bk:*",{headers:HDR})
   .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
   .then(function(meta){
    var incoming=JSON.stringify(meta.map(function(x){return [x.id,x.updated_at]}).sort());
    if(!initial&&incoming===lastPull){pulling=false;netStatus("ok");return meta.length}
    lastPull=incoming;
-   return fetch(REST+"?select=id,data,updated_at",{headers:HDR})
+   return fetch(REST+"?select=id,data,updated_at&id=not.like.bk:*",{headers:HDR})
     .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
     .then(function(list){
      pulling=false;
@@ -6978,6 +7001,119 @@ function pushRows(){
   })
   .then(function(res){if(!res.ok)throw new Error("http "+res.status);lastSaved=clock();netStatus("ok")})
   .catch(function(e){out.forEach(function(x){delete sent[x.id]});netStatus("err")});
+}
+/* ===== גיבוי בענן ===== */
+var BKKEY="marhav-eilat-bk-v1", BKKEEP=24, bkBusy=false;
+function bkStamp(){
+ var d=new Date(), p=function(n){return n<10?"0"+n:""+n};
+ return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"-"+p(d.getHours())+"-"+p(d.getMinutes());
+}
+function bkLabel(id){
+ var m=/^bk:(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})$/.exec(id||"");
+ if(!m) return id;
+ return m[3]+"."+m[2]+"."+m[1]+" בשעה "+m[4]+":"+m[5];
+}
+function bkTime(id){
+ var m=/^bk:(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})$/.exec(id||"");
+ if(!m) return 0;
+ return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),Number(m[4]),Number(m[5])).getTime();
+}
+function bkList(){
+ return fetch(REST+"?select=id,updated_at&id=like.bk:*",{headers:HDR})
+  .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
+  .then(function(l){ return l.sort(function(a,b){return bkTime(b.id)-bkTime(a.id)}) });
+}
+function bkPrune(list){
+ var old=list.slice(BKKEEP);
+ if(!old.length) return Promise.resolve(0);
+ var q=old.map(function(x){return '"'+x.id+'"'}).join(",");
+ return fetch(REST+"?id=in.("+encodeURIComponent(q)+")",{method:"DELETE",headers:HDR})
+  .then(function(){return old.length}).catch(function(){return 0});
+}
+function bkRun(manual){
+ if(bkBusy) return Promise.resolve(false);
+ bkBusy=true;
+ if(manual) toast("מכין גיבוי בענן...");
+ return fetch(REST+"?select=id,data,updated_at&id=not.like.bk:*",{headers:HDR})
+  .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
+  .then(function(rows){
+   if(!rows.length) throw new Error("empty");
+   var id="bk:"+bkStamp();
+   return fetch(REST+"?on_conflict=id",{
+     method:"POST",
+     headers:Object.assign({},HDR,{"Prefer":"resolution=merge-duplicates,return=minimal"}),
+     body:JSON.stringify([{id:id,data:{at:Date.now(),by:state.me||"",rows:rows},updated_at:new Date().toISOString()}])
+    }).then(function(res){
+     if(!res.ok) throw new Error("http "+res.status);
+     try{localStorage.setItem(BKKEY,String(Date.now()))}catch(_){}
+     bkBusy=false;
+     if(manual) toast("נשמר גיבוי בענן, "+rows.length+" רשומות");
+     bkList().then(bkPrune);
+     return true;
+    });
+  })
+  .catch(function(e){ bkBusy=false; if(manual) toast("הגיבוי נכשל. בדוק חיבור",true); return false });
+}
+function bkAuto(){
+ var last=0;
+ try{last=Number(localStorage.getItem(BKKEY))||0}catch(_){}
+ if(Date.now()-last < 6*3600*1000) return;
+ bkList().then(function(l){
+  var newest=l.length?bkTime(l[0].id):0;
+  if(Date.now()-newest < 6*3600*1000){ try{localStorage.setItem(BKKEY,String(newest))}catch(_){} return }
+  bkRun(false);
+ }).catch(function(){});
+}
+function bkRestore(id){
+ toast("מחזיר מהגיבוי...");
+ return fetch(REST+"?id=eq."+encodeURIComponent(id)+"&select=id,data",{headers:HDR})
+  .then(function(r){return r.json()})
+  .then(function(j){
+   var rows=((j[0]||{}).data||{}).rows||[];
+   if(!rows.length) throw new Error("empty");
+   return fetch(REST+"?on_conflict=id",{
+     method:"POST",
+     headers:Object.assign({},HDR,{"Prefer":"resolution=merge-duplicates,return=minimal"}),
+     body:JSON.stringify(rows.map(function(x){return {id:x.id,data:x.data,updated_at:new Date().toISOString()}}))
+    });
+  })
+  .then(function(res){
+   if(!res.ok) throw new Error("http "+res.status);
+   sent={}; lastPull=0; hist.length=0; future.length=0;
+   return pull(true).then(function(){
+    state.bkOpen=false; useView(); resetSnap(); render();
+    toast("הכול הוחזר לגיבוי מ"+bkLabel(id));
+   });
+  })
+  .catch(function(){ toast("השחזור נכשל",true) });
+}
+function bkPanel(){
+ var h='<div class="modal" data-act="bkclose"><div class="box" data-stop="1" style="max-width:620px">';
+ h+='<div class="mhead"><span>גיבויים בענן</span><button data-act="bkclose" title="סגור">×</button></div>';
+ h+='<div class="fdbody">';
+ h+='<p class="mgnote">המערכת שומרת בענן צילום מלא של הכול כמה פעמים ביום, ושומרת את '+BKKEEP+' האחרונים. שחזור מחזיר את כל הרשומות, של כל המשתמשים, למצב שהיה באותו רגע.</p>';
+ var l=state.bkList;
+ if(l===null||l===undefined) h+='<div class="lsempty"><b>טוען...</b></div>';
+ else if(!l.length) h+='<div class="lsempty"><b>עוד אין גיבויים</b><p>לחץ על גבה עכשיו כדי ליצור את הראשון.</p></div>';
+ else {
+  h+='<div class="dulist">';
+  l.forEach(function(x,i){
+   h+='<div class="durow s-open"><div class="dudate"><b>'+esc(bkLabel(x.id))+'</b><em>'+(i?"":"האחרון")+'</em></div>';
+   h+='<div class="dumain"><h4>צילום מלא של הפלטפורמה</h4></div>';
+   h+='<div class="dufoot"><button class="tinyedit" data-act="bkask" data-id="'+esc(x.id)+'">שחזר</button></div></div>';
+   if(state.bkAsk===x.id){
+    h+='<div class="durow s-late"><div class="dumain"><h4>לשחזר את הגיבוי מ'+esc(bkLabel(x.id))+'?</h4>';
+    h+='<p>כל מה שנעשה אחרי הרגע הזה יוחלף. הגיבוי הנוכחי לא נמחק, אפשר לחזור אליו.</p></div>';
+    h+='<div class="dufoot"><button class="dustat" data-act="bkdo" data-id="'+esc(x.id)+'">כן, שחזר</button>';
+    h+='<button class="tinyedit" data-act="bkno">ביטול</button></div></div>';
+   }
+  });
+  h+='</div>';
+ }
+ h+='</div><div class="s-foot"><button class="btn" data-act="bknow">גבה עכשיו</button>';
+ h+='<button class="btn ghost" data-act="bkclose">סגור</button>';
+ h+='<div class="spacer"></div><span class="trhint">הגיבויים לא יורדים בכל רענון, הם נשלפים רק כשפותחים את החלון הזה</span></div>';
+ return h+'</div></div>';
 }
 function netStatus(st){
  netState=st;
@@ -7134,7 +7270,8 @@ function mgApply(){
 function userPanel(){
  var h='<div class="upanel" data-act="closeusers"><div class="ubox" data-stop="1">';
  h+='<div class="uhead"><h3>'+(state.me?"משתמשים":"מי אתה?")+'</h3>';
- h+='<p>'+(state.me?"המקור המשותף הוא הגרסה של רובי. כל אחד משחק על עותק משלו, ורובי מחזיר את המקור לשלו בלחיצת כפתור.":"בחר את השם שלך. כל אחד עובד על עותק משלו, ורואה את של כולם.")+'</p></div>';
+ var _own=projOwner(), _ownN=_own?userName(_own):"";
+ h+='<p>'+(state.me?(_own?("המקור המשותף הוא הגרסה של "+esc(_ownN)+". כל אחד עובד על עותק משלו, ויכול לעדכן את העותק שלו למקור בלחיצה."):"כל אחד עובד על עותק משלו ורואה את של כולם."):"בחר את השם שלך, או תכתוב שם חדש למטה. כל אחד עובד על עותק משלו.")+'</p></div>';
  h+='<div class="ulist">';
  function mgbtn(k){
   if(RO||!state.me||k===state.me) return "";
@@ -7142,7 +7279,7 @@ function userPanel(){
   return '<button class="umerge'+(c?"":" off")+'" data-act="mgopen" data-k="'+esc(k||"")+'" title="לראות מה יש שם ולמשוך לגרסה שלך">מזג אליי'+(c?'<span class="n">'+c+'</span>':'')+'</button>';
  }
  h+='<div class="urowwrap"><button class="urow" data-act="pickview" data-k="" aria-current="'+(!state.viewUser)+'" style="--uc:#5A6472"><i></i>';
- h+='<b>המקור המשותף</b><span class="tagi">הגרסה של רובי</span><span>'+(STORE.base.scenes||[]).length+' סצנות</span></button>'+mgbtn("")+'</div>';
+ h+='<b>המקור המשותף</b><span class="tagi">'+esc(srcTag())+'</span><span>'+(STORE.base.scenes||[]).length+' סצנות</span></button>'+mgbtn("")+'</div>';
  users().forEach(function(u){
   var n=hasLayer(u.k)?(STORE.layers[u.k].scenes||[]).length:(STORE.base.scenes||[]).length;
   h+='<div class="urowwrap"><button class="urow" data-act="pickview" data-k="'+esc(u.k)+'" aria-current="'+(state.viewUser===u.k)+'" style="--uc:'+esc(u.color||"#455160")+'"><i></i>';
@@ -7159,9 +7296,19 @@ function userPanel(){
   h+='<button class="btn" data-act="adduser">הוסף</button></div>';
   h+='<div class="ufoot">';
   if(state.me){
-   h+='<button class="btn" data-act="promote" title="המקור המשותף מתעדכן לגרסה שלך. אף אחד לא מאבד את מה שהוא עשה">החזר את המקור המשותף לגרסה שלי</button>';
+   var _o2=projOwner();
+   if(_o2&&_o2!==state.me){
+    h+='<button class="btn" data-act="srcpull" title="הגרסה שלך תתעדכן לכל מה שיש במקור המשותף">עדכן את הגרסה שלי ל'+esc(userName(_o2))+'</button>';
+   }
+   h+='<button class="btn" data-act="promote" title="המקור המשותף מתעדכן לגרסה שלך. אף אחד לא מאבד את מה שהוא עשה">'+((_o2&&_o2!==state.me)?"קח את המקור המשותף לגרסה שלי":"החזר את המקור המשותף לגרסה שלי")+'</button>';
    if(!FORCE_ME) h+='<button class="btn ghost" data-act="switchme">אני לא '+esc(userName(state.me))+'</button>';
    if(hasLayer(state.me)) h+='<button class="btn danger" data-act="resetme" title="מוחק את העותק שלך וחוזר למקור המשותף">אפס את העותק שלי וחזור למקור</button>';
+  }
+  if(state.confirmPull){
+   h+='<div style="flex:1 0 100%;font-family:\'Heebo\',sans-serif;font-size:13px;color:var(--partial);padding-top:6px">';
+   h+='העותק שלך יוחלף במקור המשותף. מה שעשית בעותק שלך ולא נכנס למקור, יימחק. אם יש שם משהו שחשוב לך, תמזג אותו קודם עם מזג אליי. להמשיך?';
+   h+='<button class="btn" style="margin-inline-start:10px" data-act="srcpullYes">כן, עדכן אותי</button>';
+   h+='<button class="btn ghost" style="margin-inline-start:6px" data-act="srcpullNo">ביטול</button></div>';
   }
   if(state.confirmPromote){
    h+='<div style="flex:1 0 100%;font-family:\'Heebo\',sans-serif;font-size:13px;color:var(--partial);padding-top:6px">';
@@ -7485,7 +7632,7 @@ document.addEventListener("click",function(e){
   if(!state.me&&!RO&&k){setMe(k);state.showUsers=false;useView();resetSnap();render();toast("שלום "+userName(k));return}
   state.viewUser=k;state.showUsers=false;useView();resetSnap();render();
   toast(k?("צופה בגרסה של "+userName(k)):"צופה במקור המשותף");return}
- if(act==="switchme"){state.me="";state.viewUser="";try{localStorage.removeItem(MEKEY)}catch(_){}
+ if(act==="switchme"){state.me="";state.viewUser="";try{localStorage.removeItem(meKey())}catch(_){}
   state.showUsers=true;render();return}
  if(act==="adduser"){
   if(RO)return;
@@ -7496,6 +7643,7 @@ document.addEventListener("click",function(e){
   var pal=["#B5541A","#1B4B8F","#A8102E","#146B3A","#3F3A78","#A81E6B"];
   STORE.users.push({k:key,name:nm,color:pal[users().length%pal.length]});
   if(!state.me)setMe(key); else {state.viewUser=key}
+  if(!projOwner()) setProjOwner(key);
   render();save();toast("נוסף משתמש "+nm);return}
  if(act==="promote"){state.confirmPromote=true;render();return}
  if(act==="promoteNo"){state.confirmPromote=false;render();return}
@@ -7504,10 +7652,21 @@ document.addEventListener("click",function(e){
   var src=hasLayer(state.me)?STORE.layers[state.me]:STORE.base;
   STORE.base=JSON.parse(JSON.stringify(src));
   delete STORE.layers[state.me];
+  setProjOwner(state.me);
   state.viewUser=state.me;state.confirmPromote=false;state.showUsers=false;
   useView();resetSnap();render();save();
   var others=Object.keys(STORE.layers||{}).length;
   toast("המקור המשותף הוא עכשיו הגרסה שלך"+(others?". "+others+" משתמשים עדיין על העותק שלהם, הם יכולים לאפס אותו":""));
+  return}
+ if(act==="srcpull"){state.confirmPull=true;render();return}
+ if(act==="srcpullNo"){state.confirmPull=false;render();return}
+ if(act==="srcpullYes"){
+  if(!state.me||RO)return;
+  STORE.layers=STORE.layers||{};
+  STORE.layers[state.me]=JSON.parse(JSON.stringify(STORE.base));
+  state.viewUser=state.me;state.confirmPull=false;state.showUsers=false;
+  useView();resetSnap();render();save();
+  toast("הגרסה שלך עודכנה ל"+(projOwner()?userName(projOwner()):"מקור המשותף"));
   return}
  if(act==="resetme"){
   if(!state.me||RO)return;
@@ -7707,12 +7866,14 @@ document.addEventListener("click",function(e){
   var nn=fval("__proj__","name").trim();
   if(!nn){toast("תכתוב שם לפרויקט",true);return}
   var nk="pr"+Date.now().toString(36);
-  PROJECTS().push({k:nk,name:nn});
+  PROJECTS().push({k:nk,name:nn,owner:state.me});
   var keepProjects=STORE.projects;
   save();
   setTimeout(function(){
    PROJ=nk; try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
    STORE.projects=keepProjects;
+   var _mu=userOf(state.me);
+   STORE.users=_mu?[JSON.parse(JSON.stringify(_mu))]:[];
    STORE.base=blankProject(nn); STORE.layers={}; STORE.tr={};
    STORE.shifts={list:[],people:[userName(state.me)||"אני"],target:0};
    STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}};
@@ -7940,6 +8101,15 @@ document.addEventListener("click",function(e){
   state.editEp=null;render();save();return}
  if(act==="saveNow"){save();toast(saveState==="error"?"מנסה לשמור שוב":"שומר");return}
  if(act==="drive"){driveSave();return}
+ if(act==="bkopen"){state.bkOpen=true;state.bkList=null;state.bkAsk="";render();
+  bkList().then(function(l){state.bkList=l;render()}).catch(function(){state.bkList=[];render()});return}
+ if(act==="bkclose"){
+  if(modalKeep(e,b))return;
+  state.bkOpen=false;state.bkAsk="";render();return}
+ if(act==="bknow"){bkRun(true).then(function(){bkList().then(function(l){state.bkList=l;render()})});return}
+ if(act==="bkask"){state.bkAsk=id;render();return}
+ if(act==="bkno"){state.bkAsk="";render();return}
+ if(act==="bkdo"){state.bkAsk="";bkRestore(id);return}
  if(act==="backup"){backup();return}
  if(act==="restore"){restore();return}
  if(act==="add"){state.adding=true;state.editing=null;render();window.scrollTo({top:0,behavior:"smooth"});return}
@@ -8028,6 +8198,7 @@ document.addEventListener("scroll",function(e){
  else loadProj();
  if(PROJ){
   STORE.base=blankProject("טוען...");
+  STORE.users=[];
   STORE.layers={}; STORE.tr={};
   STORE.shifts={list:[],people:[],target:0};
   STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}};
@@ -8046,10 +8217,13 @@ pull(true).then(function(n){
  if(PROJ){
   if(n<0){ projLoading=true; toast("לא הצלחתי לטעון את הפרויקט. בדוק חיבור ורענן",true); }
   else if(!lastHadBase){ STORE.base=blankProject(projName(PROJ)); }
+  if(!state.me){ loadMe(); }
+  if(!state.me&&!RO) state.showUsers=true;
   useView(); resetSnap(); render();
  }
  else if(n===0){ sent={}; pushRows().then(function(){toast("הפלטפורמה אותחלה עם התוכן הנוכחי")}); }
  startPoll();
+ if(n>0) setTimeout(bkAuto,20000);
 });
 })();
 </script>
