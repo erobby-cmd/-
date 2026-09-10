@@ -7069,7 +7069,7 @@ function pushRows(){
   .catch(function(e){out.forEach(function(x){delete sent[x.id]});netStatus("err")});
 }
 /* ===== גיבוי בענן ===== */
-var BKKEY="marhav-eilat-bk-v1", BKKEEP=24, bkBusy=false;
+var BKKEY="marhav-eilat-bk-v1", BKGAP=10*60*1000, BKQUIET=45*1000, BKCAP=180, bkBusy=false, bkDirty=false, bkForce=false, bkT=null, bkTick=null;
 function bkStamp(){
  var d=new Date(), p=function(n){return n<10?"0"+n:""+n};
  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"-"+p(d.getHours())+"-"+p(d.getMinutes());
@@ -7090,8 +7090,21 @@ function bkList(){
   .then(function(l){ return l.sort(function(a,b){return bkTime(b.id)-bkTime(a.id)}) });
 }
 function bkPrune(list){
- var old=list.slice(BKKEEP);
+ var now=Date.now(), keep={}, hour={}, day={}, old=[];
+ list.forEach(function(x,i){
+  var t=bkTime(x.id), age=now-t;
+  if(i===0||age<3*3600*1000){ keep[x.id]=1; return }
+  var hk=Math.floor(t/3600000), dk=Math.floor(t/86400000);
+  if(age<3*86400000){ if(!hour[hk]){hour[hk]=1;keep[x.id]=1} return }
+  if(!day[dk]){day[dk]=1;keep[x.id]=1}
+ });
+ var kept=0;
+ list.forEach(function(x){
+  if(keep[x.id]&&kept<BKCAP){kept++;return}
+  old.push(x);
+ });
  if(!old.length) return Promise.resolve(0);
+ old=old.slice(0,40);
  var q=old.map(function(x){return '"'+x.id+'"'}).join(",");
  return fetch(REST+"?id=in.("+encodeURIComponent(q)+")",{method:"DELETE",headers:HDR})
   .then(function(){return old.length}).catch(function(){return 0});
@@ -7120,15 +7133,34 @@ function bkRun(manual){
   })
   .catch(function(e){ bkBusy=false; if(manual) toast("הגיבוי נכשל. בדוק חיבור",true); return false });
 }
-function bkAuto(){
+function bkAuto(force){
  var last=0;
  try{last=Number(localStorage.getItem(BKKEY))||0}catch(_){}
- if(Date.now()-last < 3*3600*1000) return;
+ if(!force&&Date.now()-last<BKGAP) return;
  bkList().then(function(l){
   var newest=l.length?bkTime(l[0].id):0;
-  if(Date.now()-newest < 3*3600*1000){ try{localStorage.setItem(BKKEY,String(newest))}catch(_){} return }
+  if(!force&&Date.now()-newest<BKGAP){ try{localStorage.setItem(BKKEY,String(newest))}catch(_){} return }
+  bkDirty=false;
   bkRun(false);
  }).catch(function(){});
+}
+function bkTouch(force){
+ if(RO) return;
+ bkDirty=true;
+ if(force) bkForce=true;
+ clearTimeout(bkT);
+ bkT=setTimeout(function(){
+  var f=bkForce; bkForce=false;
+  if(bkDirty) bkAuto(f);
+ }, bkForce?1800:BKQUIET);
+}
+function bkStart(){
+ clearInterval(bkTick);
+ bkTick=setInterval(function(){
+  if(document.hidden) return;
+  if(!bkDirty) return;
+  bkAuto(false);
+ },60000);
 }
 function bkRestore(id){
  toast("מחזיר מהגיבוי...");
@@ -7157,13 +7189,13 @@ function bkPanel(){
  var h='<div class="modal" data-act="bkclose"><div class="box" data-stop="1" style="max-width:620px">';
  h+='<div class="mhead"><span>גיבויים בענן</span><button data-act="bkclose" title="סגור">×</button></div>';
  h+='<div class="fdbody">';
- h+='<p class="mgnote">המערכת שומרת בענן צילום מלא של הכול כמה פעמים ביום, ושומרת את '+BKKEEP+' האחרונים. שחזור מחזיר את כל הרשומות, של כל המשתמשים, למצב שהיה באותו רגע.</p>';
+ h+='<p class="mgnote">המערכת מגבה לענן צילום מלא של הכול. כל שינוי שמישהו עושה מפעיל גיבוי תוך פחות מדקה, ולא יותר מגיבוי אחד בעשר דקות. מחיקה מגבה מיד. נשמרים כל הגיבויים של שלוש השעות האחרונות, אחד לכל שעה בשלושת הימים האחרונים, ואחד ליום אחורה מזה. שחזור מחזיר את כל הרשומות, של כל המשתמשים, למצב שהיה באותו רגע.</p>';
  var l=state.bkList;
  if(l===null||l===undefined) h+='<div class="lsempty"><b>טוען...</b></div>';
  else if(!l.length) h+='<div class="lsempty"><b>עוד אין גיבויים</b><p>לחץ על גבה עכשיו כדי ליצור את הראשון.</p></div>';
  else {
   h+='<div class="dulist">';
-  l.forEach(function(x,i){
+  l.slice(0,80).forEach(function(x,i){
    h+='<div class="durow s-open"><div class="dudate"><b>'+esc(bkLabel(x.id))+'</b><em>'+(i?"":"האחרון")+'</em></div>';
    h+='<div class="dumain"><h4>צילום מלא של הפלטפורמה</h4></div>';
    h+='<div class="dufoot"><button class="tinyedit" data-act="bkask" data-id="'+esc(x.id)+'">שחזר</button></div></div>';
@@ -7176,7 +7208,9 @@ function bkPanel(){
   });
   h+='</div>';
  }
- h+='</div><div class="s-foot"><button class="btn" data-act="bknow">גבה עכשיו</button>';
+ h+='</div><div class="s-foot"><button class="btn" data-act="bknow">גבה עכשיו לענן</button>';
+ h+='<button class="btn" data-act="backup" title="הורדת קובץ עם כל היומן למחשב שלך">שמור עותק במחשב</button>';
+ if(!RO) h+='<button class="btn ghost" data-act="restore" title="טעינת קובץ גיבוי מהמחשב">טען גיבוי מהמחשב</button>';
  h+='<button class="btn ghost" data-act="bkclose">סגור</button>';
  h+='<div class="spacer"></div><span class="trhint">הגיבויים לא יורדים בכל רענון, הם נשלפים רק כשפותחים את החלון הזה</span></div>';
  return h+'</div></div>';
@@ -7192,7 +7226,7 @@ function startPoll(){
   if(pendingRender&&!editorOpen()){pendingRender=false;render()}
   pull(false);
  },6000);
- document.addEventListener("visibilitychange",function(){if(!document.hidden){pull(false);try{bkAuto()}catch(_){}}});
+ document.addEventListener("visibilitychange",function(){if(!document.hidden){pull(false);try{if(bkDirty)bkAuto(false)}catch(_){}}});
 }
 
 var saveState="saved", lastSaved="";
@@ -7590,6 +7624,7 @@ var pushT=null;
 function save(){
  if(RO||projLoading)return;
  try{feedTick()}catch(_){}
+ try{bkTouch(false)}catch(_){}
  pushHist();
  setSave("saving");
  clearTimeout(pushT);
@@ -7994,7 +8029,7 @@ document.addEventListener("click",function(e){
    x.note=fval("__due__","note").trim();
   }});
   state.editDue=null;render();save();toast("ההגשה נשמרה");return}
- if(act==="deldue"){ try{bkRun(false)}catch(_){} SHRINKOK[rid("dues")]=1; setTimeout(function(){delete SHRINKOK[rid("dues")]},4000);
+ if(act==="deldue"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("dues")]=1; setTimeout(function(){delete SHRINKOK[rid("dues")]},4000);
   STORE.dues.list=DUES().filter(function(x){return x.k!==id});
   state.editDue=null;render();save();toast("ההגשה נמחקה");return}
  if(act==="duecycle"){
@@ -8082,7 +8117,7 @@ document.addEventListener("click",function(e){
   render();save();
   toast("נרשמה משמרת ל"+sw+" ב-"+dayLabel(sd)+". נשארו "+Math.max(shiftTarget()-SHIFTS().length,0));
   return}
- if(act==="delshift"){ SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
+ if(act==="delshift"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה");return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
@@ -8318,7 +8353,8 @@ pull(true).then(function(n){
  }
  else if(n===0){ sent={}; pushRows().then(function(){toast("הפלטפורמה אותחלה עם התוכן הנוכחי")}); }
  startPoll();
- if(n>0) setTimeout(bkAuto,20000);
+ bkStart();
+ if(n>0) setTimeout(function(){bkAuto(false)},15000);
 });
 })();
 </script>
