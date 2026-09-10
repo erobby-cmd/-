@@ -3378,7 +3378,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4341,7 +4341,10 @@ function daysSorted(){
 
 /* ===== שעון ימי צילום ===== */
 function CREWS(){
- if(!DATA.crews||!DATA.crews.length) DATA.crews=[
+ if(!DATA.crews||!DATA.crews.length) DATA.crews=PROJ?[
+  {k:"us",name:"אנחנו",target:0,color:"#0C6B75"},
+  {k:"tal",name:"צוות ב",target:0,color:"#A8791E"}
+ ]:[
   {k:"us",name:"אנחנו",target:25,color:"#0C6B75"},
   {k:"tal",name:"טל אגסי",target:10,color:"#A8791E"}
  ];
@@ -4998,11 +5001,18 @@ function exportTrDocx(list,name){
 }
 
 /* ===== בקשת רעיונות שקוראת את הכל ===== */
+function seriesIntro(){
+ var mt=M(), t=(mt.title||"").trim()||"הסדרה", sub=(mt.sub||"").trim();
+ var o="אני עורך את "+t+", סדרה תיעודית בת "+DATA.eps.length+" פרקים. כל פרק כ-"+(PER_EP*MIN_PER)+" דקות, "+PER_EP+" סצנות של כ-"+MIN_PER+" דקות, סך הכול "+TARGET+" סצנות.\n";
+ if(sub) o+=sub+"\n";
+ o+="הפרקים בנויים לפי תמות ולא לפי דמויות, וכל דמות חוזרת לאורך העונה.\n\n";
+ return o;
+}
 function fullBrief(focus,extra){
  var o="";
  var c=counts(), n=DATA.scenes.length;
  var used=SHIFTS().length, tgt=shiftTarget();
- o+="אני עורך סדרה תיעודית בת חמישה פרקים על מרחב אילת של משטרת ישראל. כל פרק חצי שעה, חמש עשרה סצנות של כשתי דקות, סך הכול "+TARGET+" סצנות. הפרקים בנויים לפי תמות ולא לפי דמויות, וכל דמות חוזרת לאורך העונה.\n\n";
+ o+=seriesIntro();
  o+="מצב נוכחי: "+n+" סצנות ביומן, "+c.shot+" צולמו, "+(c.partial||0)+" חלקיות, "+(c.todo||0)+" מחכות לצילום. נשארו "+Math.max(TARGET-n,0)+" סצנות עד היעד.\n";
  o+="תקציב הצילום: "+used+" משמרות נוצלו מתוך "+tgt+", נשארו "+Math.max(tgt-used,0)+".\n\n";
  o+="=== המשימה ===\n";
@@ -5034,7 +5044,7 @@ function fullBrief(focus,extra){
 }
 function briefHead(){
  var o="", c=counts(), n=DATA.scenes.length, used=SHIFTS().length, tgt=shiftTarget();
- o+="אני עורך סדרה תיעודית בת חמישה פרקים על מרחב אילת של משטרת ישראל. כל פרק חצי שעה, חמש עשרה סצנות של כשתי דקות, סך הכול "+TARGET+" סצנות. הפרקים בנויים לפי תמות ולא לפי דמויות, וכל דמות חוזרת לאורך העונה.\n\n";
+ o+=seriesIntro();
  o+="מצב נוכחי: "+n+" סצנות ביומן, "+c.shot+" צולמו, "+(c.partial||0)+" חלקיות, "+(c.todo||0)+" מחכות לצילום. נשארו "+Math.max(TARGET-n,0)+" סצנות עד היעד.\n";
  o+="תקציב הצילום: "+used+" משמרות נוצלו מתוך "+tgt+", נשארו "+Math.max(tgt-used,0)+".\n\n";
  return o;
@@ -5308,20 +5318,20 @@ function shiftMigrate(){
  if(!sh.people||!sh.people.length){
   var pp=(STORE.base&&STORE.base.shiftPeople)||null;
   Object.keys(STORE.layers||{}).forEach(function(k){ if(!pp&&STORE.layers[k].shiftPeople) pp=STORE.layers[k].shiftPeople });
-  sh.people=(pp&&pp.length)?pp.slice():["רובי","גבי"];
+  sh.people=(pp&&pp.length)?pp.slice():(PROJ?[userName(state.me)||"אני"]:["רובי","גבי"]);
  }
  if(!sh.target){
   var tt=0;
   if(STORE.base&&Number(STORE.base.shiftTarget)>0) tt=Number(STORE.base.shiftTarget);
   Object.keys(STORE.layers||{}).forEach(function(k){ if(!tt&&Number(STORE.layers[k].shiftTarget)>0) tt=Number(STORE.layers[k].shiftTarget) });
-  sh.target=tt||150;
+  sh.target=tt||(PROJ?0:150);
  }
  return sh;
 }
 function SHIFTS(){ var sh=shiftMigrate(); if(!sh.list) sh.list=[]; return sh.list }
 function shiftPeople(){
  var sh=shiftMigrate();
- if(!sh.people||!sh.people.length) sh.people=["רובי","גבי"];
+ if(!sh.people||!sh.people.length) sh.people=PROJ?[userName(state.me)||"אני"]:["רובי","גבי"];
  return sh.people;
 }
 function shiftTarget(){ var n=Number(shiftMigrate().target); return n>0?n:150 }
@@ -5336,6 +5346,23 @@ function shiftsSorted(){
 function shiftColor(i){
  var pal=["#0C6B75","#A8791E","#8A2D8F","#1B4B8F","#A8305C","#146B3A"];
  return pal[i%pal.length];
+}
+function shiftForm(s,ppl){
+ var h='<div class="grpform" data-form="__sedit__" style="width:100%">';
+ h+='<div class="row"><div class="f"><label>תאריך</label><input name="date" type="date" value="'+esc(s.date||"")+'"></div>';
+ h+='<div class="f"><label>מי עשה את המשמרת</label><select name="who">'+ppl.map(function(pp){
+  return '<option value="'+esc(pp)+'"'+(s.who===pp?" selected":"")+'>'+esc(pp)+'</option>'}).join("")+'</select></div></div>';
+ if(DATA.chars.length){
+  h+='<div class="f"><label>מי מהדמויות היו שם</label><div class="tagbox">'+DATA.chars.map(function(c){
+   return '<label><input type="checkbox" name="sh_'+esc(c.k)+'"'+(((s.chars||[]).indexOf(c.k)>-1)?" checked":"")+'><i class="cchip" style="background:'+esc(c.color||"#455160")+'"></i>'+esc(c.name)+'</label>';
+  }).join("")+'</div></div>';
+ }
+ h+='<div class="f"><label>מה היה במשמרת</label><textarea name="note" style="min-height:86px">'+esc(s.note||"")+'</textarea></div>';
+ h+='<div class="f"><label>מחשבות לעריכה</label><textarea name="think" style="min-height:86px">'+esc(s.think||"")+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveshift" data-id="'+esc(s.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="cancelshift">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="delshift" data-id="'+esc(s.k)+'">מחק משמרת</button></div>';
+ return h+'</div>';
 }
 function shiftsView(){
  var ppl=shiftPeople(), all=SHIFTS(), tgt=shiftTarget();
@@ -5376,12 +5403,18 @@ function shiftsView(){
  }
 
  if(!RO){
-  h+='<div class="sadd" data-form="__shift__">';
-  h+='<div class="f"><label>תאריך</label><input name="date" type="date" value="'+esc(state.shiftDate||todayISO())+'"></div>';
-  h+='<div class="f"><label>מי</label><select name="who">'+ppl.map(function(p){
-   return '<option value="'+esc(p)+'"'+(state.shiftWho===p?" selected":"")+'>'+esc(p)+'</option>'}).join("")+'</select></div>';
-  h+='<div class="f grow"><label>מה היה במשמרת</label><input name="note" placeholder="לא חובה. איפה, עם מי, מה יצא"></div>';
-  h+='<button class="btn" data-act="addshift">רשום משמרת</button>';
+  h+='<div class="grpform sform" data-form="__shift__">';
+  h+='<div class="row"><div class="f"><label>תאריך</label><input name="date" type="date" value="'+esc(state.shiftDate||todayISO())+'"></div>';
+  h+='<div class="f"><label>מי עשה את המשמרת</label><select name="who">'+ppl.map(function(p){
+   return '<option value="'+esc(p)+'"'+(state.shiftWho===p?" selected":"")+'>'+esc(p)+'</option>'}).join("")+'</select></div></div>';
+  if(DATA.chars.length){
+   h+='<div class="f"><label>מי מהדמויות היו שם</label><div class="tagbox">'+DATA.chars.map(function(c){
+    return '<label><input type="checkbox" name="sh_'+esc(c.k)+'"><i class="cchip" style="background:'+esc(c.color||"#455160")+'"></i>'+esc(c.name)+'</label>';
+   }).join("")+'</div></div>';
+  }
+  h+='<div class="f"><label>מה היה במשמרת</label><textarea name="note" style="min-height:74px" placeholder="איפה היינו, מה צילמנו, מה יצא ומה לא"></textarea></div>';
+  h+='<div class="f"><label>מחשבות לעריכה</label><textarea name="think" style="min-height:74px" placeholder="מה עלה לך בראש. רגע שכדאי לחזור אליו, קשר לסצנה אחרת, מה חסר"></textarea></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="addshift">רשום משמרת</button></div>';
   h+='</div>';
  }
 
@@ -5397,10 +5430,21 @@ function shiftsView(){
    h+='<div class="dmonth">'+esc(monthLabel(s.date))+' <span class="mcount">'+cnt+' משמרות</span></div>';
   }
   var i=ppl.indexOf(s.who);
+  if(state.editShift===s.k&&!RO){ h+='<div class="srow edit">'+shiftForm(s,ppl)+'</div>'; return }
   h+='<div class="srow"><span class="sdot" style="background:'+(i>-1?shiftColor(i):"#8A93A0")+'"></span>';
-  h+='<b class="sdate">'+esc(dayLabel(s.date))+'</b><em class="sday">'+esc(dayWeek(s.date))+'</em>';
+  h+='<div class="sinfo"><div class="shead"><b class="sdate">'+esc(dayLabel(s.date))+'</b><em class="sday">'+esc(dayWeek(s.date))+'</em>';
   h+='<span class="swho">'+esc(s.who||"לא צוין")+'</span>';
-  h+='<span class="snote">'+esc(s.note||"")+'</span>';
+  if(!RO) h+='<button class="tinyedit" data-act="editshift" data-id="'+esc(s.k)+'">ערוך</button>';
+  h+='</div>';
+  if((s.chars||[]).length){
+   h+='<div class="schars">'+(s.chars||[]).map(function(k){
+    var c=charOf(k); if(!c)return "";
+    return '<span class="dchip sm" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</span>';
+   }).join("")+'</div>';
+  }
+  if(s.note) h+='<p class="snote">'+esc(s.note).replace(/\n/g,"<br>")+'</p>';
+  if(s.think) h+='<div class="sthink"><b>מחשבות לעריכה</b><p>'+esc(s.think).replace(/\n/g,"<br>")+'</p></div>';
+  h+='</div>';
   if(!RO) h+='<button class="sdel" data-act="delshift" data-id="'+esc(s.k)+'" title="מחק משמרת">×</button>';
   h+='</div>';
  });
@@ -5441,7 +5485,7 @@ function lineObj(k){var a=LINES().filter(function(l){return l.k===k});return a[0
 function lineOf(s){
  var k;
  if(s.line) k=(s.line==="-")?"":s.line;
- else k=AUTO_LINE[s.id]||"";
+ else k=(PROJ?"":(AUTO_LINE[s.id]||""));
  return lineObj(k)?k:"";
 }
 function charTopLine(ck){
@@ -6754,7 +6798,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
@@ -6791,7 +6835,7 @@ var SNAPDATE="";
 var SB_URL="https://auhzumbvgjmwggurgkzn.supabase.co", SB_KEY="sb_publishable_FcWBT2i9cIU-JIuVWfoQRg_DRV99Scn", GATE="";
 var REST=SB_URL.replace(/\/+$/,"")+"/rest/v1/docs";
 var HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
-var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false;
+var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false, pulledOnce=false;
 var PROJKEY="marhav-eilat-proj-v1", PROJ="";
 function loadProj(){ try{PROJ=localStorage.getItem(PROJKEY)||""}catch(_){PROJ=""} }
 function pfx(){ return PROJ?("p:"+PROJ+":"):"" }
@@ -6818,17 +6862,17 @@ function blankProject(title){
 }
 var projLoading=false;
 function switchProj(k){
- PROJ=k||"";
+ PROJ=k||""; pulledOnce=false;
  try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
  sent={}; lastPull=0; projLoading=true;
  STORE.base=blankProject("טוען את "+projName(PROJ)+"...");
- STORE.layers={};STORE.tr={};STORE.shifts={list:[],people:["רובי","גבי"],target:150};
+ STORE.layers={};STORE.tr={};STORE.shifts={list:[],people:[userName(state.me)||"אני"],target:0};
  STORE.feed={items:[]};STORE.chat={};STORE.dues={list:[],next:{from:"",to:"",label:""}};
  hist.length=0;future.length=0;
  state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
  useView(); render();
  pull(true).then(function(n){
-  projLoading=false;
+  projLoading=false; pulledOnce=true;
   if(n===0){ STORE.base=blankProject(projName(PROJ)); useView(); }
   if(n<0){ toast("לא הצלחתי לטעון את הפרויקט. בדוק חיבור ורענן",true); projLoading=true; }
   resetSnap(); render();
@@ -6841,10 +6885,12 @@ function rowsOf(){
  r[rid("base")]=STORE.base;
  Object.keys(STORE.layers||{}).forEach(function(k){r[rid("layer:"+k)]=STORE.layers[k]});
  Object.keys(STORE.tr||{}).forEach(function(k){r[rid("tr:"+k)]=STORE.tr[k]});
- if(STORE.shifts) r[rid("shifts")]=STORE.shifts;
- if(STORE.feed&&STORE.feed.items) r[rid("feed")]=STORE.feed;
- Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r[rid("chat:"+k)]=STORE.chat[k] });
- if(STORE.dues) r[rid("dues")]=STORE.dues;
+ if(pulledOnce){
+  if(STORE.shifts) r[rid("shifts")]=STORE.shifts;
+  if(STORE.feed&&STORE.feed.items) r[rid("feed")]=STORE.feed;
+  Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r[rid("chat:"+k)]=STORE.chat[k] });
+  if(STORE.dues) r[rid("dues")]=STORE.dues;
+ }
  return r;
 }
 function applyRows(list){
@@ -6895,6 +6941,7 @@ function pull(initial){
     .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
     .then(function(list){
      pulling=false;
+     pulledOnce=true;
      var changed=applyRows(list);
      if(changed){
       list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
@@ -7461,7 +7508,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,projnew:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -7657,9 +7704,9 @@ document.addEventListener("click",function(e){
    PROJ=nk; try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
    STORE.projects=keepProjects;
    STORE.base=blankProject(nn); STORE.layers={}; STORE.tr={};
-   STORE.shifts={list:[],people:["רובי","גבי"],target:150};
+   STORE.shifts={list:[],people:[userName(state.me)||"אני"],target:0};
    STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}};
-   sent={}; lastPull=0;
+   sent={}; lastPull=0; pulledOnce=false;
    state.projOpen=false; state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
    useView(); resetSnap(); render(); save();
    state.projNew={k:nk,name:nn};
@@ -7772,11 +7819,26 @@ document.addEventListener("click",function(e){
   var pl=fval("__sset__","people").split(",").map(function(x){return x.trim()}).filter(Boolean);
   if(pl.length) SH().people=pl;
   state.shiftSet=false;render();save();toast("ההגדרות נשמרו");return}
+ if(act==="editshift"){state.editShift=id;render();return}
+ if(act==="cancelshift"){state.editShift=null;render();return}
+ if(act==="saveshift"){
+  var sf=document.querySelector('[data-form="__sedit__"]');
+  SHIFTS().forEach(function(x){ if(x.k===id){
+   x.date=fval("__sedit__","date")||x.date;
+   x.who=fval("__sedit__","who")||x.who;
+   x.note=fval("__sedit__","note").trim();
+   x.think=fval("__sedit__","think").trim();
+   x.chars=DATA.chars.filter(function(c){var f=sf&&sf.querySelector('[name="sh_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
+  }});
+  state.editShift=null;render();save();toast("המשמרת עודכנה");return}
  if(act==="addshift"){
+  var af=document.querySelector('[data-form="__shift__"]');
   var sd=fval("__shift__","date")||todayISO();
   var sw=fval("__shift__","who")||shiftPeople()[0];
   var sn=fval("__shift__","note").trim();
-  SHIFTS().push({k:"s"+Date.now()+"_"+Math.floor(Math.random()*999),date:sd,who:sw,note:sn});
+  var sth=fval("__shift__","think").trim();
+  var sch=DATA.chars.filter(function(c){var f=af&&af.querySelector('[name="sh_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
+  SHIFTS().push({k:"s"+Date.now()+"_"+Math.floor(Math.random()*999),date:sd,who:sw,note:sn,think:sth,chars:sch});
   state.shiftDate=sd;state.shiftWho=sw;
   render();save();
   toast("נרשמה משמרת ל"+sw+" ב-"+dayLabel(sd)+". נשארו "+Math.max(shiftTarget()-SHIFTS().length,0));
