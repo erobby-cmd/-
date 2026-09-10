@@ -393,6 +393,7 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .lcard .ldot{position:absolute;inset-inline-start:0;top:12px;bottom:12px;width:3px;border-radius:3px}
 .lcard b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:15.5px;display:block;margin-inline-start:9px}
 .lcard .lbadge{margin:6px 0 0 0;margin-inline-start:9px}
+.lcard .lcedit{margin-inline-start:8px;vertical-align:middle}
 .lcard p{font-size:13px;color:var(--ink-2);margin:7px 0 0;margin-inline-start:9px;line-height:1.5}
 .unit .lab2{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;color:var(--ink-2);margin:0 0 4px}
 .unit .lnote{border-top:1px solid var(--line);margin-top:9px;padding-top:9px;font-size:13px;color:var(--ink-2)}
@@ -3457,6 +3458,12 @@ function extraChars(s){
  return (s.chars||[]).filter(function(k){return k&&k!==s.char&&charOf(k)});
 }
 function inScene(s,k){ return s.char===k||extraChars(s).indexOf(k)>-1 }
+function setLead(s,to,from){
+ if(!s||!to) return;
+ if(from&&from!==to&&Array.isArray(s.chars)) s.chars=s.chars.filter(function(k){return k!==from});
+ s.char=to;
+ if(Array.isArray(s.chars)&&s.chars.length&&s.chars.indexOf(to)<0) s.chars.push(to);
+}
 function extraNames(s){ return extraChars(s).map(function(k){return (charOf(k)||{}).name||""}).filter(Boolean) }
 var GAPSTOP={"של":1,"את":1,"עם":1,"על":1,"אין":1,"יש":1,"מה":1,"זה":1,"הוא":1,"היא":1,"לא":1,"כבר":1,"עוד":1,"אחד":1,"אחת":1,"בכלל":1,"כדי":1,"בין":1,"אצל":1,"וגם":1,"הכול":1,"הכל":1,"צריך":1,"אולי":1,"אף":1,"בו":1,"בה":1,"שלו":1,"שלה":1,"שבו":1,"שבה":1};
 function gapWords(t){
@@ -3992,11 +3999,11 @@ function moveAfter(id,ep,afterId){
  col.forEach(function(x,j){if(x.id===afterId)idx=j+1});
  moveScene(id,ep,col[idx]?col[idx].id:null);
 }
-var dragId=null,dragLine=null,ins=null;
+var dragId=null,dragLine=null,ins=null,dragFromChar="";
 function cleanupDrag(){
  document.documentElement.classList.remove("dragging");
  document.documentElement.classList.remove("linedrag");
- dragLine=null;
+ dragLine=null; dragFromChar="";
  if(ins&&ins.parentNode)ins.parentNode.removeChild(ins);
  ins=null;
  var d=document.querySelector(".pnote.dragging");
@@ -4044,6 +4051,13 @@ document.addEventListener("dragstart",function(e){
  var n=e.target&&e.target.closest?e.target.closest(".pnote,.scene,.mchip"):null;
  if(!n)return;
  dragId=n.getAttribute("data-id");
+ dragFromChar="";
+ var _fc=n.closest?n.closest("[data-cell]"):null;
+ if(_fc){ var _p=(_fc.getAttribute("data-cell")||"").split(":"); if(_p[0]==="c") dragFromChar=_p[1] }
+ if(!dragFromChar){
+  var _fg=n.closest?n.closest("section.grp[data-grp]"):null;
+  if(_fg){ var _q=(_fg.getAttribute("data-grp")||"").split(":"); if(_q[0]==="char") dragFromChar=_q[1] }
+ }
  document.documentElement.classList.add("dragging");
  setTimeout(function(){n.classList.add("dragging")},0);
  if(e.dataTransfer){e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",dragId)}catch(_){}}
@@ -4150,7 +4164,7 @@ document.addEventListener("drop",function(e){
   if(sc){
    if(parts[0]==="c"){
     var ep=Number(parts[2])||sc.ep, epch=ep!==sc.ep;
-    sc.char=parts[1];
+    setLead(sc,parts[1],dragFromChar);
     place(ep);
     toast(sc.id+" עבר ל"+((charOf(parts[1])||{}).name||"")+(epch?", פרק "+ep:""));
    } else if(parts[0]==="l"){
@@ -4174,7 +4188,7 @@ document.addEventListener("drop",function(e){
   var g=sec.getAttribute("data-grp").split(":");
   var sc=DATA.scenes.filter(function(x){return x.id===dragId})[0];
   if(sc){
-   if(g[0]==="char")sc.char=g[1]; else if(g[0]==="unit")sc.unit=g[1];
+   if(g[0]==="char")setLead(sc,g[1],dragFromChar); else if(g[0]==="unit")sc.unit=g[1];
    var bk=e.target.closest(".scenes[data-st]");
    if(bk){var st=bk.getAttribute("data-st");if(STATUS[st])sc.status=st}
    var lbl=g[0]==="char"?((charOf(g[1])||{}).name||""):unitName(g[1]);
@@ -5961,7 +5975,7 @@ function linesView(){
   bad.forEach(function(l){
    var s=ST[l.k];
    h+='<div class="lcard" data-k="'+s.kind+'"><span class="ldot" style="background:'+esc(l.color||"#455160")+'"></span>';
-   h+='<b>'+esc(l.name)+'</b><span class="lbadge l-'+s.kind+'">'+esc(LKIND[s.kind].l)+'</span>';
+   h+='<b>'+esc(l.name)+(RO?"":'<button class="tinyedit lcedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>')+'</b><span class="lbadge l-'+s.kind+'">'+esc(LKIND[s.kind].l)+'</span>';
    h+='<p>'+esc(lineHint(l.k,s))+'</p></div>';
   });
   h+='</div>';
@@ -7140,6 +7154,7 @@ function applyRows(list){
 }
 function pull(initial){
  if(pulling)return Promise.resolve(false);
+ if(!initial&&(pushT||pushing)) return Promise.resolve(false);
  pulling=true;
  return fetch(REST+qsel("id,updated_at"),{headers:HDR})
   .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
@@ -7154,6 +7169,7 @@ function pull(initial){
      pulledOnce=true;
      projLoading=false;
      lastHadBase=list.some(function(row){return row.id===rid("base")});
+     list.forEach(function(row){ serverAt[row.id]=row.updated_at });
      var changed=applyRows(list);
      list.forEach(function(row){if(sent[row.id]===undefined)sent[row.id]=JSON.stringify(row.data)});
      if(changed){
@@ -7201,13 +7217,42 @@ function pushRows(){
  if(blocked&&!out.length){ netStatus("ok"); pull(false); return Promise.resolve() }
  if(!out.length){netStatus("ok");return Promise.resolve()}
  netStatus("saving");
- return fetch(REST+"?on_conflict=id",{
-   method:"POST",
-   headers:Object.assign({},HDR,{"Prefer":"resolution=merge-duplicates,return=minimal"}),
-   body:JSON.stringify(out.map(function(x){return {id:x.id,data:x.data,updated_at:new Date().toISOString()}}))
-  })
-  .then(function(res){if(!res.ok)throw new Error("http "+res.status);lastSaved=clock();netStatus("ok")})
-  .catch(function(e){out.forEach(function(x){delete sent[x.id]});netStatus("err")});
+ pushing=true;
+ var known=out.filter(function(x){return serverAt[x.id]!==undefined});
+ var chk=known.length
+  ? fetch(REST+"?select=id,updated_at&id=in.("+encodeURIComponent(known.map(function(x){return '"'+x.id+'"'}).join(","))+")",{headers:HDR})
+     .then(function(r){return r.ok?r.json():[]}).catch(function(){return []})
+  : Promise.resolve([]);
+ return chk.then(function(cur){
+  var stale=[];
+  (cur||[]).forEach(function(row){
+   var mine=serverAt[row.id];
+   if(!mine) return;
+   if(Date.parse(row.updated_at) > Date.parse(mine)+1000) stale.push(row.id);
+  });
+  if(stale.length){
+   pushing=false;
+   out.forEach(function(x){delete sent[x.id]});
+   lastPull=0;
+   netStatus("ok");
+   toast("מישהו אחר עדכן את זה ברגע זה. מושך את הגרסה העדכנית",true);
+   pull(true);
+   return;
+  }
+  var stamp=new Date().toISOString();
+  return fetch(REST+"?on_conflict=id",{
+    method:"POST",
+    headers:Object.assign({},HDR,{"Prefer":"resolution=merge-duplicates,return=minimal"}),
+    body:JSON.stringify(out.map(function(x){return {id:x.id,data:x.data,updated_at:stamp}}))
+   })
+   .then(function(res){
+    pushing=false;
+    if(!res.ok)throw new Error("http "+res.status);
+    out.forEach(function(x){ serverAt[x.id]=stamp });
+    lastSaved=clock();netStatus("ok");
+   })
+   .catch(function(e){pushing=false;out.forEach(function(x){delete sent[x.id]});netStatus("err")});
+ });
 }
 /* ===== גיבוי בענן ===== */
 var BKKEY="marhav-eilat-bk-v1", BKGAP=10*60*1000, BKQUIET=45*1000, BKCAP=180, bkBusy=false, bkDirty=false, bkForce=false, bkT=null, bkTick=null;
@@ -7761,7 +7806,7 @@ function restore(){
  };
  inp.click();
 }
-var pushT=null;
+var pushT=null, pushing=false, serverAt={};
 function save(){
  if(RO||projLoading)return;
  try{feedTick()}catch(_){}
@@ -7769,7 +7814,7 @@ function save(){
  pushHist();
  setSave("saving");
  clearTimeout(pushT);
- pushT=setTimeout(function(){pushRows()},450);
+ pushT=setTimeout(function(){pushT=null;pushRows()},450);
 }
 document.addEventListener("change",function(e){
  if(e.target&&e.target.classList&&e.target.classList.contains("minetr")){
