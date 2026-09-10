@@ -6148,7 +6148,7 @@ function FEED(){
  return STORE.feed;
 }
 function feedSnap(){
- var d=DATA, o={sc:{},ln:{},dy:{},id:{},sh:{}};
+ var d=DATA, o={sc:{},ln:{},dy:{},id:{},sh:{},du:{}};
  (d.scenes||[]).forEach(function(x){
   o.sc[x.id]={t:x.title||"",s:x.status||"",e:x.ep||"",c:x.char||"",l:lineOf(x),
    h:(x.short||""),v:(x.have||[]).length,n:(x.need||[]).length,o:(x.note||"")};
@@ -6157,6 +6157,7 @@ function feedSnap(){
  (d.days||[]).forEach(function(x){ o.dy[x.k]={d:x.date||"",l:x.loc||"",c:x.crew||"us",m:(x.moments||[]).length} });
  (d.ideas||[]).forEach(function(x){ o.id[x.title||""]=1 });
  SHIFTS().forEach(function(x){ o.sh[x.k]={d:x.date||"",w:x.who||""} });
+ try{ DUES().forEach(function(x){ o.du[x.k]={t:x.title||"",d:x.date||"",k:x.kind||"",s:x.status||"",w:x.who||"",n:x.note||"",e:x.ep||""} }) }catch(_){}
  return o;
 }
 function sameObj(a,b){
@@ -6204,11 +6205,27 @@ function feedSentences(a,b){
   if(!a.sh[k]) out.push({t:"רשם משמרת ל"+b.sh[k].w+" ב"+dayLabel(b.sh[k].d),go:"shifts"});
  });
  keys(a.sh).forEach(function(k){ if(!b.sh[k]) out.push({t:"מחק משמרת של "+a.sh[k].w}) });
+ keys(b.du||{}).forEach(function(k){
+  var p=(a.du||{})[k], q=b.du[k];
+  if(!p){ out.push({t:'הוסיף ללוח ההגשות, "'+(q.t||dueKind(q.k))+'"'+(q.d?" לתאריך "+dayLabel(q.d):""),go:"dues"}); return }
+  if(sameObj(p,q)) return;
+  var c=[];
+  if(p.t!==q.t) c.push('שינה את השם ל"'+q.t+'"');
+  if(p.d!==q.d) c.push("שינה תאריך ל"+(q.d?dayLabel(q.d):"בלי תאריך"));
+  if(p.s!==q.s) c.push("סימן "+dueStat(q.s));
+  if(p.w!==q.w) c.push("שינה אחראי ל"+q.w);
+  if(p.n!==q.n) c.push("עדכן את ההערה");
+  if(String(p.e)!==String(q.e)) c.push("שייך לפרק "+(q.e||"כל הסדרה"));
+  if(c.length) out.push({t:'בהגשה "'+(q.t||dueKind(q.k))+'": '+joinHe(c),go:"dues"});
+ });
+ keys(a.du||{}).forEach(function(k){
+  if(!(b.du||{})[k]) out.push({t:'מחק מלוח ההגשות, "'+((a.du[k].t)||dueKind(a.du[k].k))+'"'+(a.du[k].d?" מ"+dayLabel(a.du[k].d):"")});
+ });
  return out;
 }
 var lastSnap=null;
 function feedTick(){
- if(RO) return;
+ if(RO||projLoading) return;
  var now=feedSnap(), base=lastSnap;
  lastSnap=now;
  if(!base||!state.me||state.viewUser!==state.me) return;
@@ -6520,10 +6537,14 @@ function dueWhen(iso){
  if(d===0) return "היום";
  if(d===1) return "מחר";
  if(d===-1) return "אתמול";
+ if(d===2) return "מחרתיים";
+ if(d===-2) return "לפני יומיים";
  if(d<0) return "באיחור של "+Math.abs(d)+" ימים";
  if(d<=7) return "בעוד "+d+" ימים";
- if(d<=31) return "בעוד "+Math.round(d/7)+" שבועות";
- return "בעוד "+Math.round(d/30)+" חודשים";
+ if(d<=13) return "בעוד שבוע";
+ if(d<=31){ var w=Math.round(d/7); return w<=1?"בעוד שבוע":"בעוד "+w+" שבועות" }
+ var mo=Math.round(d/30);
+ return mo<=1?"בעוד חודש":"בעוד "+mo+" חודשים";
 }
 function dueState(x){
  if(x.status==="sent") return "sent";
@@ -7102,10 +7123,10 @@ function bkRun(manual){
 function bkAuto(){
  var last=0;
  try{last=Number(localStorage.getItem(BKKEY))||0}catch(_){}
- if(Date.now()-last < 6*3600*1000) return;
+ if(Date.now()-last < 3*3600*1000) return;
  bkList().then(function(l){
   var newest=l.length?bkTime(l[0].id):0;
-  if(Date.now()-newest < 6*3600*1000){ try{localStorage.setItem(BKKEY,String(newest))}catch(_){} return }
+  if(Date.now()-newest < 3*3600*1000){ try{localStorage.setItem(BKKEY,String(newest))}catch(_){} return }
   bkRun(false);
  }).catch(function(){});
 }
@@ -7171,7 +7192,7 @@ function startPoll(){
   if(pendingRender&&!editorOpen()){pendingRender=false;render()}
   pull(false);
  },6000);
- document.addEventListener("visibilitychange",function(){if(!document.hidden)pull(false)});
+ document.addEventListener("visibilitychange",function(){if(!document.hidden){pull(false);try{bkAuto()}catch(_){}}});
 }
 
 var saveState="saved", lastSaved="";
@@ -7973,7 +7994,7 @@ document.addEventListener("click",function(e){
    x.note=fval("__due__","note").trim();
   }});
   state.editDue=null;render();save();toast("ההגשה נשמרה");return}
- if(act==="deldue"){ SHRINKOK[rid("dues")]=1; setTimeout(function(){delete SHRINKOK[rid("dues")]},4000);
+ if(act==="deldue"){ try{bkRun(false)}catch(_){} SHRINKOK[rid("dues")]=1; setTimeout(function(){delete SHRINKOK[rid("dues")]},4000);
   STORE.dues.list=DUES().filter(function(x){return x.k!==id});
   state.editDue=null;render();save();toast("ההגשה נמחקה");return}
  if(act==="duecycle"){
@@ -8011,6 +8032,7 @@ document.addEventListener("click",function(e){
   else if(fk==="line"){state.group="lines";state.editLine=fi}
   else if(fk==="day"){state.group="days";state.editDay=fi}
   else if(fk==="shifts"){state.group="shifts"}
+  else if(fk==="dues"){state.cat="dues";state.group="dues"}
   render();return}
  if(act==="theme"){
   var i=0,j;
