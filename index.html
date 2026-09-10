@@ -707,6 +707,11 @@ li.gdone em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10.5px;fo
 .projbtn{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 13px;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:.15s;max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .projbtn i{font-style:normal;font-size:12px;opacity:.7}
 .projbtn:hover{border-color:var(--accent);color:var(--ink)}
+.pnbig{background:var(--surface-2);border:1px solid var(--line);border-inline-start:4px solid var(--accent);border-radius:11px;padding:14px 16px;margin-bottom:14px}
+.pnbig b{display:block;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:21px;font-weight:700;line-height:1.2}
+.pnbig em{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:12px;font-weight:600;color:var(--ink-3);margin-top:4px}
+.pnlink{display:flex;gap:8px;align-items:center;margin-top:12px}
+.pnlink input{flex:1;font-family:"Heebo",sans-serif;font-size:13px;padding:10px 12px;border:1px solid var(--line-2);border-radius:9px;background:var(--surface-2);color:var(--ink);direction:ltr;text-align:left}
 .prow{display:flex;gap:8px;align-items:stretch;margin-bottom:6px}
 .prname{flex:1;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px 13px;cursor:pointer}
 .prow.on .prname{border-color:var(--accent);background:var(--surface-2)}
@@ -3373,7 +3378,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(MEKEY,k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -6224,6 +6229,18 @@ function projLink(k){
  var u=location.origin+location.pathname;
  return u+(k?("?p="+encodeURIComponent(k)):"");
 }
+function projNewPanel(){
+ var k=state.projNew&&state.projNew.k, nm=state.projNew?state.projNew.name:"", lk=projLink(k);
+ var h='<div class="modal" data-act="pnclose"><div class="box" data-stop="1" style="max-width:620px">';
+ h+='<div class="mhead"><span>הפרויקט נפתח</span><button data-act="pnclose" title="סגור">×</button></div>';
+ h+='<div class="fdbody">';
+ h+='<div class="pnbig"><b>'+esc(nm)+'</b><em>יומן ריק, מוכן לעבודה</em></div>';
+ h+='<p class="mgnote">זה הקישור של הפרויקט הזה. מי שפותח אותו נכנס ישר לכאן, בוחר את השם שלו ומתחיל. הקישור של מרחב אילת נשאר כפי שהיה.</p>';
+ h+='<div class="pnlink"><input id="pnlk" readonly value="'+esc(lk)+'"><button class="btn" data-act="pncopy">העתק קישור</button></div>';
+ h+='</div><div class="s-foot"><button class="btn ghost" data-act="pnclose">התחל לעבוד</button>';
+ h+='<div class="spacer"></div><span class="trhint">אפשר להעתיק אותו שוב בכל רגע מכפתור הפרויקטים</span></div>';
+ return h+'</div></div>';
+}
 function projPanel(){
  var h='<div class="modal" data-act="projclose"><div class="box" data-stop="1" style="max-width:640px">';
  h+='<div class="mhead"><span>פרויקטים</span><button data-act="projclose" title="סגור">×</button></div>';
@@ -6715,6 +6732,7 @@ function paint(h){
  if(state.feedOpen) h+=feedPanel();
  if(state.nextOpen) h+=nextForm();
  if(state.projOpen) h+=projPanel();
+ if(state.projNew) h+=projNewPanel();
  if(state.mergeSrc!==null&&state.mergeSrc!==undefined) h+=mergePanel();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
@@ -6736,7 +6754,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
@@ -7644,8 +7662,20 @@ document.addEventListener("click",function(e){
    sent={}; lastPull=0;
    state.projOpen=false; state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
    useView(); resetSnap(); render(); save();
-   toast("נפתח פרויקט חדש: "+nn);
+   state.projNew={k:nk,name:nn};
+   render();
+   try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(projLink(nk)); }catch(_){}
   },300);
+  return}
+ if(act==="pnclose"){
+  if(e.target.closest("[data-stop]")&&!e.target.closest('[data-act="pnclose"]'))return;
+  state.projNew=null;render();return}
+ if(act==="pncopy"){
+  var el2=document.getElementById("pnlk");
+  var lk2=el2?el2.value:projLink(state.projNew&&state.projNew.k);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+   navigator.clipboard.writeText(lk2).then(function(){toast("הקישור הועתק")}).catch(function(){if(el2){el2.select()}toast("סמן והעתק ידנית",true)});
+  } else { if(el2)el2.select(); toast("סמן והעתק ידנית",true) }
   return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
  if(act==="nextclose"){
