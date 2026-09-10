@@ -296,6 +296,8 @@ html.linedrag .mchip{pointer-events:none}
 .wrap.boardmode{max-width:1560px}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
 .board>.bcol{scroll-snap-align:start}
+.bcol.addep{display:flex;flex-direction:column;align-items:flex-start;gap:8px;justify-content:flex-start;padding-top:6px;min-width:180px;border:1px dashed var(--line-2);border-radius:10px;padding:14px;align-self:flex-start;background:transparent}
+.bcol.addep .bm{font-size:12px;color:var(--ink-3);line-height:1.5}
 .board::-webkit-scrollbar{height:10px}
 .board::-webkit-scrollbar-track{background:var(--surface-2);border-radius:99px}
 .board::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:99px}
@@ -3379,7 +3381,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3550,7 +3552,8 @@ function render(){
  ["shot","partial","todo"].forEach(function(k){
   h+='<i style="width:'+((c[k]||0)/tot*100).toFixed(1)+'%;background:var(--'+k+')"></i>';});
  h+='</div>';
- h+='<p class="method">מתודת העבודה: '+EPISODES+' פרקים × '+PER_EP+' סצנות × '+MIN_PER+' דקות לסצנה. סך הכול '+TARGET+' סצנות ו-'+(TARGET*MIN_PER)+' דקות.</p>';
+ var _ne=(DATA.eps||[]).length||EPISODES, _tg=_ne*PER_EP;
+ h+='<p class="method">מתודת העבודה: '+_ne+' פרקים × '+PER_EP+' סצנות × '+MIN_PER+' דקות לסצנה. סך הכול '+_tg+' סצנות ו-'+(_tg*MIN_PER)+' דקות.</p>';
  h+='</div></div>';
  if(state.viewUser!==state.me&&!RO) h+='<div class="viewing">אתה צופה בגרסה של '+esc(userName(state.viewUser))+'. השינויים שלך נשמרים רק בגרסה שלך.</div>';
  if(RO) h+='<div class="ro">עותק צפייה של יומן העבודה, נכון ל'+esc(SNAPDATE)+'. אי אפשר לערוך כאן, וכל שינוי בעמוד המקורי לא מופיע כאן עד שנשלח עותק חדש.</div>';
@@ -3826,6 +3829,7 @@ function board(){
    if(gapN) h+='<div class="ghost">חסרות '+gapN+' סצנות בפרק הזה</div>';
    h+='</div>';
   });
+  if(!RO) h+='<div class="bcol addep"><button class="btn" data-act="addep">הוסף פרק</button><span class="bm">פרק חדש נוסף בסוף, אפשר לגרור אליו סצנות</span></div>';
   return h+'</div>';
  }
 
@@ -3853,6 +3857,7 @@ function board(){
   }
   h+='</div>';
  });
+ if(!RO) h+='<div class="bcol addep"><button class="btn" data-act="addep">הוסף פרק</button></div>';
  return h+'</div>';
 }
 function epForm(e){
@@ -3860,7 +3865,16 @@ function epForm(e){
  h+='<div class="f"><label>שם הפרק</label><input name="title" value="'+esc(e.title)+'"></div>';
  h+='<div class="f"><label>שורת משנה</label><input name="sub" value="'+esc(e.sub)+'"></div>';
  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveep" data-id="'+e.n+'">שמור</button>';
- h+='<button class="btn ghost" data-act="cancelep">ביטול</button></div></div>';
+ h+='<button class="btn ghost" data-act="cancelep">ביטול</button>';
+ if((DATA.eps||[]).length>1) h+='<div class="spacer"></div><button class="btn danger" data-act="delep" data-id="'+e.n+'">מחק פרק</button>';
+ h+='</div>';
+ if(state.confirmEp===e.n){
+  var _mv=DATA.scenes.filter(function(x){return Number(x.ep)===e.n}).length;
+  h+='<p class="hint" style="color:var(--partial)">'+(_mv?("בפרק הזה "+_mv+" סצנות. הן לא נמחקות, הן עוברות לפרק שלפניו. "):"")+'הפרקים שאחריו יקבלו מספר חדש. למחוק?</p>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn danger" data-act="delepYes" data-id="'+e.n+'">כן, מחק</button>';
+  h+='<button class="btn ghost" data-act="delepNo">ביטול</button></div>';
+ }
+ h+='</div>';
  return h;
 }
 function note(x,extra){
@@ -6272,6 +6286,9 @@ function nextForm(){
 function projBtn(){
  return '<button class="projbtn" data-act="projopen" title="הפרויקט הפתוח: '+esc(projName(PROJ))+'. לחיצה פותחת את רשימת הפרויקטים"><i>▤</i>פרויקט חדש</button>';
 }
+function projUrl(){
+ try{ history.replaceState(null,"",projLink(PROJ)) }catch(_){}
+}
 function projLink(k){
  var u=location.origin+location.pathname;
  return u+(k?("?p="+encodeURIComponent(k)):"");
@@ -6282,7 +6299,7 @@ function projNewPanel(){
  h+='<div class="mhead"><span>הפרויקט נפתח</span><button data-act="pnclose" title="סגור">×</button></div>';
  h+='<div class="fdbody">';
  h+='<div class="pnbig"><b>'+esc(nm)+'</b><em>יומן ריק, מוכן לעבודה</em></div>';
- h+='<p class="mgnote">זה הקישור של הפרויקט הזה. מי שפותח אותו נכנס ישר לכאן, בוחר את השם שלו ומתחיל. הקישור של מרחב אילת נשאר כפי שהיה.</p>';
+ h+='<p class="mgnote">זה הקישור של הפרויקט החדש. הוא כתובת נפרדת לגמרי, והקישור הישן של מרחב אילת נשאר בדיוק כפי שהיה ולא נפגע. מי שפותח את הקישור הזה נכנס ישר לפרויקט החדש, כותב את השם שלו ומתחיל.</p>';
  h+='<div class="pnlink"><input id="pnlk" readonly value="'+esc(lk)+'"><button class="btn" data-act="pncopy">העתק קישור</button></div>';
  h+='</div><div class="s-foot"><button class="btn ghost" data-act="pnclose">התחל לעבוד</button>';
  h+='<div class="spacer"></div><span class="trhint">אפשר להעתיק אותו שוב בכל רגע מכפתור הפרויקטים</span></div>';
@@ -6805,7 +6822,7 @@ var pendingRender=false;
 function editorOpen(){
  return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
-   (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||
+   (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||state.confirmEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
@@ -6883,6 +6900,7 @@ var projLoading=false, lastHadBase=false;
 function switchProj(k){
  PROJ=k||""; pulledOnce=false;
  try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
+ projUrl();
  sent={}; lastPull=0; projLoading=true;
  var _pn=projName(PROJ);
  STORE.base=blankProject("טוען את "+_pn+"...");
@@ -7676,7 +7694,7 @@ document.addEventListener("click",function(e){
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
+  edit:1,editep:1,addep:1,delepYes:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
@@ -7871,6 +7889,7 @@ document.addEventListener("click",function(e){
   save();
   setTimeout(function(){
    PROJ=nk; try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
+   projUrl();
    STORE.projects=keepProjects;
    var _mu=userOf(state.me);
    STORE.users=_mu?[JSON.parse(JSON.stringify(_mu))]:[];
@@ -8093,8 +8112,35 @@ document.addEventListener("click",function(e){
   mm.title=fval("__meta__","title").trim()||mm.title;
   mm.sub=fval("__meta__","sub").trim()||mm.sub;
   state.editMeta=false;render();save();return}
- if(act==="editep"){state.editEp=Number(id);render();return}
- if(act==="cancelep"){state.editEp=null;render();return}
+ if(act==="editep"){state.editEp=Number(id);state.confirmEp=null;render();return}
+ if(act==="cancelep"){state.editEp=null;state.confirmEp=null;render();return}
+ if(act==="addep"){
+  var _mx=0; (DATA.eps||[]).forEach(function(x){ if(Number(x.n)>_mx)_mx=Number(x.n) });
+  var _nn=_mx+1;
+  DATA.eps.push({n:_nn,title:"פרק "+_nn,sub:""});
+  state.editEp=_nn;state.confirmEp=null;render();save();toast("נוסף פרק "+_nn);return}
+ if(act==="delep"){state.confirmEp=Number(id);render();return}
+ if(act==="delepNo"){state.confirmEp=null;render();return}
+ if(act==="delepYes"){
+  var _n=Number(id);
+  var _rest=DATA.eps.filter(function(x){return Number(x.n)!==_n});
+  if(!_rest.length){toast("זה הפרק היחיד",true);return}
+  var _nums=_rest.map(function(x){return Number(x.n)}).sort(function(a,b){return a-b});
+  var _prev=_nums.filter(function(x){return x<_n});
+  var _to=_prev.length?_prev[_prev.length-1]:_nums[0];
+  var _moved=0;
+  DATA.scenes.forEach(function(x){ if(Number(x.ep)===_n){x.ep=_to;_moved++} });
+  DATA.eps=_rest.sort(function(a,b){return Number(a.n)-Number(b.n)});
+  var _map={};
+  DATA.eps.forEach(function(x,i){ _map[Number(x.n)]=i+1 });
+  DATA.scenes.forEach(function(x){ if(_map[Number(x.ep)]) x.ep=_map[Number(x.ep)] });
+  (DATA.ideas||[]).forEach(function(x){ if(_map[Number(x.ep)]) x.ep=_map[Number(x.ep)] });
+  try{ DUES().forEach(function(x){ if(Number(x.ep)&&_map[Number(x.ep)]) x.ep=_map[Number(x.ep)] }) }catch(_){}
+  DATA.eps.forEach(function(x){ x.n=_map[Number(x.n)] });
+  state.editEp=null;state.confirmEp=null;
+  render();save();
+  toast("פרק "+_n+" נמחק"+(_moved?", "+_moved+" סצנות עברו לפרק אחר":""));
+  return}
  if(act==="saveep"){
   var t=fval("__ep__","title").trim(), sb=fval("__ep__","sub").trim();
   DATA.eps.forEach(function(e){if(e.n===Number(id)){if(t)e.title=t;e.sub=sb}});
@@ -8194,8 +8240,8 @@ document.addEventListener("scroll",function(e){
 },true);
 (function(){
  var m=/[?&]p=([^&]*)/.exec(location.search);
- if(m){ PROJ=decodeURIComponent(m[1]||""); try{localStorage.setItem(PROJKEY,PROJ)}catch(_){} }
- else loadProj();
+ PROJ=m?decodeURIComponent(m[1]||""):"";
+ try{localStorage.setItem(PROJKEY,PROJ)}catch(_){}
  if(PROJ){
   STORE.base=blankProject("טוען...");
   STORE.users=[];
