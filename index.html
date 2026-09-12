@@ -3849,7 +3849,7 @@ function board(){
  if(mode==="notes"){
   h+='<div class="board">';
   DATA.eps.forEach(function(e){
-   var all=DATA.scenes.filter(function(x){return x.ep===e.n});
+   var all=epScenes(e.n);
    var vis=all.filter(function(x){return state.filter==="all"||x.status===state.filter});
    var sh=all.filter(function(x){return x.status==="shot"}).length;
    var gapN=Math.max(PER_EP-all.length,0);
@@ -3874,7 +3874,7 @@ function board(){
 
  h+='<div class="board '+(mode==="list"?"listmode":"tlmode")+'">';
  DATA.eps.forEach(function(e){
-  var all=DATA.scenes.filter(function(x){return x.ep===e.n});
+  var all=epScenes(e.n);
   var vis=all.filter(function(x){return state.filter==="all"||x.status===state.filter});
   var sh=all.filter(function(x){return x.status==="shot"}).length;
   var gapN=Math.max(PER_EP-all.length,0);
@@ -3982,6 +3982,8 @@ function fixDupIds(){
  });
  return fixed;
 }
+function byOrd(a,b){ return ((a.ord||0)-(b.ord||0))||String(a.id).localeCompare(String(b.id)) }
+function epScenes(n){ return DATA.scenes.filter(function(x){return x.ep===n}).sort(byOrd) }
 function reindex(){
  DATA.eps.forEach(function(e){
   DATA.scenes.filter(function(x){return x.ep===e.n})
@@ -4197,6 +4199,7 @@ document.addEventListener("drop",function(e){
     toast(sc.id+" שויך ל"+unitName(parts[1])+(parts[2]==="shot"?" וסומן כצולם":parts[2]==="todo"?" וסומן לצילום":""));
    }
   }
+  try{reindex()}catch(_){}
   clearZones();cleanupDrag();render();save();
   return;
  }
@@ -4210,6 +4213,7 @@ document.addEventListener("drop",function(e){
    var bk=e.target.closest(".scenes[data-st]");
    if(bk){var st=bk.getAttribute("data-st");if(STATUS[st])sc.status=st}
    var lbl=g[0]==="char"?((charOf(g[1])||{}).name||""):unitName(g[1]);
+   try{reindex()}catch(_){}
    clearZones();cleanupDrag();render();save();toast("הסצנה שויכה ל"+lbl);
    return;
   }
@@ -5791,8 +5795,7 @@ function lineForm(l){
 function seasonSeq(){
  var out=[];
  DATA.eps.forEach(function(e){
-  DATA.scenes.filter(function(x){return x.ep===e.n&&x.status!=="dropped"})
-   .sort(function(a,b){return (a.ord||0)-(b.ord||0)})
+  epScenes(e.n).filter(function(x){return x.status!=="dropped"})
    .forEach(function(x){out.push(x)});
  });
  return out;
@@ -6101,8 +6104,7 @@ function linesView(){
   if(!RO) h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>';
   h+='</th>';
   DATA.eps.forEach(function(e){
-   var cell=s.all.filter(function(x){return x.ep===e.n&&(state.filter==="all"||x.status===state.filter)})
-    .sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+   var cell=s.all.filter(function(x){return x.ep===e.n&&(state.filter==="all"||x.status===state.filter)}).sort(byOrd);
    var ck='l:'+l.k+':'+e.n;
    var cattr=RO?"":' data-cell="'+esc(ck)+'"';
    var hole=!s.eps[e.n]&&s.first&&e.n>s.first&&e.n<s.last;
@@ -6161,7 +6163,7 @@ function arcTable(){
   var all=DATA.scenes.filter(function(x){return inScene(x,c.k)});
   h+='<tr style="--ccol:'+esc(c.color||"#455160")+'"><th class="c0"'+(RO?"":' data-cell="c:'+esc(c.k)+':0" title="גרור לכאן כדי לשייך לדמות הזו בלי לשנות פרק"')+'><b>'+esc(c.name)+'</b><em>'+esc(c.role)+'</em></th>';
   DATA.eps.forEach(function(e){
-   var cell=all.filter(function(x){return x.ep===e.n}).sort(function(a,b){return (a.ord||0)-(b.ord||0)});
+   var cell=all.filter(function(x){return x.ep===e.n}).sort(byOrd);
    var ck='c:'+c.k+':'+e.n;
    var cattr=RO?"":' data-cell="'+esc(ck)+'"';
    if(!cell.length){h+='<td class="void"'+cattr+'></td>';return}
