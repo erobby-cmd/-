@@ -296,6 +296,22 @@ html.linedrag .mchip{pointer-events:none}
 .wrap.boardmode{max-width:1560px}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
 .board>.bcol{scroll-snap-align:start}
+.tkform{max-width:640px;margin-top:14px}
+.tkstats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px}
+.tklist{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.tkrow{display:flex;align-items:flex-start;gap:11px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:11px 13px;box-shadow:var(--shadow)}
+.tkrow.late{border-color:var(--todo)}
+.tkrow.done{opacity:.55;background:var(--surface-2);box-shadow:none}
+.tkbox{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);background:transparent;cursor:pointer;font-size:13px;line-height:1;color:var(--shot);display:flex;align-items:center;justify-content:center;padding:0;margin-top:1px}
+.tkbox:hover{border-color:var(--shot)}
+.tkrow.done .tkbox{background:var(--shot);border-color:var(--shot);color:#fff}
+.tkmain{flex:1 1 auto;min-width:0}
+.tkmain b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:15px;font-weight:600;display:block;line-height:1.45}
+.tkrow.done .tkmain b{text-decoration:line-through}
+.tktags{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.tktags span{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:99px;padding:1px 8px}
+.tktags span.bad{color:var(--todo);border-color:var(--todo)}
+.tktags span.ok{color:var(--shot);border-color:var(--shot)}
 mark.hly{background:#FFE45C;color:#1A1A1A;border-radius:3px;padding:1px 2px;cursor:pointer;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 mark.hly:hover{background:#FFD400}
 .hlbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
@@ -3315,6 +3331,7 @@ function normStore(o){
  if(!o.feed||!o.feed.items) o.feed={items:[]};
  if(!o.chat) o.chat={};
  if(!o.dues||!o.dues.list) o.dues={list:[]};
+ if(!o.tasks||!o.tasks.list) o.tasks={list:[]};
  return o;
 }
 var STORE=normStore(JSON.parse(document.getElementById("scene-data").textContent));
@@ -3638,6 +3655,12 @@ function render(){
   paint(h);
   var _q=document.getElementById("trq");
   if(_q&&state.trFocus){try{_q.focus();_q.setSelectionRange(_q.value.length,_q.value.length)}catch(_){}}
+  return;
+ }
+ if(state.group==="tasks"){
+  h+=tasksView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
   return;
  }
  if(state.group==="shifts"){
@@ -6090,7 +6113,7 @@ function legendStrip(){
  return h+'</div></div>';
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["shifts","שעון משמרות"]]},
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"]]},
  {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
  {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
@@ -6269,6 +6292,8 @@ function feedSnap(){
  (d.ideas||[]).forEach(function(x){ o.id[x.title||""]=1 });
  SHIFTS().forEach(function(x){ o.sh[x.k]={d:x.date||"",w:x.who||"",h:x.half?1:0,n:x.note||"",t:x.think||""} });
  try{ DUES().forEach(function(x){ o.du[x.k]={t:x.title||"",d:x.date||"",k:x.kind||"",s:x.status||"",w:x.who||"",n:x.note||"",e:x.ep||""} }) }catch(_){}
+ o.tk={};
+ try{ TASKS().forEach(function(x){ o.tk[x.k]={t:x.t||"",d:x.date||"",w:x.who||"",o:x.done?1:0} }) }catch(_){}
  return o;
 }
 function sameObj(a,b){
@@ -6332,6 +6357,16 @@ function feedSentences(a,b){
  });
  keys(a.du||{}).forEach(function(k){
   if(!(b.du||{})[k]) out.push({t:'מחק מלוח ההגשות, "'+((a.du[k].t)||dueKind(a.du[k].k))+'"'+(a.du[k].d?" מ"+dayLabel(a.du[k].d):"")});
+ });
+ keys(b.tk||{}).forEach(function(k){
+  var p=(a.tk||{})[k], q=b.tk[k];
+  if(!p){ out.push({t:'הוסיף משימה, "'+q.t+'"'+(q.w?" ל"+q.w:""),go:"tasks"}); return }
+  if(sameObj(p,q)) return;
+  if(p.o!==q.o) out.push({t:(q.o?'סימן שבוצע, "':'החזיר לרשימה את "')+q.t+'"',go:"tasks"});
+  else out.push({t:'עדכן את המשימה "'+q.t+'"',go:"tasks"});
+ });
+ keys(a.tk||{}).forEach(function(k){
+  if(!(b.tk||{})[k]) out.push({t:'מחק משימה, "'+a.tk[k].t+'"'});
  });
  return out;
 }
@@ -6626,6 +6661,59 @@ function chatView(){
   h+='<button class="btn" data-act="chatsend">שלח'+(th?' ל'+esc(tho.name):' לכולם')+'</button></div>';
  }
  return h+'</section>';
+}
+
+/* ===== משימות לביצוע ===== */
+function TASKS(){
+ if(!STORE.tasks||!STORE.tasks.list) STORE.tasks={list:[]};
+ return STORE.tasks.list;
+}
+function taskOpen(){ return TASKS().filter(function(x){return !x.done}) }
+function taskSorted(){
+ return TASKS().slice().sort(function(a,b){
+  if(!!a.done!==!!b.done) return a.done?1:-1;
+  if(a.done&&b.done) return (b.doneAt||0)-(a.doneAt||0);
+  var pa=dparts(a.date),pb=dparts(b.date);
+  if(pa&&pb) return pa.t-pb.t;
+  if(pa) return -1; if(pb) return 1;
+  return (a.at||0)-(b.at||0);
+ });
+}
+function tasksView(){
+ var all=taskSorted(), op=taskOpen(), late=op.filter(function(x){return dparts(x.date)&&daysTo(x.date)<0});
+ var ppl=[].concat(shiftPeople());
+ users().forEach(function(u){ if(ppl.indexOf(u.name)<0) ppl.push(u.name) });
+ var h='<section class="grp"><div class="grp-h"><h2>משימות לביצוע</h2><span class="role">מה צריך לסדר לפני ובין ימי הצילום</span>';
+ h+='<span class="meta">'+op.length+' פתוחות</span></div>';
+ h+='<p class="grp-note">כל מה שלא סצנה ולא הגשה. אישור צילום, טלפון שצריך לעשות, ציוד, תיאום. לחיצה על העיגול מסמנת בוצע, ולחיצה נוספת מחזירה. המשימות משותפות לכולם.</p>';
+ if(!RO){
+  h+='<div class="grpform tkform" data-form="__task__">';
+  h+='<div class="f"><label>מה צריך לעשות</label><input name="t" placeholder="למשל: לתאם עם הדוברות צילום בלשכה" autocomplete="off"></div>';
+  h+='<div class="row"><div class="f"><label>מי אחראי</label><input name="who" list="tkppl" placeholder="לא חובה" autocomplete="off">';
+  h+='<datalist id="tkppl">'+ppl.map(function(x){return '<option value="'+esc(x)+'"></option>'}).join("")+'</datalist></div>';
+  h+='<div class="f"><label>עד מתי</label><input name="date" type="date"></div></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="addtask">הוסף משימה</button></div></div>';
+ }
+ h+='<div class="tkstats">';
+ h+='<div class="dstat"><b>'+op.length+'</b><span>פתוחות</span></div>';
+ h+='<div class="dstat"><b>'+late.length+'</b><span>באיחור</span></div>';
+ h+='<div class="dstat"><b>'+(all.length-op.length)+'</b><span>בוצעו</span></div>';
+ h+='</div>';
+ if(!all.length) return h+'<div class="dempty"><b>אין משימות</b><p>תכתוב את הראשונה למעלה.</p></div></section>';
+ h+='<div class="tklist">';
+ all.forEach(function(x){
+  var lateX=!x.done&&dparts(x.date)&&daysTo(x.date)<0;
+  h+='<div class="tkrow'+(x.done?" done":"")+(lateX?" late":"")+'">';
+  h+='<button class="tkbox" data-act="tktoggle" data-id="'+esc(x.k)+'" title="'+(x.done?"להחזיר לפתוחה":"לסמן שבוצע")+'">'+(x.done?"✓":"")+'</button>';
+  h+='<div class="tkmain"><b>'+esc(x.t)+'</b><div class="tktags">';
+  if(x.who) h+='<span>'+esc(x.who)+'</span>';
+  if(x.date) h+='<span'+(lateX?' class="bad"':'')+'>'+esc(dayLabel(x.date))+' · '+esc(dueWhen(x.date))+'</span>';
+  if(x.done&&x.doneBy) h+='<span class="ok">בוצע על ידי '+esc(x.doneBy)+'</span>';
+  h+='</div></div>';
+  if(!RO) h+='<button class="sdel" data-act="deltask" data-id="'+esc(x.k)+'" title="מחק משימה">×</button>';
+  h+='</div>';
+ });
+ return h+'</div></section>';
 }
 
 /* ===== לוח הגשות ===== */
@@ -7044,7 +7132,7 @@ function switchProj(k){
  STORE.base=blankProject("טוען את "+_pn+"...");
  STORE.users=[];
  STORE.layers={};STORE.tr={};STORE.shifts={list:[],people:[],target:0};
- STORE.feed={items:[]};STORE.chat={};STORE.dues={list:[],next:{from:"",to:"",label:""}};
+ STORE.feed={items:[]};STORE.chat={};STORE.dues={list:[],next:{from:"",to:"",label:""}};STORE.tasks={list:[]};
  hist.length=0;future.length=0;
  state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
  useView(); render();
@@ -7071,11 +7159,12 @@ function rowsOf(){
   if(STORE.feed&&STORE.feed.items) r[rid("feed")]=STORE.feed;
   Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r[rid("chat:"+k)]=STORE.chat[k] });
   if(STORE.dues) r[rid("dues")]=STORE.dues;
+  if(STORE.tasks) r[rid("tasks")]=STORE.tasks;
  }
  return r;
 }
 function applyRows(list){
- var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,pr=null,seen=false;
+ var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,tk=null,pr=null,seen=false;
  list.forEach(function(row){
   if(row.id==="projects"){pr=row.data;return}
   var sid=stripId(row.id);
@@ -7084,6 +7173,7 @@ function applyRows(list){
   if(sid==="shifts")sh=row.data;
   else if(sid==="feed")fd=row.data;
   else if(sid==="dues")du=row.data;
+  else if(sid==="tasks")tk=row.data;
   else if(sid.indexOf("chat:")===0){ch=ch||{};ch[sid.slice(5)]=row.data}
   else if(sid==="base")base=row.data;
   else if(sid.indexOf("layer:")===0)layers[sid.slice(6)]=row.data;
@@ -7107,6 +7197,7 @@ function applyRows(list){
  if(fd&&fd.items) STORE.feed=fd;
  if(ch) STORE.chat=ch;
  if(du&&(du.list||du.next)){ du.list=du.list||[]; STORE.dues=du; }
+ if(tk&&tk.list) STORE.tasks=tk;
  return true;
 }
 function pull(initial){
@@ -7153,7 +7244,7 @@ function listLen(v){
 }
 function guardRow(id,val){
  var sid=stripId(id);
- if(sid!=="dues"&&sid!=="shifts"&&String(sid).indexOf("chat:")!==0) return true;
+ if(sid!=="dues"&&sid!=="tasks"&&sid!=="shifts"&&String(sid).indexOf("chat:")!==0) return true;
  if(SHRINKOK[id]) return true;
  var prev=sent[id];
  if(prev===undefined) return true;
@@ -7930,7 +8021,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,projnew:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -8155,7 +8246,7 @@ document.addEventListener("click",function(e){
    STORE.users=_mu?[JSON.parse(JSON.stringify(_mu))]:[];
    STORE.base=blankProject(nn); STORE.layers={}; STORE.tr={};
    STORE.shifts={list:[],people:[userName(state.me)||"אני"],target:0};
-   STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}};
+   STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}}; STORE.tasks={list:[]};
    sent={}; lastPull=0; pulledOnce=false;
    state.projOpen=false; state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
    useView(); resetSnap(); render(); save();
@@ -8189,6 +8280,24 @@ document.addEventListener("click",function(e){
   state.nextOpen=false;render();save();return}
  if(act==="moremenu"){state.moreOpen=!state.moreOpen;render();return}
  if(act==="qclear"){state.q="";state.qFocus=false;render();return}
+ if(act==="addtask"){
+  var tt=fval("__task__","t").trim();
+  if(!tt){toast("תכתוב מה צריך לעשות",true);return}
+  TASKS().push({k:"k"+Date.now()+"_"+Math.floor(Math.random()*999),t:tt,
+   who:fval("__task__","who").trim(), date:fval("__task__","date"),
+   done:false, at:Date.now(), by:userName(state.me)});
+  render();save();toast("נוספה משימה");return}
+ if(act==="tktoggle"){
+  var tx=TASKS().filter(function(x){return x.k===id})[0];
+  if(!tx)return;
+  tx.done=!tx.done;
+  if(tx.done){ tx.doneAt=Date.now(); tx.doneBy=userName(state.me) } else { tx.doneAt=0; tx.doneBy="" }
+  render();save();toast(tx.done?"בוצע":"חזרה לרשימה");return}
+ if(act==="deltask"){
+  try{bkTouch(true)}catch(_){}
+  SHRINKOK[rid("tasks")]=1; setTimeout(function(){delete SHRINKOK[rid("tasks")]},4000);
+  STORE.tasks.list=TASKS().filter(function(x){return x.k!==id});
+  render();save();toast("המשימה נמחקה");return}
  if(act==="adddue"){
   var dk2="q"+Date.now()+"_"+Math.floor(Math.random()*999);
   DUES().push({k:dk2,title:"",kind:"rough",date:todayISO(),ep:0,who:"",status:"todo",note:""});
@@ -8245,6 +8354,7 @@ document.addEventListener("click",function(e){
   else if(fk==="day"){state.group="days";state.editDay=fi}
   else if(fk==="shifts"){state.group="shifts"}
   else if(fk==="dues"){state.cat="dues";state.group="dues"}
+  else if(fk==="tasks"){state.cat="prod";state.group="tasks"}
   render();return}
  if(act==="theme"){
   var i=0,j;
@@ -8524,7 +8634,7 @@ document.addEventListener("scroll",function(e){
   STORE.users=[];
   STORE.layers={}; STORE.tr={};
   STORE.shifts={list:[],people:[],target:0};
-  STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}};
+  STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}}; STORE.tasks={list:[]};
   projLoading=true;
  }
 })();
