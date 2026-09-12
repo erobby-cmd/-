@@ -296,6 +296,24 @@ html.linedrag .mchip{pointer-events:none}
 .wrap.boardmode{max-width:1560px}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
 .board>.bcol{scroll-snap-align:start}
+.dcrews2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:18px}
+.dcbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow)}
+.dcbox-h{display:flex;align-items:center;gap:8px}
+.dcbox-h b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:15px}
+.dcbox-h em{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3);font-style:normal}
+.dcnone{font-size:13px;color:var(--ink-3);margin:8px 0 0}
+.dcdays{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.dcday{font-family:"Heebo",sans-serif;font-size:11.5px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2);border-radius:99px;padding:2px 9px;cursor:pointer}
+.dcday:hover{border-color:var(--cc);color:var(--cc)}
+.dcmore{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);align-self:center}
+.dmon{margin-top:20px}
+.dmon h4{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.04em;color:var(--ink-3);margin:0 0 8px}
+.dmonrows{display:flex;flex-direction:column;gap:6px}
+.dmonrow{display:flex;align-items:center;gap:10px}
+.dmname{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2);min-width:120px}
+.dmbar{flex:1 1 auto;height:9px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:99px;overflow:hidden}
+.dmbar i{display:block;height:100%;background:var(--shot)}
+.dmonrow b{font-family:"Heebo",sans-serif;font-size:12.5px;min-width:22px;text-align:start}
 .tkform{max-width:640px;margin-top:14px}
 .tkstats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px}
 .tklist{margin-top:10px;display:flex;flex-direction:column;gap:6px}
@@ -3662,6 +3680,21 @@ function render(){
   if(_q&&state.trFocus){try{_q.focus();_q.setSelectionRange(_q.value.length,_q.value.length)}catch(_){}}
   return;
  }
+ if(state.group==="dclock"){
+  h+=daysClockView();
+  h+='</div>';
+  if(state.editDay){
+   var cd=DAYS().filter(function(x){return x.k===state.editDay})[0];
+   if(cd){
+    h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+    h+='<div class="mhead"><span>יום צילום</span><button data-act="cancelgrp" title="סגור">\u00d7</button></div>';
+    h+=dayForm(cd)+'</div></div>';
+   }
+  }
+  h+='<div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
  if(state.group==="tasks"){
   h+=tasksView();
   h+='</div><div class="toast" id="toast"></div>';
@@ -4416,6 +4449,67 @@ function daysClock(){
   h+='<button class="btn ghost" data-act="crewset">סגור</button></div></div>';
  }
  return h;
+}
+function daysClockView(){
+ var cs=CREWS(), all=DAYS();
+ var tot=cs.reduce(function(a,c){return a+(Number(c.target)||0)},0);
+ var don=all.length, left=Math.max(tot-don,0);
+ var h='<section class="grp"><div class="grp-h"><h2>שעון ימי צילום</h2><span class="role">כמה ימים נשרפו מתוך המכסה</span>';
+ h+='<span class="meta">'+don+' מתוך '+tot+'</span></div>';
+ h+='<p class="grp-note">כל יום צילום שנרשם בלוג יורד מהמכסה של הצוות שצילם אותו. זה המספר שקובע כמה עוד אפשר לצאת לשטח, ולא התחושה. את המכסות משנים בכפתור הגדרות.</p>';
+ h+=daysClock();
+ // last day and pace
+ var srt=all.slice().filter(function(d){return dparts(d.date)}).sort(function(a,b){return dparts(b.date).t-dparts(a.date).t});
+ var lastD=srt[0], firstD=srt[srt.length-1];
+ var sinceTxt="עוד לא צולם";
+ if(lastD){
+  var dd=Math.round((Date.now()-dparts(lastD.date).t)/86400000);
+  sinceTxt=dd<=0?"היום":dd===1?"אתמול":"לפני "+dd+" ימים";
+ }
+ h+='<div class="dstats" style="margin-top:16px">';
+ h+='<div class="dstat"><b>'+don+'</b><span>ימים צולמו</span></div>';
+ h+='<div class="dstat"><b>'+left+'</b><span>נשארו במכסה</span></div>';
+ h+='<div class="dstat"><b class="sm">'+esc(lastD?dayLabel(lastD.date):"אין")+'</b><span>יום הצילום האחרון</span></div>';
+ h+='<div class="dstat"><b class="sm">'+esc(sinceTxt)+'</b><span>מאז</span></div>';
+ h+='</div>';
+ // per crew detail
+ h+='<div class="dcrews2">';
+ cs.forEach(function(c){
+  var mine=all.filter(function(d){return crewOf(d)===c.k}).filter(function(d){return dparts(d.date)})
+   .sort(function(a,b){return dparts(b.date).t-dparts(a.date).t});
+  var tgt=Number(c.target)||0;
+  h+='<div class="dcbox" style="--cc:'+esc(c.color||"#455160")+'">';
+  h+='<div class="dcbox-h"><span class="sdot" style="background:'+esc(c.color||"#455160")+'"></span><b>'+esc(c.name)+'</b>';
+  h+='<em>'+mine.length+' מתוך '+tgt+'</em></div>';
+  if(!mine.length) h+='<p class="dcnone">עוד לא צילם אף יום</p>';
+  else {
+   h+='<div class="dcdays">';
+   mine.slice(0,14).forEach(function(d){
+    h+='<button class="dcday" data-act="editday" data-id="'+esc(d.k)+'" title="'+esc((d.loc||"בלי מיקום"))+'">'+esc(dayLabel(d.date))+'</button>';
+   });
+   if(mine.length>14) h+='<span class="dcmore">ועוד '+(mine.length-14)+'</span>';
+   h+='</div>';
+  }
+  h+='</div>';
+ });
+ h+='</div>';
+ // per month
+ var per={};
+ all.forEach(function(d){ var k=monthKey(d.date); if(!k)return; per[k]=(per[k]||0)+1 });
+ var ks=Object.keys(per).sort();
+ if(ks.length){
+  var mx=Math.max.apply(null,ks.map(function(k){return per[k]}));
+  h+='<div class="dmon"><h4>ימי צילום לפי חודש</h4><div class="dmonrows">';
+  ks.forEach(function(k){
+   var d0=all.filter(function(x){return monthKey(x.date)===k})[0];
+   h+='<div class="dmonrow"><span class="dmname">'+esc(monthLabel(d0.date))+'</span>';
+   h+='<span class="dmbar"><i style="width:'+(per[k]/mx*100).toFixed(1)+'%"></i></span>';
+   h+='<b>'+per[k]+'</b></div>';
+  });
+  h+='</div></div>';
+ }
+ if(!RO) h+='<div class="s-foot" style="border:0;padding:0;margin-top:16px"><button class="btn" data-act="group" data-k="days">פתח את לוג ימי הצילום</button></div>';
+ return h+'</section>';
 }
 function dayForm(d){
  var h='<div class="grpform" data-form="__day__">';
@@ -6118,7 +6212,7 @@ function legendStrip(){
  return h+'</div></div>';
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["shifts","שעון משמרות"]]},
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["dclock","שעון ימי צילום"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"]]},
  {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
  {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
