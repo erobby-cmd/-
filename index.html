@@ -296,6 +296,27 @@ html.linedrag .mchip{pointer-events:none}
 .wrap.boardmode{max-width:1560px}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
 .board>.bcol{scroll-snap-align:start}
+.dsec.brk{margin-top:12px}
+.brnote{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-3);margin:2px 0 8px}
+.brtog{font-size:12.5px;padding:4px 12px}
+.brlist{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.brsc{border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--surface-2)}
+.brh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.brn{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;background:var(--ink);color:var(--surface);border-radius:99px;min-width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.brh b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:15px}
+.brtc,.brdur,.brkind{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:99px;padding:1px 8px}
+.brkind{color:var(--shot);border-color:var(--shot)}
+.brimgs{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.brimgs img{width:104px;height:auto;border-radius:6px;display:block;border:1px solid var(--line-2)}
+.brimgs.load{font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3)}
+.brsum{font-size:13.5px;line-height:1.6;margin:9px 0 0;color:var(--ink-2)}
+.brsub,.brq{margin-top:9px}
+.brsub b,.brq b{font-family:"Heebo",sans-serif;font-size:11.5px;letter-spacing:.03em;color:var(--ink-3);display:block;margin-bottom:3px}
+.brsub ul,.brq ul{margin:0;padding-inline-start:18px}
+.brsub li{font-size:13px;line-height:1.6;margin-bottom:3px}
+.brq li{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:13.5px;line-height:1.65;margin-bottom:4px;color:var(--ink)}
+.brtags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.brtags span{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);background:var(--surface);border:1px solid var(--line-2);border-radius:99px;padding:1px 8px}
 .dcrews2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:18px}
 .dcbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow)}
 .dcbox-h{display:flex;align-items:center;gap:8px}
@@ -3393,7 +3414,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4597,10 +4618,62 @@ function daysView(){
    h+='</ul></div>';
   }
   if(d.note) h+='<div class="dsec note"><h4>הערות מהיום</h4><p>'+esc(d.note)+'</p></div>';
+  h+=breakBlock(d);
   h+='</article>';
  });
  h+='</div>';
  return h+'</section>';
+}
+
+/* ===== פירוק יום הצילום ===== */
+var DIMG={}, dimgBusy={};
+function dimgLoad(k){
+ if(DIMG[k]||dimgBusy[k]) return;
+ dimgBusy[k]=1;
+ fetch(REST+"?id=eq."+encodeURIComponent(rid("dimg:"+k))+"&select=data",{headers:HDR})
+  .then(function(r){return r.json()})
+  .then(function(j){ DIMG[k]=((j[0]||{}).data||{}).imgs||[]; dimgBusy[k]=0; render() })
+  .catch(function(){ dimgBusy[k]=0 });
+}
+var BKIND={interview:"ראיון",briefing:"תדריך",field_enforcement:"אכיפה בשטח",prep:"הכנות",other:"אחר"};
+function bKind(k){ return BKIND[k]||k||"" }
+function breakBlock(d){
+ var br=d.brk||[];
+ if(!br.length) return "";
+ var open=state.brkOpen===d.k;
+ var tot=br.length, det=br.filter(function(x){return x.sum}).length;
+ var h='<div class="dsec brk"><h4>פירוק היום'+(d.brsrc?' · '+esc(d.brsrc):'')+'</h4>';
+ h+='<p class="brnote">'+tot+' סצנות בחומר'+(d.brdur?', '+esc(d.brdur):'')+(det?', '+det+' מפורקות לעומק':'')+'</p>';
+ h+='<button class="btn ghost brtog" data-act="brktog" data-id="'+esc(d.k)+'">'+(open?"סגור את הפירוק":"פתח את הפירוק")+'</button>';
+ if(!open) return h+'</div>';
+ var imgs=DIMG[d.k];
+ if(imgs===undefined) dimgLoad(d.k);
+ h+='<div class="brlist">';
+ br.forEach(function(x,i){
+  h+='<div class="brsc">';
+  h+='<div class="brh"><span class="brn">'+x.n+'</span><b>'+esc(x.t)+'</b>';
+  h+='<span class="brtc" dir="ltr">'+esc(x.tc||"")+'</span>';
+  if(x.dur) h+='<span class="brdur">'+esc(x.dur)+'</span>';
+  if(x.kind) h+='<span class="brkind">'+esc(bKind(x.kind))+'</span>';
+  if(!RO) h+='<button class="tinyedit" data-act="brk2sc" data-id="'+esc(d.k)+'" data-i="'+i+'" title="פותח סצנה חדשה ביומן מהפירוק הזה">לסצנה</button>';
+  h+='</div>';
+  var ii=(imgs&&imgs[i])||[];
+  if(ii.length){
+   h+='<div class="brimgs">'+ii.map(function(u){return '<img src="'+esc(u)+'" alt="" loading="lazy">'}).join("")+'</div>';
+  } else if(imgs===undefined){ h+='<div class="brimgs load">טוען תמונות...</div>' }
+  if(x.sum) h+='<p class="brsum">'+esc(x.sum)+'</p>';
+  if((x.good||[]).length){
+   h+='<div class="brsub"><b>רגעים טובים</b><ul>'+x.good.map(function(g){return '<li>'+esc(g)+'</li>'}).join("")+'</ul></div>';
+  }
+  (x.quotes||[]).forEach(function(q){
+   if(!(q.lines||[]).length) return;
+   h+='<div class="brq"><b>'+esc(q.who)+'</b><ul>'+q.lines.map(function(l){return '<li>"'+esc(l)+'"</li>'}).join("")+'</ul></div>';
+  });
+  if((x.tags||[]).length) h+='<div class="brtags">'+x.tags.map(function(t){return '<span>'+esc(t)+'</span>'}).join("")+'</div>';
+  h+='</div>';
+ });
+ h+='</div></div>';
+ return h;
 }
 
 /* ===== צריך לצלם ===== */
@@ -7208,8 +7281,8 @@ var REST=SB_URL.replace(/\/+$/,"")+"/rest/v1/docs";
 var HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
 var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false, pulledOnce=false;
 function qsel(cols){
- if(PROJ) return "?select="+cols+"&or=(id.eq.projects,id.like.p:"+encodeURIComponent(PROJ)+":*)";
- return "?select="+cols+"&id=not.like.p:*&id=not.like.bk:*";
+ if(PROJ) return "?select="+cols+"&or=(id.eq.projects,id.like.p:"+encodeURIComponent(PROJ)+":*)&id=not.like.*dimg:*";
+ return "?select="+cols+"&id=not.like.p:*&id=not.like.bk:*&id=not.like.dimg:*";
 }
 var PROJKEY="marhav-eilat-proj-v1", PROJ="";
 function loadProj(){ try{PROJ=localStorage.getItem(PROJKEY)||""}catch(_){PROJ=""} }
@@ -7301,6 +7374,7 @@ function applyRows(list){
   else if(sid==="feed")fd=row.data;
   else if(sid==="dues")du=row.data;
   else if(sid==="tasks")tk=row.data;
+  else if(sid.indexOf("dimg:")===0) return;
   else if(sid.indexOf("chat:")===0){ch=ch||{};ch[sid.slice(5)]=row.data}
   else if(sid==="base")base=row.data;
   else if(sid.indexOf("layer:")===0)layers[sid.slice(6)]=row.data;
@@ -8147,7 +8221,7 @@ document.addEventListener("click",function(e){
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,addep:1,delepYes:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
+  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
@@ -8551,6 +8625,27 @@ document.addEventListener("click",function(e){
  if(act==="delshift"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה");return}
+ if(act==="brktog"){state.brkOpen=(state.brkOpen===id)?"":id;render();return}
+ if(act==="brk2sc"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var bd=DAYS().filter(function(x){return x.k===id})[0];
+  if(!bd)return;
+  var bx=(bd.brk||[])[Number(b.getAttribute("data-i"))];
+  if(!bx)return;
+  var nid=newSceneId();
+  var nsc={id:nid,ep:1,ord:999,title:bx.t,status:"shot",
+   char:(DATA.chars[0]||{}).k||"", unit:"", line:"",
+   short:bx.sum||"", min:MIN_PER,
+   have:(bx.good||[]).slice(), need:[],
+   note:"מתוך "+dayLabel(bd.date)+(bx.tc?", "+bx.tc:"")+(bd.brsrc?", "+bd.brsrc:"")};
+  DATA.scenes.push(nsc);
+  reindex();
+  state.cat="story"; state.group="board"; state.boardMode="notes"; state.filter="all";
+  state.brkOpen=""; state.editing=nid; state.editModal=false;
+  render();save();
+  toast("נוספה סצנה "+nid+" מהפירוק. תשייך אותה לדמות, לליין ולפרק");
+  return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
  if(act==="saveday"){
   var dform=document.querySelector('[data-form="__day__"]');
