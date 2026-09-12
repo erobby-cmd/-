@@ -312,6 +312,11 @@ html.linedrag .mchip{pointer-events:none}
 .tktags span{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:99px;padding:1px 8px}
 .tktags span.bad{color:var(--todo);border-color:var(--todo)}
 .tktags span.ok{color:var(--shot);border-color:var(--shot)}
+.tkother{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line-2);border-radius:99px;padding:1px 9px}
+.tknote{font-size:13px;color:var(--ink-2);margin:6px 0 0;line-height:1.55}
+.tkrow.edit{display:block;padding:12px 14px}
+.tkedit{margin:0;width:100%}
+.tkrow .tinyedit{flex:0 0 auto;align-self:flex-start;margin-top:1px}
 mark.hly{background:#FFE45C;color:#1A1A1A;border-radius:3px;padding:1px 2px;cursor:pointer;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 mark.hly:hover{background:#FFD400}
 .hlbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
@@ -3370,7 +3375,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -6293,7 +6298,7 @@ function feedSnap(){
  SHIFTS().forEach(function(x){ o.sh[x.k]={d:x.date||"",w:x.who||"",h:x.half?1:0,n:x.note||"",t:x.think||""} });
  try{ DUES().forEach(function(x){ o.du[x.k]={t:x.title||"",d:x.date||"",k:x.kind||"",s:x.status||"",w:x.who||"",n:x.note||"",e:x.ep||""} }) }catch(_){}
  o.tk={};
- try{ TASKS().forEach(function(x){ o.tk[x.k]={t:x.t||"",d:x.date||"",w:x.who||"",o:x.done?1:0} }) }catch(_){}
+ try{ TASKS().forEach(function(x){ o.tk[x.k]={t:x.t||"",d:x.date||"",w:x.who||"",o:x.done?1:0,n:x.note||"",c:x.char||"",x:x.other||""} }) }catch(_){}
  return o;
 }
 function sameObj(a,b){
@@ -6679,6 +6684,20 @@ function taskSorted(){
   return (a.at||0)-(b.at||0);
  });
 }
+function taskForm(x,ppl){
+ var h='<div class="grpform tkedit" data-form="__tkedit__">';
+ h+='<div class="f"><label>מה צריך לעשות</label><input name="t" value="'+esc(x.t||"")+'" autocomplete="off"></div>';
+ h+='<div class="row"><div class="f"><label>מי אחראי</label><input name="who" list="tkppl" value="'+esc(x.who||"")+'" placeholder="לא חובה" autocomplete="off"></div>';
+ h+='<div class="f"><label>עד מתי</label><input name="date" type="date" value="'+esc(x.date||"")+'"></div></div>';
+ h+='<div class="row"><div class="f"><label>לאיזו דמות זה קשור</label><select name="char"><option value="">אחר</option>'+DATA.chars.map(function(c){
+  return '<option value="'+esc(c.k)+'"'+((x.char||"")===c.k?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select></div>';
+ h+='<div class="f"><label>אם אחר, למי או למה זה קשור</label><input name="other" value="'+esc(x.other||"")+'" placeholder="למשל: הפקה, ערוץ, ציוד, דוברות" autocomplete="off"></div></div>';
+ h+='<div class="f"><label>פרטים</label><textarea name="note" style="min-height:64px" placeholder="מספר טלפון, כתובת, מה בדיוק צריך">'+esc(x.note||"")+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="savetask" data-id="'+esc(x.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="canceltask">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="deltask" data-id="'+esc(x.k)+'">מחק משימה</button></div>';
+ return h+'</div>';
+}
 function tasksView(){
  var all=taskSorted(), op=taskOpen(), late=op.filter(function(x){return dparts(x.date)&&daysTo(x.date)<0});
  var ppl=[].concat(shiftPeople());
@@ -6692,6 +6711,9 @@ function tasksView(){
   h+='<div class="row"><div class="f"><label>מי אחראי</label><input name="who" list="tkppl" placeholder="לא חובה" autocomplete="off">';
   h+='<datalist id="tkppl">'+ppl.map(function(x){return '<option value="'+esc(x)+'"></option>'}).join("")+'</datalist></div>';
   h+='<div class="f"><label>עד מתי</label><input name="date" type="date"></div></div>';
+  h+='<div class="row"><div class="f"><label>לאיזו דמות זה קשור</label><select name="char"><option value="">אחר</option>'+DATA.chars.map(function(c){
+   return '<option value="'+esc(c.k)+'">'+esc(c.name)+'</option>'}).join("")+'</select></div>';
+  h+='<div class="f"><label>אם אחר, למי או למה זה קשור</label><input name="other" placeholder="למשל: הפקה, ערוץ, ציוד, דוברות" autocomplete="off"></div></div>';
   h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="addtask">הוסף משימה</button></div></div>';
  }
  h+='<div class="tkstats">';
@@ -6703,13 +6725,20 @@ function tasksView(){
  h+='<div class="tklist">';
  all.forEach(function(x){
   var lateX=!x.done&&dparts(x.date)&&daysTo(x.date)<0;
+  if(state.editTask===x.k&&!RO){ h+='<div class="tkrow edit">'+taskForm(x,ppl)+'</div>'; return }
   h+='<div class="tkrow'+(x.done?" done":"")+(lateX?" late":"")+'">';
   h+='<button class="tkbox" data-act="tktoggle" data-id="'+esc(x.k)+'" title="'+(x.done?"להחזיר לפתוחה":"לסמן שבוצע")+'">'+(x.done?"✓":"")+'</button>';
   h+='<div class="tkmain"><b>'+esc(x.t)+'</b><div class="tktags">';
+  var tc=charOf(x.char);
+  if(tc) h+='<span class="dchip sm" style="--cc:'+esc(tc.color||"#455160")+'"><i></i>'+esc(tc.name)+'</span>';
+  else h+='<span class="tkother">אחר'+(x.other?' · '+esc(x.other):'')+'</span>';
   if(x.who) h+='<span>'+esc(x.who)+'</span>';
   if(x.date) h+='<span'+(lateX?' class="bad"':'')+'>'+esc(dayLabel(x.date))+' · '+esc(dueWhen(x.date))+'</span>';
   if(x.done&&x.doneBy) h+='<span class="ok">בוצע על ידי '+esc(x.doneBy)+'</span>';
-  h+='</div></div>';
+  h+='</div>';
+  if(x.note) h+='<p class="tknote">'+esc(x.note).replace(/\n/g,"<br>")+'</p>';
+  h+='</div>';
+  if(!RO) h+='<button class="tinyedit" data-act="edittask" data-id="'+esc(x.k)+'">ערוך</button>';
   if(!RO) h+='<button class="sdel" data-act="deltask" data-id="'+esc(x.k)+'" title="מחק משימה">×</button>';
   h+='</div>';
  });
@@ -7044,7 +7073,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editShift||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||state.confirmEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
@@ -8023,7 +8052,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,projnew:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -8287,8 +8316,23 @@ document.addEventListener("click",function(e){
   if(!tt){toast("תכתוב מה צריך לעשות",true);return}
   TASKS().push({k:"k"+Date.now()+"_"+Math.floor(Math.random()*999),t:tt,
    who:fval("__task__","who").trim(), date:fval("__task__","date"),
+   char:fval("__task__","char"), other:fval("__task__","other").trim(),
    done:false, at:Date.now(), by:userName(state.me)});
   render();save();toast("נוספה משימה");return}
+ if(act==="edittask"){state.editTask=id;render();return}
+ if(act==="canceltask"){state.editTask=null;render();return}
+ if(act==="savetask"){
+  var te=TASKS().filter(function(x){return x.k===id})[0];
+  if(!te){state.editTask=null;render();return}
+  var nt=fval("__tkedit__","t").trim();
+  if(!nt){toast("צריך טקסט למשימה",true);return}
+  te.t=nt;
+  te.who=fval("__tkedit__","who").trim();
+  te.date=fval("__tkedit__","date");
+  te.char=fval("__tkedit__","char");
+  te.other=fval("__tkedit__","other").trim();
+  te.note=fval("__tkedit__","note").trim();
+  state.editTask=null;render();save();toast("המשימה עודכנה");return}
  if(act==="tktoggle"){
   var tx=TASKS().filter(function(x){return x.k===id})[0];
   if(!tx)return;
