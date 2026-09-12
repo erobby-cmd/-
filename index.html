@@ -6834,6 +6834,8 @@ function catBar(){
 function vbtn(k,label){
  var extra="";
  if(k==="chat"){ var cu=chatUnread(); if(cu) extra='<span class="vn">'+cu+'</span>' }
+ if(k==="tasks"){ var to=0; try{to=taskOpen().length}catch(_){} if(to) extra='<span class="vn">'+to+'</span>' }
+ if(k==="dues"){ var dn=0; try{dn=DUES().filter(function(x){return x.status!=="sent"}).length}catch(_){} if(dn) extra='<span class="vn">'+dn+'</span>' }
  return '<button data-act="group" data-k="'+k+'" aria-pressed="'+(state.group===k)+'">'+esc(label)+extra+'</button>';
 }
 function chip(kind,k,label,n){
