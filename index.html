@@ -337,6 +337,12 @@ html.linedrag .mchip{pointer-events:none}
 .injdot.on{background:#FFD400;border-color:#D9AF00;box-shadow:0 0 0 2px rgba(255,212,0,.25)}
 .injleg{display:inline-flex;align-items:center;gap:6px}
 .injline{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2);margin:9px 0 0}
+.matrow.edit{display:block;padding:12px 14px}
+.matedit{margin:0;width:100%}
+.movebtns{display:inline-flex;flex-direction:column;gap:1px;flex:0 0 auto}
+.movebtn{font-size:8px;line-height:1;padding:2px 5px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-3);border-radius:4px;cursor:pointer}
+.movebtn:hover:not(:disabled){border-color:var(--ink-3);color:var(--ink)}
+.movebtn:disabled{opacity:.28;cursor:default}
 .matep{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin:14px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
 .matjour{margin-top:26px}
 .matbody{border:1px solid var(--ink-3);border-top:0;border-radius:0 0 8px 8px;padding:4px 13px 12px;background:var(--surface-2);margin-top:-4px}
@@ -3466,7 +3472,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4878,6 +4884,26 @@ function toEpBtn(dk,ix){
  h+='<button class="tinyedit" data-act="brkaskno">ביטול</button></span>';
  return h;
 }
+function matEditForm(d,ix,x){
+ var h='<div class="grpform matedit" data-form="__matedit__">';
+ h+='<div class="f"><label>שם הסצנה</label><input name="t" value="'+esc(x.t||"")+'" autocomplete="off"></div>';
+ h+='<div class="row"><div class="f"><label>טיימקוד</label><input name="tc" value="'+esc(x.tc||"")+'" dir="ltr" autocomplete="off"></div>';
+ h+='<div class="f"><label>אורך</label><input name="dur" value="'+esc(x.dur||"")+'" dir="ltr" autocomplete="off"></div></div>';
+ h+='<div class="f"><label>קטגוריה</label><select name="kind">'+[["interview","ראיון"],["personal","אישי"],["briefing","תדריך"],["field_enforcement","אכיפה בשטח"],["prep","הכנות"],["other","אחר"]].map(function(k){
+  return '<option value="'+k[0]+'"'+((x.kind||"other")===k[0]?" selected":"")+'>'+k[1]+'</option>'}).join("")+'</select></div>';
+ if(DATA.chars.length){
+  var cur=matCharsOf(x,d);
+  h+='<div class="f"><label>מי בסצנה</label><div class="tagbox">'+DATA.chars.map(function(c){
+   return '<label><input type="checkbox" name="mc_'+esc(c.k)+'"'+(cur.indexOf(c.k)>-1?" checked":"")+'><i class="cchip" style="background:'+esc(c.color||"#455160")+'"></i>'+esc(c.name)+'</label>';
+  }).join("")+'</div></div>';
+ }
+ h+='<div class="f"><label>מה יש בה</label><textarea name="sum" style="min-height:80px">'+esc(x.sum||"")+'</textarea></div>';
+ h+='<div class="f"><label>רגעים טובים</label><textarea name="good" style="min-height:80px" placeholder="שורה לכל רגע">'+esc(lines(x.good))+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="mateditsave" data-id="'+esc(d.k)+'" data-i="'+ix+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="mateditno">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="matdel" data-id="'+esc(d.k)+'" data-i="'+ix+'">מחק שורה</button></div>';
+ return h+'</div>';
+}
 function matSceneOf(x){
  if(!x) return null;
  if(x.sid){
@@ -4956,6 +4982,8 @@ function matView(){
    h+='<span>'+dn+' סצנות · '+hms(dd)+(r.d.brsrc?' · '+esc(r.d.brsrc):'')+'</span></div>';
   }
   var key=r.d.k+"#"+r.x.n, op=state.matOpen===key;
+  var _ei=(r.d.brk||[]).indexOf(r.x), _ekey=r.d.k+"#"+_ei;
+  if(state.matEdit===_ekey&&!RO){ h+='<div class="matrow edit">'+matEditForm(r.d,_ei,r.x)+'</div>'; return }
   h+='<div class="matrow'+(op?" open":"")+'">';
   var jsc=matSceneOf(r.x);
   h+='<button class="matmain" data-act="matopen" data-k="'+esc(key)+'">';
@@ -4968,8 +4996,14 @@ function matView(){
   if(!op&&r.x.sum) h+='<span class="matsum1">'+esc(r.x.sum.slice(0,90))+(r.x.sum.length>90?"...":"")+'</span>';
   h+='</button>';
   if(!RO){
-   if(!jsc) h+=toEpBtn(r.d.k,(r.d.brk||[]).indexOf(r.x));
-   h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+((r.d.brk||[]).indexOf(r.x))+'" title="מחק שורה מהרשימה">×</button>';
+   var _ri=(r.d.brk||[]).indexOf(r.x), _rn=(r.d.brk||[]).length;
+   h+='<span class="movebtns">';
+   h+='<button class="movebtn" data-act="matup" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'"'+(_ri<=0?" disabled":"")+' title="העבר שורה אחת למעלה">▲</button>';
+   h+='<button class="movebtn" data-act="matdown" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'"'+(_ri>=_rn-1?" disabled":"")+' title="העבר שורה אחת למטה">▼</button>';
+   h+='</span>';
+   h+='<button class="tinyedit" data-act="matedit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">ערוך</button>';
+   if(!jsc) h+=toEpBtn(r.d.k,_ri);
+   h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="מחק שורה מהרשימה">×</button>';
   }
   h+='</div>';
   if(op){
@@ -5031,7 +5065,14 @@ function matJournal(){
   h+=reddotIn(x.status);
   if(x.short) h+='<span class="matsum1">'+esc(x.short.slice(0,80))+'</span>';
   h+='</button>';
-  if(!RO) h+='<button class="sdel" data-act="askdel" data-id="'+esc(x.id)+'" title="מחק סצנה">×</button>';
+  if(!RO){
+   var _ep=epScenes(x.ep), _ji=_ep.map(function(z){return z.id}).indexOf(x.id);
+   h+='<span class="movebtns">';
+   h+='<button class="movebtn" data-act="scup" data-id="'+esc(x.id)+'"'+(_ji<=0?" disabled":"")+' title="העבר למעלה בתוך הפרק">▲</button>';
+   h+='<button class="movebtn" data-act="scdown" data-id="'+esc(x.id)+'"'+(_ji>=_ep.length-1?" disabled":"")+' title="העבר למטה בתוך הפרק">▼</button>';
+   h+='</span>';
+   h+='<button class="sdel" data-act="askdel" data-id="'+esc(x.id)+'" title="מחק סצנה">×</button>';
+  }
   h+='</div>';
   if(state.confirmDel===x.id&&!RO){
    h+='<div class="matbody"><p class="brsum">למחוק את '+esc(x.id)+", "+esc(x.title)+'?</p>';
@@ -7616,7 +7657,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.editShift||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.matEdit||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||state.confirmEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
@@ -8595,7 +8636,7 @@ document.addEventListener("click",function(e){
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
+  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
@@ -9053,6 +9094,55 @@ document.addEventListener("click",function(e){
   dd.brk.forEach(function(z,i){z.n=i+1});
   state.matAdd=false;
   render();save();toast("נוספה שורה ל"+dayLabel(dd.date));
+  return}
+ if(act==="matedit"){state.matEdit=b.getAttribute("data-id")+"#"+b.getAttribute("data-i");state.matOpen="";render();return}
+ if(act==="mateditno"){state.matEdit="";render();return}
+ if(act==="mateditsave"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var ed=DAYS().filter(function(x){return x.k===id})[0];
+  if(!ed||!ed.brk){state.matEdit="";render();return}
+  var ex=ed.brk[Number(b.getAttribute("data-i"))];
+  if(!ex){state.matEdit="";render();return}
+  var nt2=fval("__matedit__","t").trim();
+  if(!nt2){toast("צריך שם לסצנה",true);return}
+  var fm=document.querySelector('[data-form="__matedit__"]');
+  ex.t=nt2;
+  ex.tc=fval("__matedit__","tc").trim();
+  ex.dur=fval("__matedit__","dur").trim();
+  ex.kind=fval("__matedit__","kind")||"other";
+  ex.sum=fval("__matedit__","sum").trim();
+  ex.good=toArr(fval("__matedit__","good"));
+  if(DATA.chars.length){
+   ex.ch=DATA.chars.filter(function(c){var f=fm&&fm.querySelector('[name="mc_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
+  }
+  state.matEdit="";
+  render();save();toast("השורה עודכנה");
+  return}
+ if(act==="matup"||act==="matdown"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var md=DAYS().filter(function(x){return x.k===id})[0];
+  if(!md||!md.brk)return;
+  var mi=Number(b.getAttribute("data-i")), mj=mi+(act==="matup"?-1:1);
+  if(mi<0||mj<0||mj>=md.brk.length)return;
+  var tmp=md.brk[mi]; md.brk[mi]=md.brk[mj]; md.brk[mj]=tmp;
+  md.brk.forEach(function(z,i){z.n=i+1});
+  state.matOpen="";
+  render();save();
+  return}
+ if(act==="scup"||act==="scdown"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var sx=DATA.scenes.filter(function(z){return z.id===id})[0];
+  if(!sx)return;
+  var col=epScenes(sx.ep), ci=col.map(function(z){return z.id}).indexOf(id);
+  var cj=ci+(act==="scup"?-1:1);
+  if(ci<0||cj<0||cj>=col.length)return;
+  var a1=col[ci], a2=col[cj], t1=a1.ord;
+  a1.ord=a2.ord; a2.ord=t1;
+  reindex();
+  render();save();
   return}
  if(act==="matdel"){
   if(RO)return;
