@@ -343,6 +343,20 @@ html.linedrag .mchip{pointer-events:none}
 .movebtn{font-size:8px;line-height:1;padding:2px 5px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-3);border-radius:4px;cursor:pointer}
 .movebtn:hover:not(:disabled){border-color:var(--ink-3);color:var(--ink)}
 .movebtn:disabled{opacity:.28;cursor:default}
+.mgrip{flex:0 0 auto;color:var(--ink-3);opacity:.45;cursor:grab;font-size:13px;line-height:1.5;padding:0 1px;user-select:none}
+.mgrip:hover{opacity:.9}
+.matrow.mdrag{opacity:.35}
+.matrow.mbefore{box-shadow:inset 0 3px 0 -1px var(--accent)}
+.matrow.mafter{box-shadow:inset 0 -3px 0 -1px var(--accent)}
+.dchip.pick,.brkind.pick,.stwrap{cursor:pointer}
+.dchip.pick:hover,.brkind.pick:hover{border-color:var(--ink-3)}
+.dchip.addch{color:var(--ink-3);border-style:dashed}
+.dchip.lead{font-weight:800}
+.stwrap{display:inline-flex}
+.matpick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-top:0;border-radius:0 0 8px 8px;padding:8px 10px;margin:-1px 0 4px}
+.matpick>b{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);font-weight:700;margin-inline-end:4px}
+.matpick .pickhint{flex:1 1 100%;margin:3px 0 0;font-size:11px;color:var(--ink-3)}
+.dchopt.lead{box-shadow:0 0 0 2px var(--cc,#455160)}
 .matep{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin:14px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
 .matjour{margin-top:26px}
 .matbody{border:1px solid var(--ink-3);border-top:0;border-radius:0 0 8px 8px;padding:4px 13px 12px;background:var(--surface-2);margin-top:-4px}
@@ -3472,7 +3486,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4106,11 +4120,13 @@ function moveAfter(id,ep,afterId){
  col.forEach(function(x,j){if(x.id===afterId)idx=j+1});
  moveScene(id,ep,col[idx]?col[idx].id:null);
 }
-var dragId=null,dragLine=null,ins=null,dragFromChar="";
+var dragId=null,dragLine=null,ins=null,dragFromChar="",dragMat=null,dragJour=null;
 function cleanupDrag(){
  document.documentElement.classList.remove("dragging");
  document.documentElement.classList.remove("linedrag");
- dragLine=null; dragFromChar="";
+ dragLine=null; dragFromChar=""; dragMat=null; dragJour=null;
+ var _md=document.querySelector(".matrow.mdrag");
+ if(_md)_md.classList.remove("mdrag");
  if(ins&&ins.parentNode)ins.parentNode.removeChild(ins);
  ins=null;
  var d=document.querySelector(".pnote.dragging");
@@ -4141,12 +4157,23 @@ function autoScroll(e){
  }
 }
 function clearZones(){
- var a=document.querySelectorAll(".dropok,.dropbucket,.dropcell,.rowdrop-before,.rowdrop-after");
+ var a=document.querySelectorAll(".dropok,.dropbucket,.dropcell,.rowdrop-before,.rowdrop-after,.mbefore,.mafter");
  for(var i=0;i<a.length;i++){a[i].classList.remove("dropok");a[i].classList.remove("dropbucket");a[i].classList.remove("dropcell");
-  a[i].classList.remove("rowdrop-before");a[i].classList.remove("rowdrop-after")}
+  a[i].classList.remove("rowdrop-before");a[i].classList.remove("rowdrop-after");
+  a[i].classList.remove("mbefore");a[i].classList.remove("mafter")}
 }
 document.addEventListener("dragstart",function(e){
  if(!canEdit())return;
+ var mrw=e.target&&e.target.closest?e.target.closest(".matrow[data-mrow],.matrow[data-jrow]"):null;
+ if(mrw){
+  dragId=null;dragLine=null;
+  dragMat=mrw.getAttribute("data-mrow")||null;
+  dragJour=mrw.getAttribute("data-jrow")||null;
+  document.documentElement.classList.add("dragging");
+  setTimeout(function(){mrw.classList.add("mdrag")},0);
+  if(e.dataTransfer){e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",dragMat||dragJour)}catch(_){}}
+  return;
+ }
  var g=e.target&&e.target.closest?e.target.closest(".rgrip"):null;
  if(g){
   dragLine=g.getAttribute("data-line");dragId=null;
@@ -4171,6 +4198,19 @@ document.addEventListener("dragstart",function(e){
 });
 document.addEventListener("dragend",function(){clearZones();cleanupDrag()});
 document.addEventListener("dragover",function(e){
+ if(dragMat||dragJour){
+  var sel=dragMat?".matrow[data-mrow]":".matrow[data-jrow]";
+  var mt=e.target&&e.target.closest?e.target.closest(sel):null;
+  clearZones();
+  if(mt){
+   e.preventDefault();
+   if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+   var mr2=mt.getBoundingClientRect();
+   mt.classList.add(e.clientY<mr2.top+mr2.height/2?"mbefore":"mafter");
+  }
+  autoScroll(e);
+  return;
+ }
  if(dragLine){
   var trow=e.target&&e.target.closest?e.target.closest("tr[data-line]"):null;
   clearZones();
@@ -4224,6 +4264,36 @@ document.addEventListener("dragover",function(e){
  } else if(!ins.parentNode||ins.parentNode!==col) col.appendChild(ins);
 });
 document.addEventListener("drop",function(e){
+ if(dragMat){
+  var mt2=e.target&&e.target.closest?e.target.closest(".matrow[data-mrow]"):null;
+  var mk2=mt2?mt2.getAttribute("data-mrow"):null;
+  if(!mk2||mk2===dragMat){clearZones();cleanupDrag();return}
+  e.preventDefault();snap();
+  var mrr=mt2.getBoundingClientRect();
+  var okm=matMoveRow(dragMat,mk2,e.clientY<mrr.top+mrr.height/2);
+  state.matOpen="";state.matCh="";state.matKindPick="";
+  clearZones();cleanupDrag();
+  if(okm){render();save();toast("\u05d4\u05e1\u05e6\u05e0\u05d4 \u05d4\u05d5\u05e2\u05d1\u05e8\u05d4")} else render();
+  return;
+ }
+ if(dragJour){
+  var jt=e.target&&e.target.closest?e.target.closest(".matrow[data-jrow]"):null;
+  var jk=jt?jt.getAttribute("data-jrow"):null;
+  if(!jk||jk===dragJour){clearZones();cleanupDrag();return}
+  e.preventDefault();snap();
+  var jtg=DATA.scenes.filter(function(z){return z.id===jk})[0];
+  var jsr=DATA.scenes.filter(function(z){return z.id===dragJour})[0];
+  var jrr=jt.getBoundingClientRect(), jbf=e.clientY<jrr.top+jrr.height/2;
+  var oldEp=jsr?jsr.ep:null;
+  if(jtg){
+   if(jbf) moveScene(dragJour,jtg.ep,jk); else moveAfter(dragJour,jtg.ep,jk);
+   try{reindex()}catch(_){}
+  }
+  var newEp=jsr?jsr.ep:null;
+  clearZones();cleanupDrag();render();save();
+  toast(newEp!==oldEp?("\u05d4\u05e1\u05e6\u05e0\u05d4 \u05e2\u05d1\u05e8\u05d4 \u05dc\u05e4\u05e8\u05e7 "+newEp):"\u05e1\u05d3\u05e8 \u05d4\u05e1\u05e6\u05e0\u05d5\u05ea \u05e2\u05d5\u05d3\u05db\u05df");
+  return;
+ }
  if(dragLine){
   var trow=e.target&&e.target.closest?e.target.closest("tr[data-line]"):null;
   if(!trow||trow.getAttribute("data-line")===dragLine){clearZones();cleanupDrag();return}
@@ -4927,6 +4997,40 @@ function hms(n){
  var p=function(v){return v<10?"0"+v:""+v};
  return h?(h+":"+p(m)+":"+p(s2)):(m+":"+p(s2));
 }
+function matChips(d,i,x){
+ var cur=matCharsOf(x,d), man=!!(x.ch&&x.ch.length), s='';
+ cur.forEach(function(k){
+  var c=charOf(k); if(!c)return;
+  s+='<span class="dchip sm'+(RO?"":" pick")+'"'+(RO?"":' data-act="matchopen" data-id="'+esc(d.k)+'" data-i="'+i+'"')+' style="--cc:'+esc(c.color||"#455160")+'" title="'+(man?"שויך ידנית":"זוהה אוטומטית")+', לחיצה משנה"><i></i>'+esc(c.name)+'</span>';
+ });
+ if(!RO) s+='<span class="dchip sm pick addch" data-act="matchopen" data-id="'+esc(d.k)+'" data-i="'+i+'" title="הוסף או החלף דמות">'+(cur.length?"+":"+ דמות")+'</span>';
+ return s;
+}
+function jourChips(x){
+ var ks=[]; if(x.char) ks.push(x.char);
+ (x.chars||[]).forEach(function(k){ if(ks.indexOf(k)<0) ks.push(k) });
+ var s='';
+ ks.forEach(function(k){
+  var c=charOf(k); if(!c)return;
+  s+='<span class="dchip sm'+(RO?"":" pick")+(k===x.char?" lead":"")+'"'+(RO?"":' data-act="jourchopen" data-id="'+esc(x.id)+'"')+' style="--cc:'+esc(c.color||"#455160")+'" title="'+(k===x.char?"הדמות המובילה":"גם בסצנה")+', לחיצה משנה"><i></i>'+esc(c.name)+'</span>';
+ });
+ if(!RO) s+='<span class="dchip sm pick addch" data-act="jourchopen" data-id="'+esc(x.id)+'" title="הוסף או החלף דמות">'+(ks.length?"+":"+ דמות")+'</span>';
+ return s;
+}
+function matMoveRow(fromKey,toKey,before){
+ var fp=String(fromKey).split("#"), tp=String(toKey).split("#");
+ var fd=DAYS().filter(function(z){return z.k===fp[0]})[0];
+ var td=DAYS().filter(function(z){return z.k===tp[0]})[0];
+ if(!fd||!td||!fd.brk||!td.brk) return false;
+ var fi=Number(fp[1]), ti=Number(tp[1]);
+ if(!(fi>=0&&fi<fd.brk.length)||!(ti>=0&&ti<td.brk.length)) return false;
+ var it=fd.brk.splice(fi,1)[0];
+ if(fd===td&&fi<ti) ti--;
+ td.brk.splice(before?ti:ti+1,0,it);
+ fd.brk.forEach(function(z,k){z.n=k+1});
+ if(td!==fd) td.brk.forEach(function(z,k){z.n=k+1});
+ return true;
+}
 function matView(){
  var all=matAll();
  var h='<section class="grp"><div class="grp-h"><h2>רשימת הסצנות מהחומר</h2><span class="role">כל מה שיש בקופסה, לפי סדר ימי הצילום</span>';
@@ -4984,28 +5088,43 @@ function matView(){
   var key=r.d.k+"#"+r.x.n, op=state.matOpen===key;
   var _ei=(r.d.brk||[]).indexOf(r.x), _ekey=r.d.k+"#"+_ei;
   if(state.matEdit===_ekey&&!RO){ h+='<div class="matrow edit">'+matEditForm(r.d,_ei,r.x)+'</div>'; return }
-  h+='<div class="matrow'+(op?" open":"")+'">';
+  var _ri=(r.d.brk||[]).indexOf(r.x), _mk=r.d.k+"#"+_ri;
+  h+='<div class="matrow'+(op?" open":"")+'"'+(RO?"":' draggable="true" data-mrow="'+esc(_mk)+'"')+'>';
   var jsc=matSceneOf(r.x);
-  h+='<button class="matmain" data-act="matopen" data-k="'+esc(key)+'">';
+  if(!RO) h+='<span class="mgrip" title="גרור כדי להעביר את הסצנה למקום אחר">⠿</span>';
+  h+='<div class="matmain" data-act="matopen" data-k="'+esc(key)+'">';
   h+='<span class="injdot'+(jsc?" on":"")+'" title="'+(jsc?esc("ביומן כסצנה "+jsc.id+", "+jsc.title):"עוד לא נכנס ליומן")+'"></span>';
   h+='<span class="brn">'+r.x.n+'</span>';
   h+='<span class="mattc" dir="ltr">'+esc(r.x.tc||"")+'</span>';
   h+='<span class="matdur">'+esc(r.x.dur||"")+'</span>';
   h+='<span class="matt">'+esc(r.x.t)+'</span>';
-  if(r.x.kind) h+='<span class="brkind">'+esc(bKind(r.x.kind))+'</span>';
+  h+=matChips(r.d,_ri,r.x);
+  if(r.x.kind) h+='<span class="brkind'+(RO?"":" pick")+'"'+(RO?"":' data-act="matkindopen" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="לחיצה משנה סוג"')+'>'+esc(bKind(r.x.kind))+'</span>';
+  else if(!RO) h+='<span class="brkind pick" data-act="matkindopen" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">+ סוג</span>';
   if(!op&&r.x.sum) h+='<span class="matsum1">'+esc(r.x.sum.slice(0,90))+(r.x.sum.length>90?"...":"")+'</span>';
-  h+='</button>';
+  h+='</div>';
   if(!RO){
-   var _ri=(r.d.brk||[]).indexOf(r.x), _rn=(r.d.brk||[]).length;
-   h+='<span class="movebtns">';
-   h+='<button class="movebtn" data-act="matup" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'"'+(_ri<=0?" disabled":"")+' title="העבר שורה אחת למעלה">▲</button>';
-   h+='<button class="movebtn" data-act="matdown" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'"'+(_ri>=_rn-1?" disabled":"")+' title="העבר שורה אחת למטה">▼</button>';
-   h+='</span>';
    h+='<button class="tinyedit" data-act="matedit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">ערוך</button>';
    if(!jsc) h+=toEpBtn(r.d.k,_ri);
    h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="מחק שורה מהרשימה">×</button>';
   }
   h+='</div>';
+  if(!RO&&state.matCh===_mk){
+   var _cur=matCharsOf(r.x,r.d);
+   h+='<div class="matpick"><b>מי בסצנה</b>';
+   DATA.chars.forEach(function(c){
+    h+='<button class="dchopt'+(_cur.indexOf(c.k)>-1?" on":"")+'" data-act="matchar" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</button>';
+   });
+   h+='<button class="tinyedit" data-act="matchclose">סגור</button>';
+   h+='<p class="pickhint">לחיצה מוסיפה או מורידה דמות מהסצנה</p></div>';
+  }
+  if(!RO&&state.matKindPick===_mk){
+   h+='<div class="matpick"><b>סוג הסצנה</b>';
+   ["interview","personal","briefing","field_enforcement","prep","other"].forEach(function(k){
+    h+='<button class="dchopt'+((r.x.kind||"other")===k?" on":"")+'" data-act="matsetkind" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" data-k="'+k+'" style="--cc:var(--shot)">'+esc(bKind(k))+'</button>';
+   });
+   h+='<button class="tinyedit" data-act="matchclose">סגור</button></div>';
+  }
   if(op){
    h+='<div class="matbody">';
    if(r.x.sum) h+='<p class="brsum">'+esc(r.x.sum)+'</p>';
@@ -5055,25 +5174,37 @@ function matJournal(){
    var e=DATA.eps.filter(function(z){return z.n===x.ep})[0];
    h+='<div class="matep">פרק '+(x.ep||"?")+(e?' · '+esc(e.title):'')+'</div>';
   }
-  var ch=charOf(x.char), ln=lineObj(lineOf(x));
-  h+='<div class="matrow">';
-  h+='<button class="matmain" data-act="edit" data-id="'+esc(x.id)+'">';
+  var ln=lineObj(lineOf(x));
+  h+='<div class="matrow"'+(RO?"":' draggable="true" data-jrow="'+esc(x.id)+'"')+'>';
+  if(!RO) h+='<span class="mgrip" title="גרור כדי להעביר את הסצנה, גם בין הפרקים">⠿</span>';
+  h+='<div class="matmain" data-act="edit" data-id="'+esc(x.id)+'">';
   h+='<span class="mattc">'+esc(x.id)+'</span>';
   h+='<span class="matt">'+esc(x.title)+'</span>';
-  if(ch) h+='<span class="dchip sm" style="--cc:'+esc(ch.color||"#455160")+'"><i></i>'+esc(ch.name)+'</span>';
-  if(ln) h+='<span class="brkind" style="color:'+esc(ln.color||"#455160")+';border-color:'+esc(ln.color||"#455160")+'">'+esc(ln.name)+'</span>';
-  h+=reddotIn(x.status);
+  h+=jourChips(x);
+  if(ln) h+='<span class="brkind'+(RO?"":" pick")+'"'+(RO?"":' data-act="jourlnopen" data-id="'+esc(x.id)+'" title="לחיצה משנה ליין"')+' style="color:'+esc(ln.color||"#455160")+';border-color:'+esc(ln.color||"#455160")+'">'+esc(ln.name)+'</span>';
+  else if(!RO) h+='<span class="brkind pick" data-act="jourlnopen" data-id="'+esc(x.id)+'">+ ליין</span>';
+  h+=(RO?reddotIn(x.status):'<span class="stwrap" data-act="cycle" data-id="'+esc(x.id)+'" title="לחיצה משנה סטטוס">'+reddotIn(x.status)+'</span>');
   if(x.short) h+='<span class="matsum1">'+esc(x.short.slice(0,80))+'</span>';
-  h+='</button>';
-  if(!RO){
-   var _ep=epScenes(x.ep), _ji=_ep.map(function(z){return z.id}).indexOf(x.id);
-   h+='<span class="movebtns">';
-   h+='<button class="movebtn" data-act="scup" data-id="'+esc(x.id)+'"'+(_ji<=0?" disabled":"")+' title="העבר למעלה בתוך הפרק">▲</button>';
-   h+='<button class="movebtn" data-act="scdown" data-id="'+esc(x.id)+'"'+(_ji>=_ep.length-1?" disabled":"")+' title="העבר למטה בתוך הפרק">▼</button>';
-   h+='</span>';
-   h+='<button class="sdel" data-act="askdel" data-id="'+esc(x.id)+'" title="מחק סצנה">×</button>';
-  }
   h+='</div>';
+  if(!RO) h+='<button class="sdel" data-act="askdel" data-id="'+esc(x.id)+'" title="מחק סצנה">×</button>';
+  h+='</div>';
+  if(!RO&&state.jourCh===x.id){
+   h+='<div class="matpick"><b>מי בסצנה</b>';
+   DATA.chars.forEach(function(c){
+    var _on=(x.char===c.k)||((x.chars||[]).indexOf(c.k)>-1);
+    h+='<button class="dchopt'+(_on?" on":"")+(x.char===c.k?" lead":"")+'" data-act="jourchar" data-id="'+esc(x.id)+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</button>';
+   });
+   h+='<button class="tinyedit" data-act="jourchclose">סגור</button>';
+   h+='<p class="pickhint">לחיצה על דמות שלא בסצנה מוסיפה אותה. לחיצה על דמות שכבר בסצנה הופכת אותה למובילה, ולחיצה על המובילה מורידה אותה</p></div>';
+  }
+  if(!RO&&state.jourLn===x.id){
+   h+='<div class="matpick"><b>ליין</b>';
+   LINES().forEach(function(l){
+    h+='<button class="dchopt'+(lineOf(x)===l.k?" on":"")+'" data-act="jourline" data-id="'+esc(x.id)+'" data-k="'+esc(l.k)+'" style="--cc:'+esc(l.color||"#455160")+'"><i></i>'+esc(l.name)+'</button>';
+   });
+   h+='<button class="dchopt'+(lineOf(x)?"":" on")+'" data-act="jourline" data-id="'+esc(x.id)+'" data-k="__none__" style="--cc:#8A93A0"><i></i>בלי ליין</button>';
+   h+='<button class="tinyedit" data-act="jourchclose">סגור</button></div>';
+  }
   if(state.confirmDel===x.id&&!RO){
    h+='<div class="matbody"><p class="brsum">למחוק את '+esc(x.id)+", "+esc(x.title)+'?</p>';
    h+='<div class="s-foot" style="border:0;padding:0"><button class="btn danger" data-act="dodel" data-id="'+esc(x.id)+'">כן, מחק</button>';
@@ -8636,7 +8767,7 @@ document.addEventListener("click",function(e){
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
+  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
@@ -9053,6 +9184,59 @@ document.addEventListener("click",function(e){
   toast(to2.day===id?("התמלול שויך ל"+dayLabel(dd3.date)):"התמלול הוסר מהיום");
   return}
  if(act==="mcbtog"){state.mcbOpen=(state.mcbOpen===id)?"":id;render();return}
+ if(act==="matchopen"){
+  if(RO)return;
+  var _mk2=id+"#"+b.getAttribute("data-i");
+  state.matCh=(state.matCh===_mk2)?"":_mk2; state.matKindPick="";
+  render();return}
+ if(act==="matkindopen"){
+  if(RO)return;
+  var _mk3=id+"#"+b.getAttribute("data-i");
+  state.matKindPick=(state.matKindPick===_mk3)?"":_mk3; state.matCh="";
+  render();return}
+ if(act==="matchclose"){state.matCh="";state.matKindPick="";state.jourCh="";state.jourLn="";render();return}
+ if(act==="jourchopen"){
+  if(RO)return;
+  state.jourCh=(state.jourCh===id)?"":id; state.jourLn="";
+  render();return}
+ if(act==="jourlnopen"){
+  if(RO)return;
+  state.jourLn=(state.jourLn===id)?"":id; state.jourCh="";
+  render();return}
+ if(act==="jourchclose"){state.jourCh="";state.jourLn="";render();return}
+ if(act==="jourchar"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var jc=DATA.scenes.filter(function(z){return z.id===id})[0];
+  if(!jc)return;
+  var jck=b.getAttribute("data-k");
+  if(!Array.isArray(jc.chars)) jc.chars=[];
+  if(jc.char&&jc.chars.indexOf(jc.char)<0) jc.chars.unshift(jc.char);
+  var jin=jc.chars.indexOf(jck);
+  if(jc.char===jck){
+   jc.chars=jc.chars.filter(function(z){return z!==jck});
+   jc.char=jc.chars[0]||"";
+   toast((charOf(jck)||{}).name+" \u05d4\u05d5\u05e1\u05e8\u05d4 \u05de\u05d4\u05e1\u05e6\u05e0\u05d4");
+  } else if(jin>-1){
+   jc.char=jck;
+   toast((charOf(jck)||{}).name+" \u05d4\u05d9\u05d0 \u05e2\u05db\u05e9\u05d9\u05d5 \u05d4\u05d3\u05de\u05d5\u05ea \u05d4\u05de\u05d5\u05d1\u05d9\u05dc\u05d4");
+  } else {
+   jc.chars.push(jck);
+   if(!jc.char) jc.char=jck;
+   toast((charOf(jck)||{}).name+" \u05e0\u05d5\u05e1\u05e4\u05d4 \u05dc\u05e1\u05e6\u05e0\u05d4");
+  }
+  render();save();return}
+ if(act==="jourline"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var jl=DATA.scenes.filter(function(z){return z.id===id})[0];
+  if(!jl)return;
+  var jlk=b.getAttribute("data-k");
+  jl.line=(jlk==="__none__")?"-":jlk;
+  state.jourLn="";
+  render();save();
+  toast(jlk==="__none__"?"\u05d4\u05e1\u05e6\u05e0\u05d4 \u05d4\u05d5\u05e6\u05d0\u05d4 \u05de\u05db\u05dc \u05dc\u05d9\u05d9\u05df":("\u05d4\u05e1\u05e6\u05e0\u05d4 \u05e2\u05d1\u05e8\u05d4 \u05dc\u05dc\u05d9\u05d9\u05df "+lineName(jlk)));
+  return}
  if(act==="matchar"){
   if(RO)return;
   if(!ensureEdit())return;
@@ -9068,6 +9252,7 @@ document.addEventListener("click",function(e){
   toast((charOf(ck2)||{}).name+(at2>-1?" הוסר מהסצנה":" סומן בסצנה"));
   return}
  if(act==="matsetkind"){
+  state.matKindPick="";
   if(RO)return;
   if(!ensureEdit())return;
   var kd=DAYS().filter(function(x){return x.k===id})[0];
