@@ -312,6 +312,9 @@ html.linedrag .mchip{pointer-events:none}
 .matkinds{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:10px}
 .matkinds b{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);margin-inline-end:3px}
 .matkinds .dchopt i{display:none}
+.sumbtn{border-color:var(--shot);color:var(--shot)}
+.dsec.synop p{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:14.5px;line-height:1.75}
+.matsynop{font-size:13px;color:var(--ink-2);line-height:1.65;margin:2px 0 8px;padding-inline-start:2px}
 .trbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .trbtn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:4px 12px}
 .trbtn em{font-style:normal;font-size:11px;color:var(--ink-3)}
@@ -3466,7 +3469,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,mcbOpen:"",brkEp:"",sumDay:"",sumText:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4707,6 +4710,7 @@ function daysView(){
    d.moments.forEach(function(x){h+='<li>'+esc(x)+'</li>'});
    h+='</ul></div>';
   }
+  if(d.synop) h+='<div class="dsec synop"><h4>סינופסיס היום</h4><p>'+esc(d.synop).replace(/\n/g,"<br>")+'</p></div>';
   if(d.note) h+='<div class="dsec note"><h4>הערות מהיום</h4><p>'+esc(d.note)+'</p></div>';
   h+=breakBlock(d);
   h+=trBlock(d);
@@ -4742,6 +4746,7 @@ function trBlock(d){
   h+='<button class="btn ghost trbtn" data-act="gototr" data-id="'+esc(t.k)+'" title="'+esc(t.title||"תמלול")+'">תמלול '+(i+1)+(c?' · '+esc(c.name):'')+'<em>'+(t.words||0).toLocaleString("he-IL")+' מילים</em></button>';
  });
  if(!RO) h+='<button class="tinyedit" data-act="trpick" data-id="'+esc(d.k)+'">'+(ts.length?"שייך עוד תמלול":"שייך תמלול ליום")+'</button>';
+ if(!RO) h+='<button class="tinyedit sumbtn" data-act="sumopen" data-id="'+esc(d.k)+'" title="בונה סינופסיס של היום מהתמלולים ומהכותרות">'+(d.synop?"ערוך סיכום":"סיכום")+'</button>';
  h+='</div>';
  if(open&&!RO){
   var all=trList();
@@ -4954,6 +4959,7 @@ function matView(){
    var dn=(r.d.brk||[]).length, dd=(r.d.brk||[]).reduce(function(a,z){return a+tcSec(z.dur)},0);
    h+='<div class="matday"><b>'+esc(dayLabel(r.d.date))+'</b><em>'+esc(r.d.loc||"")+'</em>';
    h+='<span>'+dn+' סצנות · '+hms(dd)+(r.d.brsrc?' · '+esc(r.d.brsrc):'')+'</span></div>';
+   if(r.d.synop) h+='<p class="matsynop">'+esc(r.d.synop).replace(/\n/g,"<br>")+'</p>';
   }
   var key=r.d.k+"#"+r.x.n, op=state.matOpen===key;
   h+='<div class="matrow'+(op?" open":"")+'">';
@@ -5461,6 +5467,69 @@ function trMatches(t,q){
  }
  return out;
 }
+function dayOfTr(t){
+ if(!t) return null;
+ var ds=DAYS();
+ if(t.day&&t.day!=="__none__"){ var a=ds.filter(function(d){return d.k===t.day})[0]; if(a) return a }
+ return ds.filter(function(d){return d.date&&t.date&&d.date===t.date})[0]||null;
+}
+function trsOfDay(d){ return trList().filter(function(t){ var x=dayOfTr(t); return x&&x.k===d.k }) }
+function sumPrompt(d){
+ var out=[];
+ out.push("אני עורך סדרה תיעודית על משטרת אילת. אני צריך סינופסיס קצר של יום צילום אחד.");
+ out.push("");
+ out.push("יום הצילום: "+dayLabel(d.date)+(d.loc?", "+d.loc:"")+".");
+ var who=(d.chars||[]).map(function(k){var c=charOf(k);return c?c.name:""}).filter(Boolean);
+ if(who.length) out.push("מי צולם: "+who.join(", ")+".");
+ if(d.people) out.push("עוד מי שהיה בפריים: "+d.people+".");
+ if((d.moments||[]).length) out.push("רגעים שסימנתי בשטח: "+d.moments.join(" ; ")+".");
+ if(d.note) out.push("הערות מהיום: "+d.note);
+ if((d.brk||[]).length){
+  out.push("");
+  out.push("הכותרות של החומר לפי טיימקוד, "+d.brk.length+" סצנות"+(d.brdur?", אורך כולל "+d.brdur:"")+":");
+  d.brk.forEach(function(x){
+   var l=x.n+". ["+(x.tc||"")+" "+(x.dur||"")+"] "+x.t;
+   if(x.sum) l+=" — "+x.sum;
+   if((x.good||[]).length) l+=" | רגעים: "+x.good.join(" ; ");
+   out.push(l);
+  });
+ }
+ var ts=trsOfDay(d), budget=40000;
+ if(ts.length){
+  out.push("");
+  out.push("התמלולים של אותו יום:");
+  ts.forEach(function(t){
+   var c=charOf(t.char);
+   var txt=String(t.text||"");
+   var cut=txt.length>budget;
+   out.push("");
+   out.push("### "+(c?c.name+", ":"")+(t.title||"תמלול")+(cut?" (קטע מתוך "+(t.words||0).toLocaleString("he-IL")+" מילים)":""));
+   out.push(cut?txt.slice(0,budget):txt);
+   budget=Math.max(0,budget-Math.min(txt.length,budget));
+  });
+ }
+ out.push("");
+ out.push("תכתוב לי סינופסיס של היום הזה, שש עד עשר שורות, בעברית, בלשון עבר, בלי כותרות ובלי נקודות.");
+ out.push("תישען על התמלולים לדיוק בשמות, במשפטים ובעובדות, ועל הכותרות לסדר הכרונולוגי.");
+ out.push("תכתוב מה באמת קרה באותו יום ומה נתפס במצלמה, לא מה מעניין בתיאוריה.");
+ out.push("בסוף תוסיף שורה אחת שמתחילה במילה הכי חזק, ובה הרגע הכי חזק של היום עם הטיימקוד שלו.");
+ return out.join("\n");
+}
+function sumPanel(d){
+ var h='<div class="modal" data-act="sumclose"><div class="box" data-stop="1" style="max-width:860px">';
+ h+='<div class="mhead"><span>סיכום יום צילום · '+esc(dayLabel(d.date))+'</span><button data-act="sumclose" title="סגור">×</button></div>';
+ h+='<div class="fdbody">';
+ h+='<p class="mgnote">הבקשה למטה קוראת את כותרות החומר של היום, את הרגעים שסימנת ואת התמלולים שמשויכים אליו. תעתיק אותה לצ׳אט, תדביק את התשובה בתיבה השנייה, והסינופסיס יישמר על היום.</p>';
+ h+='<div class="f"><label>הבקשה</label><textarea id="sumq" readonly style="min-height:180px;font-size:12.5px">'+esc(state.sumText||"")+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="sumcopy">העתק את הבקשה</button>';
+ h+='<span class="trhint">'+(state.sumText||"").length.toLocaleString("he-IL")+' תווים</span></div>';
+ h+='<div class="f" style="margin-top:14px"><label>הדבק כאן את הסינופסיס</label><textarea name="ans" id="sumans" style="min-height:130px">'+esc(d.synop||"")+'</textarea></div>';
+ h+='</div><div class="s-foot"><button class="btn" data-act="sumsave" data-id="'+esc(d.k)+'">שמור על היום</button>';
+ h+='<button class="btn ghost" data-act="sumclose">סגור</button>';
+ if(d.synop) h+='<div class="spacer"></div><button class="btn danger" data-act="sumclear" data-id="'+esc(d.k)+'">מחק סינופסיס</button>';
+ h+='</div></div></div>';
+ return h;
+}
 function trView(){
  var all=trList(), q=(state.trQ||"").trim();
  var words=all.reduce(function(a,t){return a+(t.words||0)},0);
@@ -5529,6 +5598,8 @@ function trView(){
    if(!RO){
     h+='<select class="smove trchar" data-id="'+esc(t.k)+'" title="שיוך לדמות אחרת"><option value="">בלי דמות</option>'+DATA.chars.map(function(c){
      return '<option value="'+esc(c.k)+'"'+(c.k===t.char?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select>';
+    var _dy=dayOfTr(t);
+    if(_dy) h+='<button class="tinyedit sumbtn" data-act="sumopen" data-id="'+esc(_dy.k)+'" title="בונה סינופסיס של יום הצילום '+esc(dayLabel(_dy.date))+' מהתמלול ומהכותרות">סיכום</button>';
     h+='<button class="tinyedit" data-act="trdocx" data-id="'+esc(t.k)+'" title="ייצוא לקובץ וורד">וורד</button>';
     if(t.url) h+='<a class="trlink" href="'+esc(t.url)+'" target="_blank" rel="noopener" title="'+esc(t.url)+'">↗ '+esc(urlLabel(t.url))+'</a>';
     h+='<button class="tinyedit" data-act="trlink" data-id="'+esc(t.k)+'" title="'+(t.url?"החלפת הקישור":"הדבקת קישור לדוקס, לדרייב או לכל כתובת")+'">'+(t.url?"ערוך קישור":"קישור")+'</button>';
@@ -7588,6 +7659,10 @@ function paint(h){
  if(state.projOpen) h+=projPanel();
  if(state.projNew) h+=projNewPanel();
  if(state.bkOpen) h+=bkPanel();
+ if(state.sumDay){
+  var _sd=DAYS().filter(function(x){return x.k===state.sumDay})[0];
+  if(_sd) h+=sumPanel(_sd); else state.sumDay="";
+ }
  if(state.mergeSrc!==null&&state.mergeSrc!==undefined) h+=mergePanel();
  var y=window.scrollY||window.pageYOffset||0;
  var bd0=document.querySelector(".board");
@@ -7609,7 +7684,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.editShift||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.sumDay||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||state.confirmEp!==null||
    !!document.querySelector('[data-form][data-dirty]'));
@@ -8589,7 +8664,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,projnew:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,sumsave:1,sumclear:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -8992,6 +9067,41 @@ document.addEventListener("click",function(e){
  if(act==="delshift"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה");return}
+ if(act==="sumopen"){
+  var sd=DAYS().filter(function(x){return x.k===id})[0];
+  if(!sd)return;
+  state.sumDay=id;
+  try{state.sumText=sumPrompt(sd)}catch(_){state.sumText=""}
+  render();return}
+ if(act==="sumclose"){
+  if(modalKeep(e,b))return;
+  state.sumDay="";state.sumText="";render();return}
+ if(act==="sumcopy"){
+  var el3=document.getElementById("sumq");
+  var tx3=el3?el3.value:(state.sumText||"");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+   navigator.clipboard.writeText(tx3).then(function(){toast("הבקשה הועתקה. תדביק אותה בצ׳אט")}).catch(function(){if(el3)el3.select();toast("סמן והעתק ידנית",true)});
+  } else { if(el3)el3.select(); toast("סמן והעתק ידנית",true) }
+  return}
+ if(act==="sumsave"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var el4=document.getElementById("sumans");
+  var v4=el4?el4.value.trim():"";
+  var sd2=DAYS().filter(function(x){return x.k===id})[0];
+  if(!sd2)return;
+  sd2.synop=v4;
+  state.sumDay="";state.sumText="";
+  render();save();toast(v4?"הסינופסיס נשמר על "+dayLabel(sd2.date):"הסינופסיס נוקה");
+  return}
+ if(act==="sumclear"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var sd3=DAYS().filter(function(x){return x.k===id})[0];
+  if(sd3) sd3.synop="";
+  state.sumDay="";state.sumText="";
+  render();save();toast("הסינופסיס נמחק");
+  return}
  if(act==="trpick"){state.trPick=(state.trPick===id)?"":id;render();return}
  if(act==="trtoday"){
   if(RO)return;
