@@ -312,6 +312,31 @@ html.linedrag .mchip{pointer-events:none}
 .matkinds{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:10px}
 .matkinds b{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);margin-inline-end:3px}
 .matkinds .dchopt i{display:none}
+.trbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.trbtn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:4px 12px}
+.trbtn em{font-style:normal;font-size:11px;color:var(--ink-3)}
+.trpickbox{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line-2)}
+.eppick{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap}
+.eppick b{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);margin-inline-end:2px}
+.eppick .dchopt{min-width:26px;justify-content:center}
+.eppick .dchopt i{display:none}
+.mcb{margin-top:16px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface-2)}
+.mcb h4{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-family:"Heebo",sans-serif;font-size:12.5px;letter-spacing:.03em;color:var(--ink-2);margin:0}
+.mcb h4 span{font-size:11.5px;color:var(--ink-3);font-weight:400}
+.mcbnone{font-size:12.5px;color:var(--ink-3);margin:7px 0 0}
+.mcbsum{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.mcbchip{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-2);border-radius:99px;padding:2px 9px}
+.mcbchip b{color:var(--ink)}
+.mcblist{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.mcbgrp h5{font-family:"Heebo",sans-serif;font-size:11.5px;letter-spacing:.03em;color:var(--ink-3);margin:0 0 5px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
+.mcbrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0}
+.mcbdate{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);min-width:68px}
+.mcbt{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:14px;font-weight:600}
+.mcbsumtxt{font-size:12.5px;color:var(--ink-3);margin:0 0 7px;padding-inline-start:27px;line-height:1.55}
+.injdot{flex:0 0 auto;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--line-2);background:transparent;display:inline-block}
+.injdot.on{background:#FFD400;border-color:#D9AF00;box-shadow:0 0 0 2px rgba(255,212,0,.25)}
+.injleg{display:inline-flex;align-items:center;gap:6px}
+.injline{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2);margin:9px 0 0}
 .matep{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin:14px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
 .matjour{margin-top:26px}
 .matbody{border:1px solid var(--ink-3);border-top:0;border-radius:0 0 8px 8px;padding:4px 13px 12px;background:var(--surface-2);margin-top:-4px}
@@ -962,6 +987,7 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .reddot{position:absolute;top:6px;inset-inline-end:6px;z-index:5;display:inline-block;
  font-family:"Heebo",sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.02em;line-height:1;
  padding:3px 6px;border-radius:5px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.reddot.rd-in{position:static;box-shadow:none;flex:0 0 auto}
 .reddot.rd-todo{background:var(--reddot);color:#fff}
 .reddot.rd-part{background:#fff;color:#A8401F;border:1.5px solid var(--reddot);padding:2px 5px}
 .reddot.rd-shot{background:rgba(255,255,255,.92);color:#18603B;border:1px solid rgba(24,96,59,.3)}
@@ -3440,7 +3466,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3845,6 +3871,7 @@ function render(){
     h+='<div class="gap"><h5>מה חסר לדמות</h5><ul>'+gapList(g.obj.k,g.obj.gaps)+'</ul></div>';
     h+='</div>';
    }
+   h+=matCharBlock(g.obj.k);
   } else if(g.uobj && state.editUnit===g.uobj.k){ h+=unitForm(g.uobj); }
   else if(g.note) h+='<p class="grp-note">'+esc(g.note)+'</p>';
   if(!RO&&(g.obj||g.uobj)) h+='<p class="draghint">גרור סצנה מהידית ⠿ אל כותרת של קבוצה אחרת כדי לשייך אותה מחדש. העמוד גולל לבד כשמתקרבים לקצה. אם נוח לך יותר, השתמש בתפריט <b>העבר אל</b> שבתחתית כל סצנה.</p>';
@@ -3872,6 +3899,7 @@ function render(){
  paint(h);
 }
 
+function reddotIn(st){ return reddot(st).replace('class="reddot','class="reddot rd-in'); }
 function reddot(st){
  if(st==="todo") return '<span class="reddot rd-todo">לא צולם</span>';
  if(st==="partial") return '<span class="reddot rd-part">חלקי</span>';
@@ -4681,6 +4709,7 @@ function daysView(){
   }
   if(d.note) h+='<div class="dsec note"><h4>הערות מהיום</h4><p>'+esc(d.note)+'</p></div>';
   h+=breakBlock(d);
+  h+=trBlock(d);
   h+='</article>';
  });
  h+='</div>';
@@ -4699,6 +4728,34 @@ function dimgLoad(k){
 }
 var BKIND={interview:"ראיון",personal:"אישי",briefing:"תדריך",field_enforcement:"אכיפה בשטח",prep:"הכנות",other:"אחר"};
 function bKind(k){ return BKIND[k]||k||"" }
+function dayTrs(d){
+ return trList().filter(function(t){
+  if(t.day) return t.day===d.k;
+  return !!(t.date&&d.date&&t.date===d.date);
+ });
+}
+function trBlock(d){
+ var ts=dayTrs(d), open=state.trPick===d.k;
+ var h='<div class="trbar">';
+ ts.forEach(function(t,i){
+  var c=charOf(t.char);
+  h+='<button class="btn ghost trbtn" data-act="gototr" data-id="'+esc(t.k)+'" title="'+esc(t.title||"תמלול")+'">תמלול '+(i+1)+(c?' · '+esc(c.name):'')+'<em>'+(t.words||0).toLocaleString("he-IL")+' מילים</em></button>';
+ });
+ if(!RO) h+='<button class="tinyedit" data-act="trpick" data-id="'+esc(d.k)+'">'+(ts.length?"שייך עוד תמלול":"שייך תמלול ליום")+'</button>';
+ h+='</div>';
+ if(open&&!RO){
+  var all=trList();
+  h+='<div class="trpickbox">';
+  if(!all.length) h+='<span class="mcbnone">אין עדיין תמלולים ביומן. תעלה אותם במסך תמלולים.</span>';
+  all.forEach(function(t){
+   var on=(t.day===d.k)||(!t.day&&t.date===d.date);
+   var c=charOf(t.char);
+   h+='<button class="dchopt'+(on?" on":"")+'" data-act="trtoday" data-id="'+esc(d.k)+'" data-k="'+esc(t.k)+'" style="--cc:'+esc((c&&c.color)||"#455160")+'"><i></i>'+esc((c?c.name+" · ":"")+(t.title||"תמלול"))+' · '+esc(dayLabel(t.date))+'</button>';
+  });
+  h+='</div>';
+ }
+ return h;
+}
 function breakBlock(d){
  var br=d.brk||[];
  if(!br.length) return "";
@@ -4717,7 +4774,7 @@ function breakBlock(d){
   h+='<span class="brtc" dir="ltr">'+esc(x.tc||"")+'</span>';
   if(x.dur) h+='<span class="brdur">'+esc(x.dur)+'</span>';
   if(x.kind) h+='<span class="brkind">'+esc(bKind(x.kind))+'</span>';
-  if(!RO) h+='<button class="tinyedit" data-act="brk2sc" data-id="'+esc(d.k)+'" data-i="'+i+'" title="פותח סצנה חדשה ביומן מהלוגיינג הזה">לסצנה</button>';
+  if(!RO) h+=toEpBtn(d.k,i);
   h+='</div>';
   var ii=(imgs&&imgs[i])||[];
   if(ii.length){
@@ -4755,6 +4812,82 @@ function matAll(){
  });
  return out;
 }
+function matText(x){
+ var t=[x.t||"",x.sum||""].concat(x.good||[]);
+ (x.quotes||[]).forEach(function(q){ t.push(q.who||""); (q.lines||[]).forEach(function(l){t.push(l)}) });
+ (x.tags||[]).forEach(function(g){t.push(g)});
+ return t.join(" ");
+}
+function matCharsOf(x,d){
+ if(x && x.ch && x.ch.length) return x.ch.slice();
+ var txt=matText(x||{}), out=[];
+ DATA.chars.forEach(function(c){
+  var nm=String(c.name||"").trim();
+  if(!nm) return;
+  var first=nm.split(/\s+/)[0];
+  if(txt.indexOf(nm)>-1 || (first.length>=3 && txt.indexOf(first)>-1)) out.push(c.k);
+ });
+ if(!out.length && d && (d.chars||[]).length===1) out=d.chars.slice();
+ return out;
+}
+function matForChar(ck){
+ return matAll().filter(function(r){ return matCharsOf(r.x,r.d).indexOf(ck)>-1 });
+}
+function matCharBlock(ck){
+ var rows=matForChar(ck);
+ if(!rows.length) return '<div class="mcb"><h4>מהחומר הגולמי</h4><p class="mcbnone">אין עדיין סצנות בלוגיינג שמשויכות לדמות הזו.</p></div>';
+ var tot=rows.reduce(function(a,r){return a+tcSec(r.x.dur)},0);
+ var open=state.mcbOpen===ck;
+ var h='<div class="mcb"><h4>מהחומר הגולמי<span>'+rows.length+' סצנות · '+hms(tot)+'</span>';
+ h+='<button class="tinyedit" data-act="mcbtog" data-id="'+esc(ck)+'">'+(open?"סגור":"פתח את הרשימה")+'</button></h4>';
+ var KORD=["personal","interview","field_enforcement","briefing","prep","other"];
+ var by={}; rows.forEach(function(r){ var k=r.x.kind||"other"; (by[k]=by[k]||[]).push(r) });
+ h+='<div class="mcbsum">';
+ KORD.forEach(function(k){ if(by[k]) h+='<span class="mcbchip">'+esc(bKind(k))+' <b>'+by[k].length+'</b></span>' });
+ Object.keys(by).forEach(function(k){ if(KORD.indexOf(k)<0) h+='<span class="mcbchip">'+esc(bKind(k))+' <b>'+by[k].length+'</b></span>' });
+ h+='</div>';
+ if(!open) return h+'</div>';
+ h+='<div class="mcblist">';
+ var ks=KORD.filter(function(k){return by[k]}).concat(Object.keys(by).filter(function(k){return KORD.indexOf(k)<0}));
+ ks.forEach(function(k){
+  h+='<div class="mcbgrp"><h5>'+esc(bKind(k))+' · '+by[k].length+'</h5>';
+  by[k].forEach(function(r){
+   var jsc=matSceneOf(r.x);
+   h+='<div class="mcbrow">';
+   h+='<span class="injdot'+(jsc?" on":"")+'" title="'+(jsc?esc("ביומן כסצנה "+jsc.id):"עוד לא נכנס ליומן")+'"></span>';
+   h+='<span class="mcbdate">'+esc(dayLabel(r.d.date))+'</span>';
+   h+='<span class="mattc" dir="ltr">'+esc(r.x.tc||"")+'</span>';
+   h+='<span class="matdur">'+esc(r.x.dur||"")+'</span>';
+   h+='<span class="mcbt">'+esc(r.x.t)+'</span>';
+   if(!RO&&!jsc) h+=toEpBtn(r.d.k,(r.d.brk||[]).indexOf(r.x));
+   h+='</div>';
+   if(r.x.sum) h+='<p class="mcbsumtxt">'+esc(r.x.sum)+'</p>';
+  });
+  h+='</div>';
+ });
+ h+='</div></div>';
+ return h;
+}
+function toEpBtn(dk,ix){
+ var key=dk+"#"+ix;
+ if(state.brkEp!==key) return '<button class="tinyedit" data-act="brkask" data-k="'+esc(key)+'">לסצנה</button>';
+ var h='<span class="eppick"><b>לאיזה פרק</b>';
+ DATA.eps.forEach(function(e){
+  h+='<button class="dchopt" data-act="brk2sc" data-id="'+esc(dk)+'" data-i="'+ix+'" data-ep="'+e.n+'" style="--cc:var(--shot)" title="'+esc(e.title||"")+'">'+e.n+'</button>';
+ });
+ h+='<button class="tinyedit" data-act="brkaskno">ביטול</button></span>';
+ return h;
+}
+function matSceneOf(x){
+ if(!x) return null;
+ if(x.sid){
+  var byId=DATA.scenes.filter(function(z){return z.id===x.sid})[0];
+  if(byId) return byId;
+ }
+ var t=String(x.t||"").replace(/\s+/g," ").trim();
+ if(!t) return null;
+ return DATA.scenes.filter(function(z){return String(z.title||"").replace(/\s+/g," ").trim()===t})[0]||null;
+}
 function tcSec(t){
  var a=String(t||"").split(":").map(Number);
  if(a.some(isNaN)) return 0;
@@ -4777,10 +4910,14 @@ function matView(){
  var days={}; all.forEach(function(r){days[r.d.k]=1});
  var byKind={}; all.forEach(function(r){var k=r.x.kind||"other";byKind[k]=(byKind[k]||0)+1});
  h+='<p class="grp-note">הרשימה נבנית לבד מהלוגיינג המפורט של ימי הצילום. כל שורה היא סצנה בחומר הגלם עם הטיימקוד, האורך ומה יש בה. לחיצה על שורה פותחת את התקציר, הרגעים הטובים והציטוטים. הכפתור לסצנה מכניס אותה ליומן כסצנה מלאה.</p>';
+ h+='<div class="legend"><span class="injleg"><span class="injdot on"></span>כבר נכנס ליומן</span>';
+ h+='<span class="injleg"><span class="injdot"></span>עוד לא נכנס</span></div>';
  h+='<div class="dstats" style="margin-top:14px">';
  h+='<div class="dstat"><b>'+all.length+'</b><span>סצנות בחומר</span></div>';
  h+='<div class="dstat"><b>'+Object.keys(days).length+'</b><span>ימי צילום מלוגגים</span></div>';
  h+='<div class="dstat"><b class="sm">'+hms(tot)+'</b><span>סך הכול חומר</span></div>';
+ var inj=all.filter(function(r){return !!matSceneOf(r.x)}).length;
+ h+='<div class="dstat"><b>'+inj+'</b><span>נכנסו ליומן</span></div>';
  h+='<div class="dstat"><b>'+all.filter(function(r){return r.x.sum}).length+'</b><span>עם תקציר</span></div>';
  h+='</div>';
  if(!RO){
@@ -4820,7 +4957,9 @@ function matView(){
   }
   var key=r.d.k+"#"+r.x.n, op=state.matOpen===key;
   h+='<div class="matrow'+(op?" open":"")+'">';
+  var jsc=matSceneOf(r.x);
   h+='<button class="matmain" data-act="matopen" data-k="'+esc(key)+'">';
+  h+='<span class="injdot'+(jsc?" on":"")+'" title="'+(jsc?esc("ביומן כסצנה "+jsc.id+", "+jsc.title):"עוד לא נכנס ליומן")+'"></span>';
   h+='<span class="brn">'+r.x.n+'</span>';
   h+='<span class="mattc" dir="ltr">'+esc(r.x.tc||"")+'</span>';
   h+='<span class="matdur">'+esc(r.x.dur||"")+'</span>';
@@ -4829,7 +4968,7 @@ function matView(){
   if(!op&&r.x.sum) h+='<span class="matsum1">'+esc(r.x.sum.slice(0,90))+(r.x.sum.length>90?"...":"")+'</span>';
   h+='</button>';
   if(!RO){
-   h+='<button class="tinyedit" data-act="brk2sc" data-id="'+esc(r.d.k)+'" data-i="'+((r.d.brk||[]).indexOf(r.x))+'">לסצנה</button>';
+   if(!jsc) h+=toEpBtn(r.d.k,(r.d.brk||[]).indexOf(r.x));
    h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+((r.d.brk||[]).indexOf(r.x))+'" title="מחק שורה מהרשימה">×</button>';
   }
   h+='</div>';
@@ -4843,6 +4982,18 @@ function matView(){
    });
    if((r.x.tags||[]).length) h+='<div class="brtags">'+r.x.tags.map(function(t){return '<span>'+esc(t)+'</span>'}).join("")+'</div>';
    if(!r.x.sum&&!(r.x.good||[]).length) h+='<p class="brsum" style="color:var(--ink-3)">אין לוגיינג מפורט לסצנה הזו, רק טיימקוד ושם.</p>';
+   if(jsc){
+    h+='<p class="injline"><span class="injdot on"></span>נכנס ליומן כסצנה <b>'+esc(jsc.id)+'</b>, '+esc(jsc.title)+
+       (RO?"":' <button class="tinyedit" data-act="edit" data-id="'+esc(jsc.id)+'">פתח</button>')+'</p>';
+   }
+   if(!RO&&DATA.chars.length){
+    var cur=matCharsOf(r.x,r.d), man=!!(r.x.ch&&r.x.ch.length);
+    h+='<div class="matkinds"><b>מי בסצנה'+(man?"":", לפי זיהוי אוטומטי")+'</b>';
+    DATA.chars.forEach(function(c){
+     h+='<button class="dchopt'+(cur.indexOf(c.k)>-1?" on":"")+'" data-act="matchar" data-id="'+esc(r.d.k)+'" data-i="'+((r.d.brk||[]).indexOf(r.x))+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</button>';
+    });
+    h+='</div>';
+   }
    if(!RO){
     h+='<div class="matkinds"><b>סוג</b>';
     ["interview","personal","briefing","field_enforcement","prep","other"].forEach(function(k){
@@ -4877,7 +5028,7 @@ function matJournal(){
   h+='<span class="matt">'+esc(x.title)+'</span>';
   if(ch) h+='<span class="dchip sm" style="--cc:'+esc(ch.color||"#455160")+'"><i></i>'+esc(ch.name)+'</span>';
   if(ln) h+='<span class="brkind" style="color:'+esc(ln.color||"#455160")+';border-color:'+esc(ln.color||"#455160")+'">'+esc(ln.name)+'</span>';
-  h+=reddot(x.status);
+  h+=reddotIn(x.status);
   if(x.short) h+='<span class="matsum1">'+esc(x.short.slice(0,80))+'</span>';
   h+='</button>';
   if(!RO) h+='<button class="sdel" data-act="askdel" data-id="'+esc(x.id)+'" title="מחק סצנה">×</button>';
@@ -6504,8 +6655,8 @@ function legendStrip(){
 }
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["dclock","שעון ימי צילום"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["mat","רשימת הסצנות"],["ideas","רעיונות לסצנות"]]},
- {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["mat","רשימת הסצנות"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["mat","רשימת הסצנות"],["days","לוג ימי צילום"],["ideas","רעיונות לסצנות"]]},
+ {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["mat","רשימת הסצנות"],["days","לוג ימי צילום"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
  {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
 ];
@@ -8437,8 +8588,8 @@ document.addEventListener("click",function(e){
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,projnew:1};
+  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -8841,6 +8992,33 @@ document.addEventListener("click",function(e){
  if(act==="delshift"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה");return}
+ if(act==="trpick"){state.trPick=(state.trPick===id)?"":id;render();return}
+ if(act==="trtoday"){
+  if(RO)return;
+  var tk2=b.getAttribute("data-k"), to2=TR()[tk2];
+  if(!to2)return;
+  var dd3=DAYS().filter(function(x){return x.k===id})[0];
+  if(!dd3)return;
+  if(to2.day===id) to2.day="__none__";
+  else to2.day=id;
+  render();save();
+  toast(to2.day===id?("התמלול שויך ל"+dayLabel(dd3.date)):"התמלול הוסר מהיום");
+  return}
+ if(act==="mcbtog"){state.mcbOpen=(state.mcbOpen===id)?"":id;render();return}
+ if(act==="matchar"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var cd2=DAYS().filter(function(x){return x.k===id})[0];
+  if(!cd2||!cd2.brk)return;
+  var cx=cd2.brk[Number(b.getAttribute("data-i"))];
+  if(!cx)return;
+  var ck2=b.getAttribute("data-k");
+  if(!cx.ch||!cx.ch.length) cx.ch=matCharsOf(cx,cd2);
+  var at2=cx.ch.indexOf(ck2);
+  if(at2>-1) cx.ch.splice(at2,1); else cx.ch.push(ck2);
+  render();save();
+  toast((charOf(ck2)||{}).name+(at2>-1?" הוסר מהסצנה":" סומן בסצנה"));
+  return}
  if(act==="matsetkind"){
   if(RO)return;
   if(!ensureEdit())return;
@@ -8898,25 +9076,33 @@ document.addEventListener("click",function(e){
   toast((charOf(ck)||{}).name+(at>-1?" הוסר מהיום":" נוסף ליום"));
   return}
  if(act==="brktog"){state.brkOpen=(state.brkOpen===id)?"":id;render();return}
+ if(act==="brkask"){state.brkEp=b.getAttribute("data-k");render();return}
+ if(act==="brkaskno"){state.brkEp="";render();return}
  if(act==="brk2sc"){
   if(RO)return;
   if(!ensureEdit())return;
+  state.brkEp="";
   var bd=DAYS().filter(function(x){return x.k===id})[0];
   if(!bd)return;
   var bx=(bd.brk||[])[Number(b.getAttribute("data-i"))];
   if(!bx)return;
   var nid=newSceneId();
-  var nsc={id:nid,ep:1,ord:999,title:bx.t,status:"shot",
+  var wantEp=Number(b.getAttribute("data-ep"))||((DATA.eps[0]||{}).n||1);
+  var nsc={id:nid,ep:wantEp,ord:999,title:bx.t,status:"shot",
    char:(DATA.chars[0]||{}).k||"", unit:"", line:"",
    short:bx.sum||"", min:MIN_PER,
    have:(bx.good||[]).slice(), need:[],
    note:"מתוך "+dayLabel(bd.date)+(bx.tc?", "+bx.tc:"")+(bd.brsrc?", "+bd.brsrc:"")};
+  nsc.src={d:bd.k,tc:bx.tc||"",day:bd.date||""};
+  bx.sid=nid;
   DATA.scenes.push(nsc);
   reindex();
+  var wch=matCharsOf(bx,bd);
+  if(wch.length){ nsc.char=wch[0]; nsc.chars=wch.slice() }
   state.cat="story"; state.group="board"; state.boardMode="notes"; state.filter="all";
   state.brkOpen=""; state.editing=nid; state.editModal=false;
   render();save();
-  toast("נוספה סצנה "+nid+" מהלוגיינג. תשייך אותה לדמות, לליין ולפרק");
+  toast("נוספה סצנה "+nid+" לפרק "+wantEp+(wch.length?", שויכה ל"+((charOf(wch[0])||{}).name||""):", תשייך אותה לדמות"));
   return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
  if(act==="saveday"){
