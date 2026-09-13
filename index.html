@@ -296,6 +296,20 @@ html.linedrag .mchip{pointer-events:none}
 .wrap.boardmode{max-width:1560px}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
 .board>.bcol{scroll-snap-align:start}
+.matmodes{margin-top:14px;flex-wrap:wrap}
+.matlist{margin-top:12px;display:flex;flex-direction:column;gap:4px}
+.matday{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:16px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--ink)}
+.matday b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16px}
+.matday em{font-size:13px;color:var(--ink-2);font-style:normal}
+.matday span{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.matrow{display:flex;align-items:flex-start;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.matrow.open{border-color:var(--ink-3);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.matmain{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:transparent;border:0;padding:0;cursor:pointer;text-align:start;color:inherit}
+.mattc{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);direction:ltr}
+.matdur{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);min-width:42px}
+.matt{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:14.5px;font-weight:600}
+.matsum1{flex:1 1 200px;font-size:12px;color:var(--ink-3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.matbody{border:1px solid var(--ink-3);border-top:0;border-radius:0 0 8px 8px;padding:4px 13px 12px;background:var(--surface-2);margin-top:-4px}
 .daddch{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:600;color:var(--ink-3);background:transparent;border:1px dashed var(--line-2);border-radius:99px;padding:2px 10px;cursor:pointer}
 .daddch:hover{color:var(--ink);border-color:var(--ink-3)}
 .dchpick{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line-2)}
@@ -3421,7 +3435,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3706,6 +3720,12 @@ function render(){
   paint(h);
   var _q=document.getElementById("trq");
   if(_q&&state.trFocus){try{_q.focus();_q.setSelectionRange(_q.value.length,_q.value.length)}catch(_){}}
+  return;
+ }
+ if(state.group==="mat"){
+  h+=matView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
   return;
  }
  if(state.group==="dclock"){
@@ -4272,11 +4292,30 @@ function ideaPrompt(){
   ctx="מה שכבר יש: "+(su.filter(function(x){return x.status==="shot"}).map(function(x){return x.title}).join("; ")||"כלום")+".\n"
    +"מה שעוד צריך לפי היומן: "+((u.need||[]).join("; ")||"לא הוגדר")+".";
  }
+ var logtxt="";
+ try{
+  var mm=matAll();
+  if(mm.length){
+   var lines=[], lastk=null;
+   mm.forEach(function(r){
+    if(r.d.k!==lastk){ lastk=r.d.k; lines.push("יום צילום "+dayLabel(r.d.date)+(r.d.loc?", "+r.d.loc:"")) }
+    var one2=r.x.n+". ["+r.x.tc+" "+r.x.dur+"] "+r.x.t;
+    if(r.x.sum) one2+=" — "+r.x.sum;
+    if((r.x.good||[]).length) one2+=" | רגעים: "+r.x.good.join(" ; ");
+    (r.x.quotes||[]).forEach(function(q){ (q.lines||[]).forEach(function(l){ one2+=' | ציטוט ('+q.who+'): "'+l+'"' }) });
+    lines.push(one2);
+   });
+   logtxt="\n\nזה הלוגיינג המפורט של החומר שכבר צולם, לפי סדר ימי הצילום. תשען עליו קודם כול:\n"+lines.join("\n")+"\n";
+  }
+ }catch(_){}
  return "אני עובד על "+M().title+", סדרה תיעודית של חמישה פרקי חצי שעה על משטרת אילת. "
   +"כל סצנה היא שתי דקות בערך.\n\nתן לי חמישה רעיונות לסצנות עבור "+lbl+".\n"
   +(ctx?ctx+"\n":"")
+  +logtxt
   +(extra?"\nמה שחשוב לי: "+extra+"\n":"")
-  +"\nלכל רעיון: כותרת קצרה, משפט אחד למה זה עובד, ובאיזה פרק זה יושב. "
+  +"\nתעדיף רעיונות שנשענים על הלוגיינג: רגע שכבר קיים בחומר ולא סומן, המשך טבעי למשהו שנאמר שם, או סצנה שסוגרת משהו שנפתח שם. "
+  +"אם אתה מציע משהו שקיים בחומר, תכתוב את התאריך והטיימקוד.\n"
+  +"לכל רעיון: כותרת קצרה, משפט אחד למה זה עובד, ובאיזה פרק זה יושב. "
   +"בלי ראיונות מדברים, רק דברים שאפשר לצלם קורים.";
 }
 function gapScore(i){
@@ -4692,6 +4731,96 @@ function breakBlock(d){
  });
  h+='</div></div>';
  return h;
+}
+
+/* ===== רשימת הסצנות מהחומר ===== */
+function matAll(){
+ var out=[], seen={};
+ DAYS().slice().sort(function(a,b){
+  var pa=dparts(a.date),pb=dparts(b.date);
+  if(pa&&pb) return pa.t-pb.t;
+  if(pa) return -1; if(pb) return 1; return 0;
+ }).forEach(function(d){
+  (d.brk||[]).forEach(function(x){
+   var sig=(d.date||"")+"|"+(x.tc||"")+"|"+String(x.t||"").trim();
+   if(seen[sig]) return;
+   seen[sig]=1;
+   out.push({d:d,x:x});
+  });
+ });
+ return out;
+}
+function tcSec(t){
+ var a=String(t||"").split(":").map(Number);
+ if(a.some(isNaN)) return 0;
+ if(a.length===3) return a[0]*3600+a[1]*60+a[2];
+ if(a.length===2) return a[0]*60+a[1];
+ return a[0]||0;
+}
+function hms(n){
+ n=Math.max(0,Math.round(n));
+ var h=Math.floor(n/3600), m=Math.floor((n%3600)/60), s2=n%60;
+ var p=function(v){return v<10?"0"+v:""+v};
+ return h?(h+":"+p(m)+":"+p(s2)):(m+":"+p(s2));
+}
+function matView(){
+ var all=matAll();
+ var h='<section class="grp"><div class="grp-h"><h2>רשימת הסצנות מהחומר</h2><span class="role">כל מה שיש בקופסה, לפי סדר ימי הצילום</span>';
+ h+='<span class="meta">'+all.length+' סצנות</span></div>';
+ if(!all.length) return h+'<div class="dempty"><b>אין עדיין לוגיינג</b><p>ברגע שייכנס לוגיינג מפורט ליום צילום, כל הסצנות שלו יופיעו כאן ברשימה אחת.</p></div></section>';
+ var tot=all.reduce(function(a,r){return a+tcSec(r.x.dur)},0);
+ var days={}; all.forEach(function(r){days[r.d.k]=1});
+ var byKind={}; all.forEach(function(r){var k=r.x.kind||"other";byKind[k]=(byKind[k]||0)+1});
+ h+='<p class="grp-note">הרשימה נבנית לבד מהלוגיינג המפורט של ימי הצילום. כל שורה היא סצנה בחומר הגלם עם הטיימקוד, האורך ומה יש בה. לחיצה על שורה פותחת את התקציר, הרגעים הטובים והציטוטים. הכפתור לסצנה מכניס אותה ליומן כסצנה מלאה.</p>';
+ h+='<div class="dstats" style="margin-top:14px">';
+ h+='<div class="dstat"><b>'+all.length+'</b><span>סצנות בחומר</span></div>';
+ h+='<div class="dstat"><b>'+Object.keys(days).length+'</b><span>ימי צילום מלוגגים</span></div>';
+ h+='<div class="dstat"><b class="sm">'+hms(tot)+'</b><span>סך הכול חומר</span></div>';
+ h+='<div class="dstat"><b>'+all.filter(function(r){return r.x.sum}).length+'</b><span>עם תקציר</span></div>';
+ h+='</div>';
+ var KL=[["","הכול"]].concat(Object.keys(byKind).sort(function(a,b){return byKind[b]-byKind[a]}).map(function(k){return [k,bKind(k)+" ("+byKind[k]+")"]}));
+ h+='<div class="modes matmodes">';
+ KL.forEach(function(k){
+  h+='<button data-act="matkind" data-k="'+esc(k[0])+'" aria-pressed="'+((state.matKind||"")===k[0])+'">'+esc(k[1])+'</button>';
+ });
+ h+='</div>';
+ var lastD=null;
+ h+='<div class="matlist">';
+ all.forEach(function(r,i){
+  if(state.matKind&&(r.x.kind||"other")!==state.matKind) return;
+  if(r.d.k!==lastD){
+   lastD=r.d.k;
+   var dn=(r.d.brk||[]).length, dd=(r.d.brk||[]).reduce(function(a,z){return a+tcSec(z.dur)},0);
+   h+='<div class="matday"><b>'+esc(dayLabel(r.d.date))+'</b><em>'+esc(r.d.loc||"")+'</em>';
+   h+='<span>'+dn+' סצנות · '+hms(dd)+(r.d.brsrc?' · '+esc(r.d.brsrc):'')+'</span></div>';
+  }
+  var key=r.d.k+"#"+r.x.n, op=state.matOpen===key;
+  h+='<div class="matrow'+(op?" open":"")+'">';
+  h+='<button class="matmain" data-act="matopen" data-k="'+esc(key)+'">';
+  h+='<span class="brn">'+r.x.n+'</span>';
+  h+='<span class="mattc" dir="ltr">'+esc(r.x.tc||"")+'</span>';
+  h+='<span class="matdur">'+esc(r.x.dur||"")+'</span>';
+  h+='<span class="matt">'+esc(r.x.t)+'</span>';
+  if(r.x.kind) h+='<span class="brkind">'+esc(bKind(r.x.kind))+'</span>';
+  if(!op&&r.x.sum) h+='<span class="matsum1">'+esc(r.x.sum.slice(0,90))+(r.x.sum.length>90?"...":"")+'</span>';
+  h+='</button>';
+  if(!RO) h+='<button class="tinyedit" data-act="brk2sc" data-id="'+esc(r.d.k)+'" data-i="'+((r.d.brk||[]).indexOf(r.x))+'">לסצנה</button>';
+  h+='</div>';
+  if(op){
+   h+='<div class="matbody">';
+   if(r.x.sum) h+='<p class="brsum">'+esc(r.x.sum)+'</p>';
+   if((r.x.good||[]).length) h+='<div class="brsub"><b>רגעים טובים</b><ul>'+r.x.good.map(function(g){return '<li>'+esc(g)+'</li>'}).join("")+'</ul></div>';
+   (r.x.quotes||[]).forEach(function(q){
+    if(!(q.lines||[]).length) return;
+    h+='<div class="brq"><b>'+esc(q.who)+'</b><ul>'+q.lines.map(function(l){return '<li>"'+esc(l)+'"</li>'}).join("")+'</ul></div>';
+   });
+   if((r.x.tags||[]).length) h+='<div class="brtags">'+r.x.tags.map(function(t){return '<span>'+esc(t)+'</span>'}).join("")+'</div>';
+   if(!r.x.sum&&!(r.x.good||[]).length) h+='<p class="brsum" style="color:var(--ink-3)">אין לוגיינג מפורט לסצנה הזו, רק טיימקוד ושם.</p>';
+   h+='</div>';
+  }
+ });
+ h+='</div>';
+ return h+'</section>';
 }
 
 /* ===== צריך לצלם ===== */
@@ -6305,9 +6434,9 @@ function legendStrip(){
  return h+'</div></div>';
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["dclock","שעון ימי צילום"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["ideas","רעיונות לסצנות"]]},
- {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["dclock","שעון ימי צילום"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["mat","רשימת הסצנות"],["ideas","רעיונות לסצנות"]]},
+ {k:"post",name:"עריכה",views:[["board","מפת הפרקים"],["mat","רשימת הסצנות"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["lines","מפת הליינים"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
  {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
 ];
@@ -8643,6 +8772,8 @@ document.addEventListener("click",function(e){
  if(act==="delshift"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה");return}
+ if(act==="matopen"){var mk=b.getAttribute("data-k");state.matOpen=(state.matOpen===mk)?"":mk;render();return}
+ if(act==="matkind"){state.matKind=b.getAttribute("data-k")||"";state.matOpen="";render();return}
  if(act==="dchopen"){state.dChar=(state.dChar===id)?"":id;render();return}
  if(act==="dchtog"){
   if(RO)return;
