@@ -296,6 +296,13 @@ html.linedrag .mchip{pointer-events:none}
 .wrap.boardmode{max-width:1560px}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:18px;margin-top:22px;align-items:start;overflow-x:auto;overflow-y:visible;padding-bottom:16px;scroll-snap-type:x proximity}
 .board>.bcol{scroll-snap-align:start}
+.daddch{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:600;color:var(--ink-3);background:transparent;border:1px dashed var(--line-2);border-radius:99px;padding:2px 10px;cursor:pointer}
+.daddch:hover{color:var(--ink);border-color:var(--ink-3)}
+.dchpick{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line-2)}
+.dchopt{display:inline-flex;align-items:center;gap:5px;font-family:"Heebo",sans-serif;font-size:11.5px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:99px;padding:2px 9px;cursor:pointer}
+.dchopt i{width:8px;height:8px;border-radius:50%;background:var(--cc);display:inline-block}
+.dchopt:hover{border-color:var(--cc)}
+.dchopt.on{border-color:var(--cc);color:var(--cc);font-weight:600}
 .dsec.brk{margin-top:12px}
 .brnote{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-3);margin:2px 0 8px}
 .brtog{font-size:12.5px;padding:4px 12px}
@@ -3414,7 +3421,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4607,7 +4614,18 @@ function daysView(){
   });
   if(d.people) h+='<span class="dppl">'+esc(d.people)+'</span>';
   if(!who.length&&!d.people) h+='<span class="dppl none">לא נרשם מי צולם</span>';
-  h+='</div></div>';
+  if(!RO) h+='<button class="daddch" data-act="dchopen" data-id="'+esc(d.k)+'" title="הוספה או הורדה של דמויות מהיום הזה">'+(state.dChar===d.k?"סגור":"+ דמות")+'</button>';
+  h+='</div>';
+  if(state.dChar===d.k&&!RO){
+   h+='<div class="dchpick">';
+   DATA.chars.forEach(function(c){
+    var on=(d.chars||[]).indexOf(c.k)>-1;
+    h+='<button class="dchopt'+(on?" on":"")+'" data-act="dchtog" data-id="'+esc(d.k)+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+(on?" ✓":"")+'</button>';
+   });
+   if(!DATA.chars.length) h+='<span class="dppl none">אין עדיין דמויות ביומן</span>';
+   h+='</div>';
+  }
+  h+='</div>';
   var _cw=crewObj(crewOf(d));
   h+='<span class="dcrewtag'+(RO?"":' can')+'" style="--cc:'+esc(_cw.color||"#455160")+'"'+(RO?"":' data-act="daycrew" data-id="'+esc(d.k)+'" title="לחיצה מעבירה לצוות הבא"')+'><i></i>'+esc(_cw.name)+'</span>';
   if(!RO) h+='<button class="tinyedit" data-act="editday" data-id="'+esc(d.k)+'">ערוך</button>';
@@ -8219,7 +8237,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
+  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,projnew:1};
@@ -8625,6 +8643,18 @@ document.addEventListener("click",function(e){
  if(act==="delshift"){ try{bkTouch(true)}catch(_){} SHRINKOK[rid("shifts")]=1; setTimeout(function(){delete SHRINKOK[rid("shifts")]},4000);
   SH().list=SHIFTS().filter(function(x){return x.k!==id});
   render();save();toast("המשמרת נמחקה");return}
+ if(act==="dchopen"){state.dChar=(state.dChar===id)?"":id;render();return}
+ if(act==="dchtog"){
+  if(RO)return;
+  var dc=DAYS().filter(function(x){return x.k===id})[0];
+  if(!dc)return;
+  var ck=b.getAttribute("data-k");
+  dc.chars=dc.chars||[];
+  var at=dc.chars.indexOf(ck);
+  if(at>-1) dc.chars.splice(at,1); else dc.chars.push(ck);
+  render();save();
+  toast((charOf(ck)||{}).name+(at>-1?" הוסר מהיום":" נוסף ליום"));
+  return}
  if(act==="brktog"){state.brkOpen=(state.brkOpen===id)?"":id;render();return}
  if(act==="brk2sc"){
   if(RO)return;
