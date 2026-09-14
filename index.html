@@ -10122,7 +10122,9 @@ document.addEventListener("click",function(e){
   DATA.scenes.push({id:nid,title:ix.title,char:ix.char,unit:ix.unit,status:"todo",min:MIN_PER,
    ep:Number(ix.ep)||1,ord:999,people:[],have:[],need:[],short:ix.why||"",note:"נכנס מבנק הרעיונות.",tags:[],mine:true});
   DATA.ideas=(DATA.ideas||[]).filter(function(x){return x.id!==id});
-  reindex();state.group="board";render();save();
+  reindex();
+  state.matEps=state.matEps||{}; state.matEps[String(Number(ix.ep)||1)]=true;
+  render();save();
   toast("נוספה סצנה "+nid+" לפרק "+(Number(ix.ep)||1));return}
  if(act==="bmode"){state.boardMode=b.getAttribute("data-k");render();return}
  if(act==="nmode"){state.needMode=b.getAttribute("data-k");render();return}
