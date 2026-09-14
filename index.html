@@ -69,7 +69,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .ngrp-h.trdrw h3{margin:0;font-size:13.5px}
 .ngrp-h.trdrw .ncar{font-style:normal;color:var(--ink-3);font-size:11px}
 .ngrp-h.trdrw .ncount{margin-inline-start:auto;white-space:nowrap}
-.ngrp .ngday{margin:6px 2px 0}
+.ngrp-h.trdrw .ngday{margin:0 0 0 2px;flex:0 0 auto}
+.ngrp-h.trdrw .ncount{margin-inline-start:auto;white-space:nowrap}
 .nextwrap{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:252px}
 .nextwrap .nextup{max-width:none;width:100%}
 .duestrip{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-inline-end:3px solid var(--line-2);border-radius:9px;padding:8px 12px 9px;width:100%}
@@ -3832,8 +3833,7 @@ function render(){
  h+='<div class="stat s-partial"><b>'+c.partial+'</b><span>חלקי</span></div>';
  h+='<div class="stat s-todo"><b>'+c.todo+'</b><span>לצילום</span></div>';
  h+='<div class="stat s-min"><b>'+Math.max(TARGET-n,0)+'</b><span>חסרות עד '+TARGET+'</span></div>';
- h+='<div class="stat"><b>'+c.min+'</b><span>דק׳ במצטבר</span></div>';
- h+='<div class="stat s-shift"><b>'+SHIFTS().length+'</b><span>משמרות מתוך '+shiftTarget()+'</span></div></div>';
+ h+='</div>';
  h+='<div class="gauge">';
  ["shot","partial","todo"].forEach(function(k){
   h+='<i style="width:'+((c[k]||0)/tot*100).toFixed(1)+'%;background:var(--'+k+')"></i>';});
@@ -6753,12 +6753,13 @@ function trView(){
   if(!items.length) return;
   state.trGrp=state.trGrp||{};
   var gopen=q?true:!!state.trGrp[g.k||"__loose__"];
-  h+='<div class="ngrp'+(gopen?" open":"")+'"><button class="ngrp-h trdrw" data-act="trgrp" data-k="'+esc(g.k||"__loose__")+'" style="--cc:'+esc(g.color)+'"><span class="ndot"></span>';
+  h+='<div class="ngrp'+(gopen?" open":"")+'"><div class="ngrp-h trdrw" data-act="trgrp" data-k="'+esc(g.k||"__loose__")+'" style="--cc:'+esc(g.color)+'" role="button" tabindex="0"><span class="ndot"></span>';
   h+='<i class="ncar">'+(gopen?"\u25be":"\u25c2")+'</i>';
   h+='<h3>'+esc(g.name)+'</h3>';
   if(g.role) h+='<em>'+esc(g.role)+'</em>';
-  h+='<span class="ncount">'+(items.length===1?"תמלול אחד":items.length+' תמלולים')+' · '+items.reduce(function(a,t){return a+(t.words||0)},0).toLocaleString("he-IL")+' מילים</span></button>';
+  h+='<span class="ncount">'+(items.length===1?"תמלול אחד":items.length+' תמלולים')+' · '+items.reduce(function(a,t){return a+(t.words||0)},0).toLocaleString("he-IL")+' מילים</span>';
   if(g.day) h+='<button class="tinyedit ngday" data-act="gotoday" data-id="'+esc(g.day.k)+'" title="פתח את היום בלוג ימי צילום">ליום בלוג</button>';
+  h+='</div>';
   if(!gopen){ h+='</div>'; return }
   items.forEach(function(t){
    var open=state.trOpen===t.k;
