@@ -425,6 +425,18 @@ html.linedrag .mchip{pointer-events:none}
 .vrlink{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid var(--line);background:var(--surface-2)}
 .vrlink textarea{flex:1 1 220px;min-width:150px;font-family:"Heebo",sans-serif;font-size:12px;padding:5px 9px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);direction:ltr;resize:vertical}
 .vrfiles{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.vrsub{position:absolute;left:3%;right:3%;bottom:4%;text-align:center;pointer-events:none;font-family:"Heebo",sans-serif;font-size:clamp(14px,2.1vw,26px);font-weight:600;line-height:1.35;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,1)}
+.vrsub span{background:rgba(0,0,0,.35);padding:2px 10px;border-radius:5px;display:inline-block}
+.tinyedit.watch{border-color:var(--ink-3);color:var(--ink);font-weight:700}
+.vrband{position:absolute;top:10px;height:6px;border-radius:3px;background:rgba(168,16,46,.30);border:1px solid rgba(168,16,46,.6);pointer-events:none}
+.vrscene{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 10px;border-bottom:1px solid var(--line);background:#F6EEDF;color:#5A4520;font-family:"Heebo",sans-serif;font-size:12.5px}
+.vrscene b{font-weight:800}
+.vroom:fullscreen .vrsub{font-size:clamp(18px,2.4vw,34px)}
+.vrnow{position:absolute;top:10px;right:10px;max-width:46%;background:rgba(14,17,21,.86);border-inline-start:4px solid var(--cc,#A8102E);border-radius:8px;padding:8px 11px;color:#fff;font-family:"Heebo",sans-serif;font-size:13px;line-height:1.5;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.vrnow b{display:block;font-size:11px;font-weight:800;color:var(--cc,#FF9AAE);margin-bottom:3px}
+.vroom:fullscreen .vrnow{font-size:16px;max-width:38%}
+.vrpin{top:2px;height:22px;width:4px}
+.vrpin.near{width:7px;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 
 .matday .dnum{font-family:"Heebo",sans-serif;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:#4A5A6B;border-radius:999px;padding:2px 9px;flex:0 0 auto;margin-inline-end:2px}
 .othrow input.hot{border-color:var(--ink-3);box-shadow:0 0 0 2px rgba(0,0,0,.05)}
@@ -4783,6 +4795,95 @@ function dayForm(d){
 }
 
 /* ===== חדר צפייה ===== */
+/* ---- כתוביות מהתמלול ---- */
+function tcf4(h,m,sec,f){ return h*3600+m*60+sec+(Number(f)||0)/25 }
+function parseCues(txt){
+ var out=[], blocks=String(txt||"").split(/\n\s*\n/);
+ blocks.forEach(function(bl){
+  var L=bl.split("\n"), i=0;
+  while(i<L.length&&!/\d/.test(L[i])) i++;
+  var line=String(L[i]||"");
+  var m=line.match(/(\d{1,2}):(\d{2}):(\d{2})[:;,.](\d{1,3})\s*(?:-->|\s)\s*(\d{1,2}):(\d{2}):(\d{2})[:;,.](\d{1,3})/);
+  if(!m) return;
+  var t=L.slice(i+1).join(" ").replace(/\s+/g," ").trim();
+  if(!t) return;
+  var f1=m[4].length>2?Number(m[4])/1000*25:Number(m[4]);
+  var f2=m[8].length>2?Number(m[8])/1000*25:Number(m[8]);
+  out.push({ra:tcf4(+m[1],+m[2],+m[3],f1), rb:tcf4(+m[5],+m[6],+m[7],f2), t:t});
+ });
+ out.sort(function(x,y){return x.ra-y.ra});
+ return out;
+}
+function rawCues(t){
+ if(!t) return [];
+ if(t.__cues) return t.__cues;
+ var c=parseCues(t.text);
+ try{ Object.defineProperty(t,"__cues",{value:c,enumerable:false,configurable:true}) }catch(_){ t.__cues=c }
+ return c;
+}
+function mapCues(raw){
+ var out=[], vEnd=0, prev=null;
+ raw.forEach(function(c){
+  var st;
+  if(prev===null) st=0;
+  else{
+   var gap=c.ra-prev;
+   if(gap<0||gap>120) gap=0.5;
+   st=vEnd+gap;
+  }
+  var dur=Math.max(0.35,c.rb-c.ra);
+  out.push({a:st,b:st+dur,t:c.t,ra:c.ra});
+  vEnd=st+dur; prev=c.rb;
+ });
+ return out;
+}
+function dayCues(d){
+ if(VR.subs&&VR.subs.length&&VR.day===d.k) return VR.subs;
+ var ts=dayTrs(d)||[];
+ for(var i=0;i<ts.length;i++){
+  var raw=rawCues(ts[i]);
+  if(raw.length){
+   if(ts[i].__map) return ts[i].__map;
+   var mp=mapCues(raw);
+   try{ Object.defineProperty(ts[i],"__map",{value:mp,enumerable:false,configurable:true}) }catch(_){ ts[i].__map=mp }
+   return mp;
+  }
+ }
+ return [];
+}
+function subOff(d){
+ var base=Number((d&&d.suboff)||0)||0;
+ if(VR.lead) base+=VR.lead;
+ return base;
+}
+function cueAt(cues,t){
+ if(!cues.length) return null;
+ var lo=0,hi=cues.length-1,best=null;
+ while(lo<=hi){
+  var mid=(lo+hi)>>1, c=cues[mid];
+  if(t<c.a) hi=mid-1;
+  else if(t>c.b) lo=mid+1;
+  else { best=c; break }
+ }
+ return best;
+}
+function srcTc(cues,t){
+ if(!cues.length) return null;
+ var lo=0,hi=cues.length-1,best=cues[0];
+ while(lo<=hi){
+  var mid=(lo+hi)>>1;
+  if(cues[mid].a<=t){ best=cues[mid]; lo=mid+1 } else hi=mid-1;
+ }
+ return best.ra+(t-best.a);
+}
+function tcStr(n){
+ n=Math.max(0,n||0);
+ var h=Math.floor(n/3600), m=Math.floor((n%3600)/60), s2=Math.floor(n%60), f=Math.round((n%1)*25);
+ if(f>24){f=0;s2++}
+ var p=function(v){return v<10?"0"+v:""+v};
+ return p(h)+":"+p(m)+":"+p(s2)+":"+p(f);
+}
+
 var DRIVE_FOLDER="https://drive.google.com/drive/folders/1FETCvoPtBRXsvuvco1Zo3um-7PncYwnX";
 var DRIVE_MAP={
  "Day01 group.mp4":"1h1mXU2y1jj2NY13UGG5TYxunymvfWkph",
@@ -4832,17 +4933,24 @@ function VN(){
 function vnFor(dk){
  return VN().filter(function(x){return x.day===dk}).sort(function(a,b){return (a.t||0)-(b.t||0)});
 }
+function tcRange(t){
+ var parts=String(t||"").split(/[\u2013\u2014-]/).map(function(z){return z.trim()}).filter(Boolean);
+ if(!parts.length) return null;
+ var a=tcSec(parts[0]), b=parts.length>1?tcSec(parts[1]):0;
+ if(!(b>a)) b=a+30;
+ return {a:a,b:b};
+}
 function vfmt(n){
  n=Math.max(0,n||0);
  var h=Math.floor(n/3600), m=Math.floor((n%3600)/60), s2=Math.floor(n%60), f=Math.floor((n%1)*25);
  var p=function(v){return v<10?"0"+v:""+v};
  return h+":"+p(m)+":"+p(s2)+"."+p(f);
 }
-var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null};
+var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,lead:0,sub:true,tcmode:true,range:null};
 function vrRelease(){
  if(VR.url){ try{URL.revokeObjectURL(VR.url)}catch(_){} }
  if(VR.video){ try{VR.video.pause();VR.video.removeAttribute("src");VR.video.load()}catch(_){} }
- VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;
+ VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;VR.subs=null;VR.lead=0;VR.range=null;
 }
 function vidBlock(d){
  var open=state.vidOpen===d.k;
@@ -4873,9 +4981,14 @@ function vidBlock(d){
   h+='</div>';
  }
 
+ if(VR.range&&VR.range.day===d.k){
+  h+='<div class="vrscene"><b>'+esc(VR.range.t||"הקטע שנבחר")+'</b>';
+  h+='<span>'+esc(vfmt(VR.range.a).slice(0,7)+" – "+vfmt(VR.range.b).slice(0,7))+'</span>';
+  h+='<div class="spacer"></div><button class="vrb" data-act="vidclrrange" data-id="'+esc(d.k)+'">בטל את הקטע</button></div>';
+ }
  if(mode==="file"){
   if(VR.day===d.k&&VR.url){
-   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas></div>';
+   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div><div class="vrsub"'+(VR.sub?"":' hidden')+'></div></div>';
    h+='<div class="vrbar">';
    h+='<button class="vrb big" data-vrc="play">נגן</button>';
    h+='<button class="vrb" data-vrc="b1">◀ פריים</button>';
@@ -4885,8 +4998,17 @@ function vidBlock(d){
    h+='<span class="vrtime" data-vrc="time">0:00:00.00</span>';
    h+='<div class="vrseek" data-vrc="seek"><div class="vrtrack"></div><div class="vrfill"></div></div>';
    h+='<button class="vrb" data-vrc="sp">1x</button>';
+   h+='<button class="vrb" data-vrc="pn" title="להערה הקודמת">◀ הערה</button>';
+   h+='<button class="vrb" data-vrc="nn" title="להערה הבאה">הערה ▶</button>';
    h+='<button class="vrb'+(VR.draw?" on":"")+'" data-vrc="draw">מרקר</button>';
    h+='<button class="vrb" data-vrc="clr">נקה ציור</button>';
+   var _cn=dayCues(d).length;
+   h+='<button class="vrb'+(VR.sub?" on":"")+'" data-vrc="sub" title="'+(_cn?(_cn+" שורות תמלול"):"אין תמלול ליום הזה")+'">כתוביות'+(_cn?"":" ✕")+'</button>';
+   h+='<button class="vrb" data-vrc="sm" title="הכתוביות מאחרות, הזז אחורה">כת׳ -1</button>';
+   h+='<button class="vrb" data-vrc="sp1" title="הכתוביות מקדימות, הזז קדימה">כת׳ +1</button>';
+   h+='<label class="vrb" for="vrsub-'+esc(d.k)+'" title="טעינת קובץ כתוביות srt או vtt">קובץ כתוביות</label>';
+   h+='<input id="vrsub-'+esc(d.k)+'" class="vrsubfile" type="file" accept=".srt,.vtt,.txt,text/plain" data-day="'+esc(d.k)+'" style="display:none">';
+   h+='<button class="vrb'+(VR.tcmode?" on":"")+'" data-vrc="tcm" title="החלפה בין טיימקוד מקור לזמן מתחילת הקובץ">TC</button>';
    h+='</div>';
   } else {
    h+='<div class="vrstage"><div class="vrpick">';
@@ -4914,7 +5036,8 @@ function vidBlock(d){
   h+='<div class="vrnrow">';
   if(mode==="file"){
    h+='<button class="vrb on" data-vrc="mark">עצור וסמן כאן</button>';
-   h+='<span class="vrtime" data-vrc="mtime">0:00:00.00</span>';
+   h+='<span class="vrhint">טיימקוד</span>';
+   h+='<input class="vrtc" name="tc" data-vrc="mtime" value="'+esc(vfmt(VR.t||0).slice(0,7))+'" autocomplete="off" title="רץ עם הוידאו. אפשר גם להקליד ידנית">';
   } else {
    h+='<span class="vrhint">טיימקוד</span><input class="vrtc" name="tc" placeholder="0:00:00" autocomplete="off">';
   }
@@ -4922,12 +5045,15 @@ function vidBlock(d){
   h+='</div></div>';
  }
 
+ var _cues=dayCues(d);
  h+='<div class="vrlist">';
  if(!notes.length) h+='<p class="vrempty">עוד אין הערות על הוידאו של היום הזה. עצור על פריים, כתוב מה אתה רואה, וכולם יראו את זה כאן.</p>';
  notes.forEach(function(x){
   var mine=(x.who===state.me);
   h+='<div class="vrn">';
-  h+='<button class="vrjump" data-act="vnjump" data-id="'+esc(x.k)+'" data-t="'+(x.t||0)+'" style="--cc:'+esc(userColor(x.who))+'">'+esc(vfmt(x.t||0).slice(0,7))+'</button>';
+  var _lbl=vfmt(x.t||0).slice(0,7);
+  if(VR.tcmode&&_cues.length){ var _s=srcTc(_cues,(x.t||0)-subOff(d)); if(_s!=null) _lbl=tcStr(_s).slice(0,8) }
+  h+='<button class="vrjump" data-act="vnjump" data-id="'+esc(x.k)+'" data-t="'+(x.t||0)+'" style="--cc:'+esc(userColor(x.who))+'">'+esc(_lbl)+'</button>';
   h+='<div class="vrbody"><div class="vrwho"><b>'+esc(userName(x.who))+'</b> · '+esc(agoTxt(x.at))
     +(dids.length>1?(' · '+esc(vidLabel(d,Number(x.fi)||0))):'')
     +((x.draw&&x.draw.length)?'<span class="vrpen">עם ציור</span>':'')+'</div>';
@@ -4979,10 +5105,30 @@ function vrMount(){
   fin.__w=1;
   fin.addEventListener("change",function(){
    var f=fin.files&&fin.files[0]; if(!f) return;
+   var keepR=VR.range, keepP=VR.pend, keepT=VR.t;
    vrRelease();
-   VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk; VR.t=0;
+   VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk;
+   VR.range=(keepR&&keepR.day===dk)?keepR:null;
+   VR.pend=(keepP!=null)?keepP:((keepR&&keepR.day===dk)?keepR.a:null);
+   VR.t=(VR.pend!=null)?VR.pend:(keepT||0);
    state.vidMode=state.vidMode||{}; state.vidMode[dk]="file";
    render();
+  });
+ }
+ var sfin=document.querySelector('.vrsubfile[data-day="'+dk+'"]');
+ if(sfin&&!sfin.__w){
+  sfin.__w=1;
+  sfin.addEventListener("change",function(){
+   var f=sfin.files&&sfin.files[0]; if(!f) return;
+   var rd=new FileReader();
+   rd.onload=function(){
+    var raw=parseCues(String(rd.result||""));
+    if(!raw.length){ toast("לא זיהיתי כתוביות בקובץ הזה",true); return }
+    VR.subs=mapCues(raw); VR.sub=true; VR.lead=0;
+    toast(raw.length+" שורות כתוביות נטענו מהקובץ");
+    render();
+   };
+   rd.readAsText(f,"utf-8");
   });
  }
  var stage=document.querySelector('[data-vrstage="'+dk+'"]');
@@ -4998,21 +5144,68 @@ function vrMount(){
  var cv=stage.querySelector(".vrdraw");
  var room=stage.closest(".vroom");
  var v=VR.video;
- function fmtNow(){ return vfmt(v.currentTime||0) }
+ var dObj=DAYS().filter(function(z){return z.k===dk})[0]||{};
+ var CUES=dayCues(dObj);
+ var subEl=stage.querySelector(".vrsub");
+ function disp(t){
+  if(VR.tcmode&&CUES.length){ var sc=srcTc(CUES,t-subOff(dObj)); if(sc!=null) return tcStr(sc) }
+  return vfmt(t||0).slice(0,7);
+ }
+ function fmtNow(){ return disp(v.currentTime||0) }
  function q(sel){ return room?room.querySelector(sel):null }
  function paintBar(){
   var te=q('[data-vrc="time"]'); if(te) te.textContent=fmtNow()+(v.duration?(" / "+vfmt(v.duration).slice(0,7)):"");
+  var nowEl=stage.querySelector(".vrnow");
+  if(nowEl){
+   var ns=vnFor(dk).filter(function(n){return (Number(n.fi)||0)===vidIx(dk,(driveIdsOf(dObj)||[]).length||1)});
+   var ct=v.currentTime||0, hit=null;
+   ns.forEach(function(n){ if(Math.abs((n.t||0)-ct)<=2.2&&(hit===null||Math.abs((n.t||0)-ct)<Math.abs((hit.t||0)-ct))) hit=n });
+   if(hit){
+    if(nowEl.__k!==hit.k){
+     nowEl.__k=hit.k;
+     nowEl.style.setProperty("--cc",userColor(hit.who));
+     nowEl.innerHTML='<b>'+esc(userName(hit.who))+'</b>'+esc(hit.txt||"");
+    }
+    nowEl.hidden=false;
+   } else { nowEl.hidden=true; nowEl.__k=null }
+   var pinsEl=room.querySelectorAll(".vrpin");
+   for(var pi=0;pi<pinsEl.length;pi++){
+    pinsEl[pi].classList.toggle("near",!!(hit&&pinsEl[pi].__k===hit.k));
+   }
+  }
+  if(subEl){
+   if(!VR.sub||!CUES.length){ subEl.hidden=true; subEl.innerHTML="" }
+   else{
+    subEl.hidden=false;
+    var cc=cueAt(CUES,(v.currentTime||0)-subOff(dObj));
+    var nt=cc?cc.t:"";
+    if(subEl.__t!==nt){ subEl.__t=nt; subEl.innerHTML=nt?('<span>'+esc(nt)+'</span>'):"" }
+   }
+  }
   var fl=q(".vrfill"); if(fl&&v.duration) fl.style.width=((v.currentTime/v.duration)*100).toFixed(2)+"%";
   var pb=q('[data-vrc="play"]'); if(pb) pb.textContent=v.paused?"נגן":"עצור";
+  var mt=q('[data-vrc="mtime"]');
+  if(mt&&document.activeElement!==mt){
+   var au=disp(v.currentTime||0);
+   if(mt.__auto===undefined||mt.value===mt.__auto||!mt.value){ mt.value=au; mt.__auto=au }
+  }
  }
  function pins(){
   var sk=q('[data-vrc="seek"]'); if(!sk||!v.duration) return;
-  var old=sk.querySelectorAll(".vrpin"); for(var i=0;i<old.length;i++) old[i].remove();
+  var old=sk.querySelectorAll(".vrpin,.vrband"); for(var i=0;i<old.length;i++) old[i].remove();
+  if(VR.range&&VR.range.day===dk&&v.duration){
+   var bd=document.createElement("div");
+   bd.className="vrband";
+   bd.style.left=((VR.range.a/v.duration)*100).toFixed(3)+"%";
+   bd.style.width=(((VR.range.b-VR.range.a)/v.duration)*100).toFixed(3)+"%";
+   bd.title=(VR.range.t||"")+" · "+vfmt(VR.range.a).slice(0,7)+" – "+vfmt(VR.range.b).slice(0,7);
+   sk.appendChild(bd);
+  }
   var _dd=DAYS().filter(function(z){return z.k===dk})[0];
   var _cf=vidIx(dk,(driveIdsOf(_dd)||[]).length||1);
   vnFor(dk).filter(function(n){return (Number(n.fi)||0)===_cf}).forEach(function(n){
    var el=document.createElement("div");
-   el.className="vrpin"; el.style.left=((n.t/v.duration)*100).toFixed(3)+"%";
+   el.className="vrpin"; el.__k=n.k; el.style.left=((n.t/v.duration)*100).toFixed(3)+"%";
    el.style.setProperty("--cc",userColor(n.who));
    el.title=userName(n.who)+" · "+vfmt(n.t).slice(0,7)+" · "+String(n.txt||"").slice(0,60);
    el.addEventListener("click",function(ev){ ev.stopPropagation(); v.currentTime=n.t; v.pause(); VR.strokes=(n.draw||[]).slice(); vrSize(cv); vrDrawAll(cv,VR.strokes); paintBar() });
@@ -5021,10 +5214,22 @@ function vrMount(){
  }
  if(!room.__w){
   room.__w=1;
-  v.addEventListener("timeupdate",function(){ VR.t=v.currentTime; paintBar() });
+  v.addEventListener("timeupdate",function(){
+   VR.t=v.currentTime;
+   if(VR.range&&VR.range.day===dk&&!v.paused&&v.currentTime>=VR.range.b){ v.pause(); v.currentTime=VR.range.b }
+   paintBar();
+  });
   v.addEventListener("play",paintBar);
   v.addEventListener("pause",paintBar);
-  v.addEventListener("loadedmetadata",function(){ VR.dur=v.duration; vrSize(cv); vrDrawAll(cv,VR.strokes); paintBar(); pins() });
+  v.addEventListener("loadedmetadata",function(){
+   VR.dur=v.duration;
+   if(CUES.length&&v.duration){
+    var mend=CUES[CUES.length-1].b, li=v.duration-mend;
+    VR.lead=(li>0&&li<180)?li:0;
+   }
+   if(VR.pend!=null){ try{ v.currentTime=VR.pend; v.play().catch(function(){}) }catch(_){} VR.t=VR.pend; VR.pend=null }
+   vrSize(cv); vrDrawAll(cv,VR.strokes); paintBar(); pins();
+  });
   room.addEventListener("click",function(e){
    var b=e.target.closest?e.target.closest("[data-vrc]"):null;
    if(!b) return;
@@ -5040,9 +5245,33 @@ function vrMount(){
    }
    if(c==="draw"){ VR.draw=!VR.draw; b.classList.toggle("on",VR.draw); cv.classList.toggle("on",VR.draw); return }
    if(c==="clr"){ VR.strokes=[]; vrDrawAll(cv,VR.strokes); return }
+   if(c==="pn"||c==="nn"){
+    var fi2=vidIx(dk,(driveIdsOf(dObj)||[]).length||1);
+    var list=vnFor(dk).filter(function(n){return (Number(n.fi)||0)===fi2});
+    if(!list.length){ toast("אין עדיין הערות על הקובץ הזה"); return }
+    var ct2=v.currentTime||0, tgt=null;
+    if(c==="nn"){ for(var i2=0;i2<list.length;i2++){ if((list[i2].t||0)>ct2+0.4){ tgt=list[i2]; break } } }
+    else { for(var j2=list.length-1;j2>=0;j2--){ if((list[j2].t||0)<ct2-0.4){ tgt=list[j2]; break } } }
+    if(!tgt){ toast(c==="nn"?"זו ההערה האחרונה":"זו ההערה הראשונה"); return }
+    v.pause(); v.currentTime=tgt.t||0; VR.t=tgt.t||0;
+    VR.strokes=(tgt.draw||[]).slice();
+    vrSize(cv); vrDrawAll(cv,VR.strokes);
+    paintBar();
+    return;
+   }
+   if(c==="sub"){ VR.sub=!VR.sub; b.classList.toggle("on",VR.sub); paintBar(); return }
+   if(c==="tcm"){ VR.tcmode=!VR.tcmode; b.classList.toggle("on",VR.tcmode); paintBar(); return }
+   if(c==="sm"||c==="sp1"){
+    if(!ensureEdit()) return;
+    dObj.suboff=(Number(dObj.suboff)||0)+(c==="sm"?-1:1);
+    toast("סנכרון כתוביות: "+(dObj.suboff>0?"+":"")+dObj.suboff.toFixed(0)+" שניות");
+    paintBar(); save();
+    return;
+   }
    if(c==="mark"){
     v.pause(); VR.t=v.currentTime;
-    var mt=q('[data-vrc="mtime"]'); if(mt) mt.textContent=fmtNow();
+    var mt2=q('[data-vrc="mtime"]');
+    if(mt2){ var au2=vfmt(VR.t).slice(0,7); mt2.value=au2; mt2.__auto=au2 }
     var ta=room.querySelector(".vrnoteform textarea"); if(ta) ta.focus();
     return;
    }
@@ -5092,7 +5321,8 @@ function vrMount(){
  }
  if(cv) cv.classList.toggle("on",VR.draw);
  vrSize(cv); vrDrawAll(cv,VR.strokes);
- if(VR.t&&Math.abs(v.currentTime-VR.t)>0.3&&v.readyState>0){ try{v.currentTime=VR.t}catch(_){} }
+ if(VR.pend!=null&&v.readyState>0){ try{ v.currentTime=VR.pend }catch(_){} VR.t=VR.pend; VR.pend=null; try{v.play().catch(function(){})}catch(_){} }
+ else if(VR.t&&Math.abs(v.currentTime-VR.t)>0.3&&v.readyState>0){ try{v.currentTime=VR.t}catch(_){} }
  paintBar(); pins();
 }
 
@@ -5501,6 +5731,7 @@ function matView(){
   h+='</div>';
   if(!RO){
    h+='<button class="tinyedit" data-act="matedit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">ערוך</button>';
+   if(tcRange(r.x.tc)) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="פתח את הקטע הזה בנגן">צפה</button>';
    if(!jsc) h+=toEpBtn(r.d.k,_ri);
    h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="מחק שורה מהרשימה">×</button>';
   }
@@ -9523,10 +9754,33 @@ document.addEventListener("click",function(e){
   if(qq) lst=lst.filter(function(t){return trMatches(t,qq).length});
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
   return}
+ if(act==="matwatch"){
+  var _wd=DAYS().filter(function(z){return z.k===id})[0];
+  if(!_wd||!_wd.brk) return;
+  var _wx=_wd.brk[Number(b.getAttribute("data-i"))];
+  if(!_wx) return;
+  var _rg=tcRange(_wx.tc);
+  if(!_rg){ toast("אין טיימקוד לסצנה הזו",true); return }
+  if(state.vidOpen&&state.vidOpen!==id) vrRelease();
+  state.vidOpen=id;
+  state.cat="prod"; state.group="days";
+  VR.t=_rg.a; VR.range={a:_rg.a,b:_rg.b,t:_wx.t||"",day:id};
+  VR.pend=_rg.a;
+  if(VR.video&&VR.day===id&&VR.url){ try{ VR.video.currentTime=_rg.a; VR.video.play().catch(function(){}) }catch(_){} }
+  render();
+  setTimeout(function(){
+   var el=document.querySelector('.vroom[data-vr="'+id+'"]');
+   if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"});
+   var ifr=document.querySelector('.vroom[data-vr="'+id+'"] iframe');
+   if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_rg.a)+"s" }
+  },90);
+  toast("הקטע "+(_wx.t||"")+" · "+vfmt(_rg.a).slice(0,7));
+  return}
  if(act==="vidtog"){
   if(state.vidOpen===id){ state.vidOpen=""; vrRelease(); }
   else { if(state.vidOpen&&state.vidOpen!==id) vrRelease(); state.vidOpen=id; }
   render();return}
+ if(act==="vidclrrange"){ VR.range=null; render(); return}
  if(act==="vidmode"){
   state.vidMode=state.vidMode||{};
   state.vidMode[id]=b.getAttribute("data-k")||"drive";
@@ -9561,15 +9815,26 @@ document.addEventListener("click",function(e){
   var _vt=(fval("__vn:"+id+"__","t")||"").trim();
   if(!_vt){ toast("תכתוב משהו קודם",true); return }
   var _md=b.getAttribute("data-k")||"drive", _sec=0;
-  if(_md==="file"){ _sec=Number(VR.t)||0 }
-  else { _sec=tcSec((fval("__vn:"+id+"__","tc")||"").trim()) }
+  var _tcs=(fval("__vn:"+id+"__","tc")||"").trim();
+  if(_md==="file"){
+   _sec=Number(VR.t)||0;
+   var _mel=document.querySelector('[data-vrc="mtime"]');
+   if(_tcs&&_mel&&_mel.__auto!==_tcs) _sec=tcSec(_tcs);
+   else if(_tcs&&!_mel) _sec=tcSec(_tcs);
+  } else { _sec=tcSec(_tcs) }
   var _dr=(_md==="file"&&VR.strokes&&VR.strokes.length)?JSON.parse(JSON.stringify(VR.strokes)):null;
   var _vd2=DAYS().filter(function(z){return z.k===id})[0];
   var _vfi=vidIx(id,(driveIdsOf(_vd2)||[]).length||1);
   VN().push({k:"v"+Date.now()+"_"+Math.floor(Math.random()*9999),day:id,fi:_vfi,t:_sec,who:state.me,at:Date.now(),txt:_vt,draw:_dr});
+  VR.pend=null; VR.t=_sec;
+  if(_md==="file"&&VR.video){ try{ VR.video.pause(); VR.video.currentTime=_sec }catch(_){} }
   feedPush('סימן הערה על הוידאו ב'+vfmt(_sec).slice(0,7)+': "'+_vt.replace(/\s+/g," ").slice(0,70)+(_vt.length>70?"...":"")+'"',"vid",id);
   render();save();
-  toast("ההערה נשמרה, כולם רואים אותה");
+  setTimeout(function(){
+   var ta=document.querySelector('[data-form="__vn:'+id+'__"] textarea');
+   if(ta) ta.value="";
+  },30);
+  toast("ההערה נשמרה וסומנה ב"+vfmt(_sec).slice(0,7));
   return}
  if(act==="vnjump"){
   var _n=VN().filter(function(z){return z.k===id})[0];
@@ -9579,7 +9844,16 @@ document.addEventListener("click",function(e){
   if(VR.video){ try{ VR.video.pause(); VR.video.currentTime=VR.t }catch(_){} }
   var _cv=document.querySelector('[data-vrstage="'+_n.day+'"] .vrdraw');
   if(_cv){ vrSize(_cv); vrDrawAll(_cv,VR.strokes) }
-  if(!VR.video){ toast("הטיימקוד "+vfmt(VR.t).slice(0,7)+". פתח את הקובץ מהמחשב כדי לקפוץ לשם") }
+  if(!VR.video){
+   var _if=document.querySelector('.vroom[data-vr="'+_n.day+'"] iframe');
+   if(_if){
+    var _b=String(_if.src).split(/[?#]/)[0];
+    _if.src=_b+"?t="+Math.max(0,Math.round(VR.t))+"s";
+    toast("קופץ ל"+vfmt(VR.t).slice(0,7));
+   } else {
+    toast("הטיימקוד "+vfmt(VR.t).slice(0,7)+". פתח את הקובץ מהמחשב כדי לקפוץ לשם");
+   }
+  }
   return}
  if(act==="vndel"){
   if(RO)return;
