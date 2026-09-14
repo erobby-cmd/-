@@ -6891,6 +6891,7 @@ function trView(){
  h+='<button data-act="trmode" data-k="char" aria-pressed="'+(!byDay)+'">לפי דמות</button></div>';
  h+='<div class="spacer"></div>';
  h+='<button class="btn ghost" data-act="trdocxall" title="כל התמלולים בקובץ וורד אחד">ייצא הכל לוורד</button>';
+ h+='<button class="btn ghost" data-act="srtall" title="כל הכתוביות של כל ימי הצילום בקובץ זיפ אחד, מסונכרנות לקבצי הגלם">כל הכתוביות בזיפ</button>';
  if(!RO) h+='<button class="btn'+(state.trAdd?" ghost":"")+'" data-act="tradd">'+(state.trAdd?"סגור":"הוסף תמלול")+'</button>';
  h+='</div>';
 
@@ -10622,6 +10623,29 @@ document.addEventListener("click",function(e){
   if(_sb) _sb.classList.toggle("on",_on);
   if(CLK.day===id) clkTick();
   toast(_on?"התרגום מופעל":"אין תרגום");
+  return}
+ if(act==="srtall"){
+  toast("מכין את קבצי הכתוביות...");
+  loadJSZip().then(function(JSZ){
+   var z=new JSZ(), n=0;
+   DAYS().forEach(function(d){
+    var ids=driveIdsOf(d)||[];
+    var cnt=Math.max(1,ids.length);
+    for(var i=0;i<cnt;i++){
+     state.vidFile=state.vidFile||{};
+     var keep=state.vidFile[d.k];
+     state.vidFile[d.k]=i;
+     var txt=srtOf(d), nm=srtName(d);
+     state.vidFile[d.k]=keep;
+     if(txt){ z.file(nm,"\ufeff"+txt); n++ }
+    }
+   });
+   if(!n){ toast("אין תמלולים עם טיימקוד",true); return }
+   z.generateAsync({type:"blob"}).then(function(bl){
+    dlBlob(bl,"eilat-subtitles.zip");
+    toast(n+" קבצי כתוביות ירדו בקובץ אחד");
+   });
+  }).catch(function(){ toast("לא הצלחתי להכין את הזיפ",true) });
   return}
  if(act==="srtdl"){
   var _sd=DAYS().filter(function(z){return z.k===id})[0];
