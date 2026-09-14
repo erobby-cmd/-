@@ -5134,7 +5134,7 @@ function vidBlock(d){
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
- h+='<button class="btn ghost brtog hl-yellow" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":"צפייה בוידאו")+'</button>';
+ h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בוידאו":"חבר וידאו ליום הזה"))+'</button>';
  if(!open) return h+'</div>';
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
  h+='<div class="vroom" data-vr="'+esc(d.k)+'">';
