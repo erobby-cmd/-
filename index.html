@@ -4737,13 +4737,10 @@ function dayWeek(s){var p=dparts(s);return p?"יום "+HEDAYS[p.w]:""}
 function monthKey(s){var p=dparts(s);return p?p.y+"-"+(p.m<9?"0":"")+(p.m+1):"zzz"}
 function monthLabel(s){var p=dparts(s);return p?HEMON[p.m]+" "+p.y:"בלי תאריך"}
 function daysSorted(){
- return DAYS().slice().sort(function(a,b){
-  var pa=dparts(a.date),pb=dparts(b.date);
-  if(pa&&pb) return pb.t-pa.t;
-  if(pa) return -1;
-  if(pb) return 1;
-  return 0;
- });
+ var o=daysOrd().slice().reverse();
+ var pre=o.filter(function(d){return d.dnum!==undefined&&d.dnum!==null&&d.dnum!==""});
+ var rest=o.filter(function(d){return !(d.dnum!==undefined&&d.dnum!==null&&d.dnum!=="")});
+ return pre.concat(rest);
 }
 
 /* ===== שעון ימי צילום ===== */
@@ -5713,11 +5710,7 @@ function breakBlock(d){
 /* ===== רשימת הסצנות מהחומר ===== */
 function matAll(){
  var out=[], seen={};
- DAYS().slice().sort(function(a,b){
-  var pa=dparts(a.date),pb=dparts(b.date);
-  if(pa&&pb) return pa.t-pb.t;
-  if(pa) return -1; if(pb) return 1; return 0;
- }).forEach(function(d){
+ daysOrd().forEach(function(d){
   (d.brk||[]).forEach(function(x){
    var sig=(d.date||"")+"|"+(x.tc||"")+"|"+String(x.t||"").trim();
    if(seen[sig]) return;
@@ -6568,14 +6561,13 @@ function dayOfTr(t){
  if(t.day&&t.day!=="__none__"){ var a=ds.filter(function(d){return d.k===t.day})[0]; if(a) return a }
  return ds.filter(function(d){return d.date&&t.date&&d.date===t.date})[0]||null;
 }
+function dayOrdT(d){
+ if(d&&d.dnum!==undefined&&d.dnum!==null&&d.dnum!=="") return -1e15+(Number(d.dnum)||0);
+ var p=dparts(d&&d.date);
+ return p?p.t:1e15;
+}
 function daysOrd(){
- return DAYS().slice().sort(function(a,b){
-  var pa=dparts(a.date), pb=dparts(b.date);
-  if(pa&&pb) return pa.t-pb.t;
-  if(pa) return -1;
-  if(pb) return 1;
-  return String(a.k).localeCompare(String(b.k));
- });
+ return DAYS().slice().sort(function(a,b){ return dayOrdT(a)-dayOrdT(b)||String(a.k).localeCompare(String(b.k)) });
 }
 function dayHasMat(d){
  if(!d) return false;
@@ -6583,15 +6575,23 @@ function dayHasMat(d){
  try{ return trList().some(function(t){ var x=dayOfTr(t); return x&&x.k===d.k }) }catch(_){ return false }
 }
 function dayNum(k){
- var n=0, out=0;
+ var n=0, out=null;
  daysOrd().forEach(function(d){
+  if(d.dnum!==undefined&&d.dnum!==null&&d.dnum!==""){ if(d.k===k) out=Number(d.dnum)||0; return }
   if(!dayHasMat(d)) return;
   n++;
   if(d.k===k) out=n;
  });
- return out;
+ return out===null?0:out;
 }
-function dayTag(k){ var n=dayNum(k); return n?("יום "+n):"" }
+function dayObjOf(k){ return DAYS().filter(function(z){return z.k===k})[0] }
+function dayTag(k){
+ var d=dayObjOf(k);
+ if(d&&d.dlabel) return d.dlabel;
+ if(d&&d.dnum!==undefined&&d.dnum!==null&&d.dnum!=="") return "יום "+(Number(d.dnum)||0);
+ var n=dayNum(k);
+ return n?("יום "+n):"";
+}
 function trDayGroups(){
  var all=trList(), used={}, out=[];
  daysOrd().forEach(function(d,i){
