@@ -5012,8 +5012,18 @@ function vfmt(n){
  return h+":"+p(m)+":"+p(s2)+"."+p(f);
 }
 var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,sub:true,tcmode:true,range:null};
+var VRFILES={};
+function vrKeep(){
+ if(VR.day&&VR.url) VRFILES[VR.day]={url:VR.url,name:VR.name};
+}
+function vrUse(dk){
+ var f=VRFILES[dk];
+ if(!f) return false;
+ VR.url=f.url; VR.name=f.name; VR.day=dk;
+ return true;
+}
 function vrRelease(){
- if(VR.url){ try{URL.revokeObjectURL(VR.url)}catch(_){} }
+ vrKeep();
  if(VR.video){ try{VR.video.pause();VR.video.removeAttribute("src");VR.video.load()}catch(_){} }
  VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;VR.subs=null;VR.range=null;
 }
@@ -5082,6 +5092,7 @@ function vidBlock(d){
    h+='<label class="btn" for="vrfile-'+esc(d.k)+'">בחר את הקובץ מהמחשב</label>';
    h+='<input id="vrfile-'+esc(d.k)+'" class="vrfile" type="file" accept="video/*" data-day="'+esc(d.k)+'" style="display:none">';
    h+='<span class="vrhint" style="color:#8A93A0">הקובץ נשאר אצלך במחשב ולא נטען לשום מקום. רק ההערות נשמרות בענן וכולם רואים אותן</span>';
+   h+='<span class="vrhint" style="color:#8A93A0">אחרי שתבחר אותו פעם אחת, כל לחיצה על צפה תפתח ותנגן את הקטע אוטומטית</span>';
    if(did) h+='<a class="vrhint" style="color:#8A93A0" href="https://drive.google.com/file/d/'+esc(did)+'/view" target="_blank" rel="noopener">להורדה מהדרייב</a>';
    h+='</div></div>';
   }
@@ -5174,6 +5185,7 @@ function vrMount(){
    var keepR=VR.range, keepP=VR.pend, keepT=VR.t;
    vrRelease();
    VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk;
+   VRFILES[dk]={url:VR.url,name:VR.name};
    VR.range=(keepR&&keepR.day===dk)?keepR:null;
    VR.pend=(keepP!=null)?keepP:((keepR&&keepR.day===dk)?keepR.a:null);
    VR.t=(VR.pend!=null)?VR.pend:(keepT||0);
@@ -9836,8 +9848,9 @@ document.addEventListener("click",function(e){
   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
   state.vidOpen=id;
   state.vidRow=id+"#"+Number(b.getAttribute("data-i"));
+  if(VR.day!==id||!VR.url) vrUse(id);
   state.vidMode=state.vidMode||{};
-  if(!state.vidMode[id]) state.vidMode[id]=(VR.day===id&&VR.url)?"file":"drive";
+  state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
   VR.t=_rg.a; VR.range={a:_rg.a,b:_rg.b,t:_wx.t||"",day:id};
   VR.pend=_rg.a;
   if(VR.video&&VR.day===id&&VR.url){ try{ VR.video.currentTime=_rg.a; VR.video.play().catch(function(){}) }catch(_){} }
@@ -9846,13 +9859,19 @@ document.addEventListener("click",function(e){
    var el=document.querySelector('.matvid')||document.querySelector('.vroom[data-vr="'+id+'"]');
    if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"});
    var ifr=document.querySelector('.vroom[data-vr="'+id+'"] iframe');
-   if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_rg.a)+"s" }
+   if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_rg.a)+"s&autoplay=1" }
   },90);
   toast("הקטע "+(_wx.t||"")+" · "+vfmt(_rg.a).slice(0,7));
   return}
  if(act==="vidtog"){
   if(state.vidOpen===id){ state.vidOpen=""; state.vidRow=""; vrRelease(); }
-  else { if(state.vidOpen&&state.vidOpen!==id) vrRelease(); state.vidOpen=id; }
+  else {
+   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
+   state.vidOpen=id;
+   if(VR.day!==id||!VR.url) vrUse(id);
+   state.vidMode=state.vidMode||{};
+   if(VR.day===id&&VR.url) state.vidMode[id]="file";
+  }
   render();return}
  if(act==="vidclrrange"){ VR.range=null; render(); return}
  if(act==="vidmode"){
@@ -9922,7 +9941,7 @@ document.addEventListener("click",function(e){
    var _if=document.querySelector('.vroom[data-vr="'+_n.day+'"] iframe');
    if(_if){
     var _b=String(_if.src).split(/[?#]/)[0];
-    _if.src=_b+"?t="+Math.max(0,Math.round(VR.t))+"s";
+    _if.src=_b+"?t="+Math.max(0,Math.round(VR.t))+"s&autoplay=1";
     toast("קופץ ל"+vfmt(VR.t).slice(0,7));
    } else {
     toast("הטיימקוד "+vfmt(VR.t).slice(0,7)+". פתח את הקובץ מהמחשב כדי לקפוץ לשם");
