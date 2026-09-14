@@ -5283,6 +5283,7 @@ function clkStop(){
  CLK.run=false;
 }
 function clkTick(){
+ vnFocusWire();
  var dk=CLK.day;
  if(!dk) return clkStop();
  var el=document.querySelector('.drvsub[data-day="'+dk+'"]');
@@ -5299,6 +5300,32 @@ function clkTick(){
  }
  var inp=document.querySelector('.vrtc[data-clk="'+dk+'"]');
  if(inp&&document.activeElement!==inp) inp.value=vfmt(clkNow(dk)).slice(0,7);
+}
+function vnFocusWire(){
+ if(document.__vnfw) return;
+ document.__vnfw=1;
+ document.addEventListener("focusin",function(e){
+  var ta=e.target;
+  if(!ta||ta.tagName!=="TEXTAREA"||!ta.closest) return;
+  var form=ta.closest(".vrnoteform");
+  if(!form) return;
+  var m=String(form.getAttribute("data-form")||"").match(/^__vn:(.+)__$/);
+  if(!m) return;
+  var dk=m[1];
+  if(VR.day===dk&&VR.video&&VR.url) return;
+  if(CLK.day!==dk) return;
+  var t=clkNow(dk), lab=vfmt(t).slice(0,7);
+  if(CLK.run){
+   clkStop();
+   var pb=document.querySelector('[data-act="clkplay"][data-id="'+dk+'"]');
+   if(pb){ pb.classList.remove("on"); pb.textContent="הפעל כתוביות" }
+   toast("נעצר על "+lab+". ההערה תישמר על הטיימקוד הזה");
+  }
+  var tcin=form.querySelector('input[name="tc"]');
+  if(tcin) tcin.value=lab;
+  var ci=document.querySelector('.vrtc[data-clk="'+dk+'"]');
+  if(ci) ci.value=lab;
+ },true);
 }
 function clkStart(dk,at){
  clkStop();
@@ -5441,7 +5468,7 @@ function vidBlock(d){
    h+='<span class="vrhint">טיימקוד</span>';
    h+='<input class="vrtc" name="tc" data-vrc="mtime" value="'+esc(vfmt(VR.t||0).slice(0,7))+'" autocomplete="off" title="רץ עם הוידאו. אפשר גם להקליד ידנית">';
   } else {
-   h+='<span class="vrhint">טיימקוד</span><input class="vrtc" name="tc" placeholder="0:00:00" autocomplete="off">';
+   h+='<span class="vrhint">טיימקוד</span><input class="vrtc" name="tc" placeholder="0:00:00" autocomplete="off" title="נכנס לבד מהשעון של הכתוביות ברגע שאתה לוחץ בתיבת ההערה">';
   }
   h+='<button class="btn" data-act="vnadd" data-id="'+esc(d.k)+'" data-k="'+mode+'">הוסף הערה</button>';
   h+='</div></div>';
@@ -9125,6 +9152,7 @@ function saveUI(){
  },300);
 }
 function paint(h){
+ try{ vnFocusWire() }catch(_){}
  try{ var _t=M().title; if(_t&&document.title!==_t) document.title=_t }catch(_){}
  if(state.adding){
   h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
@@ -10656,6 +10684,7 @@ document.addEventListener("click",function(e){
   toast("קובץ הכתוביות ירד");
   return}
  if(act==="tradd"){state.trAdd=!state.trAdd;render();return}
+ if(act==="vidtog"||act==="vidmode"){ setTimeout(vnFocusWire,0) }
  if(act==="dayopen"){
   state.logDays=state.logDays||{};
   if(state.logDays[id]){ state.logDays[id]=false; if(state.vidOpen===id){ vrRelease(); state.vidOpen="" } if(state.brkOpen===id) state.brkOpen=""; }
