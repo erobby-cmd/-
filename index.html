@@ -305,6 +305,16 @@ button.matday.drawer:not(.open){border-bottom-width:1px;border-radius:9px;margin
 button.matday.drawer:not(.open):hover{opacity:1}
 .matday .dchev{font-size:11px;color:var(--ink-3);flex:0 0 auto;width:12px}
 .matdrawer{display:flex;flex-direction:column;gap:6px;padding:8px 0 12px;border-inline:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 0 9px 9px;margin-bottom:8px;padding-inline:8px;background:var(--bg,transparent)}
+.dday.hasimg{display:flex;gap:14px;align-items:flex-start}
+.dday.hasimg .dbody{flex:1 1 auto;min-width:0}
+.dstrip{order:2;flex:0 0 156px;display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start}
+.dstrip .dthumb{position:relative;display:block;padding:0;border:1px solid var(--line-2);border-radius:6px;overflow:hidden;background:#0b0d10;cursor:pointer;aspect-ratio:16/9}
+.dstrip .dthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.dstrip .dthumb span{position:absolute;inset-inline:0;bottom:0;font-family:"Heebo",sans-serif;font-size:8.5px;font-variant-numeric:tabular-nums;color:#fff;background:rgba(0,0,0,.55);padding:1px 3px;direction:ltr;text-align:center;white-space:nowrap;overflow:hidden}
+.dstrip .dthumb:hover{border-color:var(--ink)}
+.dstrip .dmore{grid-column:1/-1;text-align:center;font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3)}
+.dstrip.loading span{display:block;aspect-ratio:16/9;border-radius:6px;background:var(--line-2);opacity:.5}
+@media (max-width:760px){.dday.hasimg{display:block}.dstrip{grid-template-columns:repeat(4,1fr);margin-bottom:10px}}
 .matday b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16px}
 .matday em{font-size:13px;color:var(--ink-2);font-style:normal}
 .matday span{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
@@ -5033,6 +5043,26 @@ function vrRelease(){
  if(VR.video){ try{VR.video.pause();VR.video.removeAttribute("src");VR.video.load()}catch(_){} }
  VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;VR.subs=null;VR.range=null;
 }
+function dayStrip(d){
+ var br=d.brk||[];
+ if(!br.length) return "";
+ var imgs=DIMG[d.k];
+ if(imgs===undefined){ dimgLoad(d.k); return '<div class="dstrip loading"><span></span><span></span><span></span></div>' }
+ var pick=[];
+ for(var i=0;i<br.length&&pick.length<9;i++){
+  var a=imgs[i];
+  if(a&&a.length&&a[0]) pick.push({src:a[0],t:br[i].t||"",tc:br[i].tc||"",i:i});
+ }
+ if(!pick.length) return "";
+ var h='<div class="dstrip">';
+ pick.forEach(function(x){
+  h+='<button class="dthumb" data-act="matwatch" data-id="'+esc(d.k)+'" data-i="'+x.i+'" title="'+esc(x.t+(x.tc?(" · "+x.tc):""))+'">';
+  h+='<img src="'+esc(x.src)+'" alt="" loading="lazy">';
+  h+='<span>'+esc(x.tc||"")+'</span></button>';
+ });
+ if(br.length>pick.length) h+='<span class="dmore">ועוד '+(br.length-pick.length)+'</span>';
+ return h+'</div>';
+}
 function vidBlock(d){
  var open=state.vidOpen===d.k;
  var dids=driveIdsOf(d), fi=vidIx(d.k,dids.length||1), did=dids[fi]||"", notes=vnFor(d.k);
@@ -5451,7 +5481,10 @@ function daysView(){
  all.forEach(function(d){
   var mk=monthKey(d.date);
   if(mk!==lastM){ lastM=mk; h+='<div class="dmonth">'+esc(monthLabel(d.date))+'</div>'; }
-  h+='<article class="dday">';
+  var _strip=dayStrip(d);
+  h+='<article class="dday'+(_strip?" hasimg":"")+'">';
+  if(_strip) h+=_strip;
+  h+='<div class="dbody">';
   h+='<div class="dhead"><div class="ddate"><b>'+esc(dayLabel(d.date))+'</b><em>'+esc(dayWeek(d.date))+'</em></div>';
   h+='<div class="dtitle"><h3>'+esc(d.loc||"בלי מיקום")+'</h3>';
   var who=(d.chars||[]).map(function(k){var c=charOf(k);return c?c.name:""}).filter(Boolean);
@@ -5487,7 +5520,7 @@ function daysView(){
   h+=vidBlock(d);
   h+=breakBlock(d);
   h+=trBlock(d);
-  h+='</article>';
+  h+='</div></article>';
  });
  h+='</div>';
  return h+'</section>';
