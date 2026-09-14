@@ -458,6 +458,12 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vgrp:hover{filter:brightness(1.1)}
 .vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.26)}
 .vgrp em{font-style:normal;font-size:11px;opacity:.85}
+.subsw{display:inline-flex;align-items:center;gap:7px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink-3);cursor:pointer}
+.subsw i{width:26px;height:14px;border-radius:999px;background:var(--line-2);position:relative;transition:.15s}
+.subsw i:after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:10px;height:10px;border-radius:50%;background:var(--surface);transition:.15s}
+.subsw.on{border-color:var(--accent);color:var(--accent)}
+.subsw.on i{background:var(--accent)}
+.subsw.on i:after{inset-inline-start:14px}
 .vrpin.pend{background:#F2C14E;box-shadow:0 0 0 2px rgba(242,193,78,.35);height:16px;margin-top:-4px}
 .subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
 .lexitag{display:inline-block;margin-inline-start:8px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--accent);background:rgba(45,160,170,.14);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;vertical-align:middle}
@@ -5280,8 +5286,10 @@ function vidBlock(d){
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
  var _sq=subQuality(d);
  if(_sq.k!=="none"){
+  var _so=subOn(d);
   h+='<p class="brnote subline">כתוביות מהתמלול של היום · <b class="subq q-'+_sq.k+'">'
    +(_sq.k==="ok"?"בסינק":_sq.k==="fix"?"סטייה קטנה":"לא בסינק")+'</b>'
+   +' <button class="subsw'+(_so?" on":"")+'" data-act="subtog" data-id="'+esc(d.k)+'" title="הדלקה וכיבוי של הכתוביות בנגן"><i></i>'+(_so?"תרגום פועל":"תרגום כבוי")+'</button>'
    +' <button class="tinyedit" data-act="srtdl" data-id="'+esc(d.k)+'" title="קובץ SRT מסונכרן לקובץ הגלם. אפשר לטעון אותו בדרייב או בכל נגן">הורד כתוביות SRT</button></p>';
  }
  h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
@@ -10467,6 +10475,13 @@ document.addEventListener("click",function(e){
   } else { if(el2)el2.select(); toast("סמן והעתק ידנית",true) }
   return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
+ if(act==="subtog"){
+  var _td2=DAYS().filter(function(z){return z.k===id})[0];
+  if(!_td2) return;
+  VR.subOn=VR.subOn||{};
+  VR.subOn[id]=!subOn(_td2);
+  toast(VR.subOn[id]?"התרגום מופעל":"התרגום כבוי");
+  render();return}
  if(act==="srtdl"){
   var _sd=DAYS().filter(function(z){return z.k===id})[0];
   if(!_sd){ return }
