@@ -49,8 +49,10 @@
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px 110px}
 .mast{border-bottom:1px solid var(--line);background:var(--surface)}
-.mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0;position:relative}
-.topstrip{position:absolute;top:26px;inset-inline-end:20px;z-index:7;display:flex;flex-direction:column;align-items:flex-end;gap:14px}
+.mast-in{max-width:1100px;margin:0 auto;padding:34px 20px 0;position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:26px;align-items:start}
+.mast-in>.eyebrow,.mast-in>h1,.mast-in>.stats,.mast-in>.gauge,.mast-in>p,.mast-in>.mnote{grid-column:1}
+.topstrip{position:static;grid-column:2;grid-row:1/span 8;z-index:7;display:flex;flex-direction:column;align-items:flex-end;gap:14px}
+@media (max-width:900px){.mast-in{display:block}.topstrip{align-items:stretch;margin-bottom:16px}.nextwrap{width:100%}}
 .tsrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .today{font-family:"Heebo",sans-serif;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--ink-3);white-space:nowrap;padding-inline-end:3px;margin-top:4px}
 .nextup{display:flex;flex-direction:column;align-items:flex-end;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-inline-end:3px solid var(--accent);border-radius:9px;padding:7px 13px;cursor:pointer;text-align:end;transition:.15s;max-width:280px}
@@ -4975,6 +4977,11 @@ function trSpan(t){ var c=rawCues(t); return c.length?(c[c.length-1].rb-c[0].ra)
 function dayTrFor(d,fi){
  var ts=dayTrs(d).filter(function(t){ return rawCues(t).length });
  if(!ts.length) return null;
+ if(ts.length>1){
+  var byv=ts.filter(function(t){ return t.vf!==undefined&&t.vf!==null&&(Number(t.vf)||0)===fi });
+  if(byv.length===1) return byv[0];
+  if(byv.length>1) ts=byv;
+ }
  var ids=driveIdsOf(d)||[], nm=normNm(driveNameOf(ids[fi]||""));
  if(ts.length>1&&nm){
   var byn=ts.filter(function(t){ var tn=normNm(t.title); return tn&&(tn.indexOf(nm)>-1||nm.indexOf(tn)>-1) });
