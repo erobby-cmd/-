@@ -4743,7 +4743,7 @@ function daysSorted(){
  var o=daysOrd().slice().reverse();
  var pre=o.filter(function(d){return d.dnum!==undefined&&d.dnum!==null&&d.dnum!==""});
  var rest=o.filter(function(d){return !(d.dnum!==undefined&&d.dnum!==null&&d.dnum!=="")});
- return pre.concat(rest);
+ return rest.concat(pre);
 }
 
 /* ===== שעון ימי צילום ===== */
@@ -5023,6 +5023,7 @@ function fileDayNum(nm){
 }
 function driveByDate(iso){
  var out=[];
+ if(!iso) return out;
  for(var k in DRIVE_MAP){ if(fileDayDate(k)===iso) out.push(DRIVE_MAP[k]) }
  return out;
 }
@@ -5161,6 +5162,7 @@ function dayStrip(d){
 function vidBlock(d){
  var open=state.vidOpen===d.k;
  var dids=driveIdsOf(d), fi=vidIx(d.k,dids.length||1), did=dids[fi]||"", notes=vnFor(d.k);
+ if(!dids.length) return '<div class="dsec vidsec nov"><h4>חדר צפייה</h4><p class="brnote">אין וידאו ליום הזה</p></div>';
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
@@ -5981,7 +5983,7 @@ function matView(){
   h+='</div>';
   if(!RO){
    h+='<button class="tinyedit" data-act="matedit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">ערוך</button>';
-   if(tcRange(r.x.tc)) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="פתח את הקטע הזה בנגן">צפה</button>';
+   if(tcRange(r.x.tc)&&(driveIdsOf(r.d)||[]).length) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="פתח את הקטע הזה בנגן">צפה</button>';
    h+=toEpBtn(r.d.k,_ri,jsc);
    h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="מחק שורה מהרשימה">×</button>';
   }
@@ -6567,7 +6569,7 @@ function dayOfTr(t){
  return ds.filter(function(d){return d.date&&t.date&&d.date===t.date})[0]||null;
 }
 function dayOrdT(d){
- if(d&&d.dnum!==undefined&&d.dnum!==null&&d.dnum!=="") return -1e15+(Number(d.dnum)||0);
+ if(d&&d.dnum!==undefined&&d.dnum!==null&&d.dnum!=="") return 9e15+(Number(d.dnum)||0);
  var p=dparts(d&&d.date);
  return p?p.t:1e15;
 }
@@ -7826,7 +7828,8 @@ function vgOf(k){
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shifts","שעון משמרות"]]},
+ {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
 ];
@@ -10074,6 +10077,7 @@ document.addEventListener("click",function(e){
   if(!_wx) return;
   var _rg=tcRange(_wx.tc);
   if(!_rg){ toast("אין טיימקוד לסצנה הזו",true); return }
+  if(!(driveIdsOf(_wd)||[]).length){ toast("אין וידאו ליום הזה",true); return }
   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
   state.vidOpen=id;
   state.vidRow=id+"#"+Number(b.getAttribute("data-i"));
