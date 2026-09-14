@@ -305,6 +305,19 @@ button.matday.drawer:not(.open){border-bottom-width:1px;border-radius:9px;margin
 button.matday.drawer:not(.open):hover{opacity:1}
 .matday .dchev{font-size:11px;color:var(--ink-3);flex:0 0 auto;width:12px}
 .matdrawer{display:flex;flex-direction:column;gap:6px;padding:8px 0 12px;border-inline:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 0 9px 9px;margin-bottom:8px;padding-inline:8px;background:var(--bg,transparent)}
+.btn.hl-yellow{background:#FFE9A3;border-color:#E3BE4A;color:#4A3A0C;font-weight:700;box-shadow:inset 0 -2px 0 rgba(0,0,0,.05)}
+.btn.hl-yellow:hover{background:#FFDF7A;border-color:#C9A63A}
+.btn.hl-blue{background:#CDECF7;border-color:#66B4D0;color:#123C4C;font-weight:700;box-shadow:inset 0 -2px 0 rgba(0,0,0,.05)}
+.btn.hl-blue:hover{background:#B2E2F2;border-color:#4C9FBE}
+.subq{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.02em}
+.subq.q-ok{background:#D9F0DC;color:#1E5C2C}
+.subq.q-fix{background:#FFEFC7;color:#6B4C08}
+.subq.q-bad{background:#FADCE2;color:#7A1228}
+.subq.q-none{background:var(--line-2);color:var(--ink-3)}
+.dwhotog{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;padding:5px 12px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface);color:var(--ink-2);cursor:pointer}
+.dwhotog:hover{border-color:var(--ink-3);color:var(--ink)}
+.dwhorow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:10px 0 0}
+.dwhorow .vrhint{color:var(--ink-3)}
 .dday.hasimg{display:flex;gap:14px;align-items:flex-start}
 .dday.hasimg .dbody{flex:1 1 auto;min-width:0}
 .dstrip{order:2;flex:0 0 clamp(190px,26vw,340px);display:grid;grid-template-columns:1fr;gap:7px;align-content:start}
@@ -3599,7 +3612,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",matDays:null,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",matDays:null,whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4895,6 +4908,29 @@ function dayCues(d){
  }
  return [];
 }
+function subQuality(d){
+ if(!d) return {k:"none"};
+ var ts=dayTrs(d)||[], raw=null;
+ for(var i=0;i<ts.length&&!raw;i++){ var c=rawCues(ts[i]); if(c.length) raw=c }
+ if(!raw) return {k:"none"};
+ var dur=tcSec(d.brdur||"")||0;
+ var span=raw[raw.length-1].rb-raw[0].ra;
+ if(!dur) return {k:"ok",n:raw.length,diff:0};
+ var diff=span-dur, rel=Math.abs(diff)/dur;
+ if(rel<=0.01) return {k:"ok",n:raw.length,diff:diff};
+ if(rel<=0.05) return {k:"fix",n:raw.length,diff:diff};
+ return {k:"bad",n:raw.length,diff:diff};
+}
+function subDefault(d){
+ var q=subQuality(d);
+ return q.k==="ok"||q.k==="fix";
+}
+function subOn(d){
+ if(!d) return false;
+ VR.subOn=VR.subOn||{};
+ if(VR.subOn[d.k]===undefined) VR.subOn[d.k]=subDefault(d);
+ return !!VR.subOn[d.k];
+}
 function subOff(d){ return Number((d&&d.suboff)||0)||0 }
 function cueAt(cues,t){
  if(!cues.length) return null;
@@ -5032,7 +5068,7 @@ function vfmt(n){
  var p=function(v){return v<10?"0"+v:""+v};
  return h+":"+p(m)+":"+p(s2)+"."+p(f);
 }
-var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,sub:true,tcmode:true,range:null};
+var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,sub:true,subOn:null,tcmode:true,range:null};
 var VRFILES={};
 function vrKeep(){
  if(VR.day&&VR.url) VRFILES[VR.day]={url:VR.url,name:VR.name};
@@ -5075,7 +5111,7 @@ function vidBlock(d){
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
- h+='<button class="btn ghost brtog" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":"צפייה בוידאו")+'</button>';
+ h+='<button class="btn ghost brtog hl-yellow" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":"צפייה בוידאו")+'</button>';
  if(!open) return h+'</div>';
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
  h+='<div class="vroom" data-vr="'+esc(d.k)+'">';
@@ -5105,7 +5141,7 @@ function vidBlock(d){
  }
  if(mode==="file"){
   if(VR.day===d.k&&VR.url){
-   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div><div class="vrsub"'+(VR.sub?"":' hidden')+'></div></div>';
+   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div><div class="vrsub"'+(subOn(d)?"":' hidden')+'></div></div>';
    h+='<div class="vrbar">';
    h+='<button class="vrb big" data-vrc="play">נגן</button>';
    h+='<button class="vrb" data-vrc="b1">◀ פריים</button>';
@@ -5119,8 +5155,10 @@ function vidBlock(d){
    h+='<button class="vrb" data-vrc="nn" title="להערה הבאה">הערה ▶</button>';
    h+='<button class="vrb'+(VR.draw?" on":"")+'" data-vrc="draw">מרקר</button>';
    h+='<button class="vrb" data-vrc="clr">נקה ציור</button>';
-   var _cn=dayCues(d).length;
-   h+='<button class="vrb'+(VR.sub?" on":"")+'" data-vrc="sub" title="'+(_cn?(_cn+" שורות תמלול"):"אין תמלול ליום הזה")+'">כתוביות'+(_cn?"":" ✕")+'</button>';
+   var _cn=dayCues(d).length, _q=subQuality(d);
+   var _qt=_q.k==="ok"?"התמלול מסונכרן לקובץ":_q.k==="fix"?("סטייה של "+Math.round(Math.abs(_q.diff))+" שניות, מכוונן אוטומטית"):_q.k==="bad"?("התמלול לא בסינק, סטייה של "+Math.round(Math.abs(_q.diff))+" שניות"):"אין תמלול ליום הזה";
+   h+='<button class="vrb'+(subOn(d)?" on":"")+'" data-vrc="sub" title="'+esc(_qt)+(_cn?(" · "+_cn+" שורות"):"")+'"'+(_cn?"":" disabled")+'>כתוביות</button>';
+   h+='<span class="subq q-'+_q.k+'" title="'+esc(_qt)+'">'+(_q.k==="ok"?"בסינק":_q.k==="fix"?"מכוונן":_q.k==="bad"?"לא בסינק":"אין")+'</span>';
    h+='<button class="vrb" data-vrc="sm" title="הכתוביות מאחרות, הזז אחורה חצי שנייה">כת׳ −</button>';
    h+='<span class="vrhint" data-vrc="soff">'+((Number(d.suboff)||0)?((d.suboff>0?"+":"")+Number(d.suboff).toFixed(1)+"ש"):"0")+'</span>';
    h+='<button class="vrb" data-vrc="sp1" title="הכתוביות מקדימות, הזז קדימה חצי שנייה">כת׳ +</button>';
@@ -5244,7 +5282,8 @@ function vrMount(){
    rd.onload=function(){
     var raw=parseCues(String(rd.result||""));
     if(!raw.length){ toast("לא זיהיתי כתוביות בקובץ הזה",true); return }
-    VR.subs=mapCues(raw,VR.dur?Math.round(VR.dur):0); VR.sub=true;
+    VR.subs=mapCues(raw,VR.dur?Math.round(VR.dur):0);
+    VR.subOn=VR.subOn||{}; VR.subOn[dk]=true;
     toast(raw.length+" שורות כתוביות נטענו מהקובץ");
     render();
    };
@@ -5294,7 +5333,7 @@ function vrMount(){
    }
   }
   if(subEl){
-   if(!VR.sub||!CUES.length){ subEl.hidden=true; subEl.innerHTML="" }
+   if(!subOn(dObj)||!CUES.length){ subEl.hidden=true; subEl.innerHTML="" }
    else{
     subEl.hidden=false;
     var cc=cueAt(CUES,(v.currentTime||0)-subOff(dObj));
@@ -5376,7 +5415,7 @@ function vrMount(){
     paintBar();
     return;
    }
-   if(c==="sub"){ VR.sub=!VR.sub; b.classList.toggle("on",VR.sub); paintBar(); return }
+   if(c==="sub"){ VR.subOn=VR.subOn||{}; VR.subOn[dk]=!subOn(dObj); b.classList.toggle("on",VR.subOn[dk]); paintBar(); return }
    if(c==="tcm"){ VR.tcmode=!VR.tcmode; b.classList.toggle("on",VR.tcmode); paintBar(); return }
    if(c==="sm"||c==="sp1"){
     if(!ensureEdit()) return;
@@ -5476,11 +5515,15 @@ function daysView(){
  h+='</div>';
  var ranked=DATA.chars.filter(function(c){return perChar[c.k]}).sort(function(a,b){return perChar[b.k]-perChar[a.k]});
  if(ranked.length){
-  h+='<div class="dwhobar">';
-  ranked.forEach(function(c){
-   h+='<span class="dchip" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'<em>'+perChar[c.k]+'</em></span>';
-  });
-  h+='</div>';
+  h+='<div class="dwhorow"><button class="dwhotog" data-act="whobar">'+(state.whoBar?"הסתר את הדמויות":"הצג את הדמויות")+'</button>';
+  h+='<span class="vrhint">'+ranked.length+' דמויות צולמו</span></div>';
+  if(state.whoBar){
+   h+='<div class="dwhobar">';
+   ranked.forEach(function(c){
+    h+='<span class="dchip" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'<em>'+perChar[c.k]+'</em></span>';
+   });
+   h+='</div>';
+  }
  }
  h+='<div class="dlog">';
  var lastM=null;
@@ -5579,7 +5622,7 @@ function breakBlock(d){
  var tot=br.length, det=br.filter(function(x){return x.sum}).length;
  var h='<div class="dsec brk"><h4>לוגיינג מפורט'+(d.brsrc?' · '+esc(d.brsrc):'')+'</h4>';
  h+='<p class="brnote">'+tot+' סצנות בחומר'+(d.brdur?', '+esc(d.brdur):'')+(det?', '+det+' עם לוגיינג מלא':'')+'</p>';
- h+='<button class="btn ghost brtog" data-act="brktog" data-id="'+esc(d.k)+'">'+(open?"סגור את הלוגיינג":"לוגיינג מפורט")+'</button>';
+ h+='<button class="btn ghost brtog hl-blue" data-act="brktog" data-id="'+esc(d.k)+'">'+(open?"סגור את הלוגיינג":"לוגיינג מפורט")+'</button>';
  if(!open) return h+'</div>';
  var imgs=DIMG[d.k];
  if(imgs===undefined) dimgLoad(d.k);
@@ -10301,6 +10344,7 @@ document.addEventListener("click",function(e){
   toast(to2.day===id?("התמלול שויך ל"+dayLabel(dd3.date)):"התמלול הוסר מהיום");
   return}
  if(act==="mcbtog"){state.mcbOpen=(state.mcbOpen===id)?"":id;render();return}
+ if(act==="whobar"){ state.whoBar=!state.whoBar; render(); return}
  if(act==="matday"){
   state.matDays=state.matDays||{};
   state.matDays[id]=!state.matDays[id];
