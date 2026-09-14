@@ -10711,7 +10711,7 @@ document.addEventListener("click",function(e){
   state.matDays=state.matDays||{}; state.matDays[bd.k]=true;
   state.matEps=state.matEps||{}; state.matEps[String(wantEp)]=true;
   state.jourOpen=true;
-  state.brkOpen=""; state.editing=nid; state.editModal=false;
+  state.brkOpen=""; state.editing=null; state.editModal=false;
   render();save();
   toast("נוספה סצנה "+nid+" לפרק "+wantEp+", היא במפת הפרקים וביומן"+(wch.length?", שויכה ל"+((charOf(wch[0])||{}).name||""):""));
   return}
