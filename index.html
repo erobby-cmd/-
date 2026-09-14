@@ -328,6 +328,11 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .dstrip .dmore{grid-column:1/-1;text-align:center;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
 .dstrip .dthumb .dn{position:absolute;top:4px;inset-inline-start:4px;font-style:normal;font-family:"Heebo",sans-serif;font-size:10px;font-weight:800;color:#fff;background:rgba(0,0,0,.72);border-radius:4px;min-width:17px;height:17px;line-height:17px;text-align:center;padding:0 4px}
 .dstrip .dthumb span em{display:block;font-style:normal;font-size:9px;font-weight:500;opacity:.85;direction:ltr}
+.dthwrap{position:relative}
+.dtools{position:absolute;top:4px;inset-inline-end:4px;display:flex;gap:3px;opacity:0;transition:opacity .12s}
+.dthwrap:hover .dtools{opacity:1}
+.dtools b{font-weight:800;font-size:11px;line-height:17px;width:18px;height:18px;text-align:center;color:#fff;background:rgba(0,0,0,.72);border-radius:4px;cursor:pointer}
+.dtools b:hover{background:#A8102E}
 .dstrip .dthumb{transition:transform .12s}
 .dstrip .dthumb:hover{transform:scale(1.02);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .dstrip.loading span{display:block;aspect-ratio:16/9;border-radius:6px;background:var(--line-2);opacity:.5}
@@ -5097,10 +5102,18 @@ function dayStrip(d){
  if(!pick.length) return "";
  var h='<div class="dstrip">';
  pick.forEach(function(x){
+  h+='<div class="dthwrap">';
   h+='<button class="dthumb" data-act="matwatch" data-id="'+esc(d.k)+'" data-i="'+x.i+'" title="'+esc(x.t+(x.tc?(" · "+x.tc):""))+'">';
   h+='<img src="'+esc(x.src)+'" alt="" loading="lazy">';
   h+='<i class="dn">'+x.n+'</i>';
   h+='<span>'+esc(x.t||"")+(x.tc?('<em>'+esc(x.tc)+'</em>'):'')+'</span></button>';
+  if(!RO){
+   h+='<span class="dtools">';
+   if((imgs[x.i]||[]).length>1) h+='<b data-act="dimgnext" data-id="'+esc(d.k)+'" data-i="'+x.i+'" title="פריים אחר מהסצנה הזו">⟳</b>';
+   h+='<b data-act="dimgdel" data-id="'+esc(d.k)+'" data-i="'+x.i+'" title="הסר את התמונה הזו">×</b>';
+   h+='</span>';
+  }
+  h+='</div>';
  });
  if(br.length>pick.length) h+='<span class="dmore">ועוד '+(br.length-pick.length)+'</span>';
  return h+'</div>';
@@ -5577,12 +5590,17 @@ function daysView(){
 
 /* ===== פירוק יום הצילום ===== */
 var DIMG={}, dimgBusy={};
+var DIMGSRC={};
+function dimgSave(k){
+ var body=[{id:rid("dimg:"+k),data:{at:Date.now(),src:DIMGSRC[k]||"",imgs:DIMG[k]||[]},updated_at:new Date().toISOString()}];
+ return fetch(REST,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(body)}).catch(function(){});
+}
 function dimgLoad(k){
  if(DIMG[k]||dimgBusy[k]) return;
  dimgBusy[k]=1;
  fetch(REST+"?id=eq."+encodeURIComponent(rid("dimg:"+k))+"&select=data",{headers:HDR})
   .then(function(r){return r.json()})
-  .then(function(j){ DIMG[k]=((j[0]||{}).data||{}).imgs||[]; dimgBusy[k]=0; render() })
+  .then(function(j){ var dd=((j[0]||{}).data||{}); DIMG[k]=dd.imgs||[]; DIMGSRC[k]=dd.src||""; dimgBusy[k]=0; render() })
   .catch(function(){ dimgBusy[k]=0 });
 }
 var BKIND={interview:"ראיון",personal:"אישי",briefing:"תדריך",field_enforcement:"אכיפה בשטח",prep:"הכנות",other:"אחר"};
@@ -10344,6 +10362,24 @@ document.addEventListener("click",function(e){
   toast(to2.day===id?("התמלול שויך ל"+dayLabel(dd3.date)):"התמלול הוסר מהיום");
   return}
  if(act==="mcbtog"){state.mcbOpen=(state.mcbOpen===id)?"":id;render();return}
+ if(act==="dimgdel"){
+  if(RO)return;
+  var _di=Number(b.getAttribute("data-i"));
+  if(!DIMG[id]||!DIMG[id][_di]) return;
+  DIMG[id][_di]=[];
+  dimgSave(id);
+  render();
+  toast("\u05d4\u05ea\u05de\u05d5\u05e0\u05d4 \u05d4\u05d5\u05e1\u05e8\u05d4");
+  return}
+ if(act==="dimgnext"){
+  if(RO)return;
+  var _dj=Number(b.getAttribute("data-i"));
+  var arr=DIMG[id]&&DIMG[id][_dj];
+  if(!arr||arr.length<2) return;
+  arr.push(arr.shift());
+  dimgSave(id);
+  render();
+  return}
  if(act==="whobar"){ state.whoBar=!state.whoBar; render(); return}
  if(act==="matday"){
   state.matDays=state.matDays||{};
