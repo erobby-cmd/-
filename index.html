@@ -1066,6 +1066,7 @@ li.gdone em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10.5px;fo
 .gcard span{display:block;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;color:var(--ink-3);margin-top:6px}
 .glist{display:grid;gap:5px}
 .grow{position:relative;text-align:start;display:grid;grid-template-columns:78px 1fr auto;gap:11px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 12px;cursor:pointer;width:100%}
+.grow.nocode{grid-template-columns:1fr auto}
 .grow.static{cursor:default}
 .grow:hover{border-color:var(--line-2)}
 .gcode{font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -8001,7 +8002,7 @@ function searchAll(raw){
 function searchBox(){
  var q=state.q||"";
  return '<div class="gsearch"><span class="gsi">חיפוש</span>'+
-  '<input id="gq" placeholder="שם, מילה, קוד סצנה" value="'+esc(q)+'" autocomplete="off">'+
+  '<input id="gq" placeholder="שם, מילה או משפט" value="'+esc(q)+'" autocomplete="off">'+
   (q?'<button class="gsx" data-act="qclear" title="נקה">×</button>':'')+'</div>';
 }
 function searchView(){
@@ -8033,8 +8034,7 @@ function searchView(){
   h+='<div class="gsec"><h3>סצנות <span>'+r.scenes.length+'</span></h3><div class="glist">';
   r.scenes.sort(function(a,b){return ((a.ep||9)-(b.ep||9))||((a.ord||0)-(b.ord||0))}).forEach(function(s){
    var ch=charOf(s.char), ln=lineObj(lineOf(s));
-   h+='<button class="grow" data-act="gotoscene" data-id="'+esc(s.id)+'">';
-   h+='<span class="gcode">'+markQ(s.id,q)+'</span>';
+   h+='<button class="grow nocode" data-act="gotoscene" data-id="'+esc(s.id)+'">';
    h+='<span class="gmain"><b>'+markQ(s.title,q)+'</b>';
    if(s.short) h+='<em>'+markQ(s.short,q)+'</em></span>';
    h+='<span class="gmeta">פרק '+(s.ep||1)+(ch?' · '+esc(ch.name):'')+(ln?' · '+esc(ln.name):'')+'</span>';
