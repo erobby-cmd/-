@@ -3578,7 +3578,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -5765,16 +5765,6 @@ function matView(){
   h+='<button data-act="matkind" data-k="'+esc(k[0])+'" aria-pressed="'+((state.matKind||"")===k[0])+'">'+esc(k[1])+'</button>';
  });
  h+='</div>';
- if(state.vidOpen){
-  var _wd=DAYS().filter(function(z){return z.k===state.vidOpen})[0];
-  if(_wd){
-   h+='<div class="matvid"><div class="matvidh"><b>'+esc(dayTag(_wd.k)||"היום")+' · '+esc(dayLabel(_wd.date))+'</b>';
-   h+='<em>'+esc(_wd.loc||"")+'</em><div class="spacer"></div>';
-   h+='<button class="tinyedit" data-act="vidtog" data-id="'+esc(_wd.k)+'">סגור את הנגן</button></div>';
-   h+=vidBlock(_wd);
-   h+='</div>';
-  }
- }
  var lastD=null;
  h+='<div class="matlist">';
  all.forEach(function(r,i){
@@ -5830,6 +5820,13 @@ function matView(){
    h+='<input name="o" value="'+esc(r.x.chx||"")+'" placeholder="מי בסצנה שהוא לא מהדמויות שלנו" autocomplete="off">';
    h+='<button class="btn" data-act="matother" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">שמור</button></div>';
    h+='<p class="pickhint">לחיצה מוסיפה או מורידה דמות מהסצנה. מי שלא מהדמויות שלנו נכנס בשורת אחר</p></div>';
+  }
+  if(state.vidRow===_mk&&state.vidOpen===r.d.k){
+   h+='<div class="matvid"><div class="matvidh"><b>'+esc(r.x.t||"הקטע")+'</b>';
+   h+='<em>'+esc((dayTag(r.d.k)||"")+" · "+dayLabel(r.d.date)+" · "+(r.x.tc||""))+'</em><div class="spacer"></div>';
+   h+='<button class="tinyedit" data-act="vidtog" data-id="'+esc(r.d.k)+'">סגור את הנגן</button></div>';
+   h+=vidBlock(r.d);
+   h+='</div>';
   }
   if(!RO&&state.matKindPick===_mk){
    h+='<div class="matpick"><b>סוג הסצנה</b>';
@@ -9838,20 +9835,23 @@ document.addEventListener("click",function(e){
   if(!_rg){ toast("אין טיימקוד לסצנה הזו",true); return }
   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
   state.vidOpen=id;
+  state.vidRow=id+"#"+Number(b.getAttribute("data-i"));
+  state.vidMode=state.vidMode||{};
+  if(!state.vidMode[id]) state.vidMode[id]=(VR.day===id&&VR.url)?"file":"drive";
   VR.t=_rg.a; VR.range={a:_rg.a,b:_rg.b,t:_wx.t||"",day:id};
   VR.pend=_rg.a;
   if(VR.video&&VR.day===id&&VR.url){ try{ VR.video.currentTime=_rg.a; VR.video.play().catch(function(){}) }catch(_){} }
   render();
   setTimeout(function(){
    var el=document.querySelector('.matvid')||document.querySelector('.vroom[data-vr="'+id+'"]');
-   if(el&&el.scrollIntoView) el.scrollIntoView({block:"start"});
+   if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"});
    var ifr=document.querySelector('.vroom[data-vr="'+id+'"] iframe');
    if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_rg.a)+"s" }
   },90);
   toast("הקטע "+(_wx.t||"")+" · "+vfmt(_rg.a).slice(0,7));
   return}
  if(act==="vidtog"){
-  if(state.vidOpen===id){ state.vidOpen=""; vrRelease(); }
+  if(state.vidOpen===id){ state.vidOpen=""; state.vidRow=""; vrRelease(); }
   else { if(state.vidOpen&&state.vidOpen!==id) vrRelease(); state.vidOpen=id; }
   render();return}
  if(act==="vidclrrange"){ VR.range=null; render(); return}
