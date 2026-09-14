@@ -5048,7 +5048,9 @@ function dayCues(d){
  var raw=rawCues(t);
  var span=raw.length?(raw[raw.length-1].rb-raw[0].ra):0;
  var base=Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-span));
- var key=fi+"|"+Math.round(base*100);
+ var exact=(VR.day===d.k&&VR.tc0!==null&&VR.tc0!==undefined);
+ if(exact) base=(raw.length?raw[0].ra:0)-VR.tc0;
+ var key=fi+"|"+Math.round(base*100)+"|"+(exact?"x":"g");
  if(t.__map&&t.__mapk===key) return t.__map;
  var mp=mapCues(raw,base);
  try{
@@ -5241,7 +5243,7 @@ function vrUse(dk){
 function vrRelease(){
  vrKeep();
  if(VR.video){ try{VR.video.pause();VR.video.removeAttribute("src");VR.video.load()}catch(_){} }
- VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;VR.subs=null;VR.range=null;
+ VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;VR.subs=null;VR.range=null;VR.tc0=null;
 }
 function dayStrip(d){
  var br=d.brk||[];
@@ -5300,6 +5302,80 @@ function clkTick(){
  }
  var inp=document.querySelector('.vrtc[data-clk="'+dk+'"]');
  if(inp&&document.activeElement!==inp) inp.value=vfmt(clkNow(dk)).slice(0,7);
+}
+/* ===== קריאת הטיימקוד ההתחלתי מתוך קובץ MP4/MOV ===== */
+function mp4Str(u8,p){ return String.fromCharCode(u8[p],u8[p+1],u8[p+2],u8[p+3]) }
+function mp4Boxes(u8,dv,start,end){
+ var out=[], p=start;
+ while(p+8<=end){
+  var sz=dv.getUint32(p), ty=mp4Str(u8,p+4), hs=8;
+  if(sz===1){ if(p+16>end) break; sz=Number(dv.getBigUint64(p+8)); hs=16 }
+  if(sz===0) sz=end-p;
+  if(sz<8||p+sz>end) break;
+  out.push({ty:ty,s:p+hs,e:p+sz});
+  p+=sz;
+ }
+ return out;
+}
+function mp4Find(list,ty){ for(var i=0;i<list.length;i++) if(list[i].ty===ty) return list[i]; return null }
+function mp4TopMoov(file){
+ var size=file.size, pos=0;
+ function step(){
+  if(pos>=size-8) return Promise.resolve(null);
+  return file.slice(pos,Math.min(pos+16,size)).arrayBuffer().then(function(ab){
+   var dv=new DataView(ab), u8=new Uint8Array(ab);
+   if(ab.byteLength<8) return null;
+   var sz=dv.getUint32(0), ty=mp4Str(u8,4), hs=8;
+   if(sz===1){ if(ab.byteLength<16) return null; sz=Number(dv.getBigUint64(8)); hs=16 }
+   if(sz===0) sz=size-pos;
+   if(sz<8) return null;
+   if(ty==="moov") return {s:pos+hs,e:pos+sz};
+   pos+=sz;
+   return step();
+  });
+ }
+ return step();
+}
+function fileStartTC(file){
+ if(!file) return Promise.resolve(null);
+ return mp4TopMoov(file).then(function(mv){
+  if(!mv) return null;
+  var len=mv.e-mv.s;
+  if(len<=0||len>40*1024*1024) return null;
+  return file.slice(mv.s,mv.e).arrayBuffer().then(function(ab){
+   var u8=new Uint8Array(ab), dv=new DataView(ab);
+   var traks=mp4Boxes(u8,dv,0,ab.byteLength).filter(function(b){return b.ty==="trak"});
+   for(var i=0;i<traks.length;i++){
+    var tk=mp4Boxes(u8,dv,traks[i].s,traks[i].e);
+    var mdia=mp4Find(tk,"mdia"); if(!mdia) continue;
+    var md=mp4Boxes(u8,dv,mdia.s,mdia.e);
+    var hdlr=mp4Find(md,"hdlr"); if(!hdlr) continue;
+    if(mp4Str(u8,hdlr.s+8)!=="tmcd") continue;
+    var minf=mp4Find(md,"minf"); if(!minf) continue;
+    var mi=mp4Boxes(u8,dv,minf.s,minf.e);
+    var stbl=mp4Find(mi,"stbl"); if(!stbl) continue;
+    var st=mp4Boxes(u8,dv,stbl.s,stbl.e);
+    var stsd=mp4Find(st,"stsd"); if(!stsd) continue;
+    var ents=mp4Boxes(u8,dv,stsd.s+8,stsd.e);
+    var tm=mp4Find(ents,"tmcd"); if(!tm) continue;
+    var q=tm.s+8;
+    var tscale=dv.getUint32(q+4), fdur=dv.getUint32(q+8), nfr=u8[q+12];
+    if(!tscale||!fdur) continue;
+    var stco=mp4Find(st,"stco"), co64=mp4Find(st,"co64"), off=null;
+    if(stco&&stco.e-stco.s>=12) off=dv.getUint32(stco.s+8);
+    else if(co64&&co64.e-co64.s>=16) off=Number(dv.getBigUint64(co64.s+8));
+    if(off===null) continue;
+    return file.slice(off,off+4).arrayBuffer().then(function(fb){
+     if(fb.byteLength<4) return null;
+     var frames=new DataView(fb).getUint32(0);
+     var fps=tscale/fdur;
+     if(!fps||!isFinite(fps)) return null;
+     return {sec:frames/fps, fps:fps, frames:frames, nfr:nfr};
+    });
+   }
+   return null;
+  });
+ }).catch(function(){ return null });
 }
 function vnFocusWire(){
  if(document.__vnfw) return;
@@ -5361,14 +5437,6 @@ function vidBlock(d){
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
- var _sq=subQuality(d);
- if(_sq.k!=="none"){
-  var _so=subOn(d);
-  h+='<p class="brnote subline">כתוביות מהתמלול של היום · <b class="subq q-'+_sq.k+'">'
-   +(_sq.k==="ok"?"בסינק":_sq.k==="fix"?"סטייה קטנה":"לא בסינק")+'</b>'
-   +' <button class="subsw'+(_so?" on":"")+'" data-act="subtog" data-id="'+esc(d.k)+'" title="הדלקה וכיבוי של הכתוביות בנגן"><i></i>'+(_so?"תרגום פועל":"אין תרגום")+'</button>'
-   +' <button class="tinyedit" data-act="srtdl" data-id="'+esc(d.k)+'" title="קובץ SRT מסונכרן לקובץ הגלם. אפשר לטעון אותו בדרייב או בכל נגן">הורד כתוביות SRT</button></p>';
- }
  h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
  if(!open) return h+'</div>';
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
@@ -5399,7 +5467,7 @@ function vidBlock(d){
  }
  if(mode==="file"){
   if(VR.day===d.k&&VR.url){
-   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div><div class="vrsub"'+(subOn(d)?"":' hidden')+'></div></div>';
+   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div></div>';
    h+='<div class="vrbar">';
    h+='<button class="vrb big" data-vrc="play">נגן</button>';
    h+='<button class="vrb" data-vrc="b1">◀ פריים</button>';
@@ -5413,16 +5481,6 @@ function vidBlock(d){
    h+='<button class="vrb" data-vrc="nn" title="להערה הבאה">הערה ▶</button>';
    h+='<button class="vrb'+(VR.draw?" on":"")+'" data-vrc="draw">מרקר</button>';
    h+='<button class="vrb" data-vrc="clr">נקה ציור</button>';
-   var _cn=dayCues(d).length, _q=subQuality(d);
-   var _qt=_q.k==="ok"?"התמלול מסונכרן לקובץ":_q.k==="fix"?("סטייה של "+Math.round(Math.abs(_q.diff))+" שניות, מכוונן אוטומטית"):_q.k==="bad"?("התמלול לא בסינק, סטייה של "+Math.round(Math.abs(_q.diff))+" שניות"):"אין תמלול ליום הזה";
-   h+='<button class="vrb'+(subOn(d)?" on":"")+'" data-vrc="sub" title="'+esc(_qt)+(_cn?(" · "+_cn+" שורות"):"")+'"'+(_cn?"":" disabled")+'>כתוביות</button>';
-   h+='<span class="subq q-'+_q.k+'" title="'+esc(_qt)+'">'+(_q.k==="ok"?"בסינק":_q.k==="fix"?"מכוונן":_q.k==="bad"?"לא בסינק":"אין")+'</span>';
-   h+='<button class="vrb" data-vrc="sm" title="הכתוביות מאחרות, הזז אחורה חצי שנייה">כת׳ −</button>';
-   h+='<span class="vrhint" data-vrc="soff">'+((Number(d.suboff)||0)?((d.suboff>0?"+":"")+Number(d.suboff).toFixed(1)+"ש"):"0")+'</span>';
-   h+='<button class="vrb" data-vrc="sp1" title="הכתוביות מקדימות, הזז קדימה חצי שנייה">כת׳ +</button>';
-   h+='<label class="vrb" for="vrsub-'+esc(d.k)+'" title="טעינת קובץ כתוביות srt או vtt">קובץ כתוביות</label>';
-   h+='<input id="vrsub-'+esc(d.k)+'" class="vrsubfile" type="file" accept=".srt,.vtt,.txt,text/plain" data-day="'+esc(d.k)+'" style="display:none">';
-   h+='<button class="vrb'+(VR.tcmode?" on":"")+'" data-vrc="tcm" title="החלפה בין טיימקוד מקור לזמן מתחילת הקובץ">TC</button>';
    h+='</div>';
   } else {
    h+='<div class="vrstage"><div class="vrpick">';
@@ -5436,21 +5494,7 @@ function vidBlock(d){
   }
  } else {
   if(did){
-   h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>';
-   h+='<div class="vrsub drvsub" data-day="'+esc(d.k)+'"'+(subOn(d)?"":' hidden')+'></div></div>';
-   if(dayCues(d).length){
-    var _run=(CLK.day===d.k&&CLK.run);
-    h+='<div class="vrclk">';
-    h+='<button class="vrb big'+(_run?" on":"")+'" data-act="clkplay" data-id="'+esc(d.k)+'">'+(_run?"עצור כתוביות":"הפעל כתוביות")+'</button>';
-    h+='<span class="vrhint">טיימקוד</span>';
-    h+='<input class="vrtc" data-clk="'+esc(d.k)+'" value="'+esc(vfmt(clkNow(d.k)).slice(0,7))+'" autocomplete="off" title="השעון של הכתוביות. אפשר להקליד ידנית">';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-5">5 שניות-</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="5">+5 שניות</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-1">1-</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="1">1+</button>';
-    h+='<span class="vrhint">לחץ פליי בדרייב ומיד אחר כך כאן. אם הכתובית מקדימה או מאחרת, כוון עם המינוס והפלוס</span>';
-    h+='</div>';
-   }
+   h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
   } else {
    h+='<div class="vrstage"><div class="vrpick"><b>עוד אין קובץ מחובר ליום הזה</b>';
    h+='<span class="vrhint" style="color:#8A93A0">הדבק למטה את הקישור לקובץ מהדרייב</span>';
@@ -5476,7 +5520,6 @@ function vidBlock(d){
 
  var _cues=dayCues(d);
  h+='<div class="vrlist">';
- if(!notes.length) h+='<p class="vrempty">עוד אין הערות על הוידאו של היום הזה. עצור על פריים, כתוב מה אתה רואה, וכולם יראו את זה כאן.</p>';
  notes.forEach(function(x){
   var mine=(x.who===state.me);
   h+='<div class="vrn">';
@@ -5492,15 +5535,6 @@ function vidBlock(d){
  });
  h+='</div>';
 
- if(!RO){
-  h+='<div class="vrlink" data-form="__vl:'+esc(d.k)+'__">';
-  h+='<span class="vrhint">קישורים לקבצים בדרייב, אחד בכל שורה</span>';
-  h+='<textarea name="u" rows="'+Math.max(1,dids.length)+'" placeholder="הדבק כאן קישור. אם יש כמה קבצים ליום, שורה לכל קישור">'
-    +esc(dids.map(function(x){return "https://drive.google.com/file/d/"+x+"/view"}).join("\n"))+'</textarea>';
-  h+='<button class="vrb" data-act="vidlink" data-id="'+esc(d.k)+'">שמור</button>';
-  h+='<a class="vrhint" href="'+DRIVE_FOLDER+'" target="_blank" rel="noopener">התיקייה בדרייב</a>';
-  h+='</div>';
- }
  return h+'</div></div>';
 }
 function vrDrawAll(cv,strokes){
@@ -5536,8 +5570,15 @@ function vrMount(){
    var f=fin.files&&fin.files[0]; if(!f) return;
    var keepR=VR.range, keepP=VR.pend, keepT=VR.t;
    vrRelease();
-   VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk;
+   VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk; VR.tc0=null;
    VRFILES[vrKey(dk)]={url:VR.url,name:VR.name};
+   fileStartTC(f).then(function(tc){
+    if(VR.day!==dk||!tc) return;
+    VR.tc0=tc.sec;
+    try{ dayTrs(DAYS().filter(function(z){return z.k===dk})[0]||{}).forEach(function(tt){ delete tt.__map; delete tt.__mapk }) }catch(_){}
+    toast("הכתוביות סונכרנו לטיימקוד של הקובץ, "+tcStr(tc.sec));
+    render();
+   });
    VR.range=(keepR&&keepR.day===dk)?keepR:null;
    VR.pend=(keepP!=null)?keepP:((keepR&&keepR.day===dk)?keepR.a:null);
    VR.t=(VR.pend!=null)?VR.pend:(keepT||0);
@@ -6918,7 +6959,6 @@ function trView(){
  h+='<button data-act="trmode" data-k="char" aria-pressed="'+(!byDay)+'">לפי דמות</button></div>';
  h+='<div class="spacer"></div>';
  h+='<button class="btn ghost" data-act="trdocxall" title="כל התמלולים בקובץ וורד אחד">ייצא הכל לוורד</button>';
- h+='<button class="btn ghost" data-act="srtall" title="כל הכתוביות של כל ימי הצילום בקובץ זיפ אחד, מסונכרנות לקבצי הגלם">כל הכתוביות בזיפ</button>';
  if(!RO) h+='<button class="btn'+(state.trAdd?" ghost":"")+'" data-act="tradd">'+(state.trAdd?"סגור":"הוסף תמלול")+'</button>';
  h+='</div>';
 
