@@ -428,6 +428,14 @@ html.linedrag .mchip{pointer-events:none}
 .vrsub{position:absolute;left:3%;right:3%;bottom:4%;text-align:center;pointer-events:none;font-family:"Heebo",sans-serif;font-size:clamp(14px,2.1vw,26px);font-weight:600;line-height:1.35;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,1)}
 .vrsub span{background:rgba(0,0,0,.35);padding:2px 10px;border-radius:5px;display:inline-block}
 .tinyedit.watch{border-color:var(--ink-3);color:var(--ink);font-weight:700}
+.matvid{margin:14px 0 6px;border:2px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--surface)}
+.matvidh{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;padding:8px 12px;background:var(--ink);color:var(--surface)}
+.matvidh b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:15px}
+.matvidh em{font-style:normal;font-family:"Heebo",sans-serif;font-size:12px;opacity:.8}
+.matvidh .tinyedit{border-color:rgba(255,255,255,.4);color:#fff;background:transparent}
+.matvid .vidsec{padding:0 12px 10px}
+.matvid .vidsec>h4{display:none}
+.matvid .vidsec .brnote{margin:8px 0 6px}
 .vrband{position:absolute;top:10px;height:6px;border-radius:3px;background:rgba(168,16,46,.30);border:1px solid rgba(168,16,46,.6);pointer-events:none}
 .vrscene{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 10px;border-bottom:1px solid var(--line);background:#F6EEDF;color:#5A4520;font-family:"Heebo",sans-serif;font-size:12.5px}
 .vrscene b{font-weight:800}
@@ -4821,41 +4829,52 @@ function rawCues(t){
  try{ Object.defineProperty(t,"__cues",{value:c,enumerable:false,configurable:true}) }catch(_){ t.__cues=c }
  return c;
 }
-function mapCues(raw){
- var out=[], vEnd=0, prev=null;
- raw.forEach(function(c){
-  var st;
-  if(prev===null) st=0;
-  else{
-   var gap=c.ra-prev;
-   if(gap<0||gap>120) gap=0.5;
-   st=vEnd+gap;
-  }
-  var dur=Math.max(0.35,c.rb-c.ra);
-  out.push({a:st,b:st+dur,t:c.t,ra:c.ra});
-  vEnd=st+dur; prev=c.rb;
- });
+function mapCues(raw,dur){
+ if(!raw||!raw.length) return [];
+ var first=raw[0].ra;
+ var rel=raw.map(function(c){ return {a:c.ra-first,b:c.rb-first,t:c.t,ra:c.ra} });
+ var span=rel[rel.length-1].b;
+ if(!dur||dur<=0||!isFinite(dur)) return rel;
+ var G=0,i;
+ for(i=1;i<rel.length;i++) G+=Math.max(0,rel[i].a-rel[i-1].b);
+ var E=span-dur, lead=0, f=1;
+ if(E>0){
+  if(G<=0) return rel;
+  f=Math.max(0,1-E/G);
+ } else if(E<0){
+  lead=Math.min(-E,90);
+  var rest=(-E)-lead;
+  if(G>0&&rest>0) f=1+rest/G;
+ }
+ var out=[], t=lead;
+ for(i=0;i<rel.length;i++){
+  if(i>0) t+=Math.max(0,rel[i].a-rel[i-1].b)*f;
+  var d2=Math.max(0.3,rel[i].b-rel[i].a);
+  out.push({a:t,b:t+d2,t:rel[i].t,ra:rel[i].ra});
+  t+=d2;
+ }
  return out;
 }
 function dayCues(d){
+ if(!d) return [];
+ var dur=(VR.day===d.k&&VR.dur)?Math.round(VR.dur):0;
  if(VR.subs&&VR.subs.length&&VR.day===d.k) return VR.subs;
  var ts=dayTrs(d)||[];
  for(var i=0;i<ts.length;i++){
   var raw=rawCues(ts[i]);
   if(raw.length){
-   if(ts[i].__map) return ts[i].__map;
-   var mp=mapCues(raw);
-   try{ Object.defineProperty(ts[i],"__map",{value:mp,enumerable:false,configurable:true}) }catch(_){ ts[i].__map=mp }
+   if(ts[i].__map&&ts[i].__mapdur===dur) return ts[i].__map;
+   var mp=mapCues(raw,dur);
+   try{
+    Object.defineProperty(ts[i],"__map",{value:mp,enumerable:false,configurable:true});
+    Object.defineProperty(ts[i],"__mapdur",{value:dur,enumerable:false,configurable:true});
+   }catch(_){ ts[i].__map=mp; ts[i].__mapdur=dur }
    return mp;
   }
  }
  return [];
 }
-function subOff(d){
- var base=Number((d&&d.suboff)||0)||0;
- if(VR.lead) base+=VR.lead;
- return base;
-}
+function subOff(d){ return Number((d&&d.suboff)||0)||0 }
 function cueAt(cues,t){
  if(!cues.length) return null;
  var lo=0,hi=cues.length-1,best=null;
@@ -4991,11 +5010,11 @@ function vfmt(n){
  var p=function(v){return v<10?"0"+v:""+v};
  return h+":"+p(m)+":"+p(s2)+"."+p(f);
 }
-var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,lead:0,sub:true,tcmode:true,range:null};
+var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,sub:true,tcmode:true,range:null};
 function vrRelease(){
  if(VR.url){ try{URL.revokeObjectURL(VR.url)}catch(_){} }
  if(VR.video){ try{VR.video.pause();VR.video.removeAttribute("src");VR.video.load()}catch(_){} }
- VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;VR.subs=null;VR.lead=0;VR.range=null;
+ VR.url="";VR.name="";VR.day="";VR.t=0;VR.dur=0;VR.strokes=[];VR.cur=null;VR.pend=null;VR.subs=null;VR.range=null;
 }
 function vidBlock(d){
  var open=state.vidOpen===d.k;
@@ -5049,8 +5068,9 @@ function vidBlock(d){
    h+='<button class="vrb" data-vrc="clr">נקה ציור</button>';
    var _cn=dayCues(d).length;
    h+='<button class="vrb'+(VR.sub?" on":"")+'" data-vrc="sub" title="'+(_cn?(_cn+" שורות תמלול"):"אין תמלול ליום הזה")+'">כתוביות'+(_cn?"":" ✕")+'</button>';
-   h+='<button class="vrb" data-vrc="sm" title="הכתוביות מאחרות, הזז אחורה">כת׳ -1</button>';
-   h+='<button class="vrb" data-vrc="sp1" title="הכתוביות מקדימות, הזז קדימה">כת׳ +1</button>';
+   h+='<button class="vrb" data-vrc="sm" title="הכתוביות מאחרות, הזז אחורה חצי שנייה">כת׳ −</button>';
+   h+='<span class="vrhint" data-vrc="soff">'+((Number(d.suboff)||0)?((d.suboff>0?"+":"")+Number(d.suboff).toFixed(1)+"ש"):"0")+'</span>';
+   h+='<button class="vrb" data-vrc="sp1" title="הכתוביות מקדימות, הזז קדימה חצי שנייה">כת׳ +</button>';
    h+='<label class="vrb" for="vrsub-'+esc(d.k)+'" title="טעינת קובץ כתוביות srt או vtt">קובץ כתוביות</label>';
    h+='<input id="vrsub-'+esc(d.k)+'" class="vrsubfile" type="file" accept=".srt,.vtt,.txt,text/plain" data-day="'+esc(d.k)+'" style="display:none">';
    h+='<button class="vrb'+(VR.tcmode?" on":"")+'" data-vrc="tcm" title="החלפה בין טיימקוד מקור לזמן מתחילת הקובץ">TC</button>';
@@ -5169,7 +5189,7 @@ function vrMount(){
    rd.onload=function(){
     var raw=parseCues(String(rd.result||""));
     if(!raw.length){ toast("לא זיהיתי כתוביות בקובץ הזה",true); return }
-    VR.subs=mapCues(raw); VR.sub=true; VR.lead=0;
+    VR.subs=mapCues(raw,VR.dur?Math.round(VR.dur):0); VR.sub=true;
     toast(raw.length+" שורות כתוביות נטענו מהקובץ");
     render();
    };
@@ -5268,10 +5288,7 @@ function vrMount(){
   v.addEventListener("pause",paintBar);
   v.addEventListener("loadedmetadata",function(){
    VR.dur=v.duration;
-   if(CUES.length&&v.duration){
-    var mend=CUES[CUES.length-1].b, li=v.duration-mend;
-    VR.lead=(li>0&&li<180)?li:0;
-   }
+   CUES=dayCues(dObj);
    if(VR.pend!=null){ try{ v.currentTime=VR.pend; v.play().catch(function(){}) }catch(_){} VR.t=VR.pend; VR.pend=null }
    vrSize(cv); vrDrawAll(cv,VR.strokes); paintBar(); pins();
   });
@@ -5308,8 +5325,10 @@ function vrMount(){
    if(c==="tcm"){ VR.tcmode=!VR.tcmode; b.classList.toggle("on",VR.tcmode); paintBar(); return }
    if(c==="sm"||c==="sp1"){
     if(!ensureEdit()) return;
-    dObj.suboff=(Number(dObj.suboff)||0)+(c==="sm"?-1:1);
-    toast("סנכרון כתוביות: "+(dObj.suboff>0?"+":"")+dObj.suboff.toFixed(0)+" שניות");
+    dObj.suboff=Math.round(((Number(dObj.suboff)||0)+(c==="sm"?-0.5:0.5))*10)/10;
+    var so=q('[data-vrc="soff"]');
+    if(so) so.textContent=dObj.suboff?((dObj.suboff>0?"+":"")+dObj.suboff.toFixed(1)+"ש"):"0";
+    toast("סנכרון כתוביות "+(dObj.suboff>0?"+":"")+dObj.suboff.toFixed(1)+" שניות");
     paintBar(); save();
     return;
    }
@@ -5745,6 +5764,16 @@ function matView(){
   h+='<button data-act="matkind" data-k="'+esc(k[0])+'" aria-pressed="'+((state.matKind||"")===k[0])+'">'+esc(k[1])+'</button>';
  });
  h+='</div>';
+ if(state.vidOpen){
+  var _wd=DAYS().filter(function(z){return z.k===state.vidOpen})[0];
+  if(_wd){
+   h+='<div class="matvid"><div class="matvidh"><b>'+esc(dayTag(_wd.k)||"היום")+' · '+esc(dayLabel(_wd.date))+'</b>';
+   h+='<em>'+esc(_wd.loc||"")+'</em><div class="spacer"></div>';
+   h+='<button class="tinyedit" data-act="vidtog" data-id="'+esc(_wd.k)+'">סגור את הנגן</button></div>';
+   h+=vidBlock(_wd);
+   h+='</div>';
+  }
+ }
  var lastD=null;
  h+='<div class="matlist">';
  all.forEach(function(r,i){
@@ -9808,14 +9837,13 @@ document.addEventListener("click",function(e){
   if(!_rg){ toast("אין טיימקוד לסצנה הזו",true); return }
   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
   state.vidOpen=id;
-  state.cat="prod"; state.group="days";
   VR.t=_rg.a; VR.range={a:_rg.a,b:_rg.b,t:_wx.t||"",day:id};
   VR.pend=_rg.a;
   if(VR.video&&VR.day===id&&VR.url){ try{ VR.video.currentTime=_rg.a; VR.video.play().catch(function(){}) }catch(_){} }
   render();
   setTimeout(function(){
-   var el=document.querySelector('.vroom[data-vr="'+id+'"]');
-   if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"});
+   var el=document.querySelector('.matvid')||document.querySelector('.vroom[data-vr="'+id+'"]');
+   if(el&&el.scrollIntoView) el.scrollIntoView({block:"start"});
    var ifr=document.querySelector('.vroom[data-vr="'+id+'"] iframe');
    if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_rg.a)+"s" }
   },90);
