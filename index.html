@@ -3843,8 +3843,10 @@ function render(){
   VGROUPS[gk].views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
   h+='</div>';
  })();
- h+='<div class="sep"></div>'+chip("filter","all","הכול",n);
- ORDER.forEach(function(k){if(k==="dropped"&&!c.dropped)return;h+=chip("filter",k,STATUS[k].l,c[k]||0)});
+ if(SCENEVIEWS[state.group]){
+  h+='<div class="sep"></div>'+chip("filter","all","הכול",n);
+  ORDER.forEach(function(k){if(k==="dropped"&&!c.dropped)return;h+=chip("filter",k,STATUS[k].l,c[k]||0)});
+ }
  h+='<div class="spacer"></div>';
  if(!RO){
   var addx="";
@@ -3853,11 +3855,12 @@ function render(){
   else if(state.group==="char") addx='<button class="btn" data-act="addchar">הוסף דמות</button>';
   else if(state.group==="unit") addx='<button class="btn" data-act="addunit">הוסף מחלקה</button>';
   else if(state.group==="ideas") addx='<button class="btn ghost" data-act="lsopen">שלוף ליינים</button><button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
-  h+='<span class="addgrp">'+addx+'<button class="btn" data-act="add">הוסף סצנה</button></span>';
+  if(SCENEVIEWS[state.group]) addx+='<button class="btn" data-act="add">הוסף סצנה</button>';
+  if(addx) h+='<span class="addgrp">'+addx+'</span>';
  } else {
   h+='<span class="savebadge s-ok"><i></i>עותק צפייה · '+esc(SNAPDATE)+'</span>';
  }
- h+='</div>'+legendStrip()+'</div><div class="wrap'+(state.group==="board"?" boardmode":"")+'">';
+ h+='</div>'+(SCENEVIEWS[state.group]?legendStrip():"")+'</div><div class="wrap'+(state.group==="board"?" boardmode":"")+'">';
 
  if((state.q||"").trim()){
   h+=searchView();
@@ -7809,6 +7812,7 @@ function legendStrip(){
  h+='<button class="clegtog" data-act="legtog">'+(state.legOpen?"הסתר":"הצג")+'</button>';
  return h+'</div></div>';
 }
+var SCENEVIEWS={board:1,char:1,unit:1,need:1,lines:1};
 var VGROUPS={
  scenes:{name:"סצנות",views:[["mat","רשימת הסצנות"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"]]}
 };
