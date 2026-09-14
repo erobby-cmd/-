@@ -5033,10 +5033,12 @@ function driveIdsOf(d){
  if(!d) return [];
  if(Array.isArray(d.vids)&&d.vids.length) return d.vids.slice();
  if(d.vid) return [d.vid];
- var one=driveIdOf(d);
- if(one) return [one];
  var byd=driveByDate(d.date);
  if(byd.length) return byd;
+ var bys=driveByDate(fileDayDate(d.brsrc));
+ if(bys.length) return bys;
+ var one=driveIdOf(d);
+ if(one) return [one];
  var byn=driveByNum(dayNum(d.k));
  if(byn.length) return byn;
  return [];
