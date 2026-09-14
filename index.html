@@ -475,6 +475,8 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vrsub{position:absolute;left:3%;right:3%;bottom:4%;text-align:center;pointer-events:none;font-family:"Heebo",sans-serif;font-size:clamp(14px,2.1vw,26px);font-weight:600;line-height:1.35;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,1)}
 .vrsub span{background:rgba(0,0,0,.35);padding:2px 10px;border-radius:5px;display:inline-block}
 .tinyedit.watch{border-color:var(--ink-3);color:var(--ink);font-weight:700}
+.tinyedit.done{border-color:#D9A62B;background:#FFF6DF;color:#6B4C08}
+.tinyedit.done em{font-style:normal;font-weight:800;font-size:10px;opacity:.85;margin-inline-start:3px}
 .matvid{margin:14px 0 6px;border:2px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--surface)}
 .matvidh{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;padding:8px 12px;background:var(--ink);color:var(--surface)}
 .matvidh b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:15px}
@@ -5753,13 +5755,18 @@ function matCharBlock(ck){
  h+='</div></div>';
  return h;
 }
-function toEpBtn(dk,ix){
+function toEpBtn(dk,ix,jsc){
  var key=dk+"#"+ix;
- if(state.brkEp!==key) return '<button class="tinyedit" data-act="brkask" data-k="'+esc(key)+'">לסצנה</button>';
- var h='<span class="eppick"><b>לאיזה פרק</b>';
+ if(state.brkEp!==key){
+  var ttl=jsc?("כבר ביומן כסצנה "+jsc.id+" בפרק "+(jsc.ep||"?")+". לחיצה מכניסה אותה גם לפרק נוסף"):"הכנס את הקטע הזה ליומן ולמפת הפרקים";
+  return '<button class="tinyedit'+(jsc?" done":"")+'" data-act="brkask" data-k="'+esc(key)+'" title="'+esc(ttl)+'">לסצנה'+(jsc?' <em>'+esc(jsc.id)+'</em>':'')+'</button>';
+ }
+ var h='<span class="eppick"><b>'+(jsc?("הסצנה "+jsc.id+" בפרק "+(jsc.ep||"?")+", העבר לפרק"):"לאיזה פרק")+'</b>';
  DATA.eps.forEach(function(e){
-  h+='<button class="dchopt" data-act="brk2sc" data-id="'+esc(dk)+'" data-i="'+ix+'" data-ep="'+e.n+'" style="--cc:var(--shot)" title="'+esc(e.title||"")+'">'+e.n+'</button>';
+  var cur=!!(jsc&&Number(jsc.ep)===e.n);
+  h+='<button class="dchopt'+(cur?" on":"")+'" data-act="'+(jsc?"brkmove":"brk2sc")+'" data-id="'+esc(dk)+'" data-i="'+ix+'" data-ep="'+e.n+'" style="--cc:var(--shot)" title="'+esc(e.title||"")+'">'+e.n+'</button>';
  });
+ if(jsc) h+='<button class="tinyedit" data-act="brk2sc" data-id="'+esc(dk)+'" data-i="'+ix+'" data-ep="'+(DATA.eps[0]||{n:1}).n+'" title="צור סצנה נוספת מאותו קטע">+ סצנה נוספת</button>';
  h+='<button class="tinyedit" data-act="brkaskno">ביטול</button></span>';
  return h;
 }
@@ -5948,7 +5955,7 @@ function matView(){
   if(!RO){
    h+='<button class="tinyedit" data-act="matedit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">ערוך</button>';
    if(tcRange(r.x.tc)) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="פתח את הקטע הזה בנגן">צפה</button>';
-   if(!jsc) h+=toEpBtn(r.d.k,_ri);
+   h+=toEpBtn(r.d.k,_ri,jsc);
    h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="מחק שורה מהרשימה">×</button>';
   }
   h+='</div>';
@@ -10661,6 +10668,24 @@ document.addEventListener("click",function(e){
  if(act==="brktog"){state.brkOpen=(state.brkOpen===id)?"":id;render();return}
  if(act==="brkask"){state.brkEp=b.getAttribute("data-k");render();return}
  if(act==="brkaskno"){state.brkEp="";render();return}
+ if(act==="brkmove"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  state.brkEp="";
+  var md2=DAYS().filter(function(x){return x.k===id})[0];
+  if(!md2)return;
+  var mx2=(md2.brk||[])[Number(b.getAttribute("data-i"))];
+  if(!mx2)return;
+  var msc=matSceneOf(mx2);
+  if(!msc){ toast("לא מצאתי את הסצנה ביומן",true); return }
+  var mep=Number(b.getAttribute("data-ep"))||1;
+  if(Number(msc.ep)===mep){ render(); toast("היא כבר בפרק "+mep); return }
+  moveScene(msc.id,mep,null);
+  try{reindex()}catch(_){}
+  state.matEps=state.matEps||{}; state.matEps[String(mep)]=true; state.jourOpen=true;
+  render();save();
+  toast("הסצנה "+msc.id+" הועברה לפרק "+mep+", גם במפת הפרקים");
+  return}
  if(act==="brk2sc"){
   if(RO)return;
   if(!ensureEdit())return;
@@ -10682,10 +10707,13 @@ document.addEventListener("click",function(e){
   reindex();
   var wch=matCharsOf(bx,bd);
   if(wch.length){ nsc.char=wch[0]; nsc.chars=wch.slice() }
-  state.cat="story"; state.group="board"; state.boardMode="notes"; state.filter="all";
+  state.boardMode="notes"; state.filter="all";
+  state.matDays=state.matDays||{}; state.matDays[bd.k]=true;
+  state.matEps=state.matEps||{}; state.matEps[String(wantEp)]=true;
+  state.jourOpen=true;
   state.brkOpen=""; state.editing=nid; state.editModal=false;
   render();save();
-  toast("נוספה סצנה "+nid+" לפרק "+wantEp+(wch.length?", שויכה ל"+((charOf(wch[0])||{}).name||""):", תשייך אותה לדמות"));
+  toast("נוספה סצנה "+nid+" לפרק "+wantEp+", היא במפת הפרקים וביומן"+(wch.length?", שויכה ל"+((charOf(wch[0])||{}).name||""):""));
   return}
  if(act==="editday"){state.editDay=id;state.editChar=null;state.editUnit=null;state.editLine=null;state.group="days";render();return}
  if(act==="saveday"){
