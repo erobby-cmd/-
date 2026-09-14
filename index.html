@@ -8155,7 +8155,7 @@ function legendStrip(){
 }
 var SCENEVIEWS={board:1,char:1,unit:1,need:1,lines:1};
 var VGROUPS={
- scenes:{name:"סצנות",views:[["mat","רשימת הסצנות"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"]]}
+ scenes:{name:"סצנות",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"]]}
 };
 function vgOf(k){
  for(var g in VGROUPS){
@@ -8166,8 +8166,8 @@ function vgOf(k){
 }
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["lines","מפת הליינים"],["board","מפת הפרקים"],["g:scenes","סצנות"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
+ {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["g:scenes","סצנות"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
