@@ -5872,13 +5872,21 @@ function matCharBlock(ck){
  h+='</div></div>';
  return h;
 }
+function brkTcOf(dk,ix){
+ var d=DAYS().filter(function(z){return z.k===dk})[0];
+ var x=d&&(d.brk||[])[ix];
+ if(!x) return "";
+ var p=String(x.tc||"").split(/[\u2013\u2014-]/);
+ return String(p[0]||"").trim();
+}
 function toEpBtn(dk,ix,jsc){
  var key=dk+"#"+ix;
+ var _tc=brkTcOf(dk,ix);
  if(state.brkEp!==key){
-  var ttl=jsc?("כבר ביומן כסצנה "+jsc.id+" בפרק "+(jsc.ep||"?")+". לחיצה מכניסה אותה גם לפרק נוסף"):"הכנס את הקטע הזה ליומן ולמפת הפרקים";
-  return '<button class="tinyedit'+(jsc?" done":"")+'" data-act="brkask" data-k="'+esc(key)+'" title="'+esc(ttl)+'">לסצנה'+(jsc?' <em>'+esc(jsc.id)+'</em>':'')+'</button>';
+  var ttl=jsc?("כבר ביומן, פרק "+(jsc.ep||"?")+" · "+(jsc.title||"")+". לחיצה מכניסה אותה גם לפרק נוסף"):"הכנס את הקטע הזה ליומן ולמפת הפרקים";
+  return '<button class="tinyedit'+(jsc?" done":"")+'" data-act="brkask" data-k="'+esc(key)+'" title="'+esc(ttl)+'">לסצנה'+(jsc?' <em>'+esc(_tc||("פרק "+(jsc.ep||"?")))+'</em>':'')+'</button>';
  }
- var h='<span class="eppick"><b>'+(jsc?("הסצנה "+jsc.id+" בפרק "+(jsc.ep||"?")+", העבר לפרק"):"לאיזה פרק")+'</b>';
+ var h='<span class="eppick"><b>'+(jsc?("הסצנה בפרק "+(jsc.ep||"?")+(_tc?(" · "+_tc):"")+", העבר לפרק"):"לאיזה פרק")+'</b>';
  DATA.eps.forEach(function(e){
   var cur=!!(jsc&&Number(jsc.ep)===e.n);
   h+='<button class="dchopt'+(cur?" on":"")+'" data-act="'+(jsc?"brkmove":"brk2sc")+'" data-id="'+esc(dk)+'" data-i="'+ix+'" data-ep="'+e.n+'" style="--cc:var(--shot)" title="'+esc(e.title||"")+'">'+e.n+'</button>';
