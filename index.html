@@ -458,6 +458,8 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vgrp:hover{filter:brightness(1.1)}
 .vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.26)}
 .vgrp em{font-style:normal;font-size:11px;opacity:.85}
+.logdrw{margin-top:10px!important}
+.dlog .dday{margin-top:0}
 .trvmode{margin:10px 0 8px}
 .trcues{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
 .trsp{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:800;color:var(--accent);background:rgba(45,160,170,.1);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 14px;position:sticky;top:0;z-index:2}
@@ -5798,6 +5800,22 @@ function daysView(){
  all.forEach(function(d){
   var mk=monthKey(d.date);
   if(mk!==lastM){ lastM=mk; h+='<div class="dmonth">'+esc(monthLabel(d.date))+'</div>'; }
+  state.logDays=state.logDays||{};
+  var _op=!!state.logDays[d.k]||state.vidOpen===d.k||state.brkOpen===d.k;
+  var _bn=(d.brk||[]).length, _mn=(d.moments||[]).length, _tn=dayTrs(d).length;
+  var _mt=[];
+  if(_bn) _mt.push(_bn+' סצנות');
+  if(d.brdur) _mt.push(d.brdur);
+  if(_mn) _mt.push(_mn+' רגעים');
+  if(_tn) _mt.push('תמלול');
+  if((driveIdsOf(d)||[]).length) _mt.push('וידאו');
+  h+='<button class="matday drawer logdrw'+(_op?" open":"")+'" data-act="dayopen" data-id="'+esc(d.k)+'" style="--dc:'+esc(dayColor(d.k))+'">';
+  h+='<span class="dchev">'+(_op?"▾":"◂")+'</span>';
+  h+='<span class="dnum'+(dayTag(d.k)?"":" ghost")+'">'+esc(dayTag(d.k)||"")+'</span>';
+  h+='<b>'+esc(dayLabel(d.date))+'</b><em>'+esc(d.loc||"בלי מיקום")+'</em>';
+  h+='<span class="dmeta">'+esc(_mt.join(' · '))+'</span>';
+  h+='</button>';
+  if(!_op) return;
   var _strip=dayStrip(d);
   h+='<article class="dday'+(_strip?" hasimg":"")+'">';
   if(_strip) h+=_strip;
@@ -10614,6 +10632,11 @@ document.addEventListener("click",function(e){
   toast("קובץ הכתוביות ירד");
   return}
  if(act==="tradd"){state.trAdd=!state.trAdd;render();return}
+ if(act==="dayopen"){
+  state.logDays=state.logDays||{};
+  if(state.logDays[id]){ state.logDays[id]=false; if(state.vidOpen===id){ vrRelease(); state.vidOpen="" } if(state.brkOpen===id) state.brkOpen=""; }
+  else state.logDays[id]=true;
+  render();return}
  if(act==="trvmode"){state.trView=state.trView||{};state.trView[id]=b.getAttribute("data-k");render();return}
  if(act==="trgrp"){var _gk=b.getAttribute("data-k")||"";state.trGrp=state.trGrp||{};state.trGrp[_gk]=!state.trGrp[_gk];render();return}
  if(act==="godues"){state.cat="dues";state.group="dues";state.moreOpen=false;render();return}
