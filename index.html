@@ -7208,6 +7208,20 @@ function feedTick(){
  });
  if(f.items.length>300) f.items=f.items.slice(f.items.length-300);
 }
+function feedPush(txt,go,id){
+ if(RO||!state.me) return;
+ try{
+  var f=FEED(), t=Date.now();
+  f.items.push({k:"f"+t+"_"+Math.floor(Math.random()*99999),who:state.me,at:t,t:txt,go:go||"",id:id||""});
+  if(f.items.length>300) f.items=f.items.slice(f.items.length-300);
+ }catch(_){}
+}
+function epnWhere(tg){
+ tg=String(tg||"");
+ if(tg.indexOf("e:")===0) return "פרק "+tg.slice(2);
+ if(tg.indexOf("l:")===0) return "הליין "+(lineName(tg.slice(2))||"");
+ return "הסדרה";
+}
 function feedSorted(){ return FEED().items.slice().sort(function(a,b){return b.at-a.at}) }
 function feedSeen(){
  try{var v=localStorage.getItem(FEEDKEY+":"+state.me);return Number(v)||0}catch(_){return 0}
@@ -9156,6 +9170,7 @@ document.addEventListener("click",function(e){
   var _tg=String(id||"");
   EPN().push({k:"n"+Date.now()+"_"+Math.floor(Math.random()*9999),tg:_tg,ep:(_tg.indexOf("e:")===0?Number(_tg.slice(2)):0),who:state.me,at:Date.now(),t:_t});
   state.epnEdit="";
+  feedPush('כתב מחשבות על '+epnWhere(_tg)+': "'+String(_t).replace(/\s+/g," ").slice(0,80)+(_t.length>80?"...":"")+'"',"epn",_tg);
   render();save();
   toast("המחשבה נשמרה, כל המשתמשים רואים אותה");
   return}
@@ -9168,6 +9183,7 @@ document.addEventListener("click",function(e){
   if(!_v){ toast("תכתוב משהו קודם",true); return }
   _x.t=_v; _x.edited=1; _x.at=_x.at||Date.now();
   state.epnEdit="";
+  feedPush("עדכן את המחשבות שלו על "+epnWhere(epnTgt(_x)),"epn",epnTgt(_x));
   render();save();
   toast("המחשבה עודכנה");
   return}
@@ -9344,6 +9360,11 @@ document.addEventListener("click",function(e){
   else if(fk==="shifts"){state.group="shifts"}
   else if(fk==="dues"){state.cat="dues";state.group="dues"}
   else if(fk==="tasks"){state.cat="prod";state.group="tasks"}
+  else if(fk==="epn"){
+   state.cat="story";
+   state.group=(String(fi||"").indexOf("l:")===0)?"lines":"board";
+   state.epNotes=fi;
+  }
   render();return}
  if(act==="theme"){
   var i=0,j;
