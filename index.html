@@ -458,6 +458,7 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vgrp:hover{filter:brightness(1.1)}
 .vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.26)}
 .vgrp em{font-style:normal;font-size:11px;opacity:.85}
+.subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
 .lexitag{display:inline-block;margin-inline-start:8px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--accent);background:rgba(45,160,170,.14);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;vertical-align:middle}
 .dchip.vfile{background:#EDF3F7;border-color:#9DBFD2;color:#1E4256;font-weight:700}
 .dchip.unit{background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)}
@@ -5248,6 +5249,27 @@ function dayStrip(d){
  if(br.length>pick.length) h+='<span class="dmore">ועוד '+(br.length-pick.length)+'</span>';
  return h+'</div>';
 }
+function srtTime(n){
+ n=Math.max(0,n||0);
+ var h=Math.floor(n/3600), m=Math.floor((n%3600)/60), sec=Math.floor(n%60), ms=Math.round((n-Math.floor(n))*1000);
+ if(ms>999) ms=999;
+ var p=function(v,w){ v=String(v); while(v.length<(w||2)) v="0"+v; return v };
+ return p(h)+":"+p(m)+":"+p(sec)+","+p(ms,3);
+}
+function srtOf(d){
+ var c=dayCues(d);
+ if(!c.length) return "";
+ var off=subOff(d), out="";
+ c.forEach(function(x,i){
+  out+=(i+1)+"\n"+srtTime(x.a+off)+" --> "+srtTime(x.b+off)+"\n"+(x.sp?(x.sp+": "):"")+x.t+"\n\n";
+ });
+ return out;
+}
+function srtName(d){
+ var fi=dayFi(d), ids=driveIdsOf(d)||[], nm=driveNameOf(ids[fi]||"");
+ if(nm) return safeName(nm.replace(/\.[^.]+$/,""))+".srt";
+ return safeName(dayTag(d.k)+" "+dayLabel(d.date))+".srt";
+}
 function vidBlock(d){
  var open=state.vidOpen===d.k;
  var dids=driveIdsOf(d), fi=vidIx(d.k,dids.length||1), did=dids[fi]||"", notes=vnFor(d.k);
@@ -5255,6 +5277,12 @@ function vidBlock(d){
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
+ var _sq=subQuality(d);
+ if(_sq.k!=="none"){
+  h+='<p class="brnote subline">כתוביות מהתמלול של היום · <b class="subq q-'+_sq.k+'">'
+   +(_sq.k==="ok"?"בסינק":_sq.k==="fix"?"סטייה קטנה":"לא בסינק")+'</b>'
+   +' <button class="tinyedit" data-act="srtdl" data-id="'+esc(d.k)+'" title="קובץ SRT מסונכרן לקובץ הגלם. אפשר לטעון אותו בדרייב או בכל נגן">הורד כתוביות SRT</button></p>';
+ }
  h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
  if(!open) return h+'</div>';
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
@@ -10415,6 +10443,14 @@ document.addEventListener("click",function(e){
   } else { if(el2)el2.select(); toast("סמן והעתק ידנית",true) }
   return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
+ if(act==="srtdl"){
+  var _sd=DAYS().filter(function(z){return z.k===id})[0];
+  if(!_sd){ return }
+  var _txt=srtOf(_sd);
+  if(!_txt){ toast("אין תמלול עם טיימקוד ליום הזה",true); return }
+  dlBlob(new Blob(["\ufeff"+_txt],{type:"text/plain;charset=utf-8"}),srtName(_sd));
+  toast("קובץ הכתוביות ירד");
+  return}
  if(act==="tradd"){state.trAdd=!state.trAdd;render();return}
  if(act==="trgrp"){var _gk=b.getAttribute("data-k")||"";state.trGrp=state.trGrp||{};state.trGrp[_gk]=!state.trGrp[_gk];render();return}
  if(act==="godues"){state.cat="dues";state.group="dues";state.moreOpen=false;render();return}
