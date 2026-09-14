@@ -458,6 +458,10 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vgrp:hover{filter:brightness(1.1)}
 .vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.26)}
 .vgrp em{font-style:normal;font-size:11px;opacity:.85}
+.vrstage.drv{position:relative}
+.vrstage.drv .drvsub{z-index:4}
+.vrclk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:var(--surface-2);border-top:1px solid var(--line)}
+.vrclk .vrtc{width:88px;text-align:center}
 .subsw{display:inline-flex;align-items:center;gap:7px;font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink-3);cursor:pointer}
 .subsw i{width:26px;height:14px;border-radius:999px;background:var(--line-2);position:relative;transition:.15s}
 .subsw i:after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:10px;height:10px;border-radius:50%;background:var(--surface);transition:.15s}
@@ -5256,6 +5260,40 @@ function dayStrip(d){
  if(br.length>pick.length) h+='<span class="dmore">ועוד '+(br.length-pick.length)+'</span>';
  return h+'</div>';
 }
+var CLK={day:"",base:0,t0:0,run:false,iv:null};
+function clkNow(dk){
+ if(CLK.day!==dk) return 0;
+ return CLK.run?(CLK.base+(Date.now()-CLK.t0)/1000):CLK.base;
+}
+function clkStop(){
+ if(CLK.iv){ clearInterval(CLK.iv); CLK.iv=null }
+ if(CLK.run&&CLK.day){ CLK.base=clkNow(CLK.day) }
+ CLK.run=false;
+}
+function clkTick(){
+ var dk=CLK.day;
+ if(!dk) return clkStop();
+ var el=document.querySelector('.drvsub[data-day="'+dk+'"]');
+ if(!el){ clkStop(); return }
+ var d=DAYS().filter(function(z){return z.k===dk})[0];
+ if(!d){ clkStop(); return }
+ if(!subOn(d)){ el.hidden=true; el.innerHTML=""; }
+ else{
+  el.hidden=false;
+  var t=clkNow(dk)-subOff(d);
+  var c=cueAt(dayCues(d),t);
+  var nt=c?c.t:"", sp=c?(c.sp||""):"";
+  if(el.__t!==nt+"|"+sp){ el.__t=nt+"|"+sp; el.innerHTML=nt?('<span>'+(sp?('<b class="vrspk">'+esc(sp)+':</b> '):'')+esc(nt)+'</span>'):"" }
+ }
+ var inp=document.querySelector('.vrtc[data-clk="'+dk+'"]');
+ if(inp&&document.activeElement!==inp) inp.value=vfmt(clkNow(dk)).slice(0,7);
+}
+function clkStart(dk,at){
+ clkStop();
+ CLK.day=dk; CLK.base=Number(at)||0; CLK.t0=Date.now(); CLK.run=true;
+ CLK.iv=setInterval(clkTick,150);
+ clkTick();
+}
 function srtTime(n){
  n=Math.max(0,n||0);
  var h=Math.floor(n/3600), m=Math.floor((n%3600)/60), sec=Math.floor(n%60), ms=Math.round((n-Math.floor(n))*1000);
@@ -5359,7 +5397,21 @@ function vidBlock(d){
   }
  } else {
   if(did){
-   h+='<div class="vrstage"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+   h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+   h+='<div class="vrsub drvsub" data-day="'+esc(d.k)+'"'+(subOn(d)?"":' hidden')+'></div></div>';
+   if(dayCues(d).length){
+    var _run=(CLK.day===d.k&&CLK.run);
+    h+='<div class="vrclk">';
+    h+='<button class="vrb big'+(_run?" on":"")+'" data-act="clkplay" data-id="'+esc(d.k)+'">'+(_run?"עצור כתוביות":"הפעל כתוביות")+'</button>';
+    h+='<span class="vrhint">טיימקוד</span>';
+    h+='<input class="vrtc" data-clk="'+esc(d.k)+'" value="'+esc(vfmt(clkNow(d.k)).slice(0,7))+'" autocomplete="off" title="השעון של הכתוביות. אפשר להקליד ידנית">';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-5">5 שניות-</button>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="5">+5 שניות</button>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-1">1-</button>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="1">1+</button>';
+    h+='<span class="vrhint">לחץ פליי בדרייב ומיד אחר כך כאן. אם הכתובית מקדימה או מאחרת, כוון עם המינוס והפלוס</span>';
+    h+='</div>';
+   }
   } else {
    h+='<div class="vrstage"><div class="vrpick"><b>עוד אין קובץ מחובר ליום הזה</b>';
    h+='<span class="vrhint" style="color:#8A93A0">הדבק למטה את הקישור לקובץ מהדרייב</span>';
@@ -10477,13 +10529,32 @@ document.addEventListener("click",function(e){
   } else { if(el2)el2.select(); toast("סמן והעתק ידנית",true) }
   return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
+ if(act==="clkplay"){
+  var _cd=DAYS().filter(function(z){return z.k===id})[0];
+  if(!_cd) return;
+  if(CLK.day===id&&CLK.run){ clkStop(); render(); return }
+  var _ip=document.querySelector('.vrtc[data-clk="'+id+'"]');
+  var _at=_ip?tcSec(String(_ip.value||"0").trim()):0;
+  clkStart(id,_at);
+  render();return}
+ if(act==="clknudge"){
+  var _dd3=Number(b.getAttribute("data-d"))||0;
+  if(CLK.day!==id){ CLK.day=id; CLK.base=0; CLK.run=false }
+  CLK.base=Math.max(0,clkNow(id)+_dd3);
+  if(CLK.run) CLK.t0=Date.now();
+  clkTick();
+  var _ip2=document.querySelector('.vrtc[data-clk="'+id+'"]');
+  if(_ip2) _ip2.value=vfmt(clkNow(id)).slice(0,7);
+  return}
  if(act==="subtog"){
   var _td2=DAYS().filter(function(z){return z.k===id})[0];
   if(!_td2) return;
   VR.subOn=VR.subOn||{};
   VR.subOn[id]=!subOn(_td2);
   toast(VR.subOn[id]?"התרגום מופעל":"אין תרגום");
-  render();return}
+  render();
+  if(CLK.day===id) clkTick();
+  return}
  if(act==="srtdl"){
   var _sd=DAYS().filter(function(z){return z.k===id})[0];
   if(!_sd){ return }
