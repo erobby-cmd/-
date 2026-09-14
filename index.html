@@ -253,7 +253,7 @@ section.grp.dropok{outline:3px dashed var(--accent);outline-offset:10px;border-r
 .f textarea{min-height:78px;resize:vertical;line-height:1.5}
 .hint{font-size:12px;color:var(--ink-3);margin:4px 0 0}
 .cats{display:inline-flex;gap:5px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:13px;padding:5px;margin-inline-end:10px}
-.cats button{font-family:"Heebo",sans-serif;font-size:15px;font-weight:700;letter-spacing:.04em;padding:11px 21px;border:0;border-radius:9px;background:transparent;color:var(--ink-3);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.cats button{font-family:"Heebo",sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em;padding:14px 28px;border:0;border-radius:10px;background:transparent;color:var(--ink-3);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
 .cats button span{font-size:11px;font-weight:700;opacity:.65;background:rgba(0,0,0,.08);border-radius:5px;padding:2px 6px}
 .cats button:hover{color:var(--ink)}
 .cats button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
@@ -1046,9 +1046,9 @@ li.gdone em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10.5px;fo
 .thbtn i{font-style:normal;font-size:14px;line-height:1}
 .thbtn:hover{border-color:var(--accent);color:var(--ink)}
 @media (max-width:640px){.thbtn span{display:none}}
-.gsearch{position:relative;display:inline-flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:13px;padding:0 13px 0 0;min-width:320px}
+.gsearch{position:relative;display:inline-flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:14px;padding:0 15px 0 0;min-width:360px}
 .gsearch .gsi{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);padding-inline-start:14px}
-.gsearch input{flex:1;font-family:"Assistant",sans-serif;font-size:15px;border:0;background:transparent;color:var(--ink);padding:12px 0;outline:none;min-width:170px}
+.gsearch input{flex:1;font-family:"Assistant",sans-serif;font-size:16px;border:0;background:transparent;color:var(--ink);padding:15px 0;outline:none;min-width:190px}
 .gsearch input::placeholder{color:var(--ink-3);opacity:.75}
 .gsearch:focus-within{border-color:var(--accent)}
 .gsx{background:transparent;border:0;font-size:17px;line-height:1;color:var(--ink-3);cursor:pointer;padding:0 2px}
@@ -8755,7 +8755,7 @@ function catBar(){
    h+='<button class="catchat'+(cn?" on":"")+'" data-act="cat" data-k="chat" aria-pressed="'+(cur==="chat")+'">✉ '+esc(c.name)+(cn?'<span>'+cn+'</span>':'')+'</button>';
    return;
   }
-  h+='<button data-act="cat" data-k="'+c.k+'" aria-pressed="'+(cur===c.k)+'">'+esc(c.name)+'<span>'+c.views.length+'</span></button>';
+  h+='<button data-act="cat" data-k="'+c.k+'" aria-pressed="'+(cur===c.k)+'">'+esc(c.name)+'</button>';
  });
  return h+'</div>';
 }
