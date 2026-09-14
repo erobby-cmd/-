@@ -5289,7 +5289,7 @@ function vidBlock(d){
   var _so=subOn(d);
   h+='<p class="brnote subline">כתוביות מהתמלול של היום · <b class="subq q-'+_sq.k+'">'
    +(_sq.k==="ok"?"בסינק":_sq.k==="fix"?"סטייה קטנה":"לא בסינק")+'</b>'
-   +' <button class="subsw'+(_so?" on":"")+'" data-act="subtog" data-id="'+esc(d.k)+'" title="הדלקה וכיבוי של הכתוביות בנגן"><i></i>'+(_so?"תרגום פועל":"תרגום כבוי")+'</button>'
+   +' <button class="subsw'+(_so?" on":"")+'" data-act="subtog" data-id="'+esc(d.k)+'" title="הדלקה וכיבוי של הכתוביות בנגן"><i></i>'+(_so?"תרגום פועל":"אין תרגום")+'</button>'
    +' <button class="tinyedit" data-act="srtdl" data-id="'+esc(d.k)+'" title="קובץ SRT מסונכרן לקובץ הגלם. אפשר לטעון אותו בדרייב או בכל נגן">הורד כתוביות SRT</button></p>';
  }
  h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
@@ -10482,7 +10482,7 @@ document.addEventListener("click",function(e){
   if(!_td2) return;
   VR.subOn=VR.subOn||{};
   VR.subOn[id]=!subOn(_td2);
-  toast(VR.subOn[id]?"התרגום מופעל":"התרגום כבוי");
+  toast(VR.subOn[id]?"התרגום מופעל":"אין תרגום");
   render();return}
  if(act==="srtdl"){
   var _sd=DAYS().filter(function(z){return z.k===id})[0];
