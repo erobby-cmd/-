@@ -122,10 +122,11 @@ h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;font-size:clamp(
 .bar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
 .bar-in{max-width:1100px;margin:0 auto;padding:11px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sep{width:1px;height:22px;background:var(--line-2);margin:0 4px}
-.chip{font-family:"Heebo",sans-serif;font-size:13px;font-weight:500;padding:6px 13px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);cursor:pointer;transition:.15s}
+.chip{font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink);cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip .n{opacity:.6;margin-inline-start:5px;font-variant-numeric:tabular-nums}
+.chip .n{opacity:.8;margin-inline-start:5px;font-variant-numeric:tabular-nums;color:var(--accent)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.75}
 .spacer{flex:1}
 .btn{font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:500;padding:7px 15px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;transition:.15s}
 .btn:hover{filter:brightness(1.08)}
@@ -326,19 +327,19 @@ html.linedrag .mchip{pointer-events:none}
 .matmodes{margin-top:14px;flex-wrap:wrap}
 .matlist{margin-top:12px;display:flex;flex-direction:column;gap:4px}
 .matday{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:16px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--ink)}
-button.matday.drawer{width:100%;box-sizing:border-box;text-align:start;background:var(--surface);border:1px solid var(--line-2);border-bottom:2px solid var(--ink);border-radius:9px 9px 0 0;cursor:pointer;color:inherit;padding:9px 12px;margin:14px 0 0;display:grid;grid-template-columns:14px 54px 96px minmax(0,1fr) auto;align-items:center;gap:10px}
-button.matday.drawer b{white-space:nowrap;font-size:15px}
-button.matday.drawer em{font-style:normal;font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-button.matday.drawer .dmeta{justify-self:end;white-space:nowrap;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+button.matday.drawer{width:100%;box-sizing:border-box;text-align:start;background:var(--surface);border:1px solid var(--line-2);border-bottom:2px solid var(--dc,var(--ink));border-inline-end:4px solid var(--dc,var(--ink));border-radius:9px 9px 0 0;cursor:pointer;color:inherit;padding:11px 14px;margin:14px 0 0;display:grid;grid-template-columns:14px 62px 104px minmax(0,1fr) auto;align-items:center;gap:11px}
+button.matday.drawer b{white-space:nowrap;font-size:16px;color:var(--ink)}
+button.matday.drawer em{font-style:normal;font-family:"Heebo",sans-serif;font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+button.matday.drawer .dmeta{justify-self:end;white-space:nowrap;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:600;color:var(--dc,var(--ink-2));opacity:.95}
 button.matday.drawer .dnum{justify-self:start}
 button.matday.drawer .dnum.ghost{background:transparent}
 button.matday.drawer.jour{border-color:var(--ink);background:var(--surface-2)}
 button.matday.drawer.ep .dnum{background:#4A5A6B}
-@media (max-width:820px){button.matday.drawer{grid-template-columns:14px 54px 1fr;row-gap:4px}button.matday.drawer em{grid-column:2/-1}button.matday.drawer .dmeta{grid-column:2/-1;justify-self:start}}
-button.matday.drawer:hover{background:var(--surface-2)}
-button.matday.drawer:not(.open){border-bottom-width:1px;border-radius:9px;margin-bottom:6px;opacity:.9}
+@media (max-width:820px){button.matday.drawer{grid-template-columns:14px 62px 1fr;row-gap:4px}button.matday.drawer em{grid-column:2/-1}button.matday.drawer .dmeta{grid-column:2/-1;justify-self:start}}
+button.matday.drawer:hover{background:var(--surface-2);border-color:var(--dc,var(--line-2));border-inline-end-color:var(--dc,var(--ink))}
+button.matday.drawer:not(.open){border-bottom-width:1px;border-radius:9px;margin-bottom:7px}
 button.matday.drawer:not(.open):hover{opacity:1}
-.matday .dchev{font-size:11px;color:var(--ink-3);flex:0 0 auto;width:12px}
+.matday .dchev{font-size:12px;color:var(--dc,var(--ink-2));flex:0 0 auto;width:12px}
 .matdrawer{display:flex;flex-direction:column;gap:6px;padding:8px 0 12px;border-inline:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 0 9px 9px;margin-bottom:8px;padding-inline:8px;background:var(--bg,transparent)}
 .btn.hl-yellow{background:#FFE9A3;border-color:#E3BE4A;color:#4A3A0C;font-weight:700;box-shadow:inset 0 -2px 0 rgba(0,0,0,.05)}
 .btn.hl-yellow:hover{background:#FFDF7A;border-color:#C9A63A}
@@ -530,7 +531,7 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vrpin{top:2px;height:22px;width:4px}
 .vrpin.near{width:7px;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 
-.matday .dnum{font-family:"Heebo",sans-serif;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:#4A5A6B;border-radius:999px;padding:2px 9px;flex:0 0 auto;margin-inline-end:2px}
+.matday .dnum{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--dc,#4A5A6B);border-radius:999px;padding:3px 11px;flex:0 0 auto;margin-inline-end:2px;text-align:center}
 .othrow input.hot{border-color:var(--ink-3);box-shadow:0 0 0 2px rgba(0,0,0,.05)}
 .dchopt.lead{box-shadow:0 0 0 2px var(--cc,#455160)}
 .matep{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin:14px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
@@ -4767,6 +4768,12 @@ function dayLabel(s){
 function dayWeek(s){var p=dparts(s);return p?"יום "+HEDAYS[p.w]:""}
 function monthKey(s){var p=dparts(s);return p?p.y+"-"+(p.m<9?"0":"")+(p.m+1):"zzz"}
 function monthLabel(s){var p=dparts(s);return p?HEMON[p.m]+" "+p.y:"בלי תאריך"}
+var DAYPAL=["#2E8B84","#C2703A","#5B6FB5","#A8508A","#3E8E5A","#B0873B","#4E7FA8","#8D5BB5","#B05050","#4C8C3F"];
+function dayColor(k){
+ var a=daysOrd(), i=0;
+ for(var j=0;j<a.length;j++){ if(a[j].k===k){ i=j; break } }
+ return DAYPAL[i%DAYPAL.length];
+}
 function daysSorted(){
  var o=daysOrd().slice().reverse();
  var pre=o.filter(function(d){return d.dnum!==undefined&&d.dnum!==null&&d.dnum!==""});
@@ -6035,7 +6042,7 @@ function matView(){
    dayOpen=matDayOpen(r.d.k);
    var dn=(r.d.brk||[]).length, dd=(r.d.brk||[]).reduce(function(a,z){return a+tcSec(z.dur)},0);
    var _dn=dayTag(r.d.k), _nt=vnFor(r.d.k).length;
-   h+='<button class="matday drawer'+(dayOpen?" open":"")+'" data-act="matday" data-id="'+esc(r.d.k)+'">';
+   h+='<button class="matday drawer'+(dayOpen?" open":"")+'" data-act="matday" data-id="'+esc(r.d.k)+'" style="--dc:'+esc(dayColor(r.d.k))+'">';
    h+='<span class="dchev">'+(dayOpen?"▾":"◂")+'</span>';
    h+='<span class="dnum'+(_dn?"":" ghost")+'">'+esc(_dn||"")+'</span>';
    h+='<b>'+esc(dayLabel(r.d.date))+'</b><em>'+esc(r.d.loc||"")+'</em>';
@@ -6146,7 +6153,7 @@ function matJournal(){
  var jOpen=!!state.jourOpen;
  var _eps={}; sc.forEach(function(x){ _eps[x.ep||0]=(_eps[x.ep||0]||0)+1 });
  var h='<div class="matjour">';
- h+='<button class="matday drawer jour'+(jOpen?" open":"")+'" data-act="jourdrawer">';
+ h+='<button class="matday drawer jour'+(jOpen?" open":"")+'" data-act="jourdrawer" style="--dc:#0C6B75">';
  h+='<span class="dchev">'+(jOpen?"▾":"◂")+'</span>';
  h+='<span class="dnum">יומן</span>';
  h+='<b>הסצנות שביומן</b><em>מה שכבר בנוי, לפי פרקים</em>';
