@@ -343,6 +343,22 @@ html.linedrag .mchip{pointer-events:none}
 .movebtn{font-size:8px;line-height:1;padding:2px 5px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-3);border-radius:4px;cursor:pointer}
 .movebtn:hover:not(:disabled){border-color:var(--ink-3);color:var(--ink)}
 .movebtn:disabled{opacity:.28;cursor:default}
+.epnbtn{position:relative}
+.epnbtn i{font-style:normal;display:inline-block;min-width:15px;text-align:center;margin-inline-start:5px;font-size:10px;font-weight:800;background:var(--accent,#8A5A2B);color:#fff;border-radius:999px;padding:0 4px;line-height:15px}
+.epnbtn.none i{background:var(--line-2);color:var(--ink-3)}
+.epnbox{max-width:640px;width:100%}
+.epnlist{padding:4px 20px 8px;max-height:46vh;overflow:auto}
+.epnnone{padding:18px 20px;color:var(--ink-3);font-size:13px}
+.epncard{border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin-bottom:9px;background:var(--surface)}
+.epncard.mine{border-color:var(--ink-3)}
+.epnwho{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
+.epnwho b{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink)}
+.epnwho i{width:9px;height:9px;border-radius:50%;background:var(--cc,#455160);flex:0 0 auto}
+.epnwho em{font-style:normal;font-size:11px;color:var(--ink-3)}
+.epnwho .spacer{flex:1 1 auto}
+.epntxt{margin:0;font-size:13.5px;line-height:1.62;white-space:pre-wrap;color:var(--ink-2)}
+.epnform{padding:10px 20px 16px;border-top:1px solid var(--line)}
+.epnep{padding:2px 20px 10px;color:var(--ink-3);font-size:12px}
 .mgrip{flex:0 0 auto;color:var(--ink-3);opacity:.45;cursor:grab;font-size:13px;line-height:1.5;padding:0 1px;user-select:none}
 .mgrip:hover{opacity:.9}
 .matrow.mdrag{opacity:.35}
@@ -3486,7 +3502,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3957,7 +3973,7 @@ function board(){
    h+='<div class="bcol" data-ep="'+e.n+'">';
    if(state.editEp===e.n){ h+=epForm(e); }
    else{
-    h+='<h3><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+(RO?"":'<button class="tinyedit" data-act="editep" data-id="'+e.n+'">ערוך</button>')+'</h3>';
+    h+='<h3><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+(RO?"":'<button class="tinyedit" data-act="editep" data-id="'+e.n+'">ערוך</button>')+epnBtn(e.n)+'</h3>';
     h+='<span class="bm">'+esc(e.sub)+'</span>';
    }
    h+='<span class="bm">'+all.length+' מתוך '+PER_EP+' סצנות · '+sh+' צולמו · '+(all.length*MIN_PER)+' דק׳</span>';
@@ -3982,7 +3998,7 @@ function board(){
   h+='<div class="bcol" data-ep="'+e.n+'"><div class="epband"><h3><span class="epn">פרק '+e.n+' ·</span>'+esc(e.title)+'</h3>';
   h+='<p class="sub">'+esc(e.sub)+'</p>';
   h+='<span class="bm">'+all.length+'/'+PER_EP+' · '+sh+' צולמו · '+(all.length*MIN_PER)+' דק׳</span>';
-  h+=(RO?"":'<button class="tinyedit" data-act="editep" data-id="'+e.n+'">ערוך</button>')+'</div>';
+  h+=(RO?"":'<button class="tinyedit" data-act="editep" data-id="'+e.n+'">ערוך</button>')+epnBtn(e.n)+'</div>';
   if(state.editEp===e.n) h+=epForm(e);
   if(mode==="list"){
    h+='<div class="notes listwrap" data-ep="'+e.n+'">';
@@ -7418,6 +7434,54 @@ function chatView(){
  return h+'</section>';
 }
 
+/* ===== מחשבות על הפרקים ===== */
+function EPN(){
+ if(!STORE.epnotes||!STORE.epnotes.list) STORE.epnotes={list:[]};
+ return STORE.epnotes.list;
+}
+function epnFor(n){
+ return EPN().filter(function(x){return Number(x.ep)===Number(n)})
+  .sort(function(a,b){return (b.at||0)-(a.at||0)});
+}
+function epnBtn(n){
+ var c=epnFor(n).length;
+ return '<button class="tinyedit epnbtn'+(c?"":" none")+'" data-act="epnopen" data-id="'+n+'" title="מחשבות על הפרק, כל המשתמשים רואים">מחשבות<i>'+c+'</i></button>';
+}
+function epnPanel(){
+ var n=Number(state.epNotes), e=DATA.eps.filter(function(z){return z.n===n})[0];
+ var list=epnFor(n);
+ var h='<div class="modal" data-act="epnclose"><div class="box epnbox" data-stop="1">';
+ h+='<div class="mhead"><span>מחשבות על פרק '+n+'</span><button data-act="epnclose" title="סגור">\u00d7</button></div>';
+ h+='<div class="epnep">'+esc(e?e.title:"")+(e&&e.sub?' · '+esc(e.sub):'')+'</div>';
+ h+='<div class="epnlist">';
+ if(!list.length) h+='<p class="epnnone">עוד אף אחד לא כתב פה כלום. תהיה הראשון.</p>';
+ list.forEach(function(x){
+  var mine=(x.who===state.me);
+  if(state.epnEdit===x.k&&mine&&!RO){
+   h+='<div class="epncard mine"><div class="grpform" data-form="__epne__">';
+   h+='<div class="f"><textarea name="t" style="min-height:96px">'+esc(x.t||"")+'</textarea></div>';
+   h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="epnsave" data-id="'+esc(x.k)+'">שמור</button>';
+   h+='<button class="btn ghost" data-act="epncancel">ביטול</button>';
+   h+='<div class="spacer"></div><button class="btn danger" data-act="epndel" data-id="'+esc(x.k)+'">מחק</button></div>';
+   h+='</div></div>';
+   return;
+  }
+  h+='<div class="epncard'+(mine?" mine":"")+'">';
+  h+='<div class="epnwho" style="--cc:'+esc(userColor(x.who))+'"><i></i><b>'+esc(userName(x.who))+'</b>';
+  h+='<em>'+esc(agoTxt(x.at))+(x.edited?" · נערך":"")+'</em><div class="spacer"></div>';
+  if(mine&&!RO) h+='<button class="tinyedit" data-act="epnedit" data-id="'+esc(x.k)+'">ערוך</button>';
+  h+='</div><p class="epntxt">'+esc(x.t||"")+'</p></div>';
+ });
+ h+='</div>';
+ if(!RO){
+  h+='<div class="epnform"><div class="grpform" data-form="__epn__">';
+  h+='<div class="f"><label>מה אתה חושב על הפרק</label><textarea name="t" style="min-height:88px" placeholder="תכתוב כאן. כל מי שנכנס לפלטפורמה יראה את זה בשמך"></textarea></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="epnadd" data-id="'+n+'">הוסף מחשבה</button>';
+  h+='<button class="btn ghost" data-act="epnclose">סגור</button></div>';
+  h+='</div></div>';
+ }
+ return h+'</div></div>';
+}
 /* ===== משימות לביצוע ===== */
 function TASKS(){
  if(!STORE.tasks||!STORE.tasks.list) STORE.tasks={list:[]};
@@ -7801,6 +7865,7 @@ function paint(h){
  if(state.nextOpen) h+=nextForm();
  if(state.projOpen) h+=projPanel();
  if(state.projNew) h+=projNewPanel();
+ if(state.epNotes) h+=epnPanel();
  if(state.bkOpen) h+=bkPanel();
  if(state.mergeSrc!==null&&state.mergeSrc!==undefined) h+=mergePanel();
  var y=window.scrollY||window.pageYOffset||0;
@@ -7941,11 +8006,12 @@ function rowsOf(){
   Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r[rid("chat:"+k)]=STORE.chat[k] });
   if(STORE.dues) r[rid("dues")]=STORE.dues;
   if(STORE.tasks) r[rid("tasks")]=STORE.tasks;
+  if(STORE.epnotes) r[rid("epnotes")]=STORE.epnotes;
  }
  return r;
 }
 function applyRows(list){
- var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,tk=null,pr=null,seen=false;
+ var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,tk=null,en=null,pr=null,seen=false;
  list.forEach(function(row){
   if(row.id==="projects"){pr=row.data;return}
   var sid=stripId(row.id);
@@ -7955,6 +8021,7 @@ function applyRows(list){
   else if(sid==="feed")fd=row.data;
   else if(sid==="dues")du=row.data;
   else if(sid==="tasks")tk=row.data;
+  else if(sid==="epnotes")en=row.data;
   else if(sid.indexOf("dimg:")===0) return;
   else if(sid.indexOf("chat:")===0){ch=ch||{};ch[sid.slice(5)]=row.data}
   else if(sid==="base")base=row.data;
@@ -7980,6 +8047,7 @@ function applyRows(list){
  if(ch) STORE.chat=ch;
  if(du&&(du.list||du.next)){ du.list=du.list||[]; STORE.dues=du; }
  if(tk&&tk.list) STORE.tasks=tk;
+ if(en&&en.list) STORE.epnotes=en;
  return true;
 }
 function pull(initial){
@@ -8026,7 +8094,7 @@ function listLen(v){
 }
 function guardRow(id,val){
  var sid=stripId(id);
- if(sid!=="dues"&&sid!=="tasks"&&sid!=="shifts"&&String(sid).indexOf("chat:")!==0) return true;
+ if(sid!=="dues"&&sid!=="tasks"&&sid!=="shifts"&&sid!=="epnotes"&&String(sid).indexOf("chat:")!==0) return true;
  if(SHRINKOK[id]) return true;
  var prev=sent[id];
  if(prev===undefined) return true;
@@ -8816,7 +8884,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,projnew:1};
+ var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -9008,6 +9076,43 @@ document.addEventListener("click",function(e){
   var lst=trGroups().reduce(function(a,g){return a.concat(g.items)},[]);
   if(qq) lst=lst.filter(function(t){return trMatches(t,qq).length});
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
+  return}
+ if(act==="epnopen"){ state.epNotes=Number(id)||1; state.epnEdit=""; render(); return}
+ if(act==="epnclose"){ if(modalKeep(e,b))return; state.epNotes=null; state.epnEdit=""; render(); return}
+ if(act==="epnedit"){ state.epnEdit=id; render(); return}
+ if(act==="epncancel"){ state.epnEdit=""; render(); return}
+ if(act==="epnadd"){
+  if(RO)return;
+  if(!state.me){ toast("בחר משתמש כדי לכתוב מחשבות",true); state.showUsers=true; render(); return }
+  var _t=(fval("__epn__","t")||"").trim();
+  if(!_t){ toast("תכתוב משהו קודם",true); return }
+  EPN().push({k:"n"+Date.now()+"_"+Math.floor(Math.random()*9999),ep:Number(id)||1,who:state.me,at:Date.now(),t:_t});
+  state.epnEdit="";
+  render();save();
+  toast("המחשבה נשמרה, כל המשתמשים רואים אותה");
+  return}
+ if(act==="epnsave"){
+  if(RO)return;
+  var _x=EPN().filter(function(z){return z.k===id})[0];
+  if(!_x) return;
+  if(_x.who!==state.me){ toast("אפשר לערוך רק מה שאתה כתבת",true); return }
+  var _v=(fval("__epne__","t")||"").trim();
+  if(!_v){ toast("תכתוב משהו קודם",true); return }
+  _x.t=_v; _x.edited=1; _x.at=_x.at||Date.now();
+  state.epnEdit="";
+  render();save();
+  toast("המחשבה עודכנה");
+  return}
+ if(act==="epndel"){
+  if(RO)return;
+  var _d=EPN().filter(function(z){return z.k===id})[0];
+  if(!_d) return;
+  if(_d.who!==state.me){ toast("אפשר למחוק רק מה שאתה כתבת",true); return }
+  SHRINKOK[rid("epnotes")]=1; setTimeout(function(){delete SHRINKOK[rid("epnotes")]},4000);
+  STORE.epnotes.list=EPN().filter(function(z){return z.k!==id});
+  state.epnEdit="";
+  render();save();
+  toast("המחשבה נמחקה");
   return}
  if(act==="trmode"){ state.trMode=b.getAttribute("data-k")||"day"; render(); return}
  if(act==="gotoday"){
