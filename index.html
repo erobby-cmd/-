@@ -3486,7 +3486,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -5639,14 +5639,41 @@ function dayOfTr(t){
  if(t.day&&t.day!=="__none__"){ var a=ds.filter(function(d){return d.k===t.day})[0]; if(a) return a }
  return ds.filter(function(d){return d.date&&t.date&&d.date===t.date})[0]||null;
 }
+function daysOrd(){
+ return DAYS().slice().sort(function(a,b){
+  var pa=dparts(a.date), pb=dparts(b.date);
+  if(pa&&pb) return pa.t-pb.t;
+  if(pa) return -1;
+  if(pb) return 1;
+  return String(a.k).localeCompare(String(b.k));
+ });
+}
+function dayNum(k){
+ var o=daysOrd(), i=o.map(function(d){return d.k}).indexOf(k);
+ return i<0?0:i+1;
+}
+function trDayGroups(){
+ var all=trList(), used={}, out=[];
+ daysOrd().forEach(function(d,i){
+  var items=all.filter(function(t){ var x=dayOfTr(t); return x&&x.k===d.k });
+  if(!items.length) return;
+  items.forEach(function(t){used[t.k]=1});
+  items.sort(function(a,b){return String(a.title||"").localeCompare(String(b.title||""))});
+  out.push({k:"d:"+d.k, day:d, name:"\u05d9\u05d5\u05dd "+(i+1)+" \u00b7 "+dayLabel(d.date), role:d.loc||"", color:"#3C5A73", items:items});
+ });
+ var loose=all.filter(function(t){return !used[t.k]});
+ if(loose.length) out.push({k:"", name:"\u05d1\u05dc\u05d9 \u05d9\u05d5\u05dd \u05e6\u05d9\u05dc\u05d5\u05dd", role:"\u05ea\u05de\u05dc\u05d5\u05dc\u05d9\u05dd \u05e9\u05e2\u05d5\u05d3 \u05dc\u05d0 \u05e9\u05d5\u05d9\u05db\u05d5 \u05dc\u05d9\u05d5\u05dd", color:"#8A93A0", items:loose});
+ return out;
+}
 function trsOfDay(d){ return trList().filter(function(t){ var x=dayOfTr(t); return x&&x.k===d.k }) }
 function trView(){
  var all=trList(), q=(state.trQ||"").trim();
  var words=all.reduce(function(a,t){return a+(t.words||0)},0);
  var chars=trGroups().filter(function(g){return g.k}).length;
- var h='<section class="grp"><div class="grp-h"><h2>תמלולים</h2><span class="role">הראיונות עצמם, לפי דמות</span>';
+ var byDay=(state.trMode||"day")==="day";
+ var h='<section class="grp"><div class="grp-h"><h2>תמלול לפי ימים</h2><span class="role">'+(byDay?"כל יום צילום והתמלולים שלו":"הראיונות עצמם, לפי דמות")+'</span>';
  h+='<span class="meta">'+all.length+' תמלולים</span></div>';
- h+='<p class="grp-note">כאן יושב הטקסט הגולמי. מעלים קובץ וורד או טקסט, או פשוט מדביקים, ומשייכים לדמות. אחר כך אפשר לחפש מילה אחת על פני כל הראיונות ולראות מי אמר אותה ואיפה, בלי לפתוח קבצים.</p>';
+ h+='<p class="grp-note">כאן יושב הטקסט הגולמי, מסודר לפי ימי הצילום. כל יום והתמלולים ששייכים לו, בסדר של לוג ימי הצילום. אפשר להחליף לתצוגה לפי דמות, ואפשר לחפש מילה אחת על פני כל התמלולים ולראות מי אמר אותה ואיפה, בלי לפתוח קבצים.</p>';
 
  if(!RO){
   h+='<div class="trup" data-form="__tr__">';
@@ -5681,7 +5708,10 @@ function trView(){
  h+='<div class="dstat"><b>'+all.length+'</b><span>תמלולים</span></div>';
  h+='<div class="dstat"><b>'+words.toLocaleString("he-IL")+'</b><span>מילים בסך הכול</span></div>';
  h+='<div class="dstat"><b>'+chars+'</b><span>דמויות עם תמלול</span></div>';
+ h+='<div class="dstat"><b>'+trDayGroups().filter(function(g){return g.k}).length+'</b><span>ימי צילום עם תמלול</span></div>';
  h+='</div>';
+ h+='<div class="modes"><button data-act="trmode" data-k="day" aria-pressed="'+(byDay)+'">לפי ימי צילום</button>';
+ h+='<button data-act="trmode" data-k="char" aria-pressed="'+(!byDay)+'">לפי דמות</button></div>';
 
  h+='<div class="trsearch"><input id="trq" placeholder="חפש מילה או משפט בכל התמלולים" value="'+esc(q)+'">';
  if(q) h+='<button class="btn ghost" data-act="trclear">נקה</button>';
@@ -5693,21 +5723,26 @@ function trView(){
  if(q) h+='<p class="trres">'+(hits?('נמצא ב-'+hits+' תמלולים'):'לא נמצא כלום')+'</p>';
 
  h+='<div class="trlist">';
- trGroups().forEach(function(g){
+ (byDay?trDayGroups():trGroups()).forEach(function(g){
   var items=q?g.items.filter(function(t){return trMatches(t,q).length}):g.items;
   if(!items.length) return;
   h+='<div class="ngrp"><div class="ngrp-h" style="--cc:'+esc(g.color)+'"><span class="ndot"></span>';
   h+='<h3>'+esc(g.name)+'</h3>';
   if(g.role) h+='<em>'+esc(g.role)+'</em>';
-  h+='<span class="ncount">'+items.length+' תמלולים · '+items.reduce(function(a,t){return a+(t.words||0)},0).toLocaleString("he-IL")+' מילים</span></div>';
+  if(g.day) h+='<button class="tinyedit" data-act="gotoday" data-id="'+esc(g.day.k)+'" title="פתח את היום בלוג ימי צילום">ליום בלוג</button>';
+  h+='<span class="ncount">'+(items.length===1?"תמלול אחד":items.length+' תמלולים')+' · '+items.reduce(function(a,t){return a+(t.words||0)},0).toLocaleString("he-IL")+' מילים</span></div>';
   items.forEach(function(t){
    var open=state.trOpen===t.k;
    h+='<div class="trrow2">';
    h+='<div class="trhead"><button class="trtitle" data-act="tropen" data-id="'+esc(t.k)+'">'+(open?"▾ ":"▸ ")+esc(t.title||"תמלול")+'</button>';
-   h+='<span class="trmeta">'+esc(dayLabel(t.date))+' · '+(t.words||0).toLocaleString("he-IL")+' מילים'+(t.src?' · '+esc(t.src):'')+(trHl(t).length?' · '+trHl(t).length+' מסומנים':'')+'</span>';
+   var _rd=dayOfTr(t);
+   h+='<span class="trmeta">'+(_rd?('יום '+dayNum(_rd.k)+' · '+esc(dayLabel(_rd.date))):esc(dayLabel(t.date)))+' · '+(t.words||0).toLocaleString("he-IL")+' מילים'+(t.src?' · '+esc(t.src):'')+(trHl(t).length?' · '+trHl(t).length+' מסומנים':'')+'</span>';
    if(!RO){
     h+='<select class="smove trchar" data-id="'+esc(t.k)+'" title="שיוך לדמות אחרת"><option value="">בלי דמות</option>'+DATA.chars.map(function(c){
      return '<option value="'+esc(c.k)+'"'+(c.k===t.char?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select>';
+    var _td=dayOfTr(t);
+    h+='<select class="smove trdaysel" data-id="'+esc(t.k)+'" title="שיוך ליום צילום אחר"><option value="__none__">בלי יום</option>'+daysOrd().map(function(d,i){
+     return '<option value="'+esc(d.k)+'"'+((_td&&_td.k===d.k)?" selected":"")+'>יום '+(i+1)+' · '+esc(dayLabel(d.date))+(d.loc?" · "+esc(String(d.loc).slice(0,28)):"")+'</option>'}).join("")+'</select>';
     h+='<button class="tinyedit" data-act="trdocx" data-id="'+esc(t.k)+'" title="ייצוא לקובץ וורד">וורד</button>';
     if(t.url) h+='<a class="trlink" href="'+esc(t.url)+'" target="_blank" rel="noopener" title="'+esc(t.url)+'">↗ '+esc(urlLabel(t.url))+'</a>';
     h+='<button class="tinyedit" data-act="trlink" data-id="'+esc(t.k)+'" title="'+(t.url?"החלפת הקישור":"הדבקת קישור לדוקס, לדרייב או לכל כתובת")+'">'+(t.url?"ערוך קישור":"קישור")+'</button>';
@@ -8678,6 +8713,19 @@ document.addEventListener("change",function(e){
 });
 document.addEventListener("change",function(e){
  var el=e.target;if(!el||!el.classList)return;
+ if(el.classList.contains("trdaysel")){
+  if(!ensureEdit()){render();return}
+  snap();
+  var t4=TR()[el.getAttribute("data-id")];
+  if(t4){
+   t4.day=el.value;
+   var _dd=(el.value&&el.value!=="__none__")?DAYS().filter(function(z){return z.k===el.value})[0]:null;
+   if(_dd&&_dd.date) t4.date=_dd.date;
+   render();save();
+   toast(_dd?("\u05d4\u05ea\u05de\u05dc\u05d5\u05dc \u05e9\u05d5\u05d9\u05da \u05dc\u05d9\u05d5\u05dd "+dayNum(_dd.k)+", "+dayLabel(_dd.date)):"\u05d4\u05ea\u05de\u05dc\u05d5\u05dc \u05d4\u05d5\u05e6\u05d0 \u05de\u05db\u05dc \u05d9\u05d5\u05dd");
+  }
+  return;
+ }
  if(el.classList.contains("trchar")){
   if(!ensureEdit()){render();return}
   snap();
@@ -8960,6 +9008,12 @@ document.addEventListener("click",function(e){
   var lst=trGroups().reduce(function(a,g){return a.concat(g.items)},[]);
   if(qq) lst=lst.filter(function(t){return trMatches(t,qq).length});
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
+  return}
+ if(act==="trmode"){ state.trMode=b.getAttribute("data-k")||"day"; render(); return}
+ if(act==="gotoday"){
+  state.cat="prod"; state.group="days"; state.brkOpen=id;
+  render();
+  setTimeout(function(){ var el=document.querySelector('[data-act="brktog"][data-id="'+id+'"]'); if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"}) },80);
   return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
  if(act==="projopen"){state.projOpen=true;render();return}
