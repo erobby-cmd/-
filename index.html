@@ -59,20 +59,20 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .nextup:hover{border-color:var(--accent)}
 .nextup.none{border-inline-end-color:var(--line-2)}
 .nextup.none b{color:var(--ink-3);font-weight:600}
-.duestrip{display:flex;flex-direction:column;align-items:stretch;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 10px 8px;max-width:280px;min-width:196px;margin-top:-8px}
-.duestrip .dshead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;background:none;border:0;padding:0;cursor:pointer;text-align:end;width:100%}
+.nextwrap{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:252px}
+.nextwrap .nextup{max-width:none;width:100%}
+.duestrip{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-inline-end:3px solid var(--line-2);border-radius:9px;padding:8px 12px 9px;width:100%}
+.duestrip .dshead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;background:none;border:0;padding:0;cursor:pointer;text-align:start;width:100%}
 .duestrip .dshead b{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:800;color:var(--ink);letter-spacing:.02em}
 .duestrip .dshead span{font-family:"Heebo",sans-serif;font-size:10px;font-weight:600;color:var(--ink-3)}
 .duestrip .dshead:hover b{color:var(--accent)}
-.dslist{display:flex;flex-direction:column;gap:3px;margin-top:3px}
-.dsrow{display:grid;grid-template-columns:1fr auto;gap:1px 7px;background:none;border:0;border-inline-end:2px solid var(--line-2);padding:2px 8px 2px 0;cursor:pointer;text-align:end;width:100%}
-.dsrow b{grid-column:1;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dslist{display:flex;flex-direction:column;gap:5px;margin-top:5px;padding-top:6px;border-top:1px solid var(--line)}
+.dsrow{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1px 8px;background:none;border:0;padding:0;cursor:pointer;text-align:start;width:100%}
+.dsrow b{grid-column:1;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .dsrow i{grid-column:2;font-style:normal;font-family:"Heebo",sans-serif;font-size:10px;font-weight:600;color:var(--ink-3);white-space:nowrap}
-.dsrow em{grid-column:1/3;font-style:normal;font-family:"Heebo",sans-serif;font-size:9.5px;font-weight:600;color:var(--ink-3)}
+.dsrow em{grid-column:1/3;font-style:normal;font-family:"Heebo",sans-serif;font-size:10px;font-weight:600;color:var(--ink-3);line-height:1.3}
 .dsrow:hover b{color:var(--accent)}
-.dsrow.s-late{border-inline-end-color:#C0392B}
 .dsrow.s-late em{color:#C0392B}
-.dsrow.s-soon{border-inline-end-color:#C87F0A}
 .dsrow.s-soon em{color:#C87F0A}
 .topstrip .thbtn,.topstrip .bell{margin-inline-start:0}
 .tmore{background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px;padding:7px 12px;font-size:15px;line-height:1;color:var(--ink-3);cursor:pointer;letter-spacing:.06em}
@@ -5185,7 +5185,7 @@ function vidBlock(d){
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
- h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בוידאו":"חבר וידאו ליום הזה"))+'</button>';
+ h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
  if(!open) return h+'</div>';
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
  h+='<div class="vroom" data-vr="'+esc(d.k)+'">';
@@ -7849,7 +7849,7 @@ var CATS=[
  {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"]]},
  {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shifts","שעון משמרות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
- {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
+ {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
 ];
 function catOf(g){
@@ -8269,11 +8269,13 @@ function topStrip(){
  h+='</div>';
  h+='<div class="today">'+esc(t)+'</div>';
  var nx=nextLine();
+ h+='<div class="nextwrap">';
  h+='<button class="nextup'+(nx.empty?" none":"")+'"'+(RO?"":' data-act="nextedit"')+' title="לחיצה לעריכה">';
  if(nx.empty) h+='<b>אין תאריך קרוב</b>';
  else h+='<b>'+esc(nx.txt)+'</b><em>'+esc(nx.sub)+'</em>';
  h+='</button>';
  h+=dueStrip();
+ h+='</div>';
  return h+'</div>';
 }
 function dueStrip(){
@@ -8683,6 +8685,7 @@ function catBar(){
  var cur=curCat();
  var h='<div class="cats">';
  CATS.forEach(function(c){
+  if(c.hide) return;
   if(c.k==="chat"){
    var cn=chatUnread();
    h+='<button class="catchat'+(cn?" on":"")+'" data-act="cat" data-k="chat" aria-pressed="'+(cur==="chat")+'">✉ '+esc(c.name)+(cn?'<span>'+cn+'</span>':'')+'</button>';
