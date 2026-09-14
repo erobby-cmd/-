@@ -372,6 +372,15 @@ html.linedrag .mchip{pointer-events:none}
 .matpick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-top:0;border-radius:0 0 8px 8px;padding:8px 10px;margin:-1px 0 4px}
 .matpick>b{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);font-weight:700;margin-inline-end:4px}
 .matpick .pickhint{flex:1 1 100%;margin:3px 0 0;font-size:11px;color:var(--ink-3)}
+.othrow{flex:1 1 100%;display:flex;align-items:center;gap:7px;margin-top:5px;padding-top:7px;border-top:1px dashed var(--line)}
+.othrow>label{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;color:var(--ink-3);flex:0 0 auto}
+.othrow input{flex:1 1 auto;min-width:120px;font-family:"Heebo",sans-serif;font-size:12.5px;padding:5px 9px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink)}
+.othrow .btn{padding:5px 12px;font-size:12px}
+.dchip.other{border-style:dashed;background:var(--surface-2)}
+.dchip.other i{background:#8A93A0}
+.dchip.unit{background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)}
+.dchip.unit i{background:#4A5A6B;border-radius:2px;width:7px;height:7px}
+.matpick .sep{flex:1 1 100%;height:0;border-top:1px dashed var(--line);margin:4px 0 1px}
 .dchopt.lead{box-shadow:0 0 0 2px var(--cc,#455160)}
 .matep{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin:14px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
 .matjour{margin-top:26px}
@@ -5019,7 +5028,12 @@ function matChips(d,i,x){
   var c=charOf(k); if(!c)return;
   s+='<span class="dchip sm'+(RO?"":" pick")+'"'+(RO?"":' data-act="matchopen" data-id="'+esc(d.k)+'" data-i="'+i+'"')+' style="--cc:'+esc(c.color||"#455160")+'" title="'+(man?"שויך ידנית":"זוהה אוטומטית")+', לחיצה משנה"><i></i>'+esc(c.name)+'</span>';
  });
- if(!RO) s+='<span class="dchip sm pick addch" data-act="matchopen" data-id="'+esc(d.k)+'" data-i="'+i+'" title="הוסף או החלף דמות">'+(cur.length?"+":"+ דמות")+'</span>';
+ if(x.chx) s+='<span class="dchip sm other'+(RO?"":" pick")+'"'+(RO?"":' data-act="matchopen" data-id="'+esc(d.k)+'" data-i="'+i+'"')+' title="לא מהדמויות שלנו"><i></i>'+esc(x.chx)+'</span>';
+ (x.un||[]).forEach(function(uk){
+  var un=unitName(uk); if(!un)return;
+  s+='<span class="dchip sm unit'+(RO?"":" pick")+'"'+(RO?"":' data-act="matchopen" data-id="'+esc(d.k)+'" data-i="'+i+'"')+' title="מחלקה"><i></i>'+esc(un)+'</span>';
+ });
+ if(!RO) s+='<span class="dchip sm pick addch" data-act="matchopen" data-id="'+esc(d.k)+'" data-i="'+i+'" title="הוסף או החלף דמות או מחלקה">'+((cur.length||x.chx||(x.un||[]).length)?"+":"+ דמות")+'</span>';
  return s;
 }
 function jourChips(x){
@@ -5030,7 +5044,9 @@ function jourChips(x){
   var c=charOf(k); if(!c)return;
   s+='<span class="dchip sm'+(RO?"":" pick")+(k===x.char?" lead":"")+'"'+(RO?"":' data-act="jourchopen" data-id="'+esc(x.id)+'"')+' style="--cc:'+esc(c.color||"#455160")+'" title="'+(k===x.char?"הדמות המובילה":"גם בסצנה")+', לחיצה משנה"><i></i>'+esc(c.name)+'</span>';
  });
- if(!RO) s+='<span class="dchip sm pick addch" data-act="jourchopen" data-id="'+esc(x.id)+'" title="הוסף או החלף דמות">'+(ks.length?"+":"+ דמות")+'</span>';
+ if(x.chx) s+='<span class="dchip sm other'+(RO?"":" pick")+'"'+(RO?"":' data-act="jourchopen" data-id="'+esc(x.id)+'"')+' title="לא מהדמויות שלנו"><i></i>'+esc(x.chx)+'</span>';
+ if(x.unit&&unitName(x.unit)) s+='<span class="dchip sm unit'+(RO?"":" pick")+'"'+(RO?"":' data-act="jourchopen" data-id="'+esc(x.id)+'"')+' title="מחלקה"><i></i>'+esc(unitName(x.unit))+'</span>';
+ if(!RO) s+='<span class="dchip sm pick addch" data-act="jourchopen" data-id="'+esc(x.id)+'" title="הוסף או החלף דמות או מחלקה">'+((ks.length||x.chx||x.unit)?"+":"+ דמות")+'</span>';
  return s;
 }
 function matMoveRow(fromKey,toKey,before){
@@ -5132,7 +5148,17 @@ function matView(){
     h+='<button class="dchopt'+(_cur.indexOf(c.k)>-1?" on":"")+'" data-act="matchar" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</button>';
    });
    h+='<button class="tinyedit" data-act="matchclose">סגור</button>';
-   h+='<p class="pickhint">לחיצה מוסיפה או מורידה דמות מהסצנה</p></div>';
+   if(DATA.units.length){
+    h+='<div class="sep"></div><b>מחלקה</b>';
+    DATA.units.forEach(function(u){
+     var uon=(r.x.un||[]).indexOf(u.k)>-1;
+     h+='<button class="dchopt'+(uon?" on":"")+'" data-act="matunit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" data-k="'+esc(u.k)+'" style="--cc:#4A5A6B"><i></i>'+esc(u.name)+'</button>';
+    });
+   }
+   h+='<div class="othrow" data-form="__mo__"><label>אחר</label>';
+   h+='<input name="o" value="'+esc(r.x.chx||"")+'" placeholder="מי בסצנה שהוא לא מהדמויות שלנו" autocomplete="off">';
+   h+='<button class="btn" data-act="matother" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">שמור</button></div>';
+   h+='<p class="pickhint">לחיצה מוסיפה או מורידה דמות מהסצנה. מי שלא מהדמויות שלנו נכנס בשורת אחר</p></div>';
   }
   if(!RO&&state.matKindPick===_mk){
    h+='<div class="matpick"><b>סוג הסצנה</b>';
@@ -5211,7 +5237,17 @@ function matJournal(){
     h+='<button class="dchopt'+(_on?" on":"")+(x.char===c.k?" lead":"")+'" data-act="jourchar" data-id="'+esc(x.id)+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</button>';
    });
    h+='<button class="tinyedit" data-act="jourchclose">סגור</button>';
-   h+='<p class="pickhint">לחיצה על דמות שלא בסצנה מוסיפה אותה. לחיצה על דמות שכבר בסצנה הופכת אותה למובילה, ולחיצה על המובילה מורידה אותה</p></div>';
+   if(DATA.units.length){
+    h+='<div class="sep"></div><b>מחלקה</b>';
+    DATA.units.forEach(function(u){
+     h+='<button class="dchopt'+(x.unit===u.k?" on":"")+'" data-act="jourunit" data-id="'+esc(x.id)+'" data-k="'+esc(u.k)+'" style="--cc:#4A5A6B"><i></i>'+esc(u.name)+'</button>';
+    });
+    h+='<button class="dchopt'+(x.unit?"":" on")+'" data-act="jourunit" data-id="'+esc(x.id)+'" data-k="__none__" style="--cc:#8A93A0"><i></i>בלי מחלקה</button>';
+   }
+   h+='<div class="othrow" data-form="__jo__"><label>אחר</label>';
+   h+='<input name="o" value="'+esc(x.chx||"")+'" placeholder="מי בסצנה שהוא לא מהדמויות שלנו" autocomplete="off">';
+   h+='<button class="btn" data-act="jourother" data-id="'+esc(x.id)+'">שמור</button></div>';
+   h+='<p class="pickhint">לחיצה על דמות שלא בסצנה מוסיפה אותה. לחיצה על דמות שכבר בסצנה הופכת אותה למובילה, ולחיצה על המובילה מורידה אותה. מי שלא מהדמויות שלנו נכנס בשורת אחר</p></div>';
   }
   if(!RO&&state.jourLn===x.id){
    h+='<div class="matpick"><b>ליין</b>';
@@ -8897,7 +8933,7 @@ document.addEventListener("click",function(e){
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
   editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
-  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
+  edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,matother:1,jourother:1,matunit:1,jourunit:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
@@ -9410,6 +9446,52 @@ document.addEventListener("click",function(e){
   state.jourLn="";
   render();save();
   toast(jlk==="__none__"?"\u05d4\u05e1\u05e6\u05e0\u05d4 \u05d4\u05d5\u05e6\u05d0\u05d4 \u05de\u05db\u05dc \u05dc\u05d9\u05d9\u05df":("\u05d4\u05e1\u05e6\u05e0\u05d4 \u05e2\u05d1\u05e8\u05d4 \u05dc\u05dc\u05d9\u05d9\u05df "+lineName(jlk)));
+  return}
+ if(act==="matunit"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var ud=DAYS().filter(function(z){return z.k===id})[0];
+  if(!ud||!ud.brk)return;
+  var ux=ud.brk[Number(b.getAttribute("data-i"))];
+  if(!ux)return;
+  var uk2=b.getAttribute("data-k");
+  if(!Array.isArray(ux.un)) ux.un=[];
+  var uat=ux.un.indexOf(uk2);
+  if(uat>-1) ux.un.splice(uat,1); else ux.un.push(uk2);
+  render();save();
+  toast(unitName(uk2)+(uat>-1?" הוסרה מהסצנה":" סומנה בסצנה"));
+  return}
+ if(act==="jourunit"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var uj=DATA.scenes.filter(function(z){return z.id===id})[0];
+  if(!uj)return;
+  var ujk=b.getAttribute("data-k");
+  uj.unit=(ujk==="__none__")?"":ujk;
+  render();save();
+  toast(ujk==="__none__"?"הסצנה הוצאה מכל מחלקה":("הסצנה שויכה ל"+unitName(ujk)));
+  return}
+ if(act==="matother"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var od=DAYS().filter(function(z){return z.k===id})[0];
+  if(!od||!od.brk)return;
+  var ox=od.brk[Number(b.getAttribute("data-i"))];
+  if(!ox)return;
+  var ov=(fval("__mo__","o")||"").trim();
+  if(ov) ox.chx=ov; else delete ox.chx;
+  render();save();
+  toast(ov?(ov+" נוסף לסצנה"):"שורת אחר נוקתה");
+  return}
+ if(act==="jourother"){
+  if(RO)return;
+  if(!ensureEdit())return;
+  var oj=DATA.scenes.filter(function(z){return z.id===id})[0];
+  if(!oj)return;
+  var ojv=(fval("__jo__","o")||"").trim();
+  if(ojv) oj.chx=ojv; else delete oj.chx;
+  render();save();
+  toast(ojv?(ojv+" נוסף לסצנה"):"שורת אחר נוקתה");
   return}
  if(act==="matchar"){
   if(RO)return;
