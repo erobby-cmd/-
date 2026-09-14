@@ -299,6 +299,12 @@ html.linedrag .mchip{pointer-events:none}
 .matmodes{margin-top:14px;flex-wrap:wrap}
 .matlist{margin-top:12px;display:flex;flex-direction:column;gap:4px}
 .matday{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:16px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--ink)}
+button.matday.drawer{width:100%;box-sizing:border-box;text-align:start;background:var(--surface);border:1px solid var(--line-2);border-bottom:2px solid var(--ink);border-radius:9px 9px 0 0;cursor:pointer;color:inherit;padding:9px 12px;margin:14px 0 0;align-items:center}
+button.matday.drawer:hover{background:var(--surface-2)}
+button.matday.drawer:not(.open){border-bottom-width:1px;border-radius:9px;margin-bottom:6px;opacity:.9}
+button.matday.drawer:not(.open):hover{opacity:1}
+.matday .dchev{font-size:11px;color:var(--ink-3);flex:0 0 auto;width:12px}
+.matdrawer{display:flex;flex-direction:column;gap:6px;padding:8px 0 12px;border-inline:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 0 9px 9px;margin-bottom:8px;padding-inline:8px;background:var(--bg,transparent)}
 .matday b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16px}
 .matday em{font-size:13px;color:var(--ink-2);font-style:normal}
 .matday span{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
@@ -3578,7 +3584,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:true,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",matDays:null,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -5733,6 +5739,11 @@ function matMoveRow(fromKey,toKey,before){
  if(td!==fd) td.brk.forEach(function(z,k){z.n=k+1});
  return true;
 }
+function matDayOpen(k){
+ if(!state.matDays) return false;
+ if(state.vidOpen===k) return true;
+ return !!state.matDays[k];
+}
 function matView(){
  var all=matAll();
  var h='<section class="grp"><div class="grp-h"><h2>רשימת הסצנות מהחומר</h2><span class="role">כל מה שיש בקופסה, לפי סדר ימי הצילום</span>';
@@ -5777,17 +5788,33 @@ function matView(){
   h+='<button data-act="matkind" data-k="'+esc(k[0])+'" aria-pressed="'+((state.matKind||"")===k[0])+'">'+esc(k[1])+'</button>';
  });
  h+='</div>';
- var lastD=null;
+ var _days=[], _seenD={};
+ all.forEach(function(r){ if(!_seenD[r.d.k]){_seenD[r.d.k]=1;_days.push(r.d)} });
+ var _openN=_days.filter(function(dd){return matDayOpen(dd.k)}).length;
+ h+='<div class="modes matmodes" style="margin-top:6px">';
+ h+='<button data-act="matallday" data-k="open" aria-pressed="'+(_openN===_days.length&&_days.length>0)+'">פתח את כל הימים</button>';
+ h+='<button data-act="matallday" data-k="close" aria-pressed="'+(_openN===0)+'">סגור הכל</button>';
+ h+='<span class="vrhint" style="padding:0 6px">'+_days.length+' ימים · לחיצה על יום פותחת את הסצנות שלו</span>';
+ h+='</div>';
+ var lastD=null, dayOpen=true;
  h+='<div class="matlist">';
  all.forEach(function(r,i){
   if(state.matKind&&(r.x.kind||"other")!==state.matKind) return;
   if(r.d.k!==lastD){
+   if(lastD!==null&&dayOpen) h+='</div>';
    lastD=r.d.k;
+   dayOpen=matDayOpen(r.d.k);
    var dn=(r.d.brk||[]).length, dd=(r.d.brk||[]).reduce(function(a,z){return a+tcSec(z.dur)},0);
-   var _dn=dayTag(r.d.k);
-   h+='<div class="matday">'+(_dn?'<span class="dnum">'+esc(_dn)+'</span>':'')+'<b>'+esc(dayLabel(r.d.date))+'</b><em>'+esc(r.d.loc||"")+'</em>';
-   h+='<span>'+dn+' סצנות · '+hms(dd)+(r.d.brsrc?' · '+esc(r.d.brsrc):'')+'</span></div>';
+   var _dn=dayTag(r.d.k), _nt=vnFor(r.d.k).length;
+   h+='<button class="matday drawer'+(dayOpen?" open":"")+'" data-act="matday" data-id="'+esc(r.d.k)+'">';
+   h+='<span class="dchev">'+(dayOpen?"▾":"◂")+'</span>';
+   if(_dn) h+='<span class="dnum">'+esc(_dn)+'</span>';
+   h+='<b>'+esc(dayLabel(r.d.date))+'</b><em>'+esc(r.d.loc||"")+'</em>';
+   h+='<span>'+dn+' סצנות · '+hms(dd)+(r.d.brsrc?' · '+esc(r.d.brsrc):'')+(_nt?(' · '+_nt+' הערות וידאו'):'')+'</span>';
+   h+='</button>';
+   if(dayOpen) h+='<div class="matdrawer">';
   }
+  if(!dayOpen) return;
   var key=r.d.k+"#"+r.x.n, op=state.matOpen===key;
   var _ei=(r.d.brk||[]).indexOf(r.x), _ekey=r.d.k+"#"+_ei;
   if(state.matEdit===_ekey&&!RO){ h+='<div class="matrow edit">'+matEditForm(r.d,_ei,r.x)+'</div>'; return }
@@ -5879,6 +5906,7 @@ function matView(){
    h+='</div>';
   }
  });
+ if(lastD!==null&&dayOpen) h+='</div>';
  h+='</div>';
  h+=matJournal();
  return h+'</section>';
@@ -9848,6 +9876,7 @@ document.addEventListener("click",function(e){
   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
   state.vidOpen=id;
   state.vidRow=id+"#"+Number(b.getAttribute("data-i"));
+  state.matDays=state.matDays||{}; state.matDays[id]=true;
   if(VR.day!==id||!VR.url) vrUse(id);
   state.vidMode=state.vidMode||{};
   state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
@@ -10233,6 +10262,15 @@ document.addEventListener("click",function(e){
   toast(to2.day===id?("התמלול שויך ל"+dayLabel(dd3.date)):"התמלול הוסר מהיום");
   return}
  if(act==="mcbtog"){state.mcbOpen=(state.mcbOpen===id)?"":id;render();return}
+ if(act==="matday"){
+  state.matDays=state.matDays||{};
+  state.matDays[id]=!state.matDays[id];
+  render();return}
+ if(act==="matallday"){
+  state.matDays=state.matDays||{};
+  var _op=(b.getAttribute("data-k")==="open");
+  DAYS().forEach(function(z){ state.matDays[z.k]=_op });
+  render();return}
  if(act==="matchopen"){
   if(RO)return;
   var _mk2=id+"#"+b.getAttribute("data-i");
