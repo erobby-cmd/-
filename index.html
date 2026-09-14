@@ -458,6 +458,7 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vgrp:hover{filter:brightness(1.1)}
 .vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.26)}
 .vgrp em{font-style:normal;font-size:11px;opacity:.85}
+.vrpin.pend{background:#F2C14E;box-shadow:0 0 0 2px rgba(242,193,78,.35);height:16px;margin-top:-4px}
 .subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
 .lexitag{display:inline-block;margin-inline-start:8px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--accent);background:rgba(45,160,170,.14);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;vertical-align:middle}
 .dchip.vfile{background:#EDF3F7;border-color:#9DBFD2;color:#1E4256;font-weight:700}
@@ -5609,6 +5610,29 @@ function vrMount(){
    }
    if(c==="seek"){ return }
   });
+  var _ta=room.querySelector(".vrnoteform textarea");
+  if(_ta&&!_ta.__mk){
+   _ta.__mk=1;
+   _ta.addEventListener("focus",function(){
+    if(!v||!v.src) return;
+    if(!v.paused) v.pause();
+    VR.t=v.currentTime;
+    var mt3=q('[data-vrc="mtime"]');
+    if(mt3){ var au3=vfmt(VR.t).slice(0,7); mt3.value=au3; mt3.__auto=au3 }
+    VR.pend={t:VR.t};
+    var nw=stage.querySelector(".vrnow");
+    if(nw){ nw.hidden=false; nw.style.setProperty("--cc",userColor(state.me)); nw.innerHTML='<b>'+esc(vfmt(VR.t).slice(0,7))+'</b><span>מסמן כאן</span>' ; nw.__k="__pend" }
+    var sk2=room.querySelector('[data-vrc="seek"]');
+    if(sk2&&v.duration){
+     var old=sk2.querySelector(".vrpin.pend"); if(old) old.remove();
+     var pin=document.createElement("i");
+     pin.className="vrpin pend";
+     pin.style.insetInlineStart=((v.currentTime/v.duration)*100).toFixed(2)+"%";
+     pin.title="הנקודה שסימנת";
+     sk2.appendChild(pin);
+    }
+   });
+  }
   var sk=room.querySelector('[data-vrc="seek"]');
   if(sk) sk.addEventListener("click",function(e){
    if(e.target.classList&&e.target.classList.contains("vrpin")) return;
