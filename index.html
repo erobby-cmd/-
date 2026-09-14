@@ -425,6 +425,11 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .othrow .btn{padding:5px 12px;font-size:12px}
 .dchip.other{border-style:dashed;background:var(--surface-2)}
 .dchip.other i{background:#8A93A0}
+.views.sub{margin-top:-2px;padding-inline-start:14px;border-inline-start:2px solid var(--line-2)}
+.vgrp{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;padding:6px 12px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface);color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.vgrp:hover{border-color:var(--ink-3);color:var(--ink)}
+.vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.vgrp em{font-style:normal;font-size:9px;opacity:.7}
 .dchip.vfile{background:#EDF3F7;border-color:#9DBFD2;color:#1E4256;font-weight:700}
 .dchip.unit{background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)}
 .dchip.unit i{background:#4A5A6B;border-radius:2px;width:7px;height:7px}
@@ -3628,7 +3633,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",matDays:null,matEps:null,jourOpen:false,whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -3791,7 +3796,7 @@ function render(){
   h+='<button class="btn ghost" data-act="cancelmeta">ביטול</button></div></div>';
  } else {
   h+='<p class="eyebrow">'+esc(mt.eyebrow)+(RO?"":'<button class="tinyedit" data-act="editmeta">ערוך כותרת</button>')+'</p>';
-  h+='<h1>'+esc(mt.title)+'</h1><p class="sub">'+esc(mt.sub)+'</p>';
+  h+='<h1>'+esc(mt.title)+'</h1>';
  }
  h+='<div class="stats">';
  h+='<div class="stat"><b>'+n+'</b><span>סצנות ביומן</span></div>';
@@ -3805,8 +3810,6 @@ function render(){
  ["shot","partial","todo"].forEach(function(k){
   h+='<i style="width:'+((c[k]||0)/tot*100).toFixed(1)+'%;background:var(--'+k+')"></i>';});
  h+='</div>';
- var _ne=(DATA.eps||[]).length||EPISODES, _tg=_ne*PER_EP;
- h+='<p class="method">מתודת העבודה: '+_ne+' פרקים × '+PER_EP+' סצנות × '+MIN_PER+' דקות לסצנה. סך הכול '+_tg+' סצנות ו-'+(_tg*MIN_PER)+' דקות.</p>';
  h+='</div></div>';
  if(state.viewUser!==state.me&&!RO) h+='<div class="viewing">אתה צופה בגרסה של '+esc(userName(state.viewUser))+'. השינויים שלך נשמרים רק בגרסה שלך.</div>';
  if(RO) h+='<div class="ro">עותק צפייה של יומן העבודה, נכון ל'+esc(SNAPDATE)+'. אי אפשר לערוך כאן, וכל שינוי בעמוד המקורי לא מופיע כאן עד שנשלח עותק חדש.</div>';
@@ -3816,11 +3819,30 @@ function render(){
  h+=searchBox()+'<div class="sep"></div>';
  h+=catBar();
  var _cv=catObj(curCat()).views;
+ var _curG=vgOf(state.group);
  if(_cv.length>1){
   h+='<div class="views">';
-  _cv.forEach(function(v){ h+=vbtn(v[0],v[1]) });
+  _cv.forEach(function(v){
+   if(String(v[0]).indexOf("g:")===0){
+    var gk=v[0].slice(2), G=VGROUPS[gk];
+    if(!G) return;
+    var act=(_curG===gk), opn=act||state.vgOpen===gk;
+    h+='<button class="vgrp'+(act?" on":"")+'" data-act="vgroup" data-k="'+esc(gk)+'" aria-pressed="'+act+'">'+esc(G.name)+'<em>'+(opn?"▾":"◂")+'</em></button>';
+    return;
+   }
+   h+=vbtn(v[0],v[1]);
+  });
   h+='</div>';
  }
+ (function(){
+  var gk=_curG||state.vgOpen;
+  if(!gk||!VGROUPS[gk]) return;
+  var inCat=_cv.some(function(v){return v[0]==="g:"+gk});
+  if(!inCat) return;
+  h+='<div class="views sub">';
+  VGROUPS[gk].views.forEach(function(v){ h+=vbtn(v[0],v[1]) });
+  h+='</div>';
+ })();
  h+='<div class="sep"></div>'+chip("filter","all","הכול",n);
  ORDER.forEach(function(k){if(k==="dropped"&&!c.dropped)return;h+=chip("filter",k,STATUS[k].l,c[k]||0)});
  h+='<div class="spacer"></div>';
@@ -7785,21 +7807,39 @@ function legendStrip(){
  h+='<button class="clegtog" data-act="legtog">'+(state.legOpen?"הסתר":"הצג")+'</button>';
  return h+'</div></div>';
 }
+var VGROUPS={
+ scenes:{name:"סצנות",views:[["mat","רשימת הסצנות"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"]]}
+};
+function vgOf(k){
+ for(var g in VGROUPS){
+  var vv=VGROUPS[g].views;
+  for(var i=0;i<vv.length;i++) if(vv[i][0]===k) return g;
+ }
+ return "";
+}
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["dclock","שעון ימי צילום"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["tr","תמלולים"],["shifts","שעון משמרות"]]},
  {k:"dues",name:"לוח הגשות",views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
 ];
 function catOf(g){
+ var gg=vgOf(g);
  for(var i=0;i<CATS.length;i++){
-  for(var j=0;j<CATS[i].views.length;j++) if(CATS[i].views[j][0]===g) return CATS[i].k;
+  for(var j=0;j<CATS[i].views.length;j++){
+   var v=CATS[i].views[j][0];
+   if(v===g) return CATS[i].k;
+   if(gg&&v==="g:"+gg) return CATS[i].k;
+  }
  }
  return CATS[0].k;
 }
 function catObj(k){var a=CATS.filter(function(c){return c.k===k});return a[0]||CATS[0]}
-function catHas(k,g){return catObj(k).views.some(function(v){return v[0]===g})}
+function catHas(k,g){
+ var gg=vgOf(g);
+ return catObj(k).views.some(function(v){return v[0]===g||(gg&&v[0]==="g:"+gg)});
+}
 function curCat(){
  if(state.cat&&catHas(state.cat,state.group)) return state.cat;
  return catOf(state.group);
@@ -9828,6 +9868,15 @@ document.addEventListener("click",function(e){
  if(act==="undo"){undo();return}
  if(act==="redo"){redo();return}
  if(act==="filter"){state.filter=b.getAttribute("data-k");render();return}
+ if(act==="vgroup"){
+  var gk=b.getAttribute("data-k"), G=VGROUPS[gk];
+  if(!G) return;
+  if(vgOf(state.group)===gk){ state.vgOpen=(state.vgOpen===gk)?"":gk; render(); return }
+  state.vgOpen=gk;
+  state.group=G.views[0][0];
+  if(!state.cat||!catHas(state.cat,"g:"+gk)) state.cat=curCat();
+  state.catLast=state.catLast||{}; state.catLast[state.cat]=state.group;
+  render();saveUI();return}
  if(act==="group"){
   state.group=b.getAttribute("data-k");
   if(state.group==="chat"){ state.chatSeenAt=chatSeen(state.chatTo||""); chatMark(state.chatTo||""); }
