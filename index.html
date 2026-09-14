@@ -307,14 +307,19 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .matdrawer{display:flex;flex-direction:column;gap:6px;padding:8px 0 12px;border-inline:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0 0 9px 9px;margin-bottom:8px;padding-inline:8px;background:var(--bg,transparent)}
 .dday.hasimg{display:flex;gap:14px;align-items:flex-start}
 .dday.hasimg .dbody{flex:1 1 auto;min-width:0}
-.dstrip{order:2;flex:0 0 156px;display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start}
+.dstrip{order:2;flex:0 0 clamp(190px,26vw,340px);display:grid;grid-template-columns:1fr;gap:7px;align-content:start}
 .dstrip .dthumb{position:relative;display:block;padding:0;border:1px solid var(--line-2);border-radius:6px;overflow:hidden;background:#0b0d10;cursor:pointer;aspect-ratio:16/9}
 .dstrip .dthumb img{width:100%;height:100%;object-fit:cover;display:block}
-.dstrip .dthumb span{position:absolute;inset-inline:0;bottom:0;font-family:"Heebo",sans-serif;font-size:8.5px;font-variant-numeric:tabular-nums;color:#fff;background:rgba(0,0,0,.55);padding:1px 3px;direction:ltr;text-align:center;white-space:nowrap;overflow:hidden}
+.dstrip .dthumb span{position:absolute;inset-inline:0;bottom:0;font-family:"Heebo",sans-serif;font-size:11px;font-weight:600;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.82));padding:16px 6px 4px;text-align:start;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dstrip .dthumb:hover{border-color:var(--ink)}
-.dstrip .dmore{grid-column:1/-1;text-align:center;font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3)}
+.dstrip .dmore{grid-column:1/-1;text-align:center;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.dstrip .dthumb .dn{position:absolute;top:5px;inset-inline-start:5px;font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;font-weight:800;color:#fff;background:rgba(0,0,0,.72);border-radius:5px;min-width:19px;height:19px;line-height:19px;text-align:center;padding:0 5px}
+.dstrip .dthumb span em{display:block;font-style:normal;font-size:10px;font-weight:500;opacity:.85;direction:ltr}
+.dstrip .dthumb{transition:transform .12s}
+.dstrip .dthumb:hover{transform:scale(1.02);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .dstrip.loading span{display:block;aspect-ratio:16/9;border-radius:6px;background:var(--line-2);opacity:.5}
-@media (max-width:760px){.dday.hasimg{display:block}.dstrip{grid-template-columns:repeat(4,1fr);margin-bottom:10px}}
+@media (max-width:900px){.dday.hasimg{display:block}.dstrip{grid-template-columns:repeat(3,1fr);margin-bottom:12px}}
+@media (max-width:560px){.dstrip{grid-template-columns:repeat(2,1fr)}}
 .matday b{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16px}
 .matday em{font-size:13px;color:var(--ink-2);font-style:normal}
 .matday span{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
@@ -5049,16 +5054,17 @@ function dayStrip(d){
  var imgs=DIMG[d.k];
  if(imgs===undefined){ dimgLoad(d.k); return '<div class="dstrip loading"><span></span><span></span><span></span></div>' }
  var pick=[];
- for(var i=0;i<br.length&&pick.length<9;i++){
+ for(var i=0;i<br.length&&pick.length<6;i++){
   var a=imgs[i];
-  if(a&&a.length&&a[0]) pick.push({src:a[0],t:br[i].t||"",tc:br[i].tc||"",i:i});
+  if(a&&a.length&&a[0]) pick.push({src:a[0],t:br[i].t||"",tc:br[i].tc||"",i:i,n:br[i].n||(i+1)});
  }
  if(!pick.length) return "";
  var h='<div class="dstrip">';
  pick.forEach(function(x){
   h+='<button class="dthumb" data-act="matwatch" data-id="'+esc(d.k)+'" data-i="'+x.i+'" title="'+esc(x.t+(x.tc?(" · "+x.tc):""))+'">';
   h+='<img src="'+esc(x.src)+'" alt="" loading="lazy">';
-  h+='<span>'+esc(x.tc||"")+'</span></button>';
+  h+='<i class="dn">'+x.n+'</i>';
+  h+='<span>'+esc(x.t||"")+(x.tc?('<em>'+esc(x.tc)+'</em>'):'')+'</span></button>';
  });
  if(br.length>pick.length) h+='<span class="dmore">ועוד '+(br.length-pick.length)+'</span>';
  return h+'</div>';
@@ -5095,7 +5101,7 @@ function vidBlock(d){
  if(VR.range&&VR.range.day===d.k){
   h+='<div class="vrscene"><b>'+esc(VR.range.t||"הקטע שנבחר")+'</b>';
   h+='<span>'+esc(vfmt(VR.range.a).slice(0,7)+" – "+vfmt(VR.range.b).slice(0,7))+'</span>';
-  h+='<div class="spacer"></div><button class="vrb" data-act="vidclrrange" data-id="'+esc(d.k)+'">בטל את הקטע</button></div>';
+  h+='</div>';
  }
  if(mode==="file"){
   if(VR.day===d.k&&VR.url){
