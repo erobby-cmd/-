@@ -458,6 +458,16 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vgrp:hover{filter:brightness(1.1)}
 .vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.26)}
 .vgrp em{font-style:normal;font-size:11px;opacity:.85}
+.trvmode{margin:10px 0 8px}
+.trcues{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+.trsp{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:800;color:var(--accent);background:rgba(45,160,170,.1);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 14px;position:sticky;top:0;z-index:2}
+.trsp.none{color:var(--ink-3);background:var(--surface-2);font-weight:600}
+.trsp:first-child{border-top:0}
+.trcue{display:grid;grid-template-columns:78px minmax(0,1fr);gap:12px;align-items:baseline;padding:5px 14px;border-bottom:1px solid var(--line)}
+.trcue:last-child{border-bottom:0}
+.trcue:hover{background:var(--surface-2)}
+.trcue i{font-style:normal;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:700;color:var(--ink-3);direction:ltr;text-align:start;font-variant-numeric:tabular-nums}
+.trcue span{font-family:"Assistant",sans-serif;font-size:14.5px;line-height:1.55;color:var(--ink)}
 .vrstage.drv{position:relative}
 .vrstage.drv .drvsub{z-index:4}
 .vrclk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:var(--surface-2);border-top:1px solid var(--line)}
@@ -6732,6 +6742,29 @@ function hlNorm(list){
 }
 function hlAdd(t,r){ t.hl=hlNorm(trHl(t).concat([r])) }
 function hlDropAt(t,pos){ t.hl=trHl(t).filter(function(r){return !(pos>=r[0]&&pos<r[1])}) }
+function trBase(t){
+ var raw=rawCues(t);
+ if(!raw.length) return null;
+ var d=dayOfTr(t);
+ if(!d||!(d.brk||[]).length) return null;
+ var fi=dayFi(d), span=raw[raw.length-1].rb-raw[0].ra;
+ return {first:raw[0].ra, base:Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-span)), day:d};
+}
+function trCueList(t,q){
+ var raw=rawCues(t);
+ if(!raw.length) return "";
+ var bs=trBase(t), h='<div class="trcues">', sp=null, i;
+ for(i=0;i<raw.length;i++){
+  var c=raw[i], cs=c.sp||"";
+  if(cs!==sp){
+   sp=cs;
+   h+='<div class="trsp'+(sp?"":" none")+'">'+esc(sp||"דובר לא מזוהה")+'</div>';
+  }
+  var lab=bs?vfmt(c.ra-bs.first+bs.base).slice(0,7):tcStr(c.ra);
+  h+='<div class="trcue"><i title="'+esc(tcStr(c.ra))+'">'+esc(lab)+'</i><span>'+hiLite(c.t,q)+'</span></div>';
+ }
+ return h+'</div>';
+}
 function trBody(t,q){
  var txt=String(t.text||""), hl=hlNorm(trHl(t)), out="", i=0;
  hl.forEach(function(r){
@@ -6935,7 +6968,15 @@ function trView(){
      qs.forEach(function(x){ h+='<li>'+esc(x.s.replace(/\s+/g," ").trim())+'</li>' });
      h+='</ol></div>';
     }
-    h+='<pre class="trtext" data-tr="'+esc(t.k)+'">'+trBody(t,q)+'</pre>';
+    var _hasc=rawCues(t).length;
+    var _tv=(state.trView||{})[t.k]||(_hasc?"tc":"raw");
+    if(_hasc){
+     h+='<div class="modes trvmode"><button data-act="trvmode" data-id="'+esc(t.k)+'" data-k="tc" aria-pressed="'+(_tv==="tc")+'">לפי טיימקוד</button>';
+     h+='<button data-act="trvmode" data-id="'+esc(t.k)+'" data-k="raw" aria-pressed="'+(_tv==="raw")+'">טקסט גולמי</button>';
+     h+='<span class="trhint">'+_hasc+' שורות עם טיימקוד. הטיימקוד הוא הזמן בתוך קובץ הגלם</span></div>';
+    }
+    if(_hasc&&_tv==="tc") h+=trCueList(t,q);
+    else h+='<pre class="trtext" data-tr="'+esc(t.k)+'">'+trBody(t,q)+'</pre>';
    }
    h+='</div>';
   });
@@ -10532,11 +10573,12 @@ document.addEventListener("click",function(e){
  if(act==="clkplay"){
   var _cd=DAYS().filter(function(z){return z.k===id})[0];
   if(!_cd) return;
-  if(CLK.day===id&&CLK.run){ clkStop(); render(); return }
+  if(CLK.day===id&&CLK.run){ clkStop(); b.classList.remove("on"); b.textContent="הפעל כתוביות"; return }
   var _ip=document.querySelector('.vrtc[data-clk="'+id+'"]');
   var _at=_ip?tcSec(String(_ip.value||"0").trim()):0;
   clkStart(id,_at);
-  render();return}
+  b.classList.add("on"); b.textContent="עצור כתוביות";
+  return}
  if(act==="clknudge"){
   var _dd3=Number(b.getAttribute("data-d"))||0;
   if(CLK.day!==id){ CLK.day=id; CLK.base=0; CLK.run=false }
@@ -10550,10 +10592,18 @@ document.addEventListener("click",function(e){
   var _td2=DAYS().filter(function(z){return z.k===id})[0];
   if(!_td2) return;
   VR.subOn=VR.subOn||{};
-  VR.subOn[id]=!subOn(_td2);
-  toast(VR.subOn[id]?"התרגום מופעל":"אין תרגום");
-  render();
+  var _on=!subOn(_td2);
+  VR.subOn[id]=_on;
+  b.classList.toggle("on",_on);
+  b.innerHTML='<i></i>'+(_on?"תרגום פועל":"אין תרגום");
+  var _els=document.querySelectorAll('.drvsub[data-day="'+id+'"]');
+  for(var _i=0;_i<_els.length;_i++){ _els[_i].hidden=!_on; if(!_on){_els[_i].innerHTML="";_els[_i].__t=""} }
+  var _fs=document.querySelector('.vrstage[data-vrstage="'+id+'"] .vrsub');
+  if(_fs){ _fs.hidden=!_on; if(!_on){_fs.innerHTML="";_fs.__t=""} }
+  var _sb=document.querySelector('.vroom[data-vr="'+id+'"] [data-vrc="sub"]');
+  if(_sb) _sb.classList.toggle("on",_on);
   if(CLK.day===id) clkTick();
+  toast(_on?"התרגום מופעל":"אין תרגום");
   return}
  if(act==="srtdl"){
   var _sd=DAYS().filter(function(z){return z.k===id})[0];
@@ -10564,6 +10614,7 @@ document.addEventListener("click",function(e){
   toast("קובץ הכתוביות ירד");
   return}
  if(act==="tradd"){state.trAdd=!state.trAdd;render();return}
+ if(act==="trvmode"){state.trView=state.trView||{};state.trView[id]=b.getAttribute("data-k");render();return}
  if(act==="trgrp"){var _gk=b.getAttribute("data-k")||"";state.trGrp=state.trGrp||{};state.trGrp[_gk]=!state.trGrp[_gk];render();return}
  if(act==="godues"){state.cat="dues";state.group="dues";state.moreOpen=false;render();return}
  if(act==="nextclose"){
