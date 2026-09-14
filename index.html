@@ -382,6 +382,7 @@ html.linedrag .mchip{pointer-events:none}
 .dchip.unit i{background:#4A5A6B;border-radius:2px;width:7px;height:7px}
 .matpick .sep{flex:1 1 100%;height:0;border-top:1px dashed var(--line);margin:4px 0 1px}
 .dchopt.oth{border-style:dashed}
+.matday .dnum{font-family:"Heebo",sans-serif;font-size:11px;font-weight:800;letter-spacing:.02em;color:#fff;background:#4A5A6B;border-radius:999px;padding:2px 9px;flex:0 0 auto;margin-inline-end:2px}
 .othrow input.hot{border-color:var(--ink-3);box-shadow:0 0 0 2px rgba(0,0,0,.05)}
 .dchopt.lead{box-shadow:0 0 0 2px var(--cc,#455160)}
 .matep{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin:14px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
@@ -5116,7 +5117,8 @@ function matView(){
   if(r.d.k!==lastD){
    lastD=r.d.k;
    var dn=(r.d.brk||[]).length, dd=(r.d.brk||[]).reduce(function(a,z){return a+tcSec(z.dur)},0);
-   h+='<div class="matday"><b>'+esc(dayLabel(r.d.date))+'</b><em>'+esc(r.d.loc||"")+'</em>';
+   var _dn=dayTag(r.d.k);
+   h+='<div class="matday">'+(_dn?'<span class="dnum">'+esc(_dn)+'</span>':'')+'<b>'+esc(dayLabel(r.d.date))+'</b><em>'+esc(r.d.loc||"")+'</em>';
    h+='<span>'+dn+' סצנות · '+hms(dd)+(r.d.brsrc?' · '+esc(r.d.brsrc):'')+'</span></div>';
   }
   var key=r.d.k+"#"+r.x.n, op=state.matOpen===key;
@@ -5704,10 +5706,21 @@ function daysOrd(){
   return String(a.k).localeCompare(String(b.k));
  });
 }
-function dayNum(k){
- var o=daysOrd(), i=o.map(function(d){return d.k}).indexOf(k);
- return i<0?0:i+1;
+function dayHasMat(d){
+ if(!d) return false;
+ if((d.brk||[]).length) return true;
+ try{ return trList().some(function(t){ var x=dayOfTr(t); return x&&x.k===d.k }) }catch(_){ return false }
 }
+function dayNum(k){
+ var n=0, out=0;
+ daysOrd().forEach(function(d){
+  if(!dayHasMat(d)) return;
+  n++;
+  if(d.k===k) out=n;
+ });
+ return out;
+}
+function dayTag(k){ var n=dayNum(k); return n?("יום "+n):"" }
 function trDayGroups(){
  var all=trList(), used={}, out=[];
  daysOrd().forEach(function(d,i){
