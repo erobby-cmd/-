@@ -480,6 +480,8 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vrfiles{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
 .vrsub{position:absolute;left:3%;right:3%;bottom:4%;text-align:center;pointer-events:none;font-family:"Heebo",sans-serif;font-size:clamp(14px,2.1vw,26px);font-weight:600;line-height:1.35;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,1)}
 .vrsub span{background:rgba(0,0,0,.35);padding:2px 10px;border-radius:5px;display:inline-block}
+.vrsub .vrspk{color:#ffd85e;font-weight:800}
+.trtext .trspk{display:inline-block;margin:6px 0 2px;padding:1px 9px;border-radius:999px;background:rgba(255,200,60,.16);border:1px solid rgba(255,200,60,.45);font-weight:800;font-size:.92em}
 .tinyedit.watch{border-color:var(--ink-3);color:var(--ink);font-weight:700}
 .tinyedit.done{border-color:#D9A62B;background:#FFF6DF;color:#6B4C08}
 .tinyedit.done em{font-style:normal;font-weight:800;font-size:10px;opacity:.85;margin-inline-start:3px}
@@ -4878,8 +4880,10 @@ function dayForm(d){
 /* ---- כתוביות מהתמלול ---- */
 function tcf4(h,m,sec,f){ return h*3600+m*60+sec+(Number(f)||0)/25 }
 function parseCues(txt){
- var out=[], blocks=String(txt||"").split(/\n\s*\n/);
+ var out=[], blocks=String(txt||"").split(/\n\s*\n/), sp="";
  blocks.forEach(function(bl){
+  var sm=String(bl).trim().match(/^\u05d3\u05d5\u05d1\u05e8:\s*(.+)$/);
+  if(sm&&sm[1].indexOf("\n")<0){ sp=(sm[1].trim()==="\u05dc\u05d0 \u05de\u05d6\u05d5\u05d4\u05d4")?"":sm[1].trim(); return }
   var L=bl.split("\n"), i=0;
   while(i<L.length&&!/\d/.test(L[i])) i++;
   var line=String(L[i]||"");
@@ -4889,7 +4893,7 @@ function parseCues(txt){
   if(!t) return;
   var f1=m[4].length>2?Number(m[4])/1000*25:Number(m[4]);
   var f2=m[8].length>2?Number(m[8])/1000*25:Number(m[8]);
-  out.push({ra:tcf4(+m[1],+m[2],+m[3],f1), rb:tcf4(+m[5],+m[6],+m[7],f2), t:t});
+  out.push({ra:tcf4(+m[1],+m[2],+m[3],f1), rb:tcf4(+m[5],+m[6],+m[7],f2), t:t, sp:sp});
  });
  out.sort(function(x,y){return x.ra-y.ra});
  return out;
@@ -4904,7 +4908,7 @@ function rawCues(t){
 function mapCues(raw,dur){
  if(!raw||!raw.length) return [];
  var first=raw[0].ra;
- var rel=raw.map(function(c){ return {a:c.ra-first,b:c.rb-first,t:c.t,ra:c.ra} });
+ var rel=raw.map(function(c){ return {a:c.ra-first,b:c.rb-first,t:c.t,ra:c.ra,sp:c.sp||""} });
  var span=rel[rel.length-1].b;
  if(!dur||dur<=0||!isFinite(dur)) return rel;
  var G=0,i;
@@ -4922,7 +4926,7 @@ function mapCues(raw,dur){
  for(i=0;i<rel.length;i++){
   if(i>0) t+=Math.max(0,rel[i].a-rel[i-1].b)*f;
   var d2=Math.max(0.3,rel[i].b-rel[i].a);
-  out.push({a:t,b:t+d2,t:rel[i].t,ra:rel[i].ra});
+  out.push({a:t,b:t+d2,t:rel[i].t,ra:rel[i].ra,sp:rel[i].sp||""});
   t+=d2;
  }
  return out;
@@ -5392,8 +5396,8 @@ function vrMount(){
    else{
     subEl.hidden=false;
     var cc=cueAt(CUES,(v.currentTime||0)-subOff(dObj));
-    var nt=cc?cc.t:"";
-    if(subEl.__t!==nt){ subEl.__t=nt; subEl.innerHTML=nt?('<span>'+esc(nt)+'</span>'):"" }
+    var nt=cc?cc.t:"", nsp=cc?(cc.sp||""):"";
+    if(subEl.__t!==nt+"|"+nsp){ subEl.__t=nt+"|"+nsp; subEl.innerHTML=nt?('<span>'+(nsp?('<b class="vrspk">'+esc(nsp)+':</b> '):'')+esc(nt)+'</span>'):"" }
    }
   }
   var fl=q(".vrfill"); if(fl&&v.duration) fl.style.width=((v.currentTime/v.duration)*100).toFixed(2)+"%";
@@ -6531,7 +6535,7 @@ function trBody(t,q){
   i=b;
  });
  out+=hiLite(txt.slice(i),q);
- return out;
+ return out.replace(/(^|\n)(\u05d3\u05d5\u05d1\u05e8:[^\n<]*)/g,'$1<b class="trspk">$2</b>');
 }
 function hlQuotes(t){
  var txt=String(t.text||"");
