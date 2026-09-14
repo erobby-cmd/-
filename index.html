@@ -454,10 +454,10 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .dchip.other{border-style:dashed;background:var(--surface-2)}
 .dchip.other i{background:#8A93A0}
 .views.sub{margin-top:-2px;padding-inline-start:14px;border-inline-start:2px solid var(--line-2)}
-.vgrp{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;padding:6px 12px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface);color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.vgrp:hover{border-color:var(--ink-3);color:var(--ink)}
-.vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
-.vgrp em{font-style:normal;font-size:9px;opacity:.7}
+.vgrp{font-family:"Heebo",sans-serif;font-size:16px;font-weight:800;letter-spacing:.03em;padding:11px 26px;border:2px solid var(--accent);border-radius:9px;background:var(--accent);color:var(--accent-ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.18);margin-inline-start:6px}
+.vgrp:hover{filter:brightness(1.1)}
+.vgrp.on{background:var(--ink);color:var(--surface);border-color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.26)}
+.vgrp em{font-style:normal;font-size:11px;opacity:.85}
 .dchip.vfile{background:#EDF3F7;border-color:#9DBFD2;color:#1E4256;font-weight:700}
 .dchip.unit{background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)}
 .dchip.unit i{background:#4A5A6B;border-radius:2px;width:7px;height:7px}
@@ -3850,18 +3850,19 @@ function render(){
  var _cv=catObj(curCat()).views;
  var _curG=vgOf(state.group);
  if(_cv.length>1){
+  var _gb="";
   h+='<div class="views">';
   _cv.forEach(function(v){
    if(String(v[0]).indexOf("g:")===0){
     var gk=v[0].slice(2), G=VGROUPS[gk];
     if(!G) return;
     var act=(_curG===gk), opn=act||state.vgOpen===gk;
-    h+='<button class="vgrp'+(act?" on":"")+'" data-act="vgroup" data-k="'+esc(gk)+'" aria-pressed="'+act+'">'+esc(G.name)+'<em>'+(opn?"▾":"◂")+'</em></button>';
+    _gb+='<button class="vgrp'+(act?" on":"")+'" data-act="vgroup" data-k="'+esc(gk)+'" aria-pressed="'+act+'">'+esc(G.name)+'<em>'+(opn?"▾":"◂")+'</em></button>';
     return;
    }
    h+=vbtn(v[0],v[1]);
   });
-  h+='</div>';
+  h+='</div>'+_gb;
  }
  (function(){
   var gk=_curG||state.vgOpen;
