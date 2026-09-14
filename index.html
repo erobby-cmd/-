@@ -59,6 +59,15 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant","Seg
 .nextup:hover{border-color:var(--accent)}
 .nextup.none{border-inline-end-color:var(--line-2)}
 .nextup.none b{color:var(--ink-3);font-weight:600}
+.trtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.trtop .trsearch{flex:1 1 280px;margin:0}
+.trtop .modes{margin:0}
+.ngrp-h.trdrw{display:flex;align-items:center;gap:9px;width:100%;background:var(--surface-2);border:1px solid var(--line);border-inline-start:0;border-inline-end:3px solid var(--cc,#455160);border-radius:9px;padding:9px 13px;cursor:pointer;text-align:start}
+.ngrp-h.trdrw:hover{border-color:var(--accent);border-inline-end-color:var(--cc,#455160)}
+.ngrp-h.trdrw h3{margin:0;font-size:13.5px}
+.ngrp-h.trdrw .ncar{font-style:normal;color:var(--ink-3);font-size:11px}
+.ngrp-h.trdrw .ncount{margin-inline-start:auto;white-space:nowrap}
+.ngrp .ngday{margin:6px 2px 0}
 .nextwrap{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:252px}
 .nextwrap .nextup{max-width:none;width:100%}
 .duestrip{display:flex;flex-direction:column;align-items:stretch;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-inline-end:3px solid var(--line-2);border-radius:9px;padding:8px 12px 9px;width:100%}
@@ -4913,71 +4922,116 @@ function parseCues(txt){
  out.sort(function(x,y){return x.ra-y.ra});
  return out;
 }
+function parseBrCues(txt){
+ var out=[], lines=String(txt||"").split("\n"), sp="";
+ lines.forEach(function(L){
+  var sm=String(L).trim().match(/^\u05d3\u05d5\u05d1\u05e8:\s*(.+)$/);
+  if(sm){ sp=(sm[1].trim()==="\u05dc\u05d0 \u05de\u05d6\u05d5\u05d4\u05d4")?"":sm[1].trim(); return }
+  var m=String(L).match(/^\s*\[(\d{1,2}):(\d{2}):(\d{2})[:;.,](\d{1,3})\]\s*(.*)$/);
+  if(!m) return;
+  var t=String(m[5]||"").replace(/\s+/g," ").trim();
+  if(!t) return;
+  var f=m[4].length>2?Number(m[4])/1000*25:Number(m[4]);
+  out.push({ra:tcf4(+m[1],+m[2],+m[3],f), rb:0, t:t, sp:sp});
+ });
+ out.sort(function(x,y){return x.ra-y.ra});
+ for(var i=0;i<out.length;i++){
+  var nx=(i+1<out.length)?out[i+1].ra:(out[i].ra+4);
+  out[i].rb=Math.min(nx,out[i].ra+8);
+  if(out[i].rb<=out[i].ra) out[i].rb=out[i].ra+1;
+ }
+ return out;
+}
 function rawCues(t){
  if(!t) return [];
  if(t.__cues) return t.__cues;
  var c=parseCues(t.text);
+ if(!c.length) c=parseBrCues(t.text);
  try{ Object.defineProperty(t,"__cues",{value:c,enumerable:false,configurable:true}) }catch(_){ t.__cues=c }
  return c;
 }
-function mapCues(raw,dur){
- if(!raw||!raw.length) return [];
- var first=raw[0].ra;
- var rel=raw.map(function(c){ return {a:c.ra-first,b:c.rb-first,t:c.t,ra:c.ra,sp:c.sp||""} });
- var span=rel[rel.length-1].b;
- if(!dur||dur<=0||!isFinite(dur)) return rel;
- var G=0,i;
- for(i=1;i<rel.length;i++) G+=Math.max(0,rel[i].a-rel[i-1].b);
- var E=span-dur, lead=0, f=1;
- if(E>0){
-  if(G<=0) return rel;
-  f=Math.max(0,1-E/G);
- } else if(E<0){
-  lead=Math.min(-E,90);
-  var rest=(-E)-lead;
-  if(G>0&&rest>0) f=1+rest/G;
+function normNm(x){ return String(x||"").toLowerCase().replace(/\.[^.]+$/,"").replace(/[^a-z0-9\u0590-\u05ff]+/g,"") }
+function dayFi(d){ return vidIx(d.k,(driveIdsOf(d)||[]).length||1) }
+function fileBrk(d,fi){
+ var br=(d&&d.brk)||[];
+ var has=br.some(function(x){return x.vf!==undefined&&x.vf!==null});
+ if(!has) return br;
+ var out=br.filter(function(x){return (Number(x.vf)||0)===fi});
+ return out.length?out:br;
+}
+function fileBase(d,fi){
+ var br=fileBrk(d,fi);
+ if(!br.length) return 0;
+ var r=tcRange(br[0].tc);
+ return r?r.a:0;
+}
+function fileEnd(d,fi){
+ var br=fileBrk(d,fi);
+ if(!br.length) return tcSec(d&&d.brdur||"")||0;
+ var r=tcRange(br[br.length-1].tc);
+ return r?r.b:0;
+}
+function trSpan(t){ var c=rawCues(t); return c.length?(c[c.length-1].rb-c[0].ra):0 }
+function dayTrFor(d,fi){
+ var ts=dayTrs(d).filter(function(t){ return rawCues(t).length });
+ if(!ts.length) return null;
+ var ids=driveIdsOf(d)||[], nm=normNm(driveNameOf(ids[fi]||""));
+ if(ts.length>1&&nm){
+  var byn=ts.filter(function(t){ var tn=normNm(t.title); return tn&&(tn.indexOf(nm)>-1||nm.indexOf(tn)>-1) });
+  if(byn.length===1) return byn[0];
+  if(byn.length>1) ts=byn;
  }
- var out=[], t=lead;
- for(i=0;i<rel.length;i++){
-  if(i>0) t+=Math.max(0,rel[i].a-rel[i-1].b)*f;
-  var d2=Math.max(0.3,rel[i].b-rel[i].a);
-  out.push({a:t,b:t+d2,t:rel[i].t,ra:rel[i].ra,sp:rel[i].sp||""});
-  t+=d2;
+ if(ts.length===1) return ts[0];
+ var dur=fileEnd(d,fi)-fileBase(d,fi);
+ if(!dur) return ts[Math.min(fi,ts.length-1)];
+ var best=ts[0], bd=Math.abs(trSpan(ts[0])-dur);
+ ts.forEach(function(t){ var x=Math.abs(trSpan(t)-dur); if(x<bd){bd=x;best=t} });
+ return best;
+}
+function mapCues(raw,base){
+ if(!raw||!raw.length) return [];
+ var first=raw[0].ra, b0=Number(base)||0, out=[], prev=null;
+ for(var i=0;i<raw.length;i++){
+  var a=raw[i].ra-first+b0, b=raw[i].rb-first+b0;
+  if(prev!==null&&a<prev) { var sh=prev-a; a+=sh; b+=sh }
+  if(b<=a) b=a+0.4;
+  out.push({a:a,b:b,t:raw[i].t,ra:raw[i].ra,sp:raw[i].sp||""});
+  prev=a;
  }
  return out;
 }
 function dayCues(d){
  if(!d) return [];
- var dur=(VR.day===d.k&&VR.dur)?Math.round(VR.dur):0;
  if(VR.subs&&VR.subs.length&&VR.day===d.k) return VR.subs;
- var ts=dayTrs(d)||[];
- for(var i=0;i<ts.length;i++){
-  var raw=rawCues(ts[i]);
-  if(raw.length){
-   if(ts[i].__map&&ts[i].__mapdur===dur) return ts[i].__map;
-   var mp=mapCues(raw,dur);
-   try{
-    Object.defineProperty(ts[i],"__map",{value:mp,enumerable:false,configurable:true});
-    Object.defineProperty(ts[i],"__mapdur",{value:dur,enumerable:false,configurable:true});
-   }catch(_){ ts[i].__map=mp; ts[i].__mapdur=dur }
-   return mp;
-  }
- }
- return [];
+ var fi=dayFi(d), t=dayTrFor(d,fi);
+ if(!t) return [];
+ var raw=rawCues(t);
+ var span=raw.length?(raw[raw.length-1].rb-raw[0].ra):0;
+ var base=Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-span));
+ var key=fi+"|"+Math.round(base*100);
+ if(t.__map&&t.__mapk===key) return t.__map;
+ var mp=mapCues(raw,base);
+ try{
+  Object.defineProperty(t,"__map",{value:mp,enumerable:false,configurable:true});
+  Object.defineProperty(t,"__mapk",{value:key,enumerable:false,configurable:true});
+ }catch(_){ t.__map=mp; t.__mapk=key }
+ return mp;
 }
 function subQuality(d){
  if(!d) return {k:"none"};
- var ts=dayTrs(d)||[], raw=null;
- for(var i=0;i<ts.length&&!raw;i++){ var c=rawCues(ts[i]); if(c.length) raw=c }
- if(!raw) return {k:"none"};
- var dur=tcSec(d.brdur||"")||0;
+ var fi=dayFi(d), t=dayTrFor(d,fi);
+ if(!t) return {k:"none"};
+ var raw=rawCues(t);
+ if(!raw.length) return {k:"none"};
+ var dur=fileEnd(d,fi)-fileBase(d,fi);
  var span=raw[raw.length-1].rb-raw[0].ra;
  if(!dur) return {k:"ok",n:raw.length,diff:0};
  var diff=span-dur, rel=Math.abs(diff)/dur;
- if(rel<=0.01) return {k:"ok",n:raw.length,diff:diff};
- if(rel<=0.05) return {k:"fix",n:raw.length,diff:diff};
+ if(rel<=0.02) return {k:"ok",n:raw.length,diff:diff};
+ if(rel<=0.08) return {k:"fix",n:raw.length,diff:diff};
  return {k:"bad",n:raw.length,diff:diff};
 }
+
 function subDefault(d){
  var q=subQuality(d);
  return q.k==="ok"||q.k==="fix";
@@ -5356,7 +5410,9 @@ function vrMount(){
    rd.onload=function(){
     var raw=parseCues(String(rd.result||""));
     if(!raw.length){ toast("לא זיהיתי כתוביות בקובץ הזה",true); return }
-    VR.subs=mapCues(raw,VR.dur?Math.round(VR.dur):0);
+    var _dd=DAYS().filter(function(z){return z.k===dk})[0];
+    var _sp=raw[raw.length-1].rb-raw[0].ra;
+    VR.subs=mapCues(raw,_dd?Math.min(fileBase(_dd,dayFi(_dd)),Math.max(0,fileEnd(_dd,dayFi(_dd))-_sp)):0);
     VR.subOn=VR.subOn||{}; VR.subOn[dk]=true;
     toast(raw.length+" שורות כתוביות נטענו מהקובץ");
     render();
@@ -6637,11 +6693,21 @@ function trView(){
  var words=all.reduce(function(a,t){return a+(t.words||0)},0);
  var chars=trGroups().filter(function(g){return g.k}).length;
  var byDay=(state.trMode||"day")==="day";
- var h='<section class="grp"><div class="grp-h"><h2>תמלול לפי ימים</h2><span class="role">'+(byDay?"כל יום צילום והתמלולים שלו":"הראיונות עצמם, לפי דמות")+'</span>';
- h+='<span class="meta">'+all.length+' תמלולים</span></div>';
- h+='<p class="grp-note">כאן יושב הטקסט הגולמי, מסודר לפי ימי הצילום. כל יום והתמלולים ששייכים לו, בסדר של לוג ימי הצילום. אפשר להחליף לתצוגה לפי דמות, ואפשר לחפש מילה אחת על פני כל התמלולים ולראות מי אמר אותה ואיפה, בלי לפתוח קבצים.</p>';
+ var h='<section class="grp"><div class="grp-h"><h2>תמלולים</h2><span class="role">'+(byDay?"לפי ימי צילום":"לפי דמות")+'</span>';
+ h+='<span class="meta">'+all.length+' תמלולים · '+words.toLocaleString("he-IL")+' מילים</span></div>';
 
- if(!RO){
+ h+='<div class="trtop">';
+ h+='<div class="trsearch"><input id="trq" placeholder="חפש מילה או משפט בכל התמלולים" value="'+esc(q)+'">';
+ if(q) h+='<button class="btn ghost" data-act="trclear">נקה</button>';
+ h+='</div>';
+ h+='<div class="modes"><button data-act="trmode" data-k="day" aria-pressed="'+(byDay)+'">לפי ימי צילום</button>';
+ h+='<button data-act="trmode" data-k="char" aria-pressed="'+(!byDay)+'">לפי דמות</button></div>';
+ h+='<div class="spacer"></div>';
+ h+='<button class="btn ghost" data-act="trdocxall" title="כל התמלולים בקובץ וורד אחד">ייצא הכל לוורד</button>';
+ if(!RO) h+='<button class="btn'+(state.trAdd?" ghost":"")+'" data-act="tradd">'+(state.trAdd?"סגור":"הוסף תמלול")+'</button>';
+ h+='</div>';
+
+ if(!RO&&(state.trAdd||state.trBusy)){
   h+='<div class="trup" data-form="__tr__">';
   h+='<div class="trrow">';
   h+='<div class="f"><label>לאיזו דמות</label><select name="char"><option value="">בלי דמות</option>'+DATA.chars.map(function(c){
@@ -6668,21 +6734,7 @@ function trView(){
   if(state.trBusy) h+='<div class="trbusy"><i></i><span>'+esc(state.trBusy)+'</span></div>';
  }
 
- if(!all.length) return h+'<div class="dempty"><b>עוד לא נטען אף תמלול</b><p>העלה קובץ או הדבק טקסט למעלה.</p></div></section>';
-
- h+='<div class="dstats">';
- h+='<div class="dstat"><b>'+all.length+'</b><span>תמלולים</span></div>';
- h+='<div class="dstat"><b>'+words.toLocaleString("he-IL")+'</b><span>מילים בסך הכול</span></div>';
- h+='<div class="dstat"><b>'+chars+'</b><span>דמויות עם תמלול</span></div>';
- h+='<div class="dstat"><b>'+trDayGroups().filter(function(g){return g.k}).length+'</b><span>ימי צילום עם תמלול</span></div>';
- h+='</div>';
- h+='<div class="modes"><button data-act="trmode" data-k="day" aria-pressed="'+(byDay)+'">לפי ימי צילום</button>';
- h+='<button data-act="trmode" data-k="char" aria-pressed="'+(!byDay)+'">לפי דמות</button></div>';
-
- h+='<div class="trsearch"><input id="trq" placeholder="חפש מילה או משפט בכל התמלולים" value="'+esc(q)+'">';
- if(q) h+='<button class="btn ghost" data-act="trclear">נקה</button>';
- h+='<button class="btn ghost" data-act="trdocxall" title="כל התמלולים בקובץ וורד אחד">ייצא הכל לוורד</button>';
- h+='</div>';
+ if(!all.length) return h+'<div class="dempty"><b>עוד לא נטען אף תמלול</b><p>לחץ על הוסף תמלול למעלה, העלה קובץ או הדבק טקסט.</p></div></section>';
 
  var hits=0;
  if(q) all.forEach(function(t){ if(trMatches(t,q).length) hits++ });
@@ -6692,11 +6744,15 @@ function trView(){
  (byDay?trDayGroups():trGroups()).forEach(function(g){
   var items=q?g.items.filter(function(t){return trMatches(t,q).length}):g.items;
   if(!items.length) return;
-  h+='<div class="ngrp"><div class="ngrp-h" style="--cc:'+esc(g.color)+'"><span class="ndot"></span>';
+  state.trGrp=state.trGrp||{};
+  var gopen=q?true:!!state.trGrp[g.k||"__loose__"];
+  h+='<div class="ngrp'+(gopen?" open":"")+'"><button class="ngrp-h trdrw" data-act="trgrp" data-k="'+esc(g.k||"__loose__")+'" style="--cc:'+esc(g.color)+'"><span class="ndot"></span>';
+  h+='<i class="ncar">'+(gopen?"\u25be":"\u25c2")+'</i>';
   h+='<h3>'+esc(g.name)+'</h3>';
   if(g.role) h+='<em>'+esc(g.role)+'</em>';
-  if(g.day) h+='<button class="tinyedit" data-act="gotoday" data-id="'+esc(g.day.k)+'" title="פתח את היום בלוג ימי צילום">ליום בלוג</button>';
-  h+='<span class="ncount">'+(items.length===1?"תמלול אחד":items.length+' תמלולים')+' · '+items.reduce(function(a,t){return a+(t.words||0)},0).toLocaleString("he-IL")+' מילים</span></div>';
+  h+='<span class="ncount">'+(items.length===1?"תמלול אחד":items.length+' תמלולים')+' · '+items.reduce(function(a,t){return a+(t.words||0)},0).toLocaleString("he-IL")+' מילים</span></button>';
+  if(g.day) h+='<button class="tinyedit ngday" data-act="gotoday" data-id="'+esc(g.day.k)+'" title="פתח את היום בלוג ימי צילום">ליום בלוג</button>';
+  if(!gopen){ h+='</div>'; return }
   items.forEach(function(t){
    var open=state.trOpen===t.k;
    h+='<div class="trrow2">';
@@ -7846,8 +7902,8 @@ function vgOf(k){
 }
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["g:scenes","סצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["lines","מפת הליינים"],["board","מפת הפרקים"],["g:scenes","סצנות"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
@@ -10335,6 +10391,8 @@ document.addEventListener("click",function(e){
   } else { if(el2)el2.select(); toast("סמן והעתק ידנית",true) }
   return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
+ if(act==="tradd"){state.trAdd=!state.trAdd;render();return}
+ if(act==="trgrp"){var _gk=b.getAttribute("data-k")||"";state.trGrp=state.trGrp||{};state.trGrp[_gk]=!state.trGrp[_gk];render();return}
  if(act==="godues"){state.cat="dues";state.group="dues";state.moreOpen=false;render();return}
  if(act==="nextclose"){
   if(modalKeep(e,b))return;
