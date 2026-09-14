@@ -381,6 +381,8 @@ html.linedrag .mchip{pointer-events:none}
 .dchip.unit{background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)}
 .dchip.unit i{background:#4A5A6B;border-radius:2px;width:7px;height:7px}
 .matpick .sep{flex:1 1 100%;height:0;border-top:1px dashed var(--line);margin:4px 0 1px}
+.dchopt.oth{border-style:dashed}
+.othrow input.hot{border-color:var(--ink-3);box-shadow:0 0 0 2px rgba(0,0,0,.05)}
 .dchopt.lead{box-shadow:0 0 0 2px var(--cc,#455160)}
 .matep{font-family:"Heebo",sans-serif;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin:14px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--line-2)}
 .matjour{margin-top:26px}
@@ -5147,6 +5149,7 @@ function matView(){
    DATA.chars.forEach(function(c){
     h+='<button class="dchopt'+(_cur.indexOf(c.k)>-1?" on":"")+'" data-act="matchar" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</button>';
    });
+   h+='<button class="dchopt oth'+(r.x.chx?" on":"")+'" data-act="othfocus" data-k="__mo__" style="--cc:#8A93A0"><i></i>'+(r.x.chx?esc(r.x.chx):"אחר")+'</button>';
    h+='<button class="tinyedit" data-act="matchclose">סגור</button>';
    if(DATA.units.length){
     h+='<div class="sep"></div><b>מחלקה</b>';
@@ -5236,6 +5239,7 @@ function matJournal(){
     var _on=(x.char===c.k)||((x.chars||[]).indexOf(c.k)>-1);
     h+='<button class="dchopt'+(_on?" on":"")+(x.char===c.k?" lead":"")+'" data-act="jourchar" data-id="'+esc(x.id)+'" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+'</button>';
    });
+   h+='<button class="dchopt oth'+(x.chx?" on":"")+'" data-act="othfocus" data-k="__jo__" style="--cc:#8A93A0"><i></i>'+(x.chx?esc(x.chx):"אחר")+'</button>';
    h+='<button class="tinyedit" data-act="jourchclose">סגור</button>';
    if(DATA.units.length){
     h+='<div class="sep"></div><b>מחלקה</b>';
@@ -9446,6 +9450,12 @@ document.addEventListener("click",function(e){
   state.jourLn="";
   render();save();
   toast(jlk==="__none__"?"\u05d4\u05e1\u05e6\u05e0\u05d4 \u05d4\u05d5\u05e6\u05d0\u05d4 \u05de\u05db\u05dc \u05dc\u05d9\u05d9\u05df":("\u05d4\u05e1\u05e6\u05e0\u05d4 \u05e2\u05d1\u05e8\u05d4 \u05dc\u05dc\u05d9\u05d9\u05df "+lineName(jlk)));
+  return}
+ if(act==="othfocus"){
+  if(RO)return;
+  var _fk=b.getAttribute("data-k")||"__mo__";
+  var _in=document.querySelector('[data-form="'+_fk+'"] input[name="o"]');
+  if(_in){ _in.classList.add("hot"); try{_in.focus();_in.select()}catch(_){} if(_in.scrollIntoView) _in.scrollIntoView({block:"nearest"}) }
   return}
  if(act==="matunit"){
   if(RO)return;
