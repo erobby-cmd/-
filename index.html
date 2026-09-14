@@ -425,6 +425,7 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .othrow .btn{padding:5px 12px;font-size:12px}
 .dchip.other{border-style:dashed;background:var(--surface-2)}
 .dchip.other i{background:#8A93A0}
+.dchip.vfile{background:#EDF3F7;border-color:#9DBFD2;color:#1E4256;font-weight:700}
 .dchip.unit{background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)}
 .dchip.unit i{background:#4A5A6B;border-radius:2px;width:7px;height:7px}
 .matpick .sep{flex:1 1 100%;height:0;border-top:1px dashed var(--line);margin:4px 0 1px}
@@ -5085,11 +5086,16 @@ function vfmt(n){
 }
 var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,sub:true,subOn:null,tcmode:true,range:null};
 var VRFILES={};
+function vrKey(dk){
+ var dd=DAYS().filter(function(z){return z.k===dk})[0];
+ var n=(driveIdsOf(dd)||[]).length||1;
+ return dk+"#"+vidIx(dk,n);
+}
 function vrKeep(){
- if(VR.day&&VR.url) VRFILES[VR.day]={url:VR.url,name:VR.name};
+ if(VR.day&&VR.url) VRFILES[vrKey(VR.day)]={url:VR.url,name:VR.name};
 }
 function vrUse(dk){
- var f=VRFILES[dk];
+ var f=VRFILES[vrKey(dk)];
  if(!f) return false;
  VR.url=f.url; VR.name=f.name; VR.day=dk;
  return true;
@@ -5288,7 +5294,7 @@ function vrMount(){
    var keepR=VR.range, keepP=VR.pend, keepT=VR.t;
    vrRelease();
    VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk;
-   VRFILES[dk]={url:VR.url,name:VR.name};
+   VRFILES[vrKey(dk)]={url:VR.url,name:VR.name};
    VR.range=(keepR&&keepR.day===dk)?keepR:null;
    VR.pend=(keepP!=null)?keepP:((keepR&&keepR.day===dk)?keepR.a:null);
    VR.t=(VR.pend!=null)?VR.pend:(keepT||0);
@@ -5948,6 +5954,7 @@ function matView(){
   h+='<span class="matdur">'+esc(r.x.dur||"")+'</span>';
   h+='<span class="matt">'+esc(r.x.t)+'</span>';
   h+=matChips(r.d,_ri,r.x);
+  if((driveIdsOf(r.d)||[]).length>1) h+='<span class="dchip sm vfile" title="הקובץ של הקטע הזה">'+esc(vidLabel(r.d,Number(r.x.vf)||0))+'</span>';
   if(r.x.kind) h+='<span class="brkind'+(RO?"":" pick")+'"'+(RO?"":' data-act="matkindopen" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="לחיצה משנה סוג"')+'>'+esc(bKind(r.x.kind))+'</span>';
   else if(!RO) h+='<span class="brkind pick" data-act="matkindopen" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">+ סוג</span>';
   if(!op&&r.x.sum) h+='<span class="matsum1">'+esc(r.x.sum.slice(0,90))+(r.x.sum.length>90?"...":"")+'</span>';
@@ -10016,10 +10023,13 @@ document.addEventListener("click",function(e){
   state.vidOpen=id;
   state.vidRow=id+"#"+Number(b.getAttribute("data-i"));
   state.matDays=state.matDays||{}; state.matDays[id]=true;
+  var _wvf=Number(_wx.vf)||0;
+  state.vidFile=state.vidFile||{};
+  if((Number(state.vidFile[id])||0)!==_wvf){ state.vidFile[id]=_wvf; if(VR.day===id) vrRelease() }
   if(VR.day!==id||!VR.url) vrUse(id);
   state.vidMode=state.vidMode||{};
   state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
-  VR.t=_rg.a; VR.range={a:_rg.a,b:_rg.b,t:_wx.t||"",day:id};
+  VR.t=_rg.a; VR.range={a:_rg.a,b:_rg.b,t:_wx.t||"",day:id,vf:_wvf};
   VR.pend=_rg.a;
   if(VR.video&&VR.day===id&&VR.url){ try{ VR.video.currentTime=_rg.a; VR.video.play().catch(function(){}) }catch(_){} }
   render();
