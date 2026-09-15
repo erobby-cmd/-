@@ -537,6 +537,12 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vrempty{padding:12px 2px;color:var(--ink-3);font-size:12.5px}
 .vrlink{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid var(--line);background:var(--surface-2)}
 .vrlink textarea{flex:1 1 220px;min-width:150px;font-family:"Heebo",sans-serif;font-size:12px;padding:5px 9px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);direction:ltr;resize:vertical}
+.fsbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2)}
+.fsbar b{color:var(--ink);font-weight:700}
+.fsdot{width:9px;height:9px;border-radius:50%;background:#C6CBD2;flex:0 0 auto}
+.fsdot.on{background:#2FA36B;box-shadow:0 0 0 3px rgba(47,163,107,.18)}
+.fsdot.ask{background:#E0A33C;box-shadow:0 0 0 3px rgba(224,163,60,.2)}
+.fsbar .btn{padding:6px 14px;font-size:12.5px}
 .vrfiles{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
 .vrsub{position:absolute;left:3%;right:3%;bottom:4%;text-align:center;pointer-events:none;font-family:"Heebo",sans-serif;font-size:clamp(14px,2.1vw,26px);font-weight:600;line-height:1.35;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,1)}
 .vrsub span{background:rgba(0,0,0,.35);padding:2px 10px;border-radius:5px;display:inline-block}
@@ -5410,6 +5416,161 @@ function vfmt(n){
  var p=function(v){return v<10?"0"+v:""+v};
  return h+":"+p(m)+":"+p(s2)+"."+p(f);
 }
+
+/* ===== תיקיית הגלם במחשב, נשמרת בין הפעלות ===== */
+var FS={root:null,name:"",idx:null,names:{},state:"none",scanning:false};
+function fsDB(){
+ return new Promise(function(res,rej){
+  var rq=indexedDB.open("eilatfs",1);
+  rq.onupgradeneeded=function(){ try{ rq.result.createObjectStore("kv") }catch(_){} };
+  rq.onsuccess=function(){ res(rq.result) };
+  rq.onerror=function(){ rej(rq.error) };
+ });
+}
+function fsGet(k){
+ return fsDB().then(function(db){ return new Promise(function(res){
+  try{ var r=db.transaction("kv","readonly").objectStore("kv").get(k);
+   r.onsuccess=function(){ res(r.result) }; r.onerror=function(){ res(null) };
+  }catch(_){ res(null) }
+ })}).catch(function(){ return null });
+}
+function fsPut(k,v){
+ return fsDB().then(function(db){ return new Promise(function(res){
+  try{ var t=db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k);
+   t.oncomplete=function(){ res(true) }; t.onerror=function(){ res(false) };
+  }catch(_){ res(false) }
+ })}).catch(function(){ return false });
+}
+function fsSupported(){ return typeof window.showDirectoryPicker==="function" }
+function fsNorm(n){ return String(n||"").toLowerCase().replace(/\s+/g," ").trim() }
+function fsBase(n){ return fsNorm(n).replace(/\.[^.]+$/,"") }
+function fsScan(){
+ if(!FS.root||FS.scanning) return Promise.resolve(false);
+ FS.scanning=true;
+ var idx={}, base={}, seen=0;
+ function walk(dir,depth){
+  if(depth>4||seen>4000) return Promise.resolve();
+  var it=dir.values(), chain=Promise.resolve();
+  function step(){
+   return it.next().then(function(r){
+    if(r.done) return;
+    var e=r.value;
+    if(e.kind==="file"){
+     if(/\.(mp4|mov|m4v|mxf|mkv|avi|webm)$/i.test(e.name)){ seen++; idx[fsNorm(e.name)]=e; base[fsBase(e.name)]=e }
+     return step();
+    }
+    if(e.kind==="directory"&&!/^\./.test(e.name)) return walk(e,depth+1).then(step);
+    return step();
+   }).catch(function(){});
+  }
+  return step();
+ }
+ return walk(FS.root,0).then(function(){
+  FS.idx={byName:idx,byBase:base,n:seen};
+  FS.scanning=false;
+  FS.state="ready";
+  return true;
+ }).catch(function(){ FS.scanning=false; return false });
+}
+function fsKey(dk,fi){ return dk+"#"+(Number(fi)||0) }
+function fsWant(d,fi){
+ var out=[], k=fsKey(d.k,fi);
+ if(FS.names[k]) out.push(FS.names[k]);
+ var ids=driveIdsOf(d)||[], nm=driveNameOf(ids[Number(fi)||0]||"");
+ if(nm) out.push(nm);
+ if(d.brsrc) out.push(d.brsrc);
+ return out;
+}
+function fsHandleFor(d,fi){
+ if(!FS.idx) return null;
+ var w=fsWant(d,fi), i;
+ for(i=0;i<w.length;i++){ var h=FS.idx.byName[fsNorm(w[i])]; if(h) return h }
+ for(i=0;i<w.length;i++){ var h2=FS.idx.byBase[fsBase(w[i])]; if(h2) return h2 }
+ return null;
+}
+function fsHas(d,fi){ return !!fsHandleFor(d,fi) }
+function fsLoad(dk,fi,then){
+ var d=DAYS().filter(function(z){return z.k===dk})[0];
+ if(!d) return Promise.resolve(false);
+ var h=fsHandleFor(d,fi);
+ if(!h) return Promise.resolve(false);
+ return h.getFile().then(function(f){
+  VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk; VR.tc0=null;
+  VRFILES[vrKey(dk)]={url:VR.url,name:VR.name};
+  state.vidMode=state.vidMode||{}; state.vidMode[dk]="file";
+  fileStartTC(f).then(function(tc){
+   if(VR.day!==dk||!tc) return;
+   VR.tc0=tc.sec;
+   try{ dayTrs(d).forEach(function(tt){ delete tt.__map; delete tt.__mapk }) }catch(_){}
+   render();
+  });
+  if(then) then();
+  render();
+  return true;
+ }).catch(function(){ return false });
+}
+function fsRemember(dk,fi,name){
+ FS.names[fsKey(dk,fi)]=name;
+ fsPut("names",FS.names);
+}
+function fsPick(){
+ if(!fsSupported()){ toast("הדפדפן הזה לא תומך בחיבור תיקייה, פתח בכרום",true); return }
+ window.showDirectoryPicker({id:"eilatraw",mode:"read",startIn:"videos"}).then(function(h){
+  FS.root=h; FS.name=h.name||"";
+  return fsPut("root",h).then(function(){ return fsScan() });
+ }).then(function(ok){
+  if(ok===false) return;
+  toast("התיקייה "+FS.name+" מחוברת, "+((FS.idx&&FS.idx.n)||0)+" קבצי וידאו נמצאו");
+  render();
+ }).catch(function(){});
+}
+function fsGrant(){
+ if(!FS.root) return fsPick();
+ FS.root.requestPermission({mode:"read"}).then(function(st){
+  if(st!=="granted"){ toast("לא קיבלתי גישה לתיקייה",true); return }
+  return fsScan().then(function(){
+   toast("התיקייה "+FS.name+" זמינה שוב, "+((FS.idx&&FS.idx.n)||0)+" קבצים");
+   render();
+  });
+ }).catch(function(){ toast("צריך לבחור את התיקייה מחדש",true); fsPick() });
+}
+function fsForget(){
+ FS.root=null; FS.name=""; FS.idx=null; FS.state="none";
+ fsPut("root",null);
+ toast("התיקייה נותקה");
+ render();
+}
+try{ window.__EILAT={FS:FS,fsPut:fsPut,fsGet:fsGet,fsScan:function(){return fsScan()},fsHas:function(k,i){var d=DAYS().filter(function(z){return z.k===k})[0];return d?fsHas(d,i||0):null}} }catch(_){}
+function fsInit(){
+ if(!fsSupported()){ FS.state="nosupport"; return }
+ fsGet("names").then(function(n){ if(n&&typeof n==="object") FS.names=n });
+ fsGet("root").then(function(h){
+  if(!h||!h.queryPermission){ FS.state="none"; return }
+  FS.root=h; FS.name=h.name||"";
+  return h.queryPermission({mode:"read"}).then(function(st){
+   if(st==="granted"){ return fsScan().then(function(){ render() }) }
+   FS.state="ask"; render();
+  });
+ }).catch(function(){ FS.state="none" });
+}
+function fsBar(){
+ if(FS.state==="nosupport") return "";
+ var h='<div class="fsbar">';
+ if(FS.state==="ready"){
+  h+='<span class="fsdot on"></span><b>'+esc(FS.name)+'</b><span>'+((FS.idx&&FS.idx.n)||0)+' קבצי וידאו מחוברים מהדיסק</span>';
+  h+='<button class="tinyedit" data-act="fspick">החלף תיקייה</button>';
+  h+='<button class="tinyedit" data-act="fsrescan">סרוק מחדש</button>';
+  h+='<button class="tinyedit" data-act="fsforget">נתק</button>';
+ } else if(FS.state==="ask"){
+  h+='<span class="fsdot ask"></span><b>'+esc(FS.name)+'</b><span>הדפדפן מבקש אישור מחדש לתיקייה, לחיצה אחת והכל חוזר</span>';
+  h+='<button class="btn" data-act="fsgrant">הפעל את התיקייה</button>';
+  h+='<button class="tinyedit" data-act="fspick">בחר תיקייה אחרת</button>';
+ } else {
+  h+='<span class="fsdot"></span><span>חבר פעם אחת את התיקייה שבה יושב הגלם, והיומן ימצא את הקבצים לבד בכל פעם שתחבר את הדיסק</span>';
+  h+='<button class="btn" data-act="fspick">חבר תיקיית גלם</button>';
+ }
+ return h+'</div>';
+}
 var VR={video:null,url:"",name:"",day:"",t:0,dur:0,draw:false,strokes:[],cur:null,pend:null,subs:null,sub:true,subOn:null,tcmode:true,range:null};
 var VRFILES={};
 function vrKey(dk){
@@ -5424,6 +5585,15 @@ function vrUse(dk){
  var f=VRFILES[vrKey(dk)];
  if(!f) return false;
  VR.url=f.url; VR.name=f.name; VR.day=dk;
+ return true;
+}
+function vrUseOrFs(dk){
+ if(vrUse(dk)) return true;
+ var d=DAYS().filter(function(z){return z.k===dk})[0];
+ if(!d||FS.state!=="ready") return false;
+ var fi=vidIx(dk,(driveIdsOf(d)||[]).length||1);
+ if(!fsHas(d,fi)) return false;
+ fsLoad(dk,fi);
  return true;
 }
 function vrRelease(){
@@ -5743,7 +5913,15 @@ function vidRoom(d){
   } else {
    h+='<div class="vrstage"><div class="vrpick">';
    h+='<b>'+esc(d.brsrc||"הקובץ של היום הזה")+'</b>';
-   h+='<label class="btn" for="vrfile-'+esc(d.k)+'">בחר את הקובץ מהמחשב</label>';
+   var _ffi=vidIx(d.k,dids.length||1);
+   if(FS.state==="ready"&&fsHas(d,_ffi)){
+    h+='<button class="btn" data-act="fsuse" data-id="'+esc(d.k)+'" data-i="'+_ffi+'">פתח מתוך התיקייה המחוברת</button>';
+   } else if(FS.state==="ask"){
+    h+='<button class="btn" data-act="fsgrant">הפעל את תיקיית הגלם</button>';
+   } else if(FS.state!=="nosupport"&&FS.state!=="ready"){
+    h+='<button class="btn" data-act="fspick">חבר תיקיית גלם פעם אחת</button>';
+   }
+   h+='<label class="btn ghost" for="vrfile-'+esc(d.k)+'">בחר את הקובץ מהמחשב</label>';
    h+='<input id="vrfile-'+esc(d.k)+'" class="vrfile" type="file" accept="video/*" data-day="'+esc(d.k)+'" style="display:none">';
    h+='<span class="vrhint" style="color:#8A93A0">הקובץ נשאר אצלך במחשב ולא נטען לשום מקום. רק ההערות נשמרות בענן וכולם רואים אותן</span>';
    h+='<span class="vrhint" style="color:#8A93A0">אחרי שתבחר אותו פעם אחת, כל לחיצה על צפה תפתח ותנגן את הקטע אוטומטית</span>';
@@ -5835,6 +6013,7 @@ function vrMount(){
    vrRelease();
    VR.url=URL.createObjectURL(f); VR.name=f.name; VR.day=dk; VR.tc0=null;
    VRFILES[vrKey(dk)]={url:VR.url,name:VR.name};
+   try{ fsRemember(dk,vidIx(dk,(driveIdsOf(DAYS().filter(function(z){return z.k===dk})[0]||{})||[]).length||1),f.name) }catch(_){}
    fileStartTC(f).then(function(tc){
     if(VR.day!==dk||!tc) return;
     VR.tc0=tc.sec;
@@ -6115,6 +6294,7 @@ function daysView(){
  var h='<section class="grp"><div class="grp-h"><h2>לוג ימי צילום</h2><span class="role">מה צולם, מתי, ומה שווה לחזור אליו</span>';
  h+='<span class="meta">'+all.length+' ימי צילום</span></div>';
  h+='<p class="grp-note">יומן של החומר שכבר בקופסה. כל יום צילום עם התאריך, המיקום, מי צולם, והרגעים שכדאי לזכור כשחוזרים לחומר הגלם. זה המקום לרשום את מה שראית במצלמה ולא נכנס עדיין לשום סצנה.</p>';
+ h+=fsBar();
  if(!all.length){
   h+=daysClock();
   h+='<div class="dempty"><b>עוד לא נרשם אף יום צילום</b><p>לחץ על "הוסף יום צילום" למעלה כדי לפתוח את הראשון.</p></div>';
@@ -9475,6 +9655,7 @@ function paint(h){
  document.documentElement.classList.toggle("modal-open",hasModal);
  if(firstPaint){firstPaint=false;y=restoreY||0;x=restoreX||0}
  try{ vrMount() }catch(_){}
+ try{ if(!window.__fsInit){ window.__fsInit=1; setTimeout(fsInit,0) } }catch(_){}
  requestAnimationFrame(function(){
   try{ vrMount() }catch(_){}
   if(y&&!hasModal)window.scrollTo(0,y);
@@ -10690,6 +10871,14 @@ document.addEventListener("click",function(e){
   if(qq) lst=lst.filter(function(t){return trMatches(t,qq).length});
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
   return}
+ if(act==="fspick"){ fsPick(); return}
+ if(act==="fsgrant"){ fsGrant(); return}
+ if(act==="fsforget"){ fsForget(); return}
+ if(act==="fsrescan"){ fsScan().then(function(){ toast("\u05e0\u05e1\u05e8\u05e7\u05d5 "+((FS.idx&&FS.idx.n)||0)+" \u05e7\u05d1\u05e6\u05d9 \u05d5\u05d9\u05d3\u05d0\u05d5"); render() }); return}
+ if(act==="fsuse"){
+  var _fu=Number(b.getAttribute("data-i"))||0;
+  fsLoad(id,_fu).then(function(ok){ if(!ok) toast("\u05dc\u05d0 \u05de\u05e6\u05d0\u05ea\u05d9 \u05d0\u05ea \u05d4\u05e7\u05d5\u05d1\u05e5 \u05d1\u05ea\u05d9\u05e7\u05d9\u05d9\u05d4",true) });
+  return}
  if(act==="watchpop"){
   var _pd=DAYS().filter(function(z){return z.k===id})[0];
   if(!_pd||!_pd.brk) return;
@@ -10704,7 +10893,7 @@ document.addEventListener("click",function(e){
   var _pvf=Number(_px.vf)||0;
   state.vidFile=state.vidFile||{};
   if((Number(state.vidFile[id])||0)!==_pvf){ state.vidFile[id]=_pvf; if(VR.day===id) vrRelease() }
-  if(VR.day!==id||!VR.url) vrUse(id);
+  if(VR.day!==id||!VR.url) vrUseOrFs(id);
   state.vidMode=state.vidMode||{};
   state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
   VR.subOn=VR.subOn||{}; VR.subOn[id]=true;
@@ -10735,7 +10924,7 @@ document.addEventListener("click",function(e){
   var _wvf=Number(_wx.vf)||0;
   state.vidFile=state.vidFile||{};
   if((Number(state.vidFile[id])||0)!==_wvf){ state.vidFile[id]=_wvf; if(VR.day===id) vrRelease() }
-  if(VR.day!==id||!VR.url) vrUse(id);
+  if(VR.day!==id||!VR.url) vrUseOrFs(id);
   state.vidMode=state.vidMode||{};
   state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
   VR.t=_rg.a; VR.range={a:_rg.a,b:_rg.b,t:_wx.t||"",day:id,vf:_wvf};
@@ -10755,7 +10944,7 @@ document.addEventListener("click",function(e){
   else {
    if(state.vidOpen&&state.vidOpen!==id) vrRelease();
    state.vidOpen=id;
-   if(VR.day!==id||!VR.url) vrUse(id);
+   if(VR.day!==id||!VR.url) vrUseOrFs(id);
    state.vidMode=state.vidMode||{};
    if(VR.day===id&&VR.url) state.vidMode[id]="file";
    VR.subOn=VR.subOn||{}; VR.subOn[id]=true;
