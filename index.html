@@ -281,6 +281,8 @@ html.linedrag .mchip{pointer-events:none}
 .modes{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;margin-top:16px}
 .modes button{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:500;padding:6px 14px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;border-inline-start:1px solid var(--line-2)}
 .modes button:first-child{border-inline-start:0}
+.nedit.nwatch{border-color:#1B4B8F;color:#1B4B8F;font-weight:600}
+.epnum{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 4px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;flex:0 0 auto}
 .lmodes{margin:6px 0 14px}
 .modes button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .board.listmode,.board.tlmode{display:block;overflow:visible;padding-bottom:0}
@@ -4265,6 +4267,36 @@ function epForm(e){
  h+='</div>';
  return h;
 }
+function srcRowOf(x){
+ if(!x||!x.id) return null;
+ var DD=DAYS(), a,b,k,t;
+ for(a=0;a<DD.length;a++){
+  var br=DD[a].brk||[];
+  for(b=0;b<br.length;b++){ if(br[b].sid&&br[b].sid===x.id) return {d:DD[a],i:b,x:br[b]} }
+ }
+ if(x.src&&x.src.d){
+  for(a=0;a<DD.length;a++){
+   if(DD[a].k!==x.src.d) continue;
+   var br2=DD[a].brk||[];
+   for(b=0;b<br2.length;b++){ if(x.src.tc&&String(br2[b].tc||"")===String(x.src.tc)) return {d:DD[a],i:b,x:br2[b]} }
+  }
+ }
+ t=String(x.title||"").replace(/\s+/g," ").trim();
+ if(t){
+  for(a=0;a<DD.length;a++){
+   var br3=DD[a].brk||[];
+   for(b=0;b<br3.length;b++){ if(String(br3[b].t||"").replace(/\s+/g," ").trim()===t) return {d:DD[a],i:b,x:br3[b]} }
+  }
+ }
+ return null;
+}
+function fromMat(x){
+ var r=srcRowOf(x);
+ if(!r) return null;
+ if(!tcRange(r.x.tc)) return null;
+ if(!(driveIdsOf(r.d)||[]).length) return null;
+ return r;
+}
 function note(x,extra){
  var ch=charOf(x.char);
  var _ca=colorAttrs(x);
@@ -4296,6 +4328,8 @@ function note(x,extra){
    h+='<button class="nedit ndel" data-act="dodel" data-id="'+esc(x.id)+'">כן, מחק</button>';
    h+='<button class="nedit" data-act="nodel">ביטול</button>';
   } else {
+   var _fm=fromMat(x);
+   if(_fm) h+='<button class="nedit nwatch" data-act="matwatch" data-id="'+esc(_fm.d.k)+'" data-i="'+_fm.i+'" title="'+esc("מתוך רשימת הסצנות, "+dayLabel(_fm.d.date)+(_fm.x.tc?" · "+_fm.x.tc:"")+". פתח בנגן על הטיימקוד")+'">צפה</button>';
    h+='<button class="nedit" data-act="edit" data-id="'+esc(x.id)+'">ערוך</button>';
    h+='<button class="nedit ndel" data-act="askdel" data-id="'+esc(x.id)+'">מחק</button>';
    h+='<select class="nmove" data-id="'+esc(x.id)+'" title="העברה לפרק אחר">';
@@ -6511,6 +6545,7 @@ function matView(){
   h+='</div>';
   if(!RO){
    h+='<button class="tinyedit" data-act="matedit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">ערוך</button>';
+   if(jsc&&jsc.ep) h+='<span class="epnum" title="'+esc("הסצנה משוייכת לפרק "+jsc.ep+" · "+(jsc.title||""))+'">'+esc(String(jsc.ep))+'</span>';
    if(tcRange(r.x.tc)&&(driveIdsOf(r.d)||[]).length) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="פתח את הקטע הזה בנגן">צפה</button>';
    h+=toEpBtn(r.d.k,_ri,jsc);
    h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="מחק שורה מהרשימה">×</button>';
