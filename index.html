@@ -5541,8 +5541,8 @@ function vidBlock(d){
  if(!RO){
   var _sfi=fi, _sk=d.k+"#"+_sfi, _sc=srtCues(d,_sfi), _son=subOn(d);
   h+='<p class="brnote subline">';
-  h+=(_sc&&_sc.length)?('כתוביות '+(dids.length>1?('· '+esc(vidLabel(d,_sfi))+' '):'')+'· '+_sc.length+' שורות')
-    :('אין כתוביות'+(dids.length>1?(' ל'+esc(vidLabel(d,_sfi))):'')+' לקובץ הזה');
+  h+=(dids.length>1?('קובץ '+esc(vidLabel(d,_sfi))+' · '):'');
+  h+=(_sc&&_sc.length)?('כתוביות, '+_sc.length+' שורות'):'אין כתוביות לקובץ הזה';
   if(_sc&&_sc.length) h+=' <button class="subsw'+(_son?" on":"")+'" data-act="subtog" data-id="'+esc(d.k)+'" title="הדלקה וכיבוי של הכתוביות"><i></i>'+(_son?"תרגום פועל":"אין תרגום")+'</button>';
   h+=' <label class="tinyedit srtup" for="srtup-'+esc(d.k)+'-'+_sfi+'">'+((_sc&&_sc.length)?"החלף קובץ SRT":"העלה קובץ SRT")+'</label>';
   h+='<input id="srtup-'+esc(d.k)+'-'+_sfi+'" class="srtupin" type="file" accept=".srt,.vtt,.txt,text/plain" data-day="'+esc(d.k)+'" data-fi="'+_sfi+'" style="display:none">';
