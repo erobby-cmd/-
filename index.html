@@ -857,6 +857,7 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .ltl2-name b{display:block;font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ltl2-name em{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .ltl2-name em.rng{color:var(--lc,#455160);font-weight:600}
+.ltl2-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
 .ltl2-bar{margin-top:0!important;min-height:82px}
 .ltl2-ep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;justify-content:center;width:20px;border-inline-end:1px solid var(--line-2);margin-inline-end:2px}
 .ltl2-ep b{font-family:"Heebo",sans-serif;font-size:11px;font-weight:800;color:var(--ink-3)}
@@ -7947,6 +7948,7 @@ function linesTimeline(){
   h+='<div class="ltl2-name"><i></i><div><b>'+esc(r.name)+'</b>';
   h+='<em>'+(mine.length?(mine.length+' סצנות · '+sh+' צולמו'):'אין סצנות')+'</em>';
   if(mine.length) h+='<em class="rng">'+(f===la?('פרק '+f):('פרק '+f+' עד '+la))+'</em>';
+  if(!RO&&r.k) h+='<div class="ltl2-btns"><button class="tinyedit" data-act="editline" data-id="'+esc(r.k)+'">ערוך</button>'+epnBtn("l:"+r.k,"מחשבות על הליין, כל המשתמשים רואים")+'</div>';
   h+='</div></div>';
   h+='<div class="notes tlbar ltl2-bar">';
   if(!vis.length){ h+='<span class="ltl2-none">'+(mine.length?'אין סצנות בסינון הזה':'הליין הזה עוד ריק')+'</span>' }
@@ -8199,19 +8201,7 @@ function linesView(){
  h+='</div>';
  if((state.lineMode||"table")==="time"){
   h+=linesTimeline();
-  h+='</section>';
-  h+='<section class="grp"><div class="grp-h"><h2>הערות על הליינים</h2><span class="role">מה כל סיפור צריך כדי לעמוד</span></div><div class="units">';
-  LS.forEach(function(l){
-   var s2=ST[l.k];
-   h+='<div class="unit" data-c="'+(s2.kind==="ok"?"full":s2.kind==="gap"?"partial":"none")+'"><div class="unit-h"><span class="dot" style="background:'+esc(l.color||"#455160")+'"></span><h3>'+esc(l.name)+'</h3>';
-   h+='<span class="cnt">'+s2.all.length+' סצנות</span></div>';
-   if(l.what) h+='<p class="lab2">'+esc(l.what)+'</p>';
-   h+='<p>'+esc(lineHint(l.k,s2))+'</p>';
-   if(l.note) h+='<p class="lnote">'+esc(l.note)+'</p>';
-   if(!RO) h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך ליין</button>'+epnBtn("l:"+l.k,"מחשבות על הליין, כל המשתמשים רואים");
-   h+='</div>';
-  });
-  return h+'</div></section>';
+  return h+'</section>';
  }
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
@@ -8264,19 +8254,7 @@ function linesView(){
  });
  h+='<td class="tot"><b>'+un.length+'</b><em>לא משויכות</em></td></tr>';
  h+='</tbody></table></div>';
- h+='</section>';
- h+='<section class="grp"><div class="grp-h"><h2>הערות על הליינים</h2><span class="role">מה כל סיפור צריך כדי לעמוד</span></div><div class="units">';
- LS.forEach(function(l){
-  var s=ST[l.k];
-  h+='<div class="unit" data-c="'+(s.kind==="ok"?"full":s.kind==="gap"?"partial":"none")+'"><div class="unit-h"><span class="dot" style="background:'+esc(l.color||"#455160")+'"></span><h3>'+esc(l.name)+'</h3>';
-  h+='<span class="cnt">'+s.all.length+' סצנות</span></div>';
-  if(l.what) h+='<p class="lab2">'+esc(l.what)+'</p>';
-  h+='<p>'+esc(lineHint(l.k,s))+'</p>';
-  if(l.note) h+='<p class="lnote">'+esc(l.note)+'</p>';
-  if(!RO) h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך ליין</button>';
-  h+='</div>';
- });
- return h+'</div></section>';
+ return h+'</section>';
 }
 
 function arcTable(){
