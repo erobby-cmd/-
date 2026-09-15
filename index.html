@@ -480,6 +480,7 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .subsw.on{border-color:var(--accent);color:var(--accent)}
 .subsw.on i{background:var(--accent)}
 .subsw.on i:after{inset-inline-start:14px}
+.vrb.srtpick{cursor:pointer;border-style:dashed}
 .vrpin.pend{background:#F2C14E;box-shadow:0 0 0 2px rgba(242,193,78,.35);height:16px;margin-top:-4px}
 .subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
 .lexitag{display:inline-block;margin-inline-start:8px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--accent);background:rgba(45,160,170,.14);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;vertical-align:middle}
@@ -5527,6 +5528,8 @@ function vidBlock(d){
     h+='<span class="vrhint" data-vrc="soff">'+((Number(d.suboff)||0)?((d.suboff>0?"+":"")+Number(d.suboff).toFixed(1)+"ש"):"0")+'</span>';
     h+='<button class="vrb" data-vrc="sp1" title="הכתוביות מקדימות, קדימה חצי שנייה">כת׳ +</button>';
    }
+   h+='<label class="vrb srtpick" for="vrsub-'+esc(d.k)+'" title="טעינת קובץ כתוביות srt או vtt מהמחשב">'+(_sn?"החלף קובץ כתוביות":"טען קובץ כתוביות")+'</label>';
+   h+='<input id="vrsub-'+esc(d.k)+'" class="vrsubfile" type="file" accept=".srt,.vtt,.txt,text/plain" data-day="'+esc(d.k)+'" style="display:none">';
    h+='</div>';
   } else {
    h+='<div class="vrstage"><div class="vrpick">';
@@ -5639,13 +5642,18 @@ function vrMount(){
    var f=sfin.files&&sfin.files[0]; if(!f) return;
    var rd=new FileReader();
    rd.onload=function(){
-    var raw=parseCues(String(rd.result||""));
+    var txt=String(rd.result||"");
+    var raw=parseCues(txt);
+    if(!raw.length) raw=parseBrCues(txt);
     if(!raw.length){ toast("לא זיהיתי כתוביות בקובץ הזה",true); return }
     var _dd=DAYS().filter(function(z){return z.k===dk})[0];
     var _sp=raw[raw.length-1].rb-raw[0].ra;
-    VR.subs=mapCues(raw,_dd?Math.min(fileBase(_dd,dayFi(_dd)),Math.max(0,fileEnd(_dd,dayFi(_dd))-_sp)):0);
+    var _b0;
+    if(VR.day===dk&&VR.tc0!==null&&VR.tc0!==undefined) _b0=raw[0].ra-VR.tc0;
+    else _b0=_dd?Math.min(fileBase(_dd,dayFi(_dd)),Math.max(0,fileEnd(_dd,dayFi(_dd))-_sp)):0;
+    VR.subs=mapCues(raw,_b0);
     VR.subOn=VR.subOn||{}; VR.subOn[dk]=true;
-    toast(raw.length+" שורות כתוביות נטענו מהקובץ");
+    toast(raw.length+" שורות כתוביות נטענו"+((VR.tc0!==null&&VR.tc0!==undefined)?", מסונכרנות לטיימקוד של הקובץ":""));
     render();
    };
    rd.readAsText(f,"utf-8");
