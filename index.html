@@ -5686,7 +5686,9 @@ function vidBlock(d){
     h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="5">+5 שניות</button>';
     h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-1">1-</button>';
     h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="1">1+</button>';
-    h+='<span class="vrhint">הנגן של גוגל סגור בפנינו, אז הכתוביות רצות על שעון שלנו. לחץ פליי בדרייב ומיד אחר כך כאן, וכוון עם המינוס והפלוס</span>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-60">דקה-</button>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="60">+דקה</button>';
+    h+='<span class="vrhint">הנגן של גוגל סגור בפנינו, אז הכתוביות רצות על שעון שלנו. אחרי שאתה קופץ בתוך הוידאו, הקלד כאן את הזמן שמופיע בנגן של גוגל ולחץ אנטר, והכתוביות יקפצו לשם. אפשר גם לכוון עם המינוס והפלוס</span>';
     h+='</div>';
    }
   } else {
@@ -5801,6 +5803,24 @@ function vrMount(){
    rd.readAsText(f,"utf-8");
   });
  }
+ var tcin=document.querySelector('.vrtc[data-clk="'+dk+'"]');
+ if(tcin&&!tcin.__w){
+  tcin.__w=1;
+  var _jump=function(){
+   var v0=String(tcin.value||"").trim();
+   if(!v0) return;
+   var sec=tcSec(v0);
+   if(sec===null||sec===undefined||isNaN(sec)) return;
+   if(CLK.day!==dk){ CLK.day=dk; CLK.run=false }
+   CLK.base=Math.max(0,sec);
+   CLK.t0=Date.now();
+   clkTick();
+   tcin.value=vfmt(clkNow(dk)).slice(0,7);
+   toast("\u05d4\u05db\u05ea\u05d5\u05d1\u05d9\u05d5\u05ea \u05e7\u05e4\u05e6\u05d5 \u05dc "+vfmt(sec).slice(0,7));
+  };
+  tcin.addEventListener("keydown",function(ev){ if(ev.key==="Enter"){ ev.preventDefault(); _jump() } });
+  tcin.addEventListener("change",_jump);
+ }
  var stage=document.querySelector('[data-vrstage="'+dk+'"]');
  if(!stage||VR.day!==dk||!VR.url) return;
  if(!VR.video){
@@ -5891,6 +5911,10 @@ function vrMount(){
   });
   v.addEventListener("play",paintBar);
   v.addEventListener("pause",paintBar);
+  v.addEventListener("seeking",paintBar);
+  v.addEventListener("seeked",paintBar);
+  v.addEventListener("ratechange",paintBar);
+  v.addEventListener("durationchange",paintBar);
   v.addEventListener("loadedmetadata",function(){
    VR.dur=v.duration;
    CUES=dayCues(dObj);
@@ -5970,12 +5994,31 @@ function vrMount(){
    });
   }
   var sk=room.querySelector('[data-vrc="seek"]');
-  if(sk) sk.addEventListener("click",function(e){
-   if(e.target.classList&&e.target.classList.contains("vrpin")) return;
-   var r=sk.getBoundingClientRect();
-   var x=(e.clientX-r.left)/r.width;
-   if(v.duration) v.currentTime=Math.max(0,Math.min(1,x))*v.duration;
-  });
+  if(sk){
+   var _drag=false;
+   var _to=function(e){
+    if(!v.duration) return;
+    var r=sk.getBoundingClientRect();
+    var x=(e.clientX-r.left)/r.width;
+    v.currentTime=Math.max(0,Math.min(1,x))*v.duration;
+    VR.t=v.currentTime;
+    paintBar();
+   };
+   sk.addEventListener("pointerdown",function(e){
+    if(e.target.classList&&e.target.classList.contains("vrpin")) return;
+    _drag=true;
+    try{ sk.setPointerCapture(e.pointerId) }catch(_){}
+    _to(e);
+   });
+   sk.addEventListener("pointermove",function(e){ if(_drag) _to(e) });
+   sk.addEventListener("pointerup",function(e){ if(_drag){ _drag=false; _to(e); try{ sk.releasePointerCapture(e.pointerId) }catch(_){} } });
+   sk.addEventListener("pointercancel",function(){ _drag=false });
+   sk.addEventListener("click",function(e){
+    if(_drag) return;
+    if(e.target.classList&&e.target.classList.contains("vrpin")) return;
+    _to(e);
+   });
+  }
   if(cv){
    var down=false;
    cv.addEventListener("pointerdown",function(e){
