@@ -1143,6 +1143,9 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .mgtxt em{display:block;font-style:normal;font-size:12.3px;color:var(--ink-3);margin-top:3px;line-height:1.55}
 .mgtxt em u{text-decoration:none;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;margin-inline-end:5px}
 .modal .box.lsbox{max-width:1120px}
+.modal .box.wpopbox{max-width:1180px}
+.wpopbody{overflow-y:auto;min-height:0;padding:0}
+.wpopbody .vroom{border:0;border-radius:0}
 .lsbody{padding:16px 20px 20px;overflow:auto}
 .lsnote{margin:0 0 14px;font-size:13.6px;color:var(--ink-3);line-height:1.55}
 .lsempty{padding:26px 6px;text-align:center;color:var(--ink-3)}
@@ -1243,6 +1246,16 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .reddot.rd-part{background:#fff;color:#A8401F;border:1.5px solid var(--reddot);padding:2px 5px}
 .reddot.rd-shot{background:rgba(255,255,255,.92);color:#18603B;border:1px solid rgba(24,96,59,.3)}
 .reddot.rd-drop{background:rgba(255,255,255,.9);color:#6B7280;border:1px solid rgba(107,114,128,.35)}
+.pnote .ntop{position:absolute;top:6px;inset-inline-end:6px;z-index:6;display:flex;gap:4px;align-items:center}
+.pnote .ntop .reddot{position:static;top:auto;inset-inline-end:auto;transform:none}
+.pnote.rowmode .ntop{top:50%;transform:translateY(-50%);inset-inline-end:11px}
+.pnote.segmode .ntop{top:3px;inset-inline-end:3px;gap:3px}
+.nwatch{font-family:"Heebo",sans-serif;font-size:10px;font-weight:700;line-height:1;cursor:pointer;
+ border:1px solid rgba(27,75,143,.45);background:rgba(255,255,255,.94);color:#1B4B8F;border-radius:5px;padding:3px 6px;flex:0 0 auto}
+.nwatch:hover{background:#1B4B8F;color:#fff;border-color:#1B4B8F}
+.pnote.segmode .nwatch{font-size:9px;padding:2px 4px}
+.pnote.segmode.nomat{background:#8E97A3!important;--cc:#8E97A3}
+.pnote.segmode.nomat .nchar{background:#8E97A3!important}
 .pnote.rowmode .reddot{top:50%;transform:translateY(-50%);inset-inline-end:11px}
 .pnote.segmode .reddot{top:3px;inset-inline-end:3px;font-size:8.5px;padding:2px 4px}
 .mchip .reddot{position:static;display:inline-block;margin-inline-end:5px;font-size:8.5px;padding:2px 5px;box-shadow:none;vertical-align:1px}
@@ -3717,7 +3730,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4300,11 +4313,15 @@ function fromMat(x){
 function note(x,extra){
  var ch=charOf(x.char);
  var _ca=colorAttrs(x);
- var h='<div class="pnote n-'+x.status+_ca.cls+(extra?" "+extra:"")+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(x.id)+'" style="'+esc(_ca.style)+'"';
+ var _fm=fromMat(x);
+ var _mc=_fm?" frommat":((x.status==="shot")?" nomat":"");
+ var h='<div class="pnote n-'+x.status+_ca.cls+_mc+(extra?" "+extra:"")+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(x.id)+'" style="'+esc(_ca.style)+'"';
  if(extra==="segmode"){var _sl=lineObj(lineOf(x));
   h+=' title="'+esc(x.id+" · "+x.title+" · "+(ch?ch.name:"")+(_sl?" · "+_sl.name:"")+" · "+STATUS[x.status].l)+'"'+(RO?"":' data-act="edit"');}
  h+='>';
- h+=reddot(x.status);
+ h+='<div class="ntop">'+reddot(x.status);
+ if(_fm&&!RO) h+='<button class="nwatch" data-act="watchpop" data-id="'+esc(_fm.d.k)+'" data-i="'+_fm.i+'" title="'+esc("מתוך רשימת הסצנות · "+dayLabel(_fm.d.date)+(_fm.x.tc?" · "+_fm.x.tc:"")+" · פתח נגן כאן על הטיימקוד")+'">'+(extra==="segmode"?"▶":"צפה")+'</button>';
+ h+='</div>';
  h+='<div class="nchar" style="background:'+esc(charColor(x.char))+'">'+esc(ch?ch.name:"ללא דמות");
  if(ch&&ch.role) h+='<small>'+esc(ch.role)+'</small>';
  h+='</div>';
@@ -4328,8 +4345,6 @@ function note(x,extra){
    h+='<button class="nedit ndel" data-act="dodel" data-id="'+esc(x.id)+'">כן, מחק</button>';
    h+='<button class="nedit" data-act="nodel">ביטול</button>';
   } else {
-   var _fm=fromMat(x);
-   if(_fm) h+='<button class="nedit nwatch" data-act="matwatch" data-id="'+esc(_fm.d.k)+'" data-i="'+_fm.i+'" title="'+esc("מתוך רשימת הסצנות, "+dayLabel(_fm.d.date)+(_fm.x.tc?" · "+_fm.x.tc:"")+". פתח בנגן על הטיימקוד")+'">צפה</button>';
    h+='<button class="nedit" data-act="edit" data-id="'+esc(x.id)+'">ערוך</button>';
    h+='<button class="nedit ndel" data-act="askdel" data-id="'+esc(x.id)+'">מחק</button>';
    h+='<select class="nmove" data-id="'+esc(x.id)+'" title="העברה לפרק אחר">';
@@ -5654,6 +5669,25 @@ function vidBlock(d){
  }
  h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
  if(!open) return h+'</div>';
+ return h+vidRoom(d)+'</div>';
+}
+function watchPopView(){
+ var w=state.watchPop;
+ if(!w) return "";
+ var d=DAYS().filter(function(z){return z.k===w.d})[0];
+ if(!d) return "";
+ var x=(d.brk||[])[w.i]||{};
+ var h='<div class="modal" data-act="wpopclose"><div class="box wpopbox" data-stop="1">';
+ h+='<div class="mhead"><b>'+esc(x.t||"צפייה")+'</b>';
+ h+='<span style="font-weight:500;letter-spacing:0">'+esc(dayLabel(d.date)+(x.tc?"  ·  "+x.tc:""))+'</span>';
+ h+='<button data-act="wpopclose" title="סגור">×</button></div>';
+ h+='<div class="wpopbody">'+vidRoom(d)+'</div>';
+ h+='</div></div>';
+ return h;
+}
+function vidRoom(d){
+ var dids=driveIdsOf(d), fi=vidIx(d.k,dids.length||1), did=dids[fi]||"", notes=vnFor(d.k);
+ var h="";
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
  h+='<div class="vroom" data-vr="'+esc(d.k)+'">';
  h+='<div class="vrhead"><div class="modes vrmodes">';
@@ -5764,7 +5798,7 @@ function vidBlock(d){
  });
  h+='</div>';
 
- return h+'</div></div>';
+ return h+'</div>';
 }
 function vrDrawAll(cv,strokes){
  if(!cv) return;
@@ -9421,6 +9455,7 @@ function paint(h){
   h+=form(null)+'</div></div>';
  }
  if(state.showUsers) h+=userPanel();
+ if(state.watchPop) h+=watchPopView();
  if(state.charPanel) h+=charPanelHtml();
  if(state.lsOpen) h+=suggPanel();
  if(state.feedOpen) h+=feedPanel();
@@ -10655,6 +10690,35 @@ document.addEventListener("click",function(e){
   if(qq) lst=lst.filter(function(t){return trMatches(t,qq).length});
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
   return}
+ if(act==="watchpop"){
+  var _pd=DAYS().filter(function(z){return z.k===id})[0];
+  if(!_pd||!_pd.brk) return;
+  var _pi=Number(b.getAttribute("data-i"))||0;
+  var _px=_pd.brk[_pi];
+  if(!_px) return;
+  var _prg=tcRange(_px.tc);
+  if(!_prg){ toast("אין טיימקוד לסצנה הזו",true); return }
+  if(!(driveIdsOf(_pd)||[]).length){ toast("אין וידאו ליום הזה",true); return }
+  if(state.vidOpen&&state.vidOpen!==id) vrRelease();
+  state.vidOpen="";
+  var _pvf=Number(_px.vf)||0;
+  state.vidFile=state.vidFile||{};
+  if((Number(state.vidFile[id])||0)!==_pvf){ state.vidFile[id]=_pvf; if(VR.day===id) vrRelease() }
+  if(VR.day!==id||!VR.url) vrUse(id);
+  state.vidMode=state.vidMode||{};
+  state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
+  VR.subOn=VR.subOn||{}; VR.subOn[id]=true;
+  VR.t=_prg.a; VR.range={a:_prg.a,b:_prg.b,t:_px.t||"",day:id,vf:_pvf};
+  VR.pend=_prg.a;
+  if(VR.video&&VR.day===id&&VR.url){ try{ VR.video.currentTime=_prg.a; VR.video.play().catch(function(){}) }catch(_){} }
+  state.watchPop={d:id,i:_pi};
+  render();
+  setTimeout(function(){
+   var ifr=document.querySelector('.wpopbody .vroom[data-vr="'+id+'"] iframe');
+   if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_prg.a)+"s&autoplay=1" }
+  },90);
+  return}
+ if(act==="wpopclose"){ if(modalKeep(e,b))return; state.watchPop=null; VR.range=null; render(); return}
  if(act==="matwatch"){
   var _wd=DAYS().filter(function(z){return z.k===id})[0];
   if(!_wd||!_wd.brk) return;
