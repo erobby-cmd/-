@@ -4987,7 +4987,48 @@ function rawCues(t){
  return c;
 }
 /* ===== קבצי כתוביות שהועלו לפרויקט ===== */
-var SRTMAP={"Day01 group.mp4":"day01.srt"};
+/* טיימקוד ההתחלה האמיתי של כל קובץ גלם, נקרא מתוך רצועת ה-tmcd של הקובץ עצמו */
+var TC0MAP={
+ "Day01 group.mp4":47298.640,
+ "Day02_for_editor_2.5GB.mov":34512.400,
+ "Day03_for_editor_TC_2.5GB.mov":34512.400,
+ "Day04_for_editor_TC_2.5GB.mov":34512.400,
+ "Day05_for_editor_TC_2.5GB.mov":34512.400,
+ "Day6.mov":34512.400,
+ "Day7.mov":34512.400,
+ "Day8.mov":34512.400,
+ "Day09-200826_With Hanan.Exported.01.mp4":68227.280,
+ "Day10-210826_Dolev, Noam, Moshe, Ido.mp4":66231.280,
+ "Day10-210826_Tomar, Noa, Klarin, Liam, Yosef.mp4":16733.800
+};
+function fileTC0(d,fi){
+ if(VR.day===d.k&&(Number(dayFi(d))||0)===(Number(fi)||0)&&VR.tc0!==null&&VR.tc0!==undefined) return VR.tc0;
+ var ids=driveIdsOf(d)||[], nm=driveNameOf(ids[fi]||"");
+ if(nm&&TC0MAP[nm]!==undefined) return TC0MAP[nm];
+ if(d&&d.tc0!==undefined&&d.tc0!==null&&d.tc0!=="") return Number(d.tc0)||0;
+ return null;
+}
+function cueBase(d,fi,raw){
+ var t0=fileTC0(d,fi);
+ var span=raw.length?(raw[raw.length-1].rb-raw[0].ra):0;
+ if(t0!==null&&raw.length){
+  var off=raw[0].ra-t0;
+  var dur=fileEnd(d,fi)||tcSec(d.brdur||"")||0;
+  if(off>=-60&&(!dur||off<dur+600)) return off;
+ }
+ return Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-span));
+}
+var SRTMAP={
+ "Day01 group.mp4":"srt/day01.srt",
+ "Day02_for_editor_2.5GB.mov":"srt/day02.srt",
+ "Day03_for_editor_TC_2.5GB.mov":"srt/day03.srt",
+ "Day04_for_editor_TC_2.5GB.mov":"srt/day04.srt",
+ "Day05_for_editor_TC_2.5GB.mov":"srt/day05.srt",
+ "Day6.mov":"srt/day06.srt",
+ "Day7.mov":"srt/day07.srt",
+ "Day8.mov":"srt/day08.srt",
+ "Day09-200826_With Hanan.Exported.01.mp4":"srt/day09.srt"
+};
 var SRTRAW={}, srtBusy={};
 var SRTDB={}, srtDbBusy={};
 function srtRowId(dk,fi){ return "srt:"+dk+"#"+(Number(fi)||0) }
@@ -5101,8 +5142,7 @@ function dayCues(d){
  var fi=dayFi(d);
  var sc=srtCues(d,fi);
  if(sc&&sc.length){
-  var sbase=(VR.day===d.k&&VR.tc0!==null&&VR.tc0!==undefined)?(sc[0].ra-VR.tc0)
-   :Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-(sc[sc.length-1].rb-sc[0].ra)));
+  var sbase=cueBase(d,fi,sc);
   var skey="srt|"+fi+"|"+Math.round(sbase*100);
   if(d.__smap&&d.__smapk===skey) return d.__smap;
   var smp=mapCues(sc,sbase);
@@ -5115,11 +5155,8 @@ function dayCues(d){
  var t=dayTrFor(d,fi);
  if(!t) return [];
  var raw=rawCues(t);
- var span=raw.length?(raw[raw.length-1].rb-raw[0].ra):0;
- var base=Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-span));
- var exact=(VR.day===d.k&&VR.tc0!==null&&VR.tc0!==undefined);
- if(exact) base=(raw.length?raw[0].ra:0)-VR.tc0;
- var key=fi+"|"+Math.round(base*100)+"|"+(exact?"x":"g");
+ var base=cueBase(d,fi,raw);
+ var key=fi+"|"+Math.round(base*100);
  if(t.__map&&t.__mapk===key) return t.__map;
  var mp=mapCues(raw,base);
  try{
@@ -5432,8 +5469,8 @@ function fileStartTC(file){
     var stsd=mp4Find(st,"stsd"); if(!stsd) continue;
     var ents=mp4Boxes(u8,dv,stsd.s+8,stsd.e);
     var tm=mp4Find(ents,"tmcd"); if(!tm) continue;
-    var q=tm.s+8;
-    var tscale=dv.getUint32(q+4), fdur=dv.getUint32(q+8), nfr=u8[q+12];
+    var q=tm.s;
+    var tscale=dv.getUint32(q+16), fdur=dv.getUint32(q+20), nfr=u8[q+24];
     if(!tscale||!fdur) continue;
     var stco=mp4Find(st,"stco"), co64=mp4Find(st,"co64"), off=null;
     if(stco&&stco.e-stco.s>=12) off=dv.getUint32(stco.s+8);
@@ -5733,10 +5770,7 @@ function vrMount(){
     if(!raw.length) raw=parseBrCues(txt);
     if(!raw.length){ toast("לא זיהיתי כתוביות בקובץ הזה",true); return }
     var _dd=DAYS().filter(function(z){return z.k===dk})[0];
-    var _sp=raw[raw.length-1].rb-raw[0].ra;
-    var _b0;
-    if(VR.day===dk&&VR.tc0!==null&&VR.tc0!==undefined) _b0=raw[0].ra-VR.tc0;
-    else _b0=_dd?Math.min(fileBase(_dd,dayFi(_dd)),Math.max(0,fileEnd(_dd,dayFi(_dd))-_sp)):0;
+    var _b0=_dd?cueBase(_dd,dayFi(_dd),raw):0;
     VR.subs=mapCues(raw,_b0);
     VR.subOn=VR.subOn||{}; VR.subOn[dk]=true;
     toast(raw.length+" שורות כתוביות נטענו"+((VR.tc0!==null&&VR.tc0!==undefined)?", מסונכרנות לטיימקוד של הקובץ":""));
