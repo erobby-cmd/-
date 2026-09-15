@@ -847,6 +847,22 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .cpmeta{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);white-space:nowrap}
 .npill.p-shot{background:var(--shot-soft);color:var(--shot)}
 .npill.p-dropped{background:var(--dropped-soft);color:var(--dropped)}
+.ltl2{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 0;box-shadow:var(--shadow);overflow:hidden}
+.ltl2-row{display:grid;grid-template-columns:200px minmax(0,1fr);align-items:stretch;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line)}
+.ltl2-row:last-child{border-bottom:0}
+.ltl2-row:hover{background:var(--surface-2)}
+.ltl2-name{display:flex;align-items:flex-start;gap:8px;min-width:0;padding-top:14px}
+.ltl2-name>i{width:10px;height:10px;border-radius:3px;background:var(--lc,#455160);flex:0 0 auto;margin-top:3px}
+.ltl2-name>div{min-width:0}
+.ltl2-name b{display:block;font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltl2-name em{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ltl2-name em.rng{color:var(--lc,#455160);font-weight:600}
+.ltl2-bar{margin-top:0!important;min-height:82px}
+.ltl2-ep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;justify-content:center;width:20px;border-inline-end:1px solid var(--line-2);margin-inline-end:2px}
+.ltl2-ep b{font-family:"Heebo",sans-serif;font-size:11px;font-weight:800;color:var(--ink-3)}
+.ltl2-ep:first-child{border-inline-end:0;width:16px}
+.ltl2-none{align-self:center;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3)}
+@media (max-width:820px){.ltl2-row{grid-template-columns:1fr;gap:6px}.ltl2-name{padding-top:0}}
 .ltl{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 0;box-shadow:var(--shadow);overflow:hidden}
 .ltl-row{display:grid;grid-template-columns:212px minmax(0,1fr);align-items:center;gap:14px;padding:5px 16px}
 .ltl-row:not(.ltl-head):hover{background:var(--surface-2)}
@@ -7918,38 +7934,37 @@ function seasonSeq(){
 function linesTimeline(){
  var LS=LINES(), seq=seasonSeq(), N=seq.length;
  if(!N) return '<div class="dempty"><b>אין סצנות להציג</b><p>הוסף סצנות ליומן והציר יופיע כאן.</p></div>';
- var pos={}; seq.forEach(function(x,i){pos[x.id]=i});
- var epStart=[],epCount={};
- seq.forEach(function(x,i){ var e=x.ep||1; if(epCount[e]===undefined){epCount[e]=0;epStart.push({ep:e,i:i})} epCount[e]++ });
- var h='<div class="ltl">';
- h+='<div class="ltl-row ltl-head"><div class="ltl-name">הציר של העונה</div><div class="ltl-track" style="grid-template-columns:repeat('+N+',minmax(0,1fr))">';
- epStart.forEach(function(b){
-  var e=DATA.eps.filter(function(x){return x.n===b.ep})[0];
-  h+='<div class="ltl-ep" style="grid-column:'+(b.i+1)+' / span '+epCount[b.ep]+'"><b>פרק '+b.ep+'</b><span>'+esc(e?e.title:"")+'</span></div>';
- });
- h+='</div></div>';
- var rows=LS.map(function(l){return {k:l.k,name:l.name,color:l.color||"#455160"}});
- rows.push({k:"",name:"בלי ליין",color:"#8A93A0"});
+ var rows=LS.map(function(l){return {k:l.k,name:l.name,what:l.what||"",color:l.color||"#455160"}});
+ rows.push({k:"",name:"בלי ליין",what:"סצנות שעוד לא שייכות לשום סיפור",color:"#8A93A0"});
+ var h='<div class="ltl2">';
  rows.forEach(function(r){
   var mine=seq.filter(function(x){return lineOf(x)===r.k});
   if(!mine.length&&r.k==="") return;
-  var first=mine.length?pos[mine[0].id]:-1, last=mine.length?pos[mine[mine.length-1].id]:-1;
-  h+='<div class="ltl-row"><div class="ltl-name" style="--lc:'+esc(r.color)+'"><i></i><b>'+esc(r.name)+'</b><em>'+mine.length+'</em></div>';
-  h+='<div class="ltl-track" style="grid-template-columns:repeat('+N+',minmax(0,1fr))">';
-  if(mine.length>1) h+='<div class="ltl-span" style="grid-column:'+(first+1)+' / span '+(last-first+1)+';--lc:'+esc(r.color)+'"></div>';
-  epStart.forEach(function(b,bi){ if(bi) h+='<span class="ltl-sep" style="inset-inline-start:'+(b.i/N*100).toFixed(3)+'%"></span>' });
-  mine.forEach(function(x){
-   var lo=lineObj(r.k);
-   h+='<button class="ltl-seg t-'+x.status+'" style="grid-column:'+(pos[x.id]+1)+';--lc:'+esc(r.color)+'"'+(RO?"":' data-act="gotoscene" data-id="'+esc(x.id)+'"')+
-      ' title="'+esc(x.id+" · "+x.title+" · פרק "+(x.ep||1)+" · "+STATUS[x.status].l)+'"></button>';
-  });
+  var vis=mine.filter(function(x){return state.filter==="all"||x.status===state.filter});
+  var sh=mine.filter(function(x){return x.status==="shot"}).length;
+  var f=mine.length?(mine[0].ep||1):0, la=mine.length?(mine[mine.length-1].ep||1):0;
+  h+='<div class="ltl2-row" style="--lc:'+esc(r.color)+'">';
+  h+='<div class="ltl2-name"><i></i><div><b>'+esc(r.name)+'</b>';
+  h+='<em>'+(mine.length?(mine.length+' סצנות · '+sh+' צולמו'):'אין סצנות')+'</em>';
+  if(mine.length) h+='<em class="rng">'+(f===la?('פרק '+f):('פרק '+f+' עד '+la))+'</em>';
+  h+='</div></div>';
+  h+='<div class="notes tlbar ltl2-bar">';
+  if(!vis.length){ h+='<span class="ltl2-none">'+(mine.length?'אין סצנות בסינון הזה':'הליין הזה עוד ריק')+'</span>' }
+  else{
+   var lastEp=null;
+   vis.forEach(function(x){
+    var ep=Number(x.ep)||1;
+    if(ep!==lastEp){ h+='<span class="ltl2-ep"><b>'+ep+'</b></span>'; lastEp=ep }
+    h+=note(x,"segmode");
+   });
+  }
   h+='</div></div>';
  });
  h+='</div>';
- h+='<div class="legend"><span><i style="background:var(--shot)"></i>צולם</span>';
- h+='<span><i style="background:var(--partial)"></i>חלקי</span>';
- h+='<span><i class="ltl-key"></i>עוד לא צולם</span>';
- h+='<span style="color:var(--ink-3)">כל מלבן הוא סצנה אחת לפי סדר הצפייה בעונה. הפס הדהוי הוא הטווח שהליין חי בו, והחורים בתוכו הם הפרקים שהוא נשמט בהם</span></div>';
+ h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
+ h+='<span><i style="background:#E0A33C"></i>חלקי</span>';
+ h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
+ h+='<span style="color:var(--ink-3)">כל ליין והסצנות שלו לפי סדר הצפייה בעונה. הצבע הוא הדמות, הפס למטה הוא הסטטוס, והמספר בין הקטעים הוא הפרק שמתחיל שם. לחיצה פותחת את הסצנה</span></div>';
  return h;
 }
 
