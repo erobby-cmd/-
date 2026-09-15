@@ -5969,6 +5969,15 @@ function vidRoom(d){
  } else {
   if(did){
    h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+   if(state.watchPop&&state.watchPop.d===d.k){
+    var _wx=(d.brk||[])[state.watchPop.i]||{}, _wr=tcRange(_wx.tc);
+    h+='<div class="vrclk nosub"><span class="vrhint"><b>'+esc(_wx.t||"")+'</b> מתחילה ב <b dir="ltr">'+esc(vfmt(_wr?_wr.a:0).slice(0,7))+'</b>. הנגן של גוגל לא ניתן לקפיצה מבחוץ, אז גלול אל הזמן הזה בעצמך. עם הקובץ מהמחשב זה קופץ לבד לשנייה הנכונה</span>';
+    var _wfi=vidIx(d.k,dids.length||1);
+    if(FS.state==="ready"&&fsHas(d,_wfi)) h+='<button class="vrb big" data-act="fsuse" data-id="'+esc(d.k)+'" data-i="'+_wfi+'">פתח מהתיקייה וקפוץ לטיימקוד</button>';
+    else if(FS.state==="ask") h+='<button class="vrb big" data-act="fsgrant">הפעל את תיקיית הגלם</button>';
+    else if(FS.state!=="nosupport") h+='<button class="vrb big" data-act="fspick">חבר תיקיית גלם</button>';
+    h+='</div>';
+   }
    if(dayCues(d).length){
     h+='<div class="vrclk nosub"><span class="vrhint">התרגום רכוב על הטיימקוד של הוידאו עצמו. הנגן של גוגל לא מוסר לנו את הטיימקוד שלו, אז כאן אין כתוביות. עבור לקובץ מהמחשב והתרגום ירוץ מדויק, לפי הטיימקוד של הקובץ מול הטיימקוד של התרגום</span>';
     h+='<button class="vrb big" data-act="vidmode" data-id="'+esc(d.k)+'" data-k="file">צפה עם התרגום, קובץ מהמחשב</button>';
@@ -6040,7 +6049,7 @@ function vrSize(cv){
  }
 }
 function vrMount(){
- var dk=state.vidOpen;
+ var dk=state.vidOpen||((state.watchPop&&state.watchPop.d)||"");
  if(!dk){ if(VR.video&&VR.video.parentNode) VR.video.parentNode.removeChild(VR.video); return }
  var fin=document.querySelector('.vrfile[data-day="'+dk+'"]');
  if(fin&&!fin.__w){
@@ -6097,6 +6106,17 @@ function vrMount(){
  }
  if(VR.video.getAttribute("src")!==VR.url){ VR.video.src=VR.url }
  if(VR.video.parentNode!==stage) stage.insertBefore(VR.video,stage.firstChild);
+ if(VR.pend!==null&&VR.pend!==undefined){
+  (function(){
+   var _v=VR.video, _p=VR.pend;
+   var _go=function(){
+    try{ _v.currentTime=_p; VR.t=_p; _v.play().catch(function(){}) }catch(_){}
+    if(VR.pend===_p) VR.pend=null;
+   };
+   if(_v.readyState>0) _go();
+   else _v.addEventListener("loadedmetadata",_go,{once:true});
+  })();
+ }
  var cv=stage.querySelector(".vrdraw");
  var room=stage.closest(".vroom");
  var v=VR.video;
@@ -10961,36 +10981,56 @@ document.addEventListener("click",function(e){
  if(act==="fsrescan"){ fsScan().then(function(){ toast("\u05e0\u05e1\u05e8\u05e7\u05d5 "+((FS.idx&&FS.idx.n)||0)+" \u05e7\u05d1\u05e6\u05d9 \u05d5\u05d9\u05d3\u05d0\u05d5"); render() }); return}
  if(act==="fsuse"){
   var _fu=Number(b.getAttribute("data-i"))||0;
+  if(state.watchPop&&state.watchPop.d===id){
+   var _fd=DAYS().filter(function(z){return z.k===id})[0]||{};
+   var _fx=(_fd.brk||[])[state.watchPop.i]||{}, _fr=tcRange(_fx.tc);
+   if(_fr){ VR.pend=_fr.a; VR.t=_fr.a; VR.range={a:_fr.a,b:_fr.b,t:_fx.t||"",day:id,vf:Number(_fx.vf)||0} }
+  }
   fsLoad(id,_fu).then(function(ok){ if(!ok) toast("\u05dc\u05d0 \u05de\u05e6\u05d0\u05ea\u05d9 \u05d0\u05ea \u05d4\u05e7\u05d5\u05d1\u05e5 \u05d1\u05ea\u05d9\u05e7\u05d9\u05d9\u05d4",true) });
   return}
- if(act==="watchpop"){
-  var _pd=DAYS().filter(function(z){return z.k===id})[0];
-  if(!_pd||!_pd.brk) return;
-  var _pi=Number(b.getAttribute("data-i"))||0;
-  var _px=_pd.brk[_pi];
-  if(!_px) return;
-  var _prg=tcRange(_px.tc);
-  if(!_prg){ toast("אין טיימקוד לסצנה הזו",true); return }
-  if(!(driveIdsOf(_pd)||[]).length){ toast("אין וידאו ליום הזה",true); return }
-  if(state.vidOpen&&state.vidOpen!==id) vrRelease();
-  state.vidOpen="";
-  var _pvf=Number(_px.vf)||0;
-  state.vidFile=state.vidFile||{};
-  if((Number(state.vidFile[id])||0)!==_pvf){ state.vidFile[id]=_pvf; if(VR.day===id) vrRelease() }
-  if(VR.day!==id||!VR.url) vrUseOrFs(id);
-  state.vidMode=state.vidMode||{};
-  state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
-  VR.subOn=VR.subOn||{}; VR.subOn[id]=true;
-  VR.t=_prg.a; VR.range={a:_prg.a,b:_prg.b,t:_px.t||"",day:id,vf:_pvf};
-  VR.pend=_prg.a;
-  if(VR.video&&VR.day===id&&VR.url){ try{ VR.video.currentTime=_prg.a; VR.video.play().catch(function(){}) }catch(_){} }
-  state.watchPop={d:id,i:_pi};
-  render();
-  setTimeout(function(){
-   var ifr=document.querySelector('.wpopbody .vroom[data-vr="'+id+'"] iframe');
-   if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_prg.a)+"s&autoplay=1" }
-  },90);
-  return}
+  if(act==="watchpop"){
+   var _pd=DAYS().filter(function(z){return z.k===id})[0];
+   if(!_pd||!_pd.brk) return;
+   var _pi=Number(b.getAttribute("data-i"))||0;
+   var _px=_pd.brk[_pi];
+   if(!_px) return;
+   var _prg=tcRange(_px.tc);
+   if(!_prg){ toast("אין טיימקוד לסצנה הזו",true); return }
+   if(!(driveIdsOf(_pd)||[]).length){ toast("אין וידאו ליום הזה",true); return }
+   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
+   state.vidOpen="";
+   var _pvf=Number(_px.vf)||0;
+   state.vidFile=state.vidFile||{};
+   if((Number(state.vidFile[id])||0)!==_pvf){ state.vidFile[id]=_pvf; if(VR.day===id) vrRelease() }
+   VR.subOn=VR.subOn||{}; VR.subOn[id]=true;
+   VR.t=_prg.a; VR.range={a:_prg.a,b:_prg.b,t:_px.t||"",day:id,vf:_pvf};
+   VR.pend=_prg.a;
+   state.watchPop={d:id,i:_pi};
+   /* הקובץ עולה לבד, מהזיכרון או מהתיקייה המחוברת */
+   if(!(VR.day===id&&VR.url)){
+    if(!vrUse(id)){
+     if(FS.state==="ready"&&fsHas(_pd,_pvf)){ fsLoad(id,_pvf) }
+     else if(FS.state==="ask"&&FS.root&&FS.root.requestPermission){
+      FS.root.requestPermission({mode:"read"}).then(function(st){
+       if(st!=="granted") return null;
+       return fsScan().then(function(){ return fsLoad(id,_pvf) });
+      }).catch(function(){});
+     }
+    }
+   }
+   state.vidMode=state.vidMode||{};
+   state.vidMode[id]=(VR.day===id&&VR.url)?"file":(state.vidMode[id]||"drive");
+   render();
+   setTimeout(function(){
+    if(VR.video&&VR.day===id&&VR.url&&VR.video.readyState>0&&VR.pend!==null&&VR.pend!==undefined){
+     try{ VR.video.currentTime=VR.pend; VR.t=VR.pend; VR.video.play().catch(function(){}) }catch(_){}
+     VR.pend=null;
+    }
+    var ifr=document.querySelector('.wpopbody .vroom[data-vr="'+id+'"] iframe');
+    if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_prg.a)+"s&autoplay=1" }
+   },120);
+   toast("הסצנה "+(_px.t||"")+" · "+vfmt(_prg.a).slice(0,7));
+   return}
  if(act==="wpopclose"){ if(modalKeep(e,b))return; state.watchPop=null; VR.range=null; render(); return}
  if(act==="matwatch"){
   var _wd=DAYS().filter(function(z){return z.k===id})[0];
