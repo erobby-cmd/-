@@ -4944,10 +4944,9 @@ function parseCues(txt){
  blocks.forEach(function(bl){
   var sm=String(bl).trim().match(/^\u05d3\u05d5\u05d1\u05e8:\s*(.+)$/);
   if(sm&&sm[1].indexOf("\n")<0){ sp=(sm[1].trim()==="\u05dc\u05d0 \u05de\u05d6\u05d5\u05d4\u05d4")?"":sm[1].trim(); return }
-  var L=bl.split("\n"), i=0;
-  while(i<L.length&&!/\d/.test(L[i])) i++;
-  var line=String(L[i]||"");
-  var m=line.match(/(\d{1,2}):(\d{2}):(\d{2})[:;,.](\d{1,3})\s*(?:-->|\s)\s*(\d{1,2}):(\d{2}):(\d{2})[:;,.](\d{1,3})/);
+  var L=bl.split("\n"), i=0, m=null;
+  var RE=/(\d{1,2}):(\d{2}):(\d{2})[:;,.](\d{1,3})\s*(?:-->|\s)\s*(\d{1,2}):(\d{2}):(\d{2})[:;,.](\d{1,3})/;
+  for(i=0;i<L.length;i++){ m=String(L[i]).match(RE); if(m) break }
   if(!m) return;
   var t=L.slice(i+1).join(" ").replace(/\s+/g," ").trim();
   if(!t) return;
