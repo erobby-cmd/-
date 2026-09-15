@@ -5047,7 +5047,12 @@ function dayForm(d){
  }).join("")+'</div></div>';
  h+='<div class="f"><label>עוד מי שהיה בפריים</label><input name="people" value="'+esc(d.people||"")+'" placeholder="מופרד בפסיקים"></div>';
  h+='<div class="f"><label>רגעים חזקים</label><textarea name="moments" style="min-height:96px" placeholder="שורה לכל רגע">'+esc(lines(d.moments))+'</textarea><p class="hint">שורה לכל רגע. מה שנתפס במצלמה ושווה לחזור אליו</p></div>';
- h+='<div class="f"><label>קישור LexiCut</label><input name="lexi" value="'+esc(d.lexi||"")+'" dir="ltr" placeholder="https://lexicut.com/watch/..." autocomplete="off"><p class="hint">אם יש כאן קישור, הנגן שבמסך יהיה של LexiCut ולא של הדרייב. ההערות עם הטיימקוד עובדות בדיוק אותו דבר</p></div>';
+ var _lfn=(driveIdsOf(d)||[]).length||1;
+ for(var _li=0;_li<_lfn;_li++){
+  h+='<div class="f"><label>קישור LexiCut'+(_lfn>1?(" · "+esc(vidLabel(d,_li))):"")+'</label>';
+  h+='<input name="lexi'+_li+'" value="'+esc(lexiOf(d,_li))+'" dir="ltr" placeholder="https://lexicut.com/watch/..." autocomplete="off"></div>';
+ }
+ h+='<p class="hint">אם יש כאן קישור, הנגן שבמסך יהיה של LexiCut ולא של הדרייב. קישור לכל קובץ בנפרד. ההערות עם הטיימקוד עובדות בדיוק אותו דבר</p>';
  h+='<div class="f"><label>הערות מהיום</label><textarea name="note" style="min-height:76px" placeholder="מה עבד, מה פספסנו, למה לחזור">'+esc(d.note||"")+'</textarea></div>';
  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="saveday" data-id="'+esc(d.k)+'">שמור</button>';
  h+='<button class="btn ghost" data-act="cancelgrp">ביטול</button>';
@@ -5861,7 +5866,7 @@ function srtName(d){
 function vidBlock(d){
  var open=state.vidOpen===d.k;
  var dids=driveIdsOf(d), fi=vidIx(d.k,dids.length||1), did=dids[fi]||"", notes=vnFor(d.k);
- if(!dids.length&&!d.lexi) return '<div class="dsec vidsec nov"><h4>חדר צפייה</h4><p class="brnote">אין וידאו ליום הזה</p></div>';
+ if(!dids.length&&!lexiAny(d)) return '<div class="dsec vidsec nov"><h4>חדר צפייה</h4><p class="brnote">אין וידאו ליום הזה</p></div>';
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
@@ -5876,7 +5881,7 @@ function vidBlock(d){
   if(_sc&&_sc.length&&srtDbGet(d.k,_sfi)) h+=' <button class="tinyedit" data-act="srtdel" data-id="'+esc(d.k)+'" data-i="'+_sfi+'" title="הסרת קובץ הכתוביות">הסר</button>';
   h+='</p>';
  }
- h+='<button class="btn ghost brtog'+((dids.length||d.lexi)?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":((dids.length||d.lexi)?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
+ h+='<button class="btn ghost brtog'+((dids.length||lexiAny(d))?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":((dids.length||lexiAny(d))?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
  if(!open) return h+'</div>';
  return h+vidRoom(d)+'</div>';
 }
@@ -5894,6 +5899,21 @@ function watchPopView(){
  h+='</div></div>';
  return h;
 }
+function lexiOf(d,fi){
+ if(!d) return "";
+ fi=Number(fi)||0;
+ if(Array.isArray(d.lexis)&&d.lexis[fi]) return String(d.lexis[fi]);
+ if(d.lexi){
+  var n=(driveIdsOf(d)||[]).length;
+  if(fi===0||n<2) return String(d.lexi);
+ }
+ return "";
+}
+function lexiAny(d){
+ if(!d) return false;
+ if(d.lexi) return true;
+ return !!(Array.isArray(d.lexis)&&d.lexis.filter(Boolean).length);
+}
 function vidRoom(d){
  var dids=driveIdsOf(d), fi=vidIx(d.k,dids.length||1), did=dids[fi]||"", notes=vnFor(d.k);
  var h="";
@@ -5901,7 +5921,7 @@ function vidRoom(d){
  h+='<div class="vroom" data-vr="'+esc(d.k)+'">';
  h+='<div class="vrhead"><div class="modes vrmodes">';
  h+='<button data-act="vidmode" data-id="'+esc(d.k)+'" data-k="file" aria-pressed="'+(mode==="file")+'">קובץ מהמחשב</button>';
- h+='<button data-act="vidmode" data-id="'+esc(d.k)+'" data-k="drive" aria-pressed="'+(mode==="drive")+'">'+(d.lexi?"LexiCut":"דרייב")+'</button>';
+ h+='<button data-act="vidmode" data-id="'+esc(d.k)+'" data-k="drive" aria-pressed="'+(mode==="drive")+'">'+(lexiAny(d)?"LexiCut":"דרייב")+'</button>';
  h+='</div>';
  h+='<span class="vrhint">'+(mode==="file"
    ?"נגן מלא. רווח נגן ועצור, חצים פריים אחד, חץ למעלה ולמטה עשר שניות"
@@ -5969,7 +5989,8 @@ function vidRoom(d){
   }
  } else {
   if(did){
-   if(d.lexi) h+='<div class="vrstage drv lexi"><iframe src="'+esc(d.lexi)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+   var _lx=lexiOf(d,fi);
+   if(_lx) h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    else h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    if(state.watchPop&&state.watchPop.d===d.k){
     var _wx=(d.brk||[])[state.watchPop.i]||{}, _wr=tcRange(_wx.tc);
@@ -5986,8 +6007,9 @@ function vidRoom(d){
     h+='</div>';
    }
   } else {
-   if(d.lexi){
-    h+='<div class="vrstage drv lexi"><iframe src="'+esc(d.lexi)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+   var _lx0=lexiOf(d,fi);
+   if(_lx0){
+    h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx0)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    } else {
    h+='<div class="vrstage"><div class="vrpick"><b>עוד אין קובץ מחובר ליום הזה</b>';
    h+='<span class="vrhint" style="color:#8A93A0">הדבק למטה את הקישור לקובץ מהדרייב</span>';
@@ -11002,7 +11024,7 @@ document.addEventListener("click",function(e){
    if(!_px) return;
    var _prg=tcRange(_px.tc);
    if(!_prg){ toast("אין טיימקוד לסצנה הזו",true); return }
-   if(!(driveIdsOf(_pd)||[]).length&&!_pd.lexi){ toast("אין וידאו ליום הזה",true); return }
+   if(!(driveIdsOf(_pd)||[]).length&&!lexiAny(_pd)){ toast("אין וידאו ליום הזה",true); return }
    if(state.vidOpen&&state.vidOpen!==id) vrRelease();
    state.vidOpen="";
    var _pvf=Number(_px.vf)||0;
@@ -11045,7 +11067,7 @@ document.addEventListener("click",function(e){
   if(!_wx) return;
   var _rg=tcRange(_wx.tc);
   if(!_rg){ toast("אין טיימקוד לסצנה הזו",true); return }
-  if(!(driveIdsOf(_wd)||[]).length&&!_wd.lexi){ toast("אין וידאו ליום הזה",true); return }
+  if(!(driveIdsOf(_wd)||[]).length&&!lexiAny(_wd)){ toast("אין וידאו ליום הזה",true); return }
   if(state.vidOpen&&state.vidOpen!==id) vrRelease();
   state.vidOpen=id;
   state.vidRow=id+"#"+Number(b.getAttribute("data-i"));
@@ -11844,7 +11866,10 @@ document.addEventListener("click",function(e){
    d.people=fval("__day__","people").trim();
    d.moments=toArr(fval("__day__","moments"));
    d.note=fval("__day__","note").trim();
-   d.lexi=fval("__day__","lexi").trim();
+   var _sn=(driveIdsOf(d)||[]).length||1, _sl=[], _si;
+   for(_si=0;_si<_sn;_si++) _sl.push(fval("__day__","lexi"+_si).trim());
+   d.lexis=_sl;
+   d.lexi=_sl[0]||"";
    d.crew=fval("__day__","crew")||d.crew||"us";
    d.chars=DATA.chars.filter(function(c){var f=dform&&dform.querySelector('[name="ch_'+c.k+'"]');return f&&f.checked}).map(function(c){return c.k});
   }});
