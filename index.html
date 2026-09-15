@@ -481,6 +481,7 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .subsw.on i{background:var(--accent)}
 .subsw.on i:after{inset-inline-start:14px}
 .vrb.srtpick{cursor:pointer;border-style:dashed}
+.tinyedit.srtup{cursor:pointer;border-style:dashed}
 .vrpin.pend{background:#F2C14E;box-shadow:0 0 0 2px rgba(242,193,78,.35);height:16px;margin-top:-4px}
 .subline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
 .lexitag{display:inline-block;margin-inline-start:8px;font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--accent);background:rgba(45,160,170,.14);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;vertical-align:middle}
@@ -4988,6 +4989,35 @@ function rawCues(t){
 /* ===== קבצי כתוביות שהועלו לפרויקט ===== */
 var SRTMAP={"Day01 group.mp4":"day01.srt"};
 var SRTRAW={}, srtBusy={};
+var SRTDB={}, srtDbBusy={};
+function srtRowId(dk,fi){ return "srt:"+dk+"#"+(Number(fi)||0) }
+function srtDbGet(dk,fi){
+ var k=dk+"#"+(Number(fi)||0);
+ if(SRTDB[k]!==undefined) return SRTDB[k];
+ if(srtDbBusy[k]) return undefined;
+ srtDbBusy[k]=1;
+ fetch(REST+"?id=eq."+encodeURIComponent(rid(srtRowId(dk,fi)))+"&select=data",{headers:HDR})
+  .then(function(r){return r.json()})
+  .then(function(j){
+   var dd=(j[0]||{}).data||null;
+   var c=null;
+   if(dd&&dd.text){ c=parseCues(dd.text); if(!c.length) c=parseBrCues(dd.text); if(!c.length) c=null; }
+   SRTDB[k]=c; srtDbBusy[k]=0;
+   if(c) render();
+  })
+  .catch(function(){ srtDbBusy[k]=0; SRTDB[k]=null });
+ return undefined;
+}
+function srtDbSave(dk,fi,text,name){
+ var k=dk+"#"+(Number(fi)||0);
+ var body=[{id:rid(srtRowId(dk,fi)),data:{at:Date.now(),by:state.me||"",name:name||"",text:text},updated_at:new Date().toISOString()}];
+ return fetch(REST,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(body)});
+}
+function srtDbDel(dk,fi){
+ var k=dk+"#"+(Number(fi)||0);
+ SRTDB[k]=null;
+ return fetch(REST+"?id=eq."+encodeURIComponent(rid(srtRowId(dk,fi))),{method:"DELETE",headers:HDR}).catch(function(){});
+}
 function srtUrlOf(d,fi){
  var ids=driveIdsOf(d)||[], nm=driveNameOf(ids[fi]||"");
  if(nm&&SRTMAP[nm]) return SRTMAP[nm];
@@ -4995,6 +5025,8 @@ function srtUrlOf(d,fi){
  return "";
 }
 function srtCues(d,fi){
+ var db=srtDbGet(d.k,fi);
+ if(db&&db.length) return db;
  var u=srtUrlOf(d,fi);
  if(!u) return null;
  if(SRTRAW[u]) return SRTRAW[u];
@@ -5115,7 +5147,10 @@ function subQuality(d){
 }
 
 function subDefault(d){
- return !!srtUrlOf(d,dayFi(d));
+ var fi=dayFi(d);
+ if(srtUrlOf(d,fi)) return true;
+ var db=srtDbGet(d.k,fi);
+ return !!(db&&db.length);
 }
 function subOn(d){
  if(!d) return false;
@@ -5416,6 +5451,33 @@ function fileStartTC(file){
   });
  }).catch(function(){ return null });
 }
+function srtUpWire(){
+ var ins=document.querySelectorAll(".srtupin");
+ for(var i=0;i<ins.length;i++){
+  (function(el){
+   if(el.__w) return;
+   el.__w=1;
+   el.addEventListener("change",function(){
+    var f=el.files&&el.files[0]; if(!f) return;
+    var dk=el.getAttribute("data-day"), fi=Number(el.getAttribute("data-fi"))||0;
+    var rd=new FileReader();
+    rd.onload=function(){
+     var txt=String(rd.result||"");
+     var c=parseCues(txt);
+     if(!c.length) c=parseBrCues(txt);
+     if(!c.length){ toast("לא זיהיתי כתוביות בקובץ הזה",true); return }
+     SRTDB[dk+"#"+fi]=c;
+     VR.subOn=VR.subOn||{}; VR.subOn[dk]=true;
+     try{ var _d=DAYS().filter(function(z){return z.k===dk})[0]; if(_d){ delete _d.__smap; delete _d.__smapk } }catch(_){}
+     srtDbSave(dk,fi,txt,f.name).then(function(){ toast(c.length+" שורות כתוביות נשמרו. כולם יראו אותן") })
+      .catch(function(){ toast("נטען אצלך, אבל השמירה בענן נכשלה",true) });
+     render();
+    };
+    rd.readAsText(f,"utf-8");
+   });
+  })(ins[i]);
+ }
+}
 function vnFocusWire(){
  if(document.__vnfw) return;
  document.__vnfw=1;
@@ -5476,6 +5538,17 @@ function vidBlock(d){
  var h='<div class="dsec vidsec"><h4>חדר צפייה</h4>';
  h+='<p class="brnote">'+(notes.length?(notes.length===1?"הערה אחת על הוידאו":notes.length+" הערות על הוידאו"):"עוד אין הערות על הוידאו")
    +(dids.length>1?(" · "+dids.length+" קבצים"):(did?"":" · הקובץ עוד לא מחובר"))+'</p>';
+ if(!RO){
+  var _sfi=fi, _sk=d.k+"#"+_sfi, _sc=srtCues(d,_sfi), _son=subOn(d);
+  h+='<p class="brnote subline">';
+  h+=(_sc&&_sc.length)?('כתוביות '+(dids.length>1?('· '+esc(vidLabel(d,_sfi))+' '):'')+'· '+_sc.length+' שורות')
+    :('אין כתוביות'+(dids.length>1?(' ל'+esc(vidLabel(d,_sfi))):'')+' לקובץ הזה');
+  if(_sc&&_sc.length) h+=' <button class="subsw'+(_son?" on":"")+'" data-act="subtog" data-id="'+esc(d.k)+'" title="הדלקה וכיבוי של הכתוביות"><i></i>'+(_son?"תרגום פועל":"אין תרגום")+'</button>';
+  h+=' <label class="tinyedit srtup" for="srtup-'+esc(d.k)+'-'+_sfi+'">'+((_sc&&_sc.length)?"החלף קובץ SRT":"העלה קובץ SRT")+'</label>';
+  h+='<input id="srtup-'+esc(d.k)+'-'+_sfi+'" class="srtupin" type="file" accept=".srt,.vtt,.txt,text/plain" data-day="'+esc(d.k)+'" data-fi="'+_sfi+'" style="display:none">';
+  if(_sc&&_sc.length&&srtDbGet(d.k,_sfi)) h+=' <button class="tinyedit" data-act="srtdel" data-id="'+esc(d.k)+'" data-i="'+_sfi+'" title="הסרת קובץ הכתוביות">הסר</button>';
+  h+='</p>';
+ }
  h+='<button class="btn ghost brtog'+(dids.length?" hl-yellow":"")+'" data-act="vidtog" data-id="'+esc(d.k)+'">'+(open?"סגור את הנגן":(dids.length?"צפייה בגלם":"חבר וידאו ליום הזה"))+'</button>';
  if(!open) return h+'</div>';
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
@@ -9247,6 +9320,7 @@ function saveUI(){
 }
 function paint(h){
  try{ vnFocusWire() }catch(_){}
+ try{ setTimeout(srtUpWire,0) }catch(_){}
  try{ var _t=M().title; if(_t&&document.title!==_t) document.title=_t }catch(_){}
  if(state.adding){
   h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
@@ -10730,6 +10804,13 @@ document.addEventListener("click",function(e){
   var _ip2=document.querySelector('.vrtc[data-clk="'+id+'"]');
   if(_ip2) _ip2.value=vfmt(clkNow(id)).slice(0,7);
   return}
+ if(act==="srtdel"){
+  var _sfi2=Number(b.getAttribute("data-i"))||0;
+  srtDbDel(id,_sfi2);
+  try{ var _d2=DAYS().filter(function(z){return z.k===id})[0]; if(_d2){ delete _d2.__smap; delete _d2.__smapk } }catch(_){}
+  if(VR.day===id) VR.subs=null;
+  toast("קובץ הכתוביות הוסר");
+  render();return}
  if(act==="subtog"){
   var _td2=DAYS().filter(function(z){return z.k===id})[0];
   if(!_td2) return;
