@@ -5615,7 +5615,21 @@ function vidBlock(d){
   }
  } else {
   if(did){
-   h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+   h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+   h+='<div class="vrsub drvsub" data-day="'+esc(d.k)+'"'+(subOn(d)?"":' hidden')+'></div></div>';
+   if(dayCues(d).length){
+    var _run=(CLK.day===d.k&&CLK.run);
+    h+='<div class="vrclk">';
+    h+='<button class="vrb big'+(_run?" on":"")+'" data-act="clkplay" data-id="'+esc(d.k)+'">'+(_run?"עצור כתוביות":"הפעל כתוביות")+'</button>';
+    h+='<span class="vrhint">טיימקוד</span>';
+    h+='<input class="vrtc" data-clk="'+esc(d.k)+'" value="'+esc(vfmt(clkNow(d.k)).slice(0,7))+'" autocomplete="off" title="השעון של הכתוביות. אפשר גם להקליד ידנית">';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-5">5 שניות-</button>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="5">+5 שניות</button>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-1">1-</button>';
+    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="1">1+</button>';
+    h+='<span class="vrhint">הנגן של גוגל סגור בפנינו, אז הכתוביות רצות על שעון שלנו. לחץ פליי בדרייב ומיד אחר כך כאן, וכוון עם המינוס והפלוס</span>';
+    h+='</div>';
+   }
   } else {
    h+='<div class="vrstage"><div class="vrpick"><b>עוד אין קובץ מחובר ליום הזה</b>';
    h+='<span class="vrhint" style="color:#8A93A0">הדבק למטה את הקישור לקובץ מהדרייב</span>';
