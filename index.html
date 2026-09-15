@@ -5895,7 +5895,7 @@ function watchPopView(){
  h+='<div class="mhead"><b>'+esc(x.t||"צפייה")+'</b>';
  h+='<span style="font-weight:500;letter-spacing:0">'+esc(dayLabel(d.date)+(x.tc?"  ·  "+x.tc:""))+'</span>';
  h+='<button data-act="wpopclose" title="סגור">×</button></div>';
- h+='<div class="wpopbody">'+vidRoom(d)+'</div>';
+ h+='<div class="wpopbody">'+vidRoom(d,true)+'</div>';
  h+='</div></div>';
  return h;
 }
@@ -5914,14 +5914,15 @@ function lexiAny(d){
  if(d.lexi) return true;
  return !!(Array.isArray(d.lexis)&&d.lexis.filter(Boolean).length);
 }
-function vidRoom(d){
+function vidRoom(d,noLexi){
  var dids=driveIdsOf(d), fi=vidIx(d.k,dids.length||1), did=dids[fi]||"", notes=vnFor(d.k);
+ var LX=function(i){ return noLexi?"":lexiOf(d,i) };
  var h="";
  var mode=(state.vidMode&&state.vidMode[d.k])||((VR.day===d.k&&VR.url)?"file":"drive");
  h+='<div class="vroom" data-vr="'+esc(d.k)+'">';
  h+='<div class="vrhead"><div class="modes vrmodes">';
  h+='<button data-act="vidmode" data-id="'+esc(d.k)+'" data-k="file" aria-pressed="'+(mode==="file")+'">קובץ מהמחשב</button>';
- h+='<button data-act="vidmode" data-id="'+esc(d.k)+'" data-k="drive" aria-pressed="'+(mode==="drive")+'">'+(lexiAny(d)?"LexiCut":"דרייב")+'</button>';
+ h+='<button data-act="vidmode" data-id="'+esc(d.k)+'" data-k="drive" aria-pressed="'+(mode==="drive")+'">'+((!noLexi&&lexiAny(d))?"LexiCut":"דרייב")+'</button>';
  h+='</div>';
  h+='<span class="vrhint">'+(mode==="file"
    ?"נגן מלא. רווח נגן ועצור, חצים פריים אחד, חץ למעלה ולמטה עשר שניות"
@@ -5989,7 +5990,7 @@ function vidRoom(d){
   }
  } else {
   if(did){
-   var _lx=lexiOf(d,fi);
+   var _lx=LX(fi);
    if(_lx) h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    else h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    if(state.watchPop&&state.watchPop.d===d.k){
@@ -6007,7 +6008,7 @@ function vidRoom(d){
     h+='</div>';
    }
   } else {
-   var _lx0=lexiOf(d,fi);
+   var _lx0=LX(fi);
    if(_lx0){
     h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx0)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    } else {
@@ -11016,7 +11017,7 @@ document.addEventListener("click",function(e){
   }
   fsLoad(id,_fu).then(function(ok){ if(!ok) toast("\u05dc\u05d0 \u05de\u05e6\u05d0\u05ea\u05d9 \u05d0\u05ea \u05d4\u05e7\u05d5\u05d1\u05e5 \u05d1\u05ea\u05d9\u05e7\u05d9\u05d9\u05d4",true) });
   return}
-  if(act==="watchpop"){
+  if(act==="watchpop"||act==="matwatch"){
    var _pd=DAYS().filter(function(z){return z.k===id})[0];
    if(!_pd||!_pd.brk) return;
    var _pi=Number(b.getAttribute("data-i"))||0;
