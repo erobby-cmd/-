@@ -513,6 +513,8 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vrb.big{font-size:13px;padding:5px 14px}
 .vrtime{font-variant-numeric:tabular-nums;font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink);min-width:118px;direction:ltr;text-align:center}
 .vrseek{flex:1 1 220px;position:relative;height:26px;min-width:160px;cursor:pointer}
+.clkseek{flex:1 1 260px;direction:ltr;touch-action:none}
+.clkseek .vrfill{background:#E0A100}
 .vrtrack{position:absolute;top:11px;left:0;right:0;height:4px;border-radius:3px;background:var(--line-2)}
 .vrfill{position:absolute;top:11px;left:0;height:4px;border-radius:3px;background:var(--ink-3);width:0}
 .vrpin{position:absolute;top:4px;width:3px;height:18px;border-radius:2px;background:var(--cc,#A8102E);cursor:pointer;transform:translateX(-1px)}
@@ -5206,10 +5208,12 @@ function subQuality(d){
 }
 
 function subDefault(d){
+ if(!d) return false;
  var fi=dayFi(d);
  if(srtUrlOf(d,fi)) return true;
  var db=srtDbGet(d.k,fi);
- return !!(db&&db.length);
+ if(db&&db.length) return true;
+ try{ return !!(dayCues(d)||[]).length }catch(_){ return false }
 }
 function subOn(d){
  if(!d) return false;
@@ -5435,6 +5439,12 @@ function clkTick(){
  }
  var inp=document.querySelector('.vrtc[data-clk="'+dk+'"]');
  if(inp&&document.activeElement!==inp) inp.value=vfmt(clkNow(dk)).slice(0,7);
+ var sk9=document.querySelector('.clkseek[data-clk="'+dk+'"]');
+ if(sk9&&!sk9.__drag){
+  var du9=Number(sk9.getAttribute("data-dur"))||0;
+  var fl9=sk9.querySelector(".clkfill");
+  if(fl9&&du9>0) fl9.style.width=(Math.max(0,Math.min(1,clkNow(dk)/du9))*100).toFixed(2)+"%";
+ }
 }
 /* ===== קריאת הטיימקוד ההתחלתי מתוך קובץ MP4/MOV ===== */
 function mp4Str(u8,p){ return String.fromCharCode(u8[p],u8[p+1],u8[p+2],u8[p+3]) }
@@ -5674,21 +5684,10 @@ function vidBlock(d){
   }
  } else {
   if(did){
-   h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>';
-   h+='<div class="vrsub drvsub" data-day="'+esc(d.k)+'"'+(subOn(d)?"":' hidden')+'></div></div>';
+   h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    if(dayCues(d).length){
-    var _run=(CLK.day===d.k&&CLK.run);
-    h+='<div class="vrclk">';
-    h+='<button class="vrb big'+(_run?" on":"")+'" data-act="clkplay" data-id="'+esc(d.k)+'">'+(_run?"עצור כתוביות":"הפעל כתוביות")+'</button>';
-    h+='<span class="vrhint">טיימקוד</span>';
-    h+='<input class="vrtc" data-clk="'+esc(d.k)+'" value="'+esc(vfmt(clkNow(d.k)).slice(0,7))+'" autocomplete="off" title="השעון של הכתוביות. אפשר גם להקליד ידנית">';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-5">5 שניות-</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="5">+5 שניות</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-1">1-</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="1">1+</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="-60">דקה-</button>';
-    h+='<button class="vrb" data-act="clknudge" data-id="'+esc(d.k)+'" data-d="60">+דקה</button>';
-    h+='<span class="vrhint">הנגן של גוגל סגור בפנינו, אז הכתוביות רצות על שעון שלנו. אחרי שאתה קופץ בתוך הוידאו, הקלד כאן את הזמן שמופיע בנגן של גוגל ולחץ אנטר, והכתוביות יקפצו לשם. אפשר גם לכוון עם המינוס והפלוס</span>';
+    h+='<div class="vrclk nosub"><span class="vrhint">התרגום רכוב על הטיימקוד של הוידאו עצמו. הנגן של גוגל לא מוסר לנו את הטיימקוד שלו, אז כאן אין כתוביות. עבור לקובץ מהמחשב והתרגום ירוץ מדויק, לפי הטיימקוד של הקובץ מול הטיימקוד של התרגום</span>';
+    h+='<button class="vrb big" data-act="vidmode" data-id="'+esc(d.k)+'" data-k="file">צפה עם התרגום, קובץ מהמחשב</button>';
     h+='</div>';
    }
   } else {
@@ -5802,24 +5801,6 @@ function vrMount(){
    };
    rd.readAsText(f,"utf-8");
   });
- }
- var tcin=document.querySelector('.vrtc[data-clk="'+dk+'"]');
- if(tcin&&!tcin.__w){
-  tcin.__w=1;
-  var _jump=function(){
-   var v0=String(tcin.value||"").trim();
-   if(!v0) return;
-   var sec=tcSec(v0);
-   if(sec===null||sec===undefined||isNaN(sec)) return;
-   if(CLK.day!==dk){ CLK.day=dk; CLK.run=false }
-   CLK.base=Math.max(0,sec);
-   CLK.t0=Date.now();
-   clkTick();
-   tcin.value=vfmt(clkNow(dk)).slice(0,7);
-   toast("\u05d4\u05db\u05ea\u05d5\u05d1\u05d9\u05d5\u05ea \u05e7\u05e4\u05e6\u05d5 \u05dc "+vfmt(sec).slice(0,7));
-  };
-  tcin.addEventListener("keydown",function(ev){ if(ev.key==="Enter"){ ev.preventDefault(); _jump() } });
-  tcin.addEventListener("change",_jump);
  }
  var stage=document.querySelector('[data-vrstage="'+dk+'"]');
  if(!stage||VR.day!==dk||!VR.url) return;
@@ -10678,6 +10659,7 @@ document.addEventListener("click",function(e){
    if(VR.day!==id||!VR.url) vrUse(id);
    state.vidMode=state.vidMode||{};
    if(VR.day===id&&VR.url) state.vidMode[id]="file";
+   VR.subOn=VR.subOn||{}; VR.subOn[id]=true;
   }
   render();return}
  if(act==="vidclrrange"){ VR.range=null; render(); return}
@@ -10896,13 +10878,11 @@ document.addEventListener("click",function(e){
   VR.subOn[id]=_on;
   b.classList.toggle("on",_on);
   b.innerHTML='<i></i>'+(_on?"תרגום פועל":"אין תרגום");
-  var _els=document.querySelectorAll('.drvsub[data-day="'+id+'"]');
-  for(var _i=0;_i<_els.length;_i++){ _els[_i].hidden=!_on; if(!_on){_els[_i].innerHTML="";_els[_i].__t=""} }
   var _fs=document.querySelector('.vrstage[data-vrstage="'+id+'"] .vrsub');
   if(_fs){ _fs.hidden=!_on; if(!_on){_fs.innerHTML="";_fs.__t=""} }
   var _sb=document.querySelector('.vroom[data-vr="'+id+'"] [data-vrc="sub"]');
   if(_sb) _sb.classList.toggle("on",_on);
-  if(CLK.day===id) clkTick();
+  try{ if(VR.day===id) vrMount() }catch(_){}
   toast(_on?"התרגום מופעל":"אין תרגום");
   return}
  if(act==="srtall"){
