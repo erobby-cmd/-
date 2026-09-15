@@ -5992,6 +5992,7 @@ function breakBlock(d){
   h+='<span class="brtc" dir="ltr">'+esc(x.tc||"")+'</span>';
   if(x.dur) h+='<span class="brdur">'+esc(x.dur)+'</span>';
   if(x.kind) h+='<span class="brkind">'+esc(bKind(x.kind))+'</span>';
+  if(tcRange(x.tc)&&(driveIdsOf(d)||[]).length) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(d.k)+'" data-i="'+i+'" title="פתח את הקטע הזה בנגן, בדיוק על הטיימקוד">צפה</button>';
   if(!RO) h+=toEpBtn(d.k,i);
   h+='</div>';
   var ii=(imgs&&imgs[i])||[];
@@ -10446,6 +10447,7 @@ document.addEventListener("click",function(e){
   state.vidOpen=id;
   state.vidRow=id+"#"+Number(b.getAttribute("data-i"));
   state.matDays=state.matDays||{}; state.matDays[id]=true;
+  state.logDays=state.logDays||{}; state.logDays[id]=true;
   var _wvf=Number(_wx.vf)||0;
   state.vidFile=state.vidFile||{};
   if((Number(state.vidFile[id])||0)!==_wvf){ state.vidFile[id]=_wvf; if(VR.day===id) vrRelease() }
