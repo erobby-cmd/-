@@ -537,6 +537,12 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vrempty{padding:12px 2px;color:var(--ink-3);font-size:12.5px}
 .vrlink{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid var(--line);background:var(--surface-2)}
 .vrlink textarea{flex:1 1 220px;min-width:150px;font-family:"Heebo",sans-serif;font-size:12px;padding:5px 9px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);direction:ltr;resize:vertical}
+.shelfbar{display:flex;gap:8px;margin:0 0 16px}
+.shelfep{margin:0 0 26px}
+.shelfep h3{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.shelfep h3 em{font-style:normal;font-size:11px;font-weight:700;background:var(--ink);color:var(--bg);border-radius:9px;padding:2px 8px}
+.notes.shelfnotes{display:flex;flex-direction:column;gap:7px}
+.nedit.nback{border-color:#2FA36B;color:#18603B;font-weight:700}
 .fsbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2)}
 .fsbar b{color:var(--ink);font-weight:700}
 .fsdot{width:9px;height:9px;border-radius:50%;background:#C6CBD2;flex:0 0 auto}
@@ -4113,6 +4119,21 @@ function render(){
   paint(h);
   return;
  }
+ if(state.group==="shelf"){
+  h+=shelfView();
+  h+='</div>';
+  if(state.editing){
+   var _se=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
+   if(_se){
+    h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+    h+='<div class="mhead"><span>עריכת סצנה '+esc(_se.id)+'</span><button data-act="cancel" title="סגור">×</button></div>';
+    h+=form(_se)+'</div></div>';
+   }
+  }
+  h+='<div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
  if(state.group==="board"){
   h+=board();
   h+='</div>';
@@ -4352,6 +4373,8 @@ function note(x,extra){
    h+='<button class="nedit" data-act="nodel">ביטול</button>';
   } else {
    h+='<button class="nedit" data-act="edit" data-id="'+esc(x.id)+'">ערוך</button>';
+   if(onShelf(x)) h+='<button class="nedit nback" data-act="unshelf" data-id="'+esc(x.id)+'" title="החזר את הסצנה למפת הפרקים">החזר למפה</button>';
+   else h+='<button class="nedit" data-act="toshelf" data-id="'+esc(x.id)+'" title="העבר לאחסון, לא נמחק כלום">לאחסון</button>';
    h+='<button class="nedit ndel" data-act="askdel" data-id="'+esc(x.id)+'">מחק</button>';
    h+='<select class="nmove" data-id="'+esc(x.id)+'" title="העברה לפרק אחר">';
    DATA.eps.forEach(function(ee){h+='<option value="'+ee.n+'"'+(ee.n===x.ep?" selected":"")+'>פרק '+ee.n+'</option>'});
@@ -4387,7 +4410,22 @@ function fixDupIds(){
  return fixed;
 }
 function byOrd(a,b){ return ((a.ord||0)-(b.ord||0))||String(a.id).localeCompare(String(b.id)) }
-function epScenes(n){ return DATA.scenes.filter(function(x){return x.ep===n}).sort(byOrd) }
+function shelfMap(){
+ DATA.meta=DATA.meta||{};
+ if(!DATA.meta.shelf||typeof DATA.meta.shelf!=="object") DATA.meta.shelf={};
+ return DATA.meta.shelf;
+}
+function onShelf(x){
+ if(!x) return false;
+ var m=(DATA&&DATA.meta&&DATA.meta.shelf)||{};
+ if(m[x.id]===1) return true;
+ if(m[x.id]===0) return false;
+ if(x.status!=="shot") return false;
+ return !fromMat(x);
+}
+function shelfList(){ return DATA.scenes.filter(onShelf).sort(byOrd) }
+function epScenes(n){ return DATA.scenes.filter(function(x){return x.ep===n&&!onShelf(x)}).sort(byOrd) }
+function epScenesAll(n){ return DATA.scenes.filter(function(x){return x.ep===n}).sort(byOrd) }
 function reindex(){
  DATA.eps.forEach(function(e){
   DATA.scenes.filter(function(x){return x.ep===e.n})
@@ -6942,6 +6980,33 @@ function needGroups(mode){
  }
  return g;
 }
+function shelfView(){
+ var rows=shelfList();
+ var h='<section class="grp"><div class="grp-h"><h2>אחסון</h2><span class="role">סצנות שירדו ממפת הפרקים</span>';
+ h+='<span class="meta">'+rows.length+' סצנות</span></div>';
+ h+='<p class="grp-note">כאן יושבות הסצנות שכתבת בעצמך וסומנו כצולמו, אבל אין להן שורה ברשימת הסצנות. לא נמחק כלום, הכל שמור עם הפרק והליין שלו, וכל סצנה חוזרת למפה בלחיצה אחת. סצנה שתקשר לשורה ברשימת הסצנות תצא מכאן לבד.</p>';
+ if(!rows.length){
+  return h+'<div class="dempty"><b>האחסון ריק</b><p>כל מה שעל המפה או שייך לרשימת הסצנות או עוד לא צולם.</p></div></section>';
+ }
+ var byEp={};
+ rows.forEach(function(x){ var k=Number(x.ep)||0; (byEp[k]=byEp[k]||[]).push(x) });
+ if(!RO) h+='<div class="shelfbar"><button class="tinyedit" data-act="shelfallback">החזר את כולן למפת הפרקים</button></div>';
+ DATA.eps.forEach(function(e){
+  var mine=byEp[e.n]||[];
+  if(!mine.length) return;
+  h+='<div class="shelfep"><h3><span class="epn">פרק '+e.n+' ·</span>'+esc(e.title)+'<em>'+mine.length+'</em></h3>';
+  h+='<div class="notes shelfnotes">';
+  mine.forEach(function(x){ h+=note(x,"rowmode") });
+  h+='</div></div>';
+ });
+ var loose=byEp[0]||[];
+ if(loose.length){
+  h+='<div class="shelfep"><h3>בלי פרק<em>'+loose.length+'</em></h3><div class="notes shelfnotes">';
+  loose.forEach(function(x){ h+=note(x,"rowmode") });
+  h+='</div></div>';
+ }
+ return h+'</section>';
+}
 function needView(){
  var mode=state.needMode||"char";
  var open=openScenes();
@@ -8205,7 +8270,7 @@ function lineForm(l){
 function seasonSeq(){
  var out=[];
  DATA.eps.forEach(function(e){
-  epScenes(e.n).filter(function(x){return x.status!=="dropped"})
+  epScenesAll(e.n).filter(function(x){return x.status!=="dropped"})
    .forEach(function(x){out.push(x)});
  });
  return out;
@@ -8600,8 +8665,8 @@ function vgOf(k){
 }
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["g:scenes","סצנות"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
+ {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
@@ -10871,6 +10936,25 @@ document.addEventListener("click",function(e){
   if(qq) lst=lst.filter(function(t){return trMatches(t,qq).length});
   exportTrDocx(lst,"תמלולים - "+M().title+(qq?" - "+qq:""));
   return}
+ if(act==="toshelf"){
+  if(RO)return; if(!ensureEdit())return;
+  shelfMap()[id]=1;
+  render();save();
+  toast("\u05d4\u05e1\u05e6\u05e0\u05d4 "+id+" \u05e2\u05d1\u05e8\u05d4 \u05dc\u05d0\u05d7\u05e1\u05d5\u05df");
+  return}
+ if(act==="unshelf"){
+  if(RO)return; if(!ensureEdit())return;
+  shelfMap()[id]=0;
+  render();save();
+  toast("\u05d4\u05e1\u05e6\u05e0\u05d4 "+id+" \u05d7\u05d6\u05e8\u05d4 \u05dc\u05de\u05e4\u05ea \u05d4\u05e4\u05e8\u05e7\u05d9\u05dd");
+  return}
+ if(act==="shelfallback"){
+  if(RO)return; if(!ensureEdit())return;
+  var _sl=shelfList(), _m=shelfMap();
+  _sl.forEach(function(z){ _m[z.id]=0 });
+  render();save();
+  toast(_sl.length+" \u05e1\u05e6\u05e0\u05d5\u05ea \u05d7\u05d6\u05e8\u05d5 \u05dc\u05de\u05e4\u05ea \u05d4\u05e4\u05e8\u05e7\u05d9\u05dd");
+  return}
  if(act==="fspick"){ fsPick(); return}
  if(act==="fsgrant"){ fsGrant(); return}
  if(act==="fsforget"){ fsForget(); return}
@@ -11619,7 +11703,7 @@ document.addEventListener("click",function(e){
   if(!ensureEdit())return;
   var sx=DATA.scenes.filter(function(z){return z.id===id})[0];
   if(!sx)return;
-  var col=epScenes(sx.ep), ci=col.map(function(z){return z.id}).indexOf(id);
+  var col=epScenesAll(sx.ep), ci=col.map(function(z){return z.id}).indexOf(id);
   var cj=ci+(act==="scup"?-1:1);
   if(ci<0||cj<0||cj>=col.length)return;
   var a1=col[ci], a2=col[cj], t1=a1.ord;
