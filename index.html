@@ -851,15 +851,19 @@ html.dragging .arc th.c0 .tinyedit{pointer-events:none}
 .ltl2-row{display:grid;grid-template-columns:200px minmax(0,1fr);align-items:stretch;gap:14px;padding:9px 16px;border-bottom:1px solid var(--line)}
 .ltl2-row:last-child{border-bottom:0}
 .ltl2-row:hover{background:var(--surface-2)}
-.ltl2-name{display:flex;align-items:flex-start;gap:8px;min-width:0;padding-top:14px}
+.ltl2-name{display:flex;align-items:flex-start;gap:8px;min-width:0;padding-top:4px}
 .ltl2-name>i{width:10px;height:10px;border-radius:3px;background:var(--lc,#455160);flex:0 0 auto;margin-top:3px}
 .ltl2-name>div{min-width:0}
 .ltl2-name b{display:block;font-family:"Heebo",sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ltl2-name em{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .ltl2-name em.rng{color:var(--lc,#455160);font-weight:600}
 .ltl2-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
-.ltl2-bar{margin-top:0!important;min-height:82px}
-.ltl2-ep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;justify-content:center;width:20px;border-inline-end:1px solid var(--line-2);margin-inline-end:2px}
+.ltl2-bar{margin-top:0!important;min-height:0;overflow-x:auto;overflow-y:hidden;padding-bottom:3px}
+.ltl2-bar .pnote.segmode{flex:0 0 72px;max-width:72px;min-height:62px;padding:5px 5px 10px}
+.ltl2-bar .pnote.segmode .c{font-size:9px}
+.ltl2-bar .pnote.segmode h4{font-size:10px;line-height:1.15;margin:2px 0 0;-webkit-line-clamp:3}
+.ltl2-bar .pnote.segmode::after{height:5px}
+.ltl2-ep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;justify-content:center;width:16px;border-inline-end:1px solid var(--line-2);margin-inline-end:2px}
 .ltl2-ep b{font-family:"Heebo",sans-serif;font-size:11px;font-weight:800;color:var(--ink-3)}
 .ltl2-ep:first-child{border-inline-end:0;width:16px}
 .ltl2-none{align-self:center;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3)}
@@ -8181,24 +8185,6 @@ function linesView(){
  var bad=LS.filter(function(l){return ST[l.k].kind!=="ok"});
  var h='<section class="grp"><div class="grp-h"><h2>מפת הליינים</h2><span class="role">כל סיפור לרוחב חמשת הפרקים</span>';
  h+='<span class="meta">'+LS.length+' ליינים · '+bad.length+' צריכים טיפול</span></div>';
- h+='<p class="grp-note">מפת הפרקים אומרת מה יש בתוך כל פרק. המפה הזו אומרת מה ממשיך מפרק לפרק. כל שורה היא סיפור אחד וכל עמודה היא פרק. תא ריק בין שני תאים מלאים הוא ליין שנשמט באמצע, וליין שכל כולו בפרק אחד הוא לא ליין אלא סצנה שהתחפשה לסיפור.</p>';
- h+=lineStrip();
-
- if(bad.length){
-  h+='<div class="ldiag">';
-  bad.forEach(function(l){
-   var s=ST[l.k];
-   h+='<div class="lcard" data-k="'+s.kind+'"><span class="ldot" style="background:'+esc(l.color||"#455160")+'"></span>';
-   h+='<b>'+esc(l.name)+(RO?"":'<button class="tinyedit lcedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>'+epnBtn("l:"+l.k,"מחשבות על הליין, כל המשתמשים רואים"))+'</b><span class="lbadge l-'+s.kind+'">'+esc(LKIND[s.kind].l)+'</span>';
-   h+='<p>'+esc(lineHint(l.k,s))+'</p></div>';
-  });
-  h+='</div>';
- }
- h+='<div class="modes">';
- [["table","טבלה"],["time","ציר זמן"]].forEach(function(m){
-  h+='<button data-act="lmode" data-k="'+m[0]+'" aria-pressed="'+((state.lineMode||"table")===m[0])+'">'+esc(m[1])+'</button>';
- });
- h+='</div>';
  if((state.lineMode||"table")==="time"){
   h+=linesTimeline();
   return h+'</section>';
