@@ -281,6 +281,7 @@ html.linedrag .mchip{pointer-events:none}
 .modes{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;margin-top:16px}
 .modes button{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:500;padding:6px 14px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;border-inline-start:1px solid var(--line-2)}
 .modes button:first-child{border-inline-start:0}
+.lmodes{margin:6px 0 14px}
 .modes button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .board.listmode,.board.tlmode{display:block;overflow:visible;padding-bottom:0}
 .epband{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:26px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
@@ -8185,7 +8186,13 @@ function linesView(){
  var bad=LS.filter(function(l){return ST[l.k].kind!=="ok"});
  var h='<section class="grp"><div class="grp-h"><h2>מפת הליינים</h2><span class="role">כל סיפור לרוחב חמשת הפרקים</span>';
  h+='<span class="meta">'+LS.length+' ליינים · '+bad.length+' צריכים טיפול</span></div>';
- if((state.lineMode||"table")==="time"){
+ var LM=state.lineMode||"table";
+ h+='<div class="modes lmodes">';
+ [["table","טבלה"],["time","ציר זמן"]].forEach(function(m){
+  h+='<button data-act="lmode" data-k="'+m[0]+'" aria-pressed="'+(LM===m[0])+'">'+esc(m[1])+'</button>';
+ });
+ h+='</div>';
+ if(LM==="time"){
   h+=linesTimeline();
   return h+'</section>';
  }
