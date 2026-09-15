@@ -4985,6 +4985,29 @@ function rawCues(t){
  try{ Object.defineProperty(t,"__cues",{value:c,enumerable:false,configurable:true}) }catch(_){ t.__cues=c }
  return c;
 }
+/* ===== קבצי כתוביות שהועלו לפרויקט ===== */
+var SRTMAP={"Day01 group.mp4":"day01.srt"};
+var SRTRAW={}, srtBusy={};
+function srtUrlOf(d,fi){
+ var ids=driveIdsOf(d)||[], nm=driveNameOf(ids[fi]||"");
+ if(nm&&SRTMAP[nm]) return SRTMAP[nm];
+ if(d&&d.srt) return d.srt;
+ return "";
+}
+function srtCues(d,fi){
+ var u=srtUrlOf(d,fi);
+ if(!u) return null;
+ if(SRTRAW[u]) return SRTRAW[u];
+ if(srtBusy[u]) return null;
+ srtBusy[u]=1;
+ fetch(u).then(function(r){return r.ok?r.text():""}).then(function(t){
+  var c=parseCues(t);
+  if(!c.length) c=parseBrCues(t);
+  SRTRAW[u]=c; srtBusy[u]=0;
+  if(c.length){ toast(c.length+" שורות כתוביות נטענו"); render() }
+ }).catch(function(){ srtBusy[u]=0 });
+ return null;
+}
 function normNm(x){ return String(x||"").toLowerCase().replace(/\.[^.]+$/,"").replace(/[^a-z0-9\u0590-\u05ff]+/g,"") }
 function dayFi(d){ return vidIx(d.k,(driveIdsOf(d)||[]).length||1) }
 function fileBrk(d,fi){
@@ -5043,7 +5066,21 @@ function mapCues(raw,base){
 function dayCues(d){
  if(!d) return [];
  if(VR.subs&&VR.subs.length&&VR.day===d.k) return VR.subs;
- var fi=dayFi(d), t=dayTrFor(d,fi);
+ var fi=dayFi(d);
+ var sc=srtCues(d,fi);
+ if(sc&&sc.length){
+  var sbase=(VR.day===d.k&&VR.tc0!==null&&VR.tc0!==undefined)?(sc[0].ra-VR.tc0)
+   :Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-(sc[sc.length-1].rb-sc[0].ra)));
+  var skey="srt|"+fi+"|"+Math.round(sbase*100);
+  if(d.__smap&&d.__smapk===skey) return d.__smap;
+  var smp=mapCues(sc,sbase);
+  try{
+   Object.defineProperty(d,"__smap",{value:smp,enumerable:false,configurable:true});
+   Object.defineProperty(d,"__smapk",{value:skey,enumerable:false,configurable:true});
+  }catch(_){ d.__smap=smp; d.__smapk=skey }
+  return smp;
+ }
+ var t=dayTrFor(d,fi);
  if(!t) return [];
  var raw=rawCues(t);
  var span=raw.length?(raw[raw.length-1].rb-raw[0].ra):0;
@@ -5061,7 +5098,10 @@ function dayCues(d){
 }
 function subQuality(d){
  if(!d) return {k:"none"};
- var fi=dayFi(d), t=dayTrFor(d,fi);
+ var fi=dayFi(d);
+ var sq=srtCues(d,fi);
+ if(sq&&sq.length) return {k:"ok",n:sq.length,diff:0};
+ var t=dayTrFor(d,fi);
  if(!t) return {k:"none"};
  var raw=rawCues(t);
  if(!raw.length) return {k:"none"};
@@ -5075,8 +5115,7 @@ function subQuality(d){
 }
 
 function subDefault(d){
- var q=subQuality(d);
- return q.k==="ok"||q.k==="fix";
+ return !!srtUrlOf(d,dayFi(d));
 }
 function subOn(d){
  if(!d) return false;
@@ -5467,7 +5506,7 @@ function vidBlock(d){
  }
  if(mode==="file"){
   if(VR.day===d.k&&VR.url){
-   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div></div>';
+   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div><div class="vrsub"'+(subOn(d)?"":' hidden')+'></div></div>';
    h+='<div class="vrbar">';
    h+='<button class="vrb big" data-vrc="play">נגן</button>';
    h+='<button class="vrb" data-vrc="b1">◀ פריים</button>';
@@ -5481,6 +5520,13 @@ function vidBlock(d){
    h+='<button class="vrb" data-vrc="nn" title="להערה הבאה">הערה ▶</button>';
    h+='<button class="vrb'+(VR.draw?" on":"")+'" data-vrc="draw">מרקר</button>';
    h+='<button class="vrb" data-vrc="clr">נקה ציור</button>';
+   var _sn=dayCues(d).length;
+   if(_sn){
+    h+='<button class="vrb'+(subOn(d)?" on":"")+'" data-vrc="sub" title="'+_sn+' שורות כתוביות">כתוביות</button>';
+    h+='<button class="vrb" data-vrc="sm" title="הכתוביות מאחרות, אחורה חצי שנייה">כת׳ −</button>';
+    h+='<span class="vrhint" data-vrc="soff">'+((Number(d.suboff)||0)?((d.suboff>0?"+":"")+Number(d.suboff).toFixed(1)+"ש"):"0")+'</span>';
+    h+='<button class="vrb" data-vrc="sp1" title="הכתוביות מקדימות, קדימה חצי שנייה">כת׳ +</button>';
+   }
    h+='</div>';
   } else {
    h+='<div class="vrstage"><div class="vrpick">';
