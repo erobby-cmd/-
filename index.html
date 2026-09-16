@@ -8399,16 +8399,16 @@ function mapUnitName(){
 function mapRows(){
  var b=mapBy();
  if(b==="char") return (DATA.chars||[]).map(function(c){
-   return {k:c.k,name:c.name,what:c.role||"",color:c.color||"#455160",
+   return {k:c.k,tg:"c:"+c.k,name:c.name,what:c.role||"",color:c.color||"#455160",
     f:function(x){ return x.char===c.k }} });
  if(b==="unit") return (DATA.units||[]).map(function(u){
-   return {k:u.k,name:u.name,what:u.what||"",color:u.color||"#455160",
+   return {k:u.k,tg:"u:"+u.k,name:u.name,what:u.what||"",color:u.color||"#455160",
     f:function(x){ return x.unit===u.k }} });
  if(b==="tag") return (DATA.tagdefs||[]).map(function(t,i){
-   return {k:t.k,name:t.label||t.k,what:"",color:TAGPAL[i%TAGPAL.length],
+   return {k:t.k,tg:"t:"+t.k,name:t.label||t.k,what:"",color:TAGPAL[i%TAGPAL.length],
     f:function(x){ return (x.tags||[]).indexOf(t.k)>-1 }} });
  return LINES().map(function(l){
-   return {k:l.k,name:l.name,what:l.what||"",color:l.color||"#455160",
+   return {k:l.k,tg:"l:"+l.k,name:l.name,what:l.what||"",color:l.color||"#455160",
     f:function(x){ return lineOf(x)===l.k }} });
 }
 function mapUnassigned(){
@@ -8464,7 +8464,12 @@ function linesTimeline(){
   h+='<div class="ltl2-name"><i></i><div><b>'+esc(r.name)+'</b>';
   h+='<em>'+(mine.length?(mine.length+' סצנות · '+sh+' צולמו'):'אין סצנות')+'</em>';
   if(mine.length) h+='<em class="rng">'+(f===la?('פרק '+f):('פרק '+f+' עד '+la))+'</em>';
-  if(!RO&&r.k&&mapBy()==="line") h+='<div class="ltl2-btns"><button class="tinyedit" data-act="editline" data-id="'+esc(r.k)+'">ערוך</button>'+epnBtn("l:"+r.k,"מחשבות על הליין, כל המשתמשים רואים")+'</div>';
+  if(!RO&&r.k){
+   h+='<div class="ltl2-btns">';
+   if(mapBy()==="line") h+='<button class="tinyedit" data-act="editline" data-id="'+esc(r.k)+'">ערוך</button>';
+   h+=epnBtn(r.tg||("l:"+r.k),"מחשבות, כל המשתמשים רואים");
+   h+='</div>';
+  }
   h+='</div></div>';
   h+='<div class="notes tlbar ltl2-bar">';
   if(!vis.length){ h+='<span class="ltl2-none">'+(mine.length?'אין סצנות בסינון הזה':('אין סצנות ל'+mapUnitName()+' הזה'))+'</span>' }
@@ -8727,7 +8732,10 @@ function linesView(){
   });
   h+='</span>';
   h+='<span class="lbadge l-'+s.kind+'">'+esc(LKIND[s.kind].l)+'</span>';
-  if(!RO&&BY==="line") h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>'+epnBtn("l:"+l.k,"מחשבות על הליין, כל המשתמשים רואים");
+  if(!RO){
+   if(BY==="line") h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>';
+   h+=epnBtn(l.tg||("l:"+l.k),"מחשבות, כל המשתמשים רואים");
+  }
   h+='</th>';
   DATA.eps.forEach(function(e){
    var cell=s.all.filter(function(x){return x.ep===e.n&&(state.filter==="all"||x.status===state.filter)}).sort(byOrd);
@@ -9455,6 +9463,18 @@ function epnTitle(tg){
  if(tg.indexOf("l:")===0){
   var l=lineObj(tg.slice(2));
   return {h:"מחשבות על הליין "+((l&&l.name)||""), s:(l&&l.what)||""};
+ }
+ if(tg.indexOf("c:")===0){
+  var c=charOf(tg.slice(2));
+  return {h:"מחשבות על "+((c&&c.name)||""), s:(c&&c.role)||""};
+ }
+ if(tg.indexOf("u:")===0){
+  var u=(DATA.units||[]).filter(function(z){return z.k===tg.slice(2)})[0];
+  return {h:"מחשבות על המחלקה "+((u&&u.name)||""), s:(u&&u.what)||""};
+ }
+ if(tg.indexOf("t:")===0){
+  var t=(DATA.tagdefs||[]).filter(function(z){return z.k===tg.slice(2)})[0];
+  return {h:"מחשבות על "+((t&&t.label)||""), s:""};
  }
  return {h:"מחשבות", s:""};
 }
