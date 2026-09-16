@@ -537,6 +537,20 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .vrempty{padding:12px 2px;color:var(--ink-3);font-size:12.5px}
 .vrlink{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid var(--line);background:var(--surface-2)}
 .vrlink textarea{flex:1 1 220px;min-width:150px;font-family:"Heebo",sans-serif;font-size:12px;padding:5px 9px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);direction:ltr;resize:vertical}
+.gapwarn{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 20px;padding:12px 16px;border-radius:10px;border:1px solid #E0A33C;background:rgba(224,163,60,.12);font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-2)}
+.gapwarn b{color:var(--ink);font-size:13.5px}
+.gapwarn span{flex:1 1 220px}
+.gapsec{margin:0 0 24px}
+.gapsec h3{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.gapsec h3 em{font-style:normal;font-size:11px;font-weight:700;background:var(--ink);color:var(--bg);border-radius:9px;padding:2px 8px}
+.gapsec p{font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3);margin:0 0 9px}
+.gaplist{display:flex;flex-wrap:wrap;gap:6px}
+.gaprow{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;cursor:pointer;
+ border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:7px 11px;font-family:"Heebo",sans-serif;max-width:100%}
+.gaprow b{font-size:12.5px;font-weight:600;color:var(--ink)}
+.gaprow em{font-style:normal;font-size:11px;color:var(--ink-3)}
+.gaprow:hover{border-color:var(--ink);background:var(--surface-2)}
+.gapmore{align-self:center;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);padding:7px 4px}
 .shelfbar{display:flex;gap:8px;margin:0 0 16px}
 .shelfep{margin:0 0 26px}
 .shelfep h3{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:8px;color:var(--ink)}
@@ -4119,6 +4133,12 @@ function render(){
   paint(h);
   return;
  }
+ if(state.group==="gaps"){
+  h+=gapsView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
  if(state.group==="shelf"){
   h+=shelfView();
   h+='</div>';
@@ -5674,42 +5694,6 @@ function dayStrip(d){
  if(br.length>pick.length) h+='<span class="dmore">ועוד '+(br.length-pick.length)+'</span>';
  return h+'</div>';
 }
-var CLK={day:"",base:0,t0:0,run:false,iv:null};
-function clkNow(dk){
- if(CLK.day!==dk) return 0;
- return CLK.run?(CLK.base+(Date.now()-CLK.t0)/1000):CLK.base;
-}
-function clkStop(){
- if(CLK.iv){ clearInterval(CLK.iv); CLK.iv=null }
- if(CLK.run&&CLK.day){ CLK.base=clkNow(CLK.day) }
- CLK.run=false;
-}
-function clkTick(){
- vnFocusWire();
- var dk=CLK.day;
- if(!dk) return clkStop();
- var el=document.querySelector('.drvsub[data-day="'+dk+'"]');
- if(!el){ clkStop(); return }
- var d=DAYS().filter(function(z){return z.k===dk})[0];
- if(!d){ clkStop(); return }
- if(!subOn(d)){ el.hidden=true; el.innerHTML=""; }
- else{
-  el.hidden=false;
-  var t=clkNow(dk)-subOff(d);
-  var c=cueAt(dayCues(d),t);
-  var nt=c?c.t:"", sp=c?(c.sp||""):"";
-  if(el.__t!==nt+"|"+sp){ el.__t=nt+"|"+sp; el.innerHTML=nt?('<span>'+(sp?('<b class="vrspk">'+esc(sp)+':</b> '):'')+esc(nt)+'</span>'):"" }
- }
- var inp=document.querySelector('.vrtc[data-clk="'+dk+'"]');
- if(inp&&document.activeElement!==inp) inp.value=vfmt(clkNow(dk)).slice(0,7);
- var sk9=document.querySelector('.clkseek[data-clk="'+dk+'"]');
- if(sk9&&!sk9.__drag){
-  var du9=Number(sk9.getAttribute("data-dur"))||0;
-  var fl9=sk9.querySelector(".clkfill");
-  if(fl9&&du9>0) fl9.style.width=(Math.max(0,Math.min(1,clkNow(dk)/du9))*100).toFixed(2)+"%";
- }
-}
-/* ===== קריאת הטיימקוד ההתחלתי מתוך קובץ MP4/MOV ===== */
 function mp4Str(u8,p){ return String.fromCharCode(u8[p],u8[p+1],u8[p+2],u8[p+3]) }
 function mp4Boxes(u8,dv,start,end){
  var out=[], p=start;
@@ -5822,25 +5806,9 @@ function vnFocusWire(){
   if(!m) return;
   var dk=m[1];
   if(VR.day===dk&&VR.video&&VR.url) return;
-  if(CLK.day!==dk) return;
-  var t=clkNow(dk), lab=vfmt(t).slice(0,7);
-  if(CLK.run){
-   clkStop();
-   var pb=document.querySelector('[data-act="clkplay"][data-id="'+dk+'"]');
-   if(pb){ pb.classList.remove("on"); pb.textContent="הפעל כתוביות" }
-   toast("נעצר על "+lab+". ההערה תישמר על הטיימקוד הזה");
-  }
   var tcin=form.querySelector('input[name="tc"]');
-  if(tcin) tcin.value=lab;
-  var ci=document.querySelector('.vrtc[data-clk="'+dk+'"]');
-  if(ci) ci.value=lab;
+  if(tcin&&!tcin.value) tcin.value=vfmt(VR.t||0).slice(0,7);
  },true);
-}
-function clkStart(dk,at){
- clkStop();
- CLK.day=dk; CLK.base=Number(at)||0; CLK.t0=Date.now(); CLK.run=true;
- CLK.iv=setInterval(clkTick,150);
- clkTick();
 }
 function srtTime(n){
  n=Math.max(0,n||0);
@@ -6380,7 +6348,6 @@ function daysView(){
  var all=daysSorted();
  var h='<section class="grp"><div class="grp-h"><h2>לוג ימי צילום</h2><span class="role">מה צולם, מתי, ומה שווה לחזור אליו</span>';
  h+='<span class="meta">'+all.length+' ימי צילום</span></div>';
- h+='<p class="grp-note">יומן של החומר שכבר בקופסה. כל יום צילום עם התאריך, המיקום, מי צולם, והרגעים שכדאי לזכור כשחוזרים לחומר הגלם. זה המקום לרשום את מה שראית במצלמה ולא נכנס עדיין לשום סצנה.</p>';
  h+=fsBar();
  if(!all.length){
   h+=daysClock();
@@ -7054,6 +7021,70 @@ function shelfView(){
   loose.forEach(function(x){ h+=note(x,"rowmode") });
   h+='</div></div>';
  }
+ return h+'</section>';
+}
+function gapRow(txt,sub,act,id,k){
+ var h='<button class="gaprow"'+(act?(' data-act="'+esc(act)+'"'+(id?(' data-id="'+esc(id)+'"'):"")+(k?(' data-k="'+esc(k)+'"'):"")):"")+'>';
+ h+='<b>'+esc(txt)+'</b>';
+ if(sub) h+='<em>'+esc(sub)+'</em>';
+ return h+'</button>';
+}
+function gapsView(){
+ var days=DAYS(), sc=DATA.scenes||[];
+ var rows=[]; days.forEach(function(d){ (d.brk||[]).forEach(function(b,i){ rows.push({d:d,i:i,b:b}) }) });
+ var noBrk=days.filter(function(d){ return !(d.brk||[]).length });
+ var noVid=days.filter(function(d){ return !(driveIdsOf(d)||[]).length&&!lexiAny(d) });
+ var noSum=rows.filter(function(r){ return !String(r.b.sum||"").trim() });
+ var noWho=rows.filter(function(r){ return !matCharsOf(r.b,r.d).length&&!r.b.chx });
+ var noLine=sc.filter(function(x){ return !lineOf(x)&&x.status!=="dropped" });
+ var noShort=sc.filter(function(x){ return !String(x.short||"").trim() });
+ var shelf=shelfList();
+ var lost=sc.filter(function(x){ return x.status==="shot"&&!fromMat(x) });
+ var tot=noBrk.length+noVid.length+noSum.length+noWho.length+noLine.length+noShort.length;
+
+ var h='<section class="grp"><div class="grp-h"><h2>\u05de\u05d4 \u05d7\u05e1\u05e8</h2><span class="role">\u05db\u05dc \u05d4\u05d7\u05d5\u05e8\u05d9\u05dd \u05d1\u05d9\u05d5\u05de\u05df, \u05d1\u05de\u05e7\u05d5\u05dd \u05d0\u05d7\u05d3</span>';
+ h+='<span class="meta">'+tot+' \u05e4\u05e2\u05e8\u05d9\u05dd</span></div>';
+
+ try{
+  var mine=(STORE.layers&&STORE.layers[state.me])?STORE.layers[state.me]:null;
+  var bs=STORE.base||{};
+  if(mine&&bs.scenes&&mine.scenes.length!==bs.scenes.length){
+   var diff=Math.abs(mine.scenes.length-bs.scenes.length);
+   h+='<div class="gapwarn"><b>\u05d4\u05d2\u05e8\u05e1\u05d4 \u05e9\u05dc\u05da \u05d4\u05ea\u05e8\u05d7\u05e7\u05d4 \u05de\u05d4\u05de\u05e9\u05d5\u05ea\u05e4\u05ea</b>';
+   h+='<span>'+mine.scenes.length+' \u05e1\u05e6\u05e0\u05d5\u05ea \u05d0\u05e6\u05dc\u05da \u05de\u05d5\u05dc '+bs.scenes.length+' \u05d1\u05d2\u05e8\u05e1\u05d4 \u05e9\u05db\u05d5\u05dc\u05dd \u05e8\u05d5\u05d0\u05d9\u05dd. '+diff+' \u05d4\u05e4\u05e8\u05e9 \u05e9\u05dc\u05d0 \u05e4\u05d5\u05e8\u05e1\u05dd</span>';
+   h+='<button class="btn" data-act="openusers">\u05e4\u05ea\u05d7 \u05d0\u05ea \u05d4\u05d2\u05e8\u05e1\u05d0\u05d5\u05ea \u05d5\u05e4\u05e8\u05e1\u05dd</button></div>';
+  }
+ }catch(_){}
+
+ if(!tot) h+='<div class="dempty"><b>\u05d0\u05d9\u05df \u05d7\u05d5\u05e8\u05d9\u05dd</b><p>\u05db\u05dc \u05d9\u05d5\u05dd \u05de\u05ea\u05d5\u05e2\u05d3, \u05db\u05dc \u05e9\u05d5\u05e8\u05d4 \u05de\u05e1\u05d5\u05db\u05de\u05ea, \u05db\u05dc \u05e1\u05e6\u05e0\u05d4 \u05e9\u05d5\u05d9\u05d9\u05db\u05d4.</p></div>';
+
+ function sec(title,n,note,body){
+  if(!n) return "";
+  return '<div class="gapsec"><h3>'+esc(title)+'<em>'+n+'</em></h3>'+(note?'<p>'+esc(note)+'</p>':"")+'<div class="gaplist">'+body+'</div></div>';
+ }
+ h+=sec("\u05d9\u05de\u05d9 \u05e6\u05d9\u05dc\u05d5\u05dd \u05d1\u05dc\u05d9 \u05dc\u05d5\u05d2\u05d9\u05e0\u05d2",noBrk.length,
+   "\u05e6\u05d5\u05dc\u05dd \u05d5\u05dc\u05d0 \u05e0\u05e8\u05e9\u05dd. \u05d4\u05d7\u05d5\u05de\u05e8 \u05d4\u05d6\u05d4 \u05dc\u05d0 \u05d9\u05d9\u05de\u05e6\u05d0 \u05d1\u05d7\u05d9\u05e4\u05d5\u05e9",
+   noBrk.map(function(d){ return gapRow(dayLabel(d.date)+(d.loc?(" \u00b7 "+d.loc):""),"\u05e4\u05ea\u05d7 \u05d0\u05ea \u05d4\u05d9\u05d5\u05dd","dayopen",d.k) }).join(""));
+ h+=sec("\u05d9\u05de\u05d9\u05dd \u05d1\u05dc\u05d9 \u05d5\u05d9\u05d3\u05d0\u05d5 \u05de\u05d7\u05d5\u05d1\u05e8",noVid.length,
+   "\u05d0\u05d9 \u05d0\u05e4\u05e9\u05e8 \u05dc\u05e6\u05e4\u05d5\u05ea \u05d1\u05d2\u05dc\u05dd \u05e9\u05dc\u05d4\u05dd",
+   noVid.map(function(d){ return gapRow(dayLabel(d.date)+(d.loc?(" \u00b7 "+d.loc):""),"\u05d7\u05d1\u05e8 \u05d5\u05d9\u05d3\u05d0\u05d5","editday",d.k) }).join(""));
+ h+=sec("\u05e9\u05d5\u05e8\u05d5\u05ea \u05dc\u05d5\u05d2\u05d9\u05e0\u05d2 \u05d1\u05dc\u05d9 \u05e1\u05d9\u05db\u05d5\u05dd",noSum.length,
+   "\u05d9\u05e9 \u05e9\u05dd \u05d5\u05d8\u05d9\u05d9\u05de\u05e7\u05d5\u05d3, \u05d0\u05d1\u05dc \u05d0\u05e3 \u05de\u05d9\u05dc\u05d4 \u05e2\u05dc \u05de\u05d4 \u05e7\u05d5\u05e8\u05d4 \u05e9\u05dd",
+   noSum.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"matedit",r.d.k,null).replace("data-act=\"matedit\"","data-act=\"matedit\" data-i=\""+r.i+"\"") }).join("")
+   +(noSum.length>25?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noSum.length-25)+'</span>':""));
+ h+=sec("\u05e9\u05d5\u05e8\u05d5\u05ea \u05dc\u05d5\u05d2\u05d9\u05e0\u05d2 \u05d1\u05dc\u05d9 \u05d3\u05de\u05d5\u05ea",noWho.length,
+   "\u05dc\u05d0 \u05d9\u05e2\u05dc\u05d5 \u05db\u05e9\u05ea\u05d7\u05e4\u05e9 \u05dc\u05e4\u05d9 \u05d3\u05de\u05d5\u05ea",
+   noWho.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"matedit",r.d.k,null).replace("data-act=\"matedit\"","data-act=\"matedit\" data-i=\""+r.i+"\"") }).join("")
+   +(noWho.length>25?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noWho.length-25)+'</span>':""));
+ h+=sec("\u05e1\u05e6\u05e0\u05d5\u05ea \u05d1\u05dc\u05d9 \u05dc\u05d9\u05d9\u05df",noLine.length,
+   "\u05dc\u05d0 \u05de\u05d5\u05e4\u05d9\u05e2\u05d5\u05ea \u05d1\u05de\u05e4\u05ea \u05d4\u05dc\u05d9\u05d9\u05e0\u05d9\u05dd",
+   noLine.slice(0,30).map(function(x){ return gapRow(x.title||x.id,"\u05e4\u05e8\u05e7 "+(x.ep||"?")+" \u00b7 "+x.id,"edit",x.id) }).join("")
+   +(noLine.length>30?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noLine.length-30)+'</span>':""));
+ h+=sec("\u05e1\u05e6\u05e0\u05d5\u05ea \u05d1\u05dc\u05d9 \u05ea\u05d9\u05d0\u05d5\u05e8",noShort.length,
+   "\u05e4\u05ea\u05e7 \u05e8\u05d9\u05e7 \u05d1\u05de\u05e4\u05ea \u05d4\u05e4\u05e8\u05e7\u05d9\u05dd",
+   noShort.slice(0,30).map(function(x){ return gapRow(x.title||x.id,"\u05e4\u05e8\u05e7 "+(x.ep||"?")+" \u00b7 "+x.id,"edit",x.id) }).join("")
+   +(noShort.length>30?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noShort.length-30)+'</span>':""));
+ if(shelf.length) h+='<div class="gapsec"><h3>\u05d1\u05d0\u05d7\u05e1\u05d5\u05df<em>'+shelf.length+'</em></h3><p>\u05e1\u05e6\u05e0\u05d5\u05ea \u05e9\u05db\u05ea\u05d1\u05ea \u05d5\u05dc\u05d0 \u05de\u05e7\u05d5\u05e9\u05e8\u05d5\u05ea \u05dc\u05e9\u05d5\u05e8\u05d4 \u05d1\u05d7\u05d5\u05de\u05e8</p><div class="gaplist">'+gapRow("\u05e4\u05ea\u05d7 \u05d0\u05ea \u05d4\u05d0\u05d7\u05e1\u05d5\u05df","","group",null,"shelf")+'</div></div>';
  return h+'</section>';
 }
 function needView(){
@@ -8713,9 +8744,9 @@ function vgOf(k){
  return "";
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["gaps","מה חסר"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["gaps","מה חסר"],["g:scenes","סצנות"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["gaps","מה חסר"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
@@ -10050,7 +10081,7 @@ function pushRows(){
  });
 }
 /* ===== גיבוי בענן ===== */
-var BKKEY="marhav-eilat-bk-v1", BKGAP=10*60*1000, BKQUIET=45*1000, BKCAP=180, bkBusy=false, bkDirty=false, bkForce=false, bkT=null, bkTick=null;
+var BKKEY="marhav-eilat-bk-v1", BKGAP=10*60*1000, BKQUIET=45*1000, BKCAP=60, bkBusy=false, bkDirty=false, bkForce=false, bkT=null, bkTick=null;
 function bkStamp(){
  var d=new Date(), p=function(n){return n<10?"0"+n:""+n};
  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"-"+p(d.getHours())+"-"+p(d.getMinutes());
@@ -11286,24 +11317,6 @@ document.addEventListener("click",function(e){
   } else { if(el2)el2.select(); toast("סמן והעתק ידנית",true) }
   return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
- if(act==="clkplay"){
-  var _cd=DAYS().filter(function(z){return z.k===id})[0];
-  if(!_cd) return;
-  if(CLK.day===id&&CLK.run){ clkStop(); b.classList.remove("on"); b.textContent="הפעל כתוביות"; return }
-  var _ip=document.querySelector('.vrtc[data-clk="'+id+'"]');
-  var _at=_ip?tcSec(String(_ip.value||"0").trim()):0;
-  clkStart(id,_at);
-  b.classList.add("on"); b.textContent="עצור כתוביות";
-  return}
- if(act==="clknudge"){
-  var _dd3=Number(b.getAttribute("data-d"))||0;
-  if(CLK.day!==id){ CLK.day=id; CLK.base=0; CLK.run=false }
-  CLK.base=Math.max(0,clkNow(id)+_dd3);
-  if(CLK.run) CLK.t0=Date.now();
-  clkTick();
-  var _ip2=document.querySelector('.vrtc[data-clk="'+id+'"]');
-  if(_ip2) _ip2.value=vfmt(clkNow(id)).slice(0,7);
-  return}
  if(act==="srtdel"){
   var _sfi2=Number(b.getAttribute("data-i"))||0;
   srtDbDel(id,_sfi2);
@@ -11326,30 +11339,7 @@ document.addEventListener("click",function(e){
   try{ if(VR.day===id) vrMount() }catch(_){}
   toast(_on?"התרגום מופעל":"אין תרגום");
   return}
- if(act==="srtall"){
-  toast("מכין את קבצי הכתוביות...");
-  loadJSZip().then(function(JSZ){
-   var z=new JSZ(), n=0;
-   DAYS().forEach(function(d){
-    var ids=driveIdsOf(d)||[];
-    var cnt=Math.max(1,ids.length);
-    for(var i=0;i<cnt;i++){
-     state.vidFile=state.vidFile||{};
-     var keep=state.vidFile[d.k];
-     state.vidFile[d.k]=i;
-     var txt=srtOf(d), nm=srtName(d);
-     state.vidFile[d.k]=keep;
-     if(txt){ z.file(nm,"\ufeff"+txt); n++ }
-    }
-   });
-   if(!n){ toast("אין תמלולים עם טיימקוד",true); return }
-   z.generateAsync({type:"blob"}).then(function(bl){
-    dlBlob(bl,"eilat-subtitles.zip");
-    toast(n+" קבצי כתוביות ירדו בקובץ אחד");
-   });
-  }).catch(function(){ toast("לא הצלחתי להכין את הזיפ",true) });
-  return}
- if(act==="srtdl"){
+  if(act==="srtdl"){
   var _sd=DAYS().filter(function(z){return z.k===id})[0];
   if(!_sd){ return }
   var _txt=srtOf(_sd);
