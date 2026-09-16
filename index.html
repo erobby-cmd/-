@@ -4135,7 +4135,16 @@ function render(){
  }
  if(state.group==="gaps"){
   h+=gapsView();
-  h+='</div><div class="toast" id="toast"></div>';
+  h+='</div>';
+  if(state.editing){
+    var _ge=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
+    if(_ge){
+     h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
+     h+='<div class="mhead"><span>\u05e2\u05e8\u05d9\u05db\u05ea \u05e1\u05e6\u05e0\u05d4 '+esc(_ge.id)+'</span><button data-act="cancel" title="\u05e1\u05d2\u05d5\u05e8">\u00d7</button></div>';
+     h+=form(_ge)+'</div></div>';
+    }
+  }
+  h+='<div class="toast" id="toast"></div>';
   paint(h);
   return;
  }
@@ -5604,7 +5613,7 @@ function fsForget(){
  toast("התיקייה נותקה");
  render();
 }
-try{ window.__EILAT={FS:FS,fsPut:fsPut,fsGet:fsGet,fsScan:function(){return fsScan()},fsHas:function(k,i){var d=DAYS().filter(function(z){return z.k===k})[0];return d?fsHas(d,i||0):null}} }catch(_){}
+try{ window.__EILAT={st:function(){return state},fsPut:fsPut,fsGet:fsGet,fsScan:function(){return fsScan()},fsHas:function(k,i){var d=DAYS().filter(function(z){return z.k===k})[0];return d?fsHas(d,i||0):null}} }catch(_){}
 function fsInit(){
  if(!fsSupported()){ FS.state="nosupport"; return }
  fsGet("names").then(function(n){ if(n&&typeof n==="object") FS.names=n });
@@ -7064,17 +7073,17 @@ function gapsView(){
  }
  h+=sec("\u05d9\u05de\u05d9 \u05e6\u05d9\u05dc\u05d5\u05dd \u05d1\u05dc\u05d9 \u05dc\u05d5\u05d2\u05d9\u05e0\u05d2",noBrk.length,
    "\u05e6\u05d5\u05dc\u05dd \u05d5\u05dc\u05d0 \u05e0\u05e8\u05e9\u05dd. \u05d4\u05d7\u05d5\u05de\u05e8 \u05d4\u05d6\u05d4 \u05dc\u05d0 \u05d9\u05d9\u05de\u05e6\u05d0 \u05d1\u05d7\u05d9\u05e4\u05d5\u05e9",
-   noBrk.map(function(d){ return gapRow(dayLabel(d.date)+(d.loc?(" \u00b7 "+d.loc):""),"\u05e4\u05ea\u05d7 \u05d0\u05ea \u05d4\u05d9\u05d5\u05dd","dayopen",d.k) }).join(""));
+   noBrk.map(function(d){ return gapRow(dayLabel(d.date)+(d.loc?(" \u00b7 "+d.loc):""),"\u05e4\u05ea\u05d7 \u05d0\u05ea \u05d4\u05d9\u05d5\u05dd","gapday",d.k) }).join(""));
  h+=sec("\u05d9\u05de\u05d9\u05dd \u05d1\u05dc\u05d9 \u05d5\u05d9\u05d3\u05d0\u05d5 \u05de\u05d7\u05d5\u05d1\u05e8",noVid.length,
    "\u05d0\u05d9 \u05d0\u05e4\u05e9\u05e8 \u05dc\u05e6\u05e4\u05d5\u05ea \u05d1\u05d2\u05dc\u05dd \u05e9\u05dc\u05d4\u05dd",
-   noVid.map(function(d){ return gapRow(dayLabel(d.date)+(d.loc?(" \u00b7 "+d.loc):""),"\u05d7\u05d1\u05e8 \u05d5\u05d9\u05d3\u05d0\u05d5","editday",d.k) }).join(""));
+   noVid.map(function(d){ return gapRow(dayLabel(d.date)+(d.loc?(" \u00b7 "+d.loc):""),"\u05d7\u05d1\u05e8 \u05d5\u05d9\u05d3\u05d0\u05d5","gapday",d.k) }).join(""));
  h+=sec("\u05e9\u05d5\u05e8\u05d5\u05ea \u05dc\u05d5\u05d2\u05d9\u05e0\u05d2 \u05d1\u05dc\u05d9 \u05e1\u05d9\u05db\u05d5\u05dd",noSum.length,
    "\u05d9\u05e9 \u05e9\u05dd \u05d5\u05d8\u05d9\u05d9\u05de\u05e7\u05d5\u05d3, \u05d0\u05d1\u05dc \u05d0\u05e3 \u05de\u05d9\u05dc\u05d4 \u05e2\u05dc \u05de\u05d4 \u05e7\u05d5\u05e8\u05d4 \u05e9\u05dd",
-   noSum.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"matedit",r.d.k,null).replace("data-act=\"matedit\"","data-act=\"matedit\" data-i=\""+r.i+"\"") }).join("")
+   noSum.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"gapmat",r.d.k,null).replace('data-act="gapmat"','data-act="gapmat" data-i="'+r.i+'"') }).join("")
    +(noSum.length>25?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noSum.length-25)+'</span>':""));
  h+=sec("\u05e9\u05d5\u05e8\u05d5\u05ea \u05dc\u05d5\u05d2\u05d9\u05e0\u05d2 \u05d1\u05dc\u05d9 \u05d3\u05de\u05d5\u05ea",noWho.length,
    "\u05dc\u05d0 \u05d9\u05e2\u05dc\u05d5 \u05db\u05e9\u05ea\u05d7\u05e4\u05e9 \u05dc\u05e4\u05d9 \u05d3\u05de\u05d5\u05ea",
-   noWho.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"matedit",r.d.k,null).replace("data-act=\"matedit\"","data-act=\"matedit\" data-i=\""+r.i+"\"") }).join("")
+   noWho.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"gapmat",r.d.k,null).replace('data-act="gapmat"','data-act="gapmat" data-i="'+r.i+'"') }).join("")
    +(noWho.length>25?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noWho.length-25)+'</span>':""));
  h+=sec("\u05e1\u05e6\u05e0\u05d5\u05ea \u05d1\u05dc\u05d9 \u05dc\u05d9\u05d9\u05df",noLine.length,
    "\u05dc\u05d0 \u05de\u05d5\u05e4\u05d9\u05e2\u05d5\u05ea \u05d1\u05de\u05e4\u05ea \u05d4\u05dc\u05d9\u05d9\u05e0\u05d9\u05dd",
@@ -8744,9 +8753,9 @@ function vgOf(k){
  return "";
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["gaps","מה חסר"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["gaps","מה חסר"],["g:scenes","סצנות"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["gaps","מה חסר"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
@@ -9148,13 +9157,15 @@ function topStrip(){
  try{ t=d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) }
  catch(_){ t=d.toDateString() }
  var h='<div class="topstrip"><div class="tsrow">';
- h+=projBtn()+themeBtn()+bellBtn();
+ h+=themeBtn()+bellBtn();
  if(!RO){
   h+=saveBadge();
   h+='<button class="btn" data-act="saveNow" title="שמירה עכשיו">שמור</button>';
   h+='<button class="tmore" data-act="moremenu" aria-pressed="'+(!!state.moreOpen)+'" title="עוד">···</button>';
   if(state.moreOpen){
    h+='<div class="tmenu" data-stop="1">';
+   h+='<button data-act="projopen">פרויקטים · '+esc(projName(PROJ))+'</button>';
+   h+='<button data-act="gapsopen">מה חסר</button>';
    h+='<button data-act="bkopen">גיבויים בענן</button>';
    h+='<button data-act="backup">שמור עותק למחשב</button>';
    h+='<button data-act="restore">טען גיבוי מהמחשב</button>';
@@ -11266,7 +11277,7 @@ document.addEventListener("click",function(e){
   setTimeout(function(){ var el=document.querySelector('[data-act="brktog"][data-id="'+id+'"]'); if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"}) },80);
   return}
  if(act==="trclear"){state.trQ="";state.trFocus=true;render();return}
- if(act==="projopen"){state.projOpen=true;render();return}
+ if(act==="projopen"){ state.moreOpen=false;state.projOpen=true;render();return}
  if(act==="projclose"){
   if(modalKeep(e,b))return;
   state.projOpen=false;render();return}
@@ -11316,6 +11327,22 @@ document.addEventListener("click",function(e){
    navigator.clipboard.writeText(lk2).then(function(){toast("הקישור הועתק")}).catch(function(){if(el2){el2.select()}toast("סמן והעתק ידנית",true)});
   } else { if(el2)el2.select(); toast("סמן והעתק ידנית",true) }
   return}
+ if(act==="gapmat"){
+  state.group="mat"; state.cat="prod";
+  state.matDays=state.matDays||{}; state.matDays[id]=true;
+  state.matEdit=id+"#"+(Number(b.getAttribute("data-i"))||0);
+  state.matOpen="";
+  render();
+  setTimeout(function(){ var el=document.querySelector(".matrow.edit"); if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"}) },120);
+  return}
+ if(act==="gapday"){
+  state.group="days"; state.cat="prod";
+  state.logDays=state.logDays||{}; state.logDays[id]=true;
+  state.matDays=state.matDays||{}; state.matDays[id]=true;
+  render();
+  setTimeout(function(){ var el=document.querySelector('[data-act="dayopen"][data-id="'+id+'"]'); if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"}) },120);
+  return}
+ if(act==="gapsopen"){ state.moreOpen=false; state.group="gaps"; render(); return}
  if(act==="nextedit"){state.nextOpen=true;render();return}
  if(act==="srtdel"){
   var _sfi2=Number(b.getAttribute("data-i"))||0;
