@@ -7063,8 +7063,8 @@ function gapsView(){
  var noVid=days.filter(function(d){ return !(driveIdsOf(d)||[]).length&&!lexiAny(d) });
  var noSum=rows.filter(function(r){ return !String(r.b.sum||"").trim() });
  var noWho=rows.filter(function(r){ return !matCharsOf(r.b,r.d).length&&!r.b.chx });
- var noLine=sc.filter(function(x){ return !lineOf(x)&&x.status!=="dropped" });
- var noShort=sc.filter(function(x){ return !String(x.short||"").trim() });
+ var noLine=sc.filter(function(x){ return !lineOf(x)&&x.status!=="dropped"&&!onShelf(x) });
+ var noShort=sc.filter(function(x){ return !String(x.short||"").trim()&&!onShelf(x) });
  var shelf=shelfList();
  var lost=sc.filter(function(x){ return x.status==="shot"&&!fromMat(x) });
  var tot=noBrk.length+noVid.length+noSum.length+noWho.length+noLine.length+noShort.length;
