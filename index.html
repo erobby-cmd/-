@@ -549,6 +549,10 @@ button.matday.drawer:not(.open):hover{opacity:1}
  border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:7px 11px;font-family:"Heebo",sans-serif;max-width:100%}
 .gaprow b{font-size:12.5px;font-weight:600;color:var(--ink)}
 .gaprow em{font-style:normal;font-size:11px;color:var(--ink-3)}
+.gaprow.nochar{border-color:#E38AAC;background:rgba(243,196,212,.4)}
+.gaprow.nochar b{color:#8A2B4D}
+.matrow.nochar{background:rgba(243,196,212,.34);border-color:#E38AAC}
+.matrow.nochar .matt{color:#8A2B4D}
 .gaprow:hover{border-color:var(--ink);background:var(--surface-2)}
 .gapmore{align-self:center;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3);padding:7px 4px}
 .shelfbar{display:flex;gap:8px;margin:0 0 16px}
@@ -6823,7 +6827,7 @@ function matView(){
   var _ei=(r.d.brk||[]).indexOf(r.x), _ekey=r.d.k+"#"+_ei;
   if(state.matEdit===_ekey&&!RO){ h+='<div class="matrow edit">'+matEditForm(r.d,_ei,r.x)+'</div>'; return }
   var _ri=(r.d.brk||[]).indexOf(r.x), _mk=r.d.k+"#"+_ri;
-  h+='<div class="matrow'+(op?" open":"")+'"'+(RO?"":' draggable="true" data-mrow="'+esc(_mk)+'"')+'>';
+  h+='<div class="matrow'+(op?" open":"")+(noOurChar(r.x,r.d)?" nochar":"")+'"'+(RO?"":' draggable="true" data-mrow="'+esc(_mk)+'"')+'>';
   var jsc=matSceneOf(r.x);
   if(!RO) h+='<span class="mgrip" title="גרור כדי להעביר את הסצנה למקום אחר">⠿</span>';
   h+='<div class="matmain" data-act="matopen" data-k="'+esc(key)+'">';
@@ -7050,8 +7054,11 @@ function shelfView(){
  }
  return h+'</section>';
 }
-function gapRow(txt,sub,act,id,k){
- var h='<button class="gaprow"'+(act?(' data-act="'+esc(act)+'"'+(id?(' data-id="'+esc(id)+'"'):"")+(k?(' data-k="'+esc(k)+'"'):"")):"")+'>';
+function noOurChar(x,d){
+ try{ return !matCharsOf(x,d).length }catch(_){ return false }
+}
+function gapRow(txt,sub,act,id,k,cls){
+ var h='<button class="gaprow'+(cls?(" "+cls):"")+'"'+(act?(' data-act="'+esc(act)+'"'+(id?(' data-id="'+esc(id)+'"'):"")+(k?(' data-k="'+esc(k)+'"'):"")):"")+'>';
  h+='<b>'+esc(txt)+'</b>';
  if(sub) h+='<em>'+esc(sub)+'</em>';
  return h+'</button>';
@@ -7062,7 +7069,7 @@ function gapsView(){
  var noBrk=days.filter(function(d){ return !(d.brk||[]).length });
  var noVid=days.filter(function(d){ return !(driveIdsOf(d)||[]).length&&!lexiAny(d) });
  var noSum=rows.filter(function(r){ return !String(r.b.sum||"").trim() });
- var noWho=rows.filter(function(r){ return !matCharsOf(r.b,r.d).length&&!r.b.chx });
+ var noWho=rows.filter(function(r){ return noOurChar(r.b,r.d) });
  var noLine=sc.filter(function(x){ return !lineOf(x)&&x.status!=="dropped"&&!onShelf(x) });
  var noShort=sc.filter(function(x){ return !String(x.short||"").trim()&&!onShelf(x) });
  var shelf=shelfList();
@@ -7101,7 +7108,7 @@ function gapsView(){
    +(noSum.length>25?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noSum.length-25)+'</span>':""));
  h+=sec("\u05e9\u05d5\u05e8\u05d5\u05ea \u05dc\u05d5\u05d2\u05d9\u05e0\u05d2 \u05d1\u05dc\u05d9 \u05d3\u05de\u05d5\u05ea",noWho.length,
    "\u05dc\u05d0 \u05d9\u05e2\u05dc\u05d5 \u05db\u05e9\u05ea\u05d7\u05e4\u05e9 \u05dc\u05e4\u05d9 \u05d3\u05de\u05d5\u05ea",
-   noWho.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"gapmat",r.d.k,null).replace('data-act="gapmat"','data-act="gapmat" data-i="'+r.i+'"') }).join("")
+   noWho.slice(0,25).map(function(r){ return gapRow(r.b.t||"\u05d1\u05dc\u05d9 \u05e9\u05dd",dayLabel(r.d.date)+" \u00b7 "+(r.b.tc||""),"gapmat",r.d.k,null,"nochar").replace('data-act="gapmat"','data-act="gapmat" data-i="'+r.i+'"') }).join("")
    +(noWho.length>25?'<span class="gapmore">\u05d5\u05e2\u05d5\u05d3 '+(noWho.length-25)+'</span>':""));
  h+=sec("\u05e1\u05e6\u05e0\u05d5\u05ea \u05d1\u05dc\u05d9 \u05dc\u05d9\u05d9\u05df",noLine.length,
    "\u05dc\u05d0 \u05de\u05d5\u05e4\u05d9\u05e2\u05d5\u05ea \u05d1\u05de\u05e4\u05ea \u05d4\u05dc\u05d9\u05d9\u05e0\u05d9\u05dd",
