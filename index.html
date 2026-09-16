@@ -284,6 +284,7 @@ html.linedrag .mchip{pointer-events:none}
 .nedit.nwatch{border-color:#1B4B8F;color:#1B4B8F;font-weight:600}
 .epnum{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 4px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;flex:0 0 auto}
 .lmodes{margin:6px 0 14px}
+.lmodes.lby{margin-inline-end:10px}
 .modes button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .board.listmode,.board.tlmode{display:block;overflow:visible;padding-bottom:0}
 .epband{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:26px 0 10px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
@@ -3768,7 +3769,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -8381,6 +8382,63 @@ function lineForm(l){
  h+='<div class="spacer"></div><button class="btn danger" data-act="delline" data-id="'+esc(l.k)+'">מחק ליין</button></div>';
  return h+'</div>';
 }
+var TAGPAL=["#1B4B8F","#8E3B70","#2F7D5B","#B5622A","#5A4B9E","#A03A48"];
+function mapBy(){ var b=state.lineBy||"line"; return ({line:1,char:1,tag:1,unit:1})[b]?b:"line" }
+function mapTitle(){
+ var b=mapBy();
+ return b==="char"?"\u05dc\u05e4\u05d9 \u05d3\u05de\u05d5\u05d9\u05d5\u05ea":b==="tag"?"\u05dc\u05e4\u05d9 \u05d0\u05d9\u05e8\u05d5\u05e2\u05d9\u05dd":b==="unit"?"\u05dc\u05e4\u05d9 \u05de\u05d7\u05dc\u05e7\u05d5\u05ea":"\u05dc\u05e4\u05d9 \u05dc\u05d9\u05d9\u05e0\u05d9\u05dd";
+}
+function mapNoneLabel(){
+ var b=mapBy();
+ return b==="char"?"\u05d1\u05dc\u05d9 \u05d3\u05de\u05d5\u05ea":b==="tag"?"\u05d1\u05dc\u05d9 \u05d0\u05d9\u05e8\u05d5\u05e2":b==="unit"?"\u05d1\u05dc\u05d9 \u05de\u05d7\u05dc\u05e7\u05d4":"\u05d1\u05dc\u05d9 \u05dc\u05d9\u05d9\u05df";
+}
+function mapUnitName(){
+ var b=mapBy();
+ return b==="char"?"\u05d3\u05de\u05d5\u05ea":b==="tag"?"\u05d0\u05d9\u05e8\u05d5\u05e2":b==="unit"?"\u05de\u05d7\u05dc\u05e7\u05d4":"\u05dc\u05d9\u05d9\u05df";
+}
+function mapRows(){
+ var b=mapBy();
+ if(b==="char") return (DATA.chars||[]).map(function(c){
+   return {k:c.k,name:c.name,what:c.role||"",color:c.color||"#455160",
+    f:function(x){ return x.char===c.k }} });
+ if(b==="unit") return (DATA.units||[]).map(function(u){
+   return {k:u.k,name:u.name,what:u.what||"",color:u.color||"#455160",
+    f:function(x){ return x.unit===u.k }} });
+ if(b==="tag") return (DATA.tagdefs||[]).map(function(t,i){
+   return {k:t.k,name:t.label||t.k,what:"",color:TAGPAL[i%TAGPAL.length],
+    f:function(x){ return (x.tags||[]).indexOf(t.k)>-1 }} });
+ return LINES().map(function(l){
+   return {k:l.k,name:l.name,what:l.what||"",color:l.color||"#455160",
+    f:function(x){ return lineOf(x)===l.k }} });
+}
+function mapUnassigned(){
+ var rows=mapRows();
+ return DATA.scenes.filter(function(x){
+  for(var i=0;i<rows.length;i++) if(rows[i].f(x)) return false;
+  return true;
+ });
+}
+function mapStat(f){
+ var all=DATA.scenes.filter(function(x){return f(x)&&x.status!=="dropped"});
+ var eps={},first=99,last=0;
+ all.forEach(function(x){var e=Number(x.ep)||1;eps[e]=(eps[e]||0)+1;if(e<first)first=e;if(e>last)last=e});
+ var holes=[],e2;
+ for(e2=first;e2<=last;e2++) if(!eps[e2]) holes.push(e2);
+ var present=0;for(var kk in eps)present++;
+ var maxEp=DATA.eps.length?DATA.eps[DATA.eps.length-1].n:5;
+ var kind=!all.length?"empty":all.length<=2?"thin":present===1?"drop":holes.length?"gap":(last<maxEp?"end":"ok");
+ return {all:all,eps:eps,first:all.length?first:0,last:last,holes:holes,present:present,kind:kind,
+  min:all.reduce(function(a,x){return a+(Number(x.min)||0)},0),
+  shot:all.filter(function(x){return x.status==="shot"}).length};
+}
+function mapSwitch(){
+ var b=mapBy();
+ var h='<div class="modes lmodes lby">';
+ [["line","\u05dc\u05d9\u05d9\u05e0\u05d9\u05dd"],["char","\u05d3\u05de\u05d5\u05d9\u05d5\u05ea"],["tag","\u05d0\u05d9\u05e8\u05d5\u05e2\u05d9\u05dd"],["unit","\u05de\u05d7\u05dc\u05e7\u05d5\u05ea"]].forEach(function(m){
+  h+='<button data-act="lby" data-k="'+m[0]+'" aria-pressed="'+(b===m[0])+'">'+esc(m[1])+'</button>';
+ });
+ return h+'</div>';
+}
 function seasonSeq(){
  var out=[];
  DATA.eps.forEach(function(e){
@@ -8392,11 +8450,12 @@ function seasonSeq(){
 function linesTimeline(){
  var LS=LINES(), seq=seasonSeq(), N=seq.length;
  if(!N) return '<div class="dempty"><b>אין סצנות להציג</b><p>הוסף סצנות ליומן והציר יופיע כאן.</p></div>';
- var rows=LS.map(function(l){return {k:l.k,name:l.name,what:l.what||"",color:l.color||"#455160"}});
- rows.push({k:"",name:"בלי ליין",what:"סצנות שעוד לא שייכות לשום סיפור",color:"#8A93A0"});
+ var rows=mapRows();
+ var _un=mapUnassigned();
+ rows=rows.concat([{k:"",name:mapNoneLabel(),what:"",color:"#8A93A0",f:function(x){ return _un.indexOf(x)>-1 }}]);
  var h='<div class="ltl2">';
  rows.forEach(function(r){
-  var mine=seq.filter(function(x){return lineOf(x)===r.k});
+  var mine=seq.filter(function(x){return r.f(x)});
   if(!mine.length&&r.k==="") return;
   var vis=mine.filter(function(x){return state.filter==="all"||x.status===state.filter});
   var sh=mine.filter(function(x){return x.status==="shot"}).length;
@@ -8405,10 +8464,10 @@ function linesTimeline(){
   h+='<div class="ltl2-name"><i></i><div><b>'+esc(r.name)+'</b>';
   h+='<em>'+(mine.length?(mine.length+' סצנות · '+sh+' צולמו'):'אין סצנות')+'</em>';
   if(mine.length) h+='<em class="rng">'+(f===la?('פרק '+f):('פרק '+f+' עד '+la))+'</em>';
-  if(!RO&&r.k) h+='<div class="ltl2-btns"><button class="tinyedit" data-act="editline" data-id="'+esc(r.k)+'">ערוך</button>'+epnBtn("l:"+r.k,"מחשבות על הליין, כל המשתמשים רואים")+'</div>';
+  if(!RO&&r.k&&mapBy()==="line") h+='<div class="ltl2-btns"><button class="tinyedit" data-act="editline" data-id="'+esc(r.k)+'">ערוך</button>'+epnBtn("l:"+r.k,"מחשבות על הליין, כל המשתמשים רואים")+'</div>';
   h+='</div></div>';
   h+='<div class="notes tlbar ltl2-bar">';
-  if(!vis.length){ h+='<span class="ltl2-none">'+(mine.length?'אין סצנות בסינון הזה':'הליין הזה עוד ריק')+'</span>' }
+  if(!vis.length){ h+='<span class="ltl2-none">'+(mine.length?'אין סצנות בסינון הזה':('אין סצנות ל'+mapUnitName()+' הזה'))+'</span>' }
   else{
    var lastEp=null;
    vis.forEach(function(x){
@@ -8632,12 +8691,13 @@ function lineStrip(){
  return h+'</div>';
 }
 function linesView(){
- var LS=LINES(),ST={};
- LS.forEach(function(l){ST[l.k]=lineStat(l.k)});
- var un=DATA.scenes.filter(function(x){return !lineOf(x)});
- var bad=LS.filter(function(l){return ST[l.k].kind!=="ok"});
- var h='<section class="grp"><div class="grp-h"><h2>מפת הליינים</h2><span class="role">כל סיפור לרוחב חמשת הפרקים</span>';
- h+='<span class="meta">'+LS.length+' ליינים · '+bad.length+' צריכים טיפול</span></div>';
+ var ROWS=mapRows(), ST={}, BY=mapBy();
+ ROWS.forEach(function(r){ST[r.k]=mapStat(r.f)});
+ var un=mapUnassigned();
+ var bad=ROWS.filter(function(r){return ST[r.k].kind!=="ok"});
+ var h='<section class="grp"><div class="grp-h"><h2>מפת הליינים</h2><span class="role">'+esc(mapTitle())+' · לרוחב חמשת הפרקים</span>';
+ h+='<span class="meta">'+ROWS.length+' '+esc(BY==="char"?"דמויות":BY==="tag"?"אירועים":BY==="unit"?"מחלקות":"ליינים")+' · '+bad.length+' צריכים טיפול</span></div>';
+ h+=mapSwitch();
  var LM=state.lineMode||"table";
  h+='<div class="modes lmodes">';
  [["table","טבלה"],["time","ציר זמן"]].forEach(function(m){
@@ -8651,13 +8711,14 @@ function linesView(){
  h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
  h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
  h+='<span><i class="holekey"></i>תא ורוד = הליין נשמט בפרק הזה</span>';
- h+='<span style="color:var(--ink-3)">'+(RO?"":"גרור סצנה לתא כדי לשנות ליין ופרק, על שם הליין כדי לשנות רק ליין, ובידית ⠿ כדי לסדר את הליינים עצמם")+'</span></div>';
- h+='<div class="tscroll"><table class="arc lmap"><thead><tr><th class="c0">ליין</th>';
+ h+='<span style="color:var(--ink-3)">'+((RO||BY!=="line")?"":"גרור סצנה לתא כדי לשנות ליין ופרק, על שם הליין כדי לשנות רק ליין, ובידית ⠿ כדי לסדר את הליינים עצמם")+'</span></div>';
+ h+='<div class="tscroll"><table class="arc lmap"><thead><tr><th class="c0">'+esc(mapUnitName())+'</th>';
  DATA.eps.forEach(function(e){h+='<th><span class="epn">פרק '+e.n+'</span>'+esc(e.title)+'</th>'});
  h+='<th class="tot">המהלך</th></tr></thead><tbody>';
- LS.forEach(function(l){
+ ROWS.forEach(function(l){
   var s=ST[l.k];
-  h+='<tr data-line="'+esc(l.k)+'" style="--ccol:'+esc(l.color||"#455160")+'"><th class="c0"'+(RO?"":' data-cell="l:'+esc(l.k)+':0" title="גרור לכאן כדי להעביר לליין הזה בלי לשנות פרק"')+'><b>'+(RO?"":'<span class="rgrip" draggable="true" data-line="'+esc(l.k)+'" title="גרור כדי לשנות את סדר הליינים">⠿</span>')+esc(l.name)+'</b>';
+  var _dr=(!RO&&BY==="line");
+  h+='<tr data-line="'+esc(l.k)+'" style="--ccol:'+esc(l.color||"#455160")+'"><th class="c0"'+(_dr?' data-cell="l:'+esc(l.k)+':0" title="גרור לכאן כדי להעביר לליין הזה בלי לשנות פרק"':"")+'><b>'+(_dr?'<span class="rgrip" draggable="true" data-line="'+esc(l.k)+'" title="גרור כדי לשנות את סדר הליינים">⠿</span>':"")+esc(l.name)+'</b>';
   if(l.what) h+='<em>'+esc(l.what)+'</em>';
   h+='<span class="ldots">';
   DATA.eps.forEach(function(e){
@@ -8666,12 +8727,12 @@ function linesView(){
   });
   h+='</span>';
   h+='<span class="lbadge l-'+s.kind+'">'+esc(LKIND[s.kind].l)+'</span>';
-  if(!RO) h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>'+epnBtn("l:"+l.k,"מחשבות על הליין, כל המשתמשים רואים");
+  if(!RO&&BY==="line") h+='<button class="tinyedit" data-act="editline" data-id="'+esc(l.k)+'">ערוך</button>'+epnBtn("l:"+l.k,"מחשבות על הליין, כל המשתמשים רואים");
   h+='</th>';
   DATA.eps.forEach(function(e){
    var cell=s.all.filter(function(x){return x.ep===e.n&&(state.filter==="all"||x.status===state.filter)}).sort(byOrd);
    var ck='l:'+l.k+':'+e.n;
-   var cattr=RO?"":' data-cell="'+esc(ck)+'"';
+   var cattr=_dr?(' data-cell="'+esc(ck)+'"'):"";
    var hole=!s.eps[e.n]&&s.first&&e.n>s.first&&e.n<s.last;
    if(!cell.length){h+='<td class="'+(hole?"hole":"void")+'"'+cattr+'>'+(hole?'<em class="holem">נשמט</em>':"")+'</td>';return}
    h+='<td'+cattr+'>';
@@ -8685,10 +8746,10 @@ function linesView(){
   h+='<em>'+s.shot+' צולמו · '+s.min+' דק׳</em></td></tr>';
  });
  var unv=un.filter(function(x){return state.filter==="all"||x.status===state.filter});
- h+='<tr class="norow" data-line="__none__" style="--ccol:#8A93A0"><th class="c0"'+(RO?"":' data-cell="l:__none__:0" title="גרור לכאן כדי להוציא מכל ליין"')+'><b>בלי ליין</b><em>סצנות שעוד לא שייכות לשום סיפור</em></th>';
+ h+='<tr class="norow" data-line="__none__" style="--ccol:#8A93A0"><th class="c0"'+((!RO&&BY==="line")?' data-cell="l:__none__:0" title="גרור לכאן כדי להוציא מכל ליין"':"")+'><b>'+esc(mapNoneLabel())+'</b><em>סצנות ללא שיוך</em></th>';
  DATA.eps.forEach(function(e){
   var cell=unv.filter(function(x){return x.ep===e.n});
-  var cattr=RO?"":' data-cell="l:__none__:'+e.n+'"';
+  var cattr=(!RO&&BY==="line")?(' data-cell="l:__none__:'+e.n+'"'):"";
   if(!cell.length){h+='<td class="void"'+cattr+'></td>';return}
   h+='<td'+cattr+'>';
   cell.forEach(function(x){
@@ -9787,6 +9848,7 @@ function loadUI(){
   if(o.boardMode)state.boardMode=o.boardMode;
   if(o.needMode)state.needMode=o.needMode;
   if(o.lineMode)state.lineMode=o.lineMode;
+ if(o.lineBy)state.lineBy=o.lineBy;
   if(o.filter)state.filter=o.filter;
   restoreY=Number(o.scrollY)||0;
   restoreX=Number(o.scrollX)||0;
@@ -9799,7 +9861,7 @@ function saveUI(){
   try{
    var bd=document.querySelector(".board");
    localStorage.setItem(UIKEY,JSON.stringify({
-    group:state.group,boardMode:state.boardMode,needMode:state.needMode,lineMode:state.lineMode,filter:state.filter,
+    group:state.group,boardMode:state.boardMode,needMode:state.needMode,lineMode:state.lineMode,lineBy:state.lineBy,filter:state.filter,
     scrollY:window.scrollY||window.pageYOffset||0,
     scrollX:bd?bd.scrollLeft:0
    }));
@@ -10926,7 +10988,8 @@ document.addEventListener("click",function(e){
   toast("נוספה סצנה "+nid+" לפרק "+(Number(ix.ep)||1));return}
  if(act==="bmode"){state.boardMode=b.getAttribute("data-k");render();return}
  if(act==="nmode"){state.needMode=b.getAttribute("data-k");render();return}
- if(act==="lmode"){state.lineMode=b.getAttribute("data-k");render();return}
+ if(act==="lmode"){state.lineMode=b.getAttribute("data-k");render();saveUI();return}
+ if(act==="lby"){state.lineBy=b.getAttribute("data-k");render();saveUI();return}
  if(act==="newat"){state.newAt=b.getAttribute("data-k");state.editing=null;render();return}
  if(act==="newcancel"){state.newAt=null;render();return}
  if(act==="newshot"){createAt("shot");return}
