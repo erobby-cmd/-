@@ -427,6 +427,8 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .epnbtn.none i{background:var(--line-2);color:var(--ink-3)}
 .epnbox{max-width:640px;width:100%}
 .epnlist{padding:4px 20px 8px;max-height:46vh;overflow:auto}
+.epnfrom{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:600;color:#1B4B8F;background:rgba(27,75,143,.1);border:1px solid rgba(27,75,143,.3);border-radius:6px;padding:2px 7px}
+.epncard.borrowed{opacity:.92;border-inline-start:3px solid rgba(27,75,143,.45)}
 .epnnone{padding:18px 20px;color:var(--ink-3);font-size:13px}
 .epncard{border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin-bottom:9px;background:var(--surface)}
 .epncard.mine{border-color:var(--ink-3)}
@@ -9449,10 +9451,30 @@ function EPN(){
  return STORE.epnotes.list;
 }
 function epnTgt(x){ return x.tg||("e:"+x.ep) }
+function charLineTags(ck){
+ var out=[];
+ LINES().forEach(function(l){
+  if(l.k===ck){ out.push("l:"+l.k); return }
+  var mine=DATA.scenes.filter(function(x){return lineOf(x)===l.k&&x.status!=="dropped"});
+  if(!mine.length) return;
+  var n=mine.filter(function(x){return x.char===ck}).length;
+  if(n*2>mine.length) out.push("l:"+l.k);
+ });
+ return out;
+}
 function epnFor(tg){
  tg=String(tg);
- return EPN().filter(function(x){return epnTgt(x)===tg})
-  .sort(function(a,b){return (b.at||0)-(a.at||0)});
+ var own=EPN().filter(function(x){return epnTgt(x)===tg});
+ if(tg.indexOf("c:")===0){
+  var tags=charLineTags(tg.slice(2));
+  if(tags.length){
+   EPN().forEach(function(x){
+    var t=epnTgt(x);
+    if(tags.indexOf(t)>-1) own.push(Object.assign({},x,{__from:t}));
+   });
+  }
+ }
+ return own.sort(function(a,b){return (b.at||0)-(a.at||0)});
 }
 function epnTitle(tg){
  tg=String(tg||"");
@@ -9491,7 +9513,7 @@ function epnPanel(){
  h+='<div class="epnlist">';
  if(!list.length) h+='<p class="epnnone">עוד אף אחד לא כתב פה כלום. תהיה הראשון.</p>';
  list.forEach(function(x){
-  var mine=(x.who===state.me);
+  var mine=(x.who===state.me)&&!x.__from;
   if(state.epnEdit===x.k&&mine&&!RO){
    h+='<div class="epncard mine"><div class="grpform" data-form="__epne__">';
    h+='<div class="f"><textarea name="t" style="min-height:96px">'+esc(x.t||"")+'</textarea></div>';
@@ -9501,10 +9523,14 @@ function epnPanel(){
    h+='</div></div>';
    return;
   }
-  h+='<div class="epncard'+(mine?" mine":"")+'">';
+  h+='<div class="epncard'+(mine?" mine":"")+(x.__from?" borrowed":"")+'">';
   h+='<div class="epnwho" style="--cc:'+esc(userColor(x.who))+'"><i></i><b>'+esc(userName(x.who))+'</b>';
   h+='<em>'+esc(agoTxt(x.at))+(x.edited?" · נערך":"")+'</em><div class="spacer"></div>';
-  if(mine&&!RO) h+='<button class="tinyedit" data-act="epnedit" data-id="'+esc(x.k)+'">ערוך</button>';
+  if(x.__from){
+   var _lo=lineObj(String(x.__from).slice(2));
+   h+='<span class="epnfrom">מהליין '+esc((_lo&&_lo.name)||"")+'</span>';
+  }
+  else if(mine&&!RO) h+='<button class="tinyedit" data-act="epnedit" data-id="'+esc(x.k)+'">ערוך</button>';
   h+='</div><p class="epntxt">'+esc(x.t||"")+'</p></div>';
  });
  h+='</div>';
