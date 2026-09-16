@@ -564,6 +564,14 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .fsdot.ask{background:#E0A33C;box-shadow:0 0 0 3px rgba(224,163,60,.2)}
 .fsbar .btn{padding:6px 14px;font-size:12.5px}
 .vrfiles{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.vrcenter{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:74px;height:74px;border-radius:50%;
+ border:0;cursor:pointer;background:rgba(10,13,18,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;
+ transition:opacity .25s,transform .12s;opacity:1}
+.vrcenter:hover{transform:translate(-50%,-50%) scale(1.06);background:rgba(10,13,18,.72)}
+.vrcenter span{display:block;width:0;height:0;border-style:solid;border-width:15px 0 15px 25px;border-color:transparent transparent transparent #fff;margin-inline-start:6px}
+.vrcenter.playing span{width:22px;height:26px;border:0;margin:0;background:linear-gradient(to left,#fff 0 7px,transparent 7px 15px,#fff 15px 22px)}
+.vrcenter.playing{opacity:0}
+.vrstage:hover .vrcenter.playing{opacity:.85}
 .vrsub{position:absolute;left:3%;right:3%;bottom:4%;text-align:center;pointer-events:none;font-family:"Heebo",sans-serif;font-size:clamp(14px,2.1vw,26px);font-weight:600;line-height:1.35;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,1)}
 .vrsub span{background:rgba(0,0,0,.35);padding:2px 10px;border-radius:5px;display:inline-block}
 .vrsub .vrspk{color:#ffd85e;font-weight:800}
@@ -5923,7 +5931,9 @@ function vidRoom(d,noLexi){
  }
  if(mode==="file"){
   if(VR.day===d.k&&VR.url){
-   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div><div class="vrsub"'+(subOn(d)?"":' hidden')+'></div></div>';
+   h+='<div class="vrstage" data-vrstage="'+esc(d.k)+'"><canvas class="vrdraw"></canvas><div class="vrnow" hidden></div>';
+   h+='<button class="vrcenter" data-vrc="play" title="נגן ועצור, או רווח"><span></span></button>';
+   h+='<div class="vrsub"'+(subOn(d)?"":' hidden')+'></div></div>';
    h+='<div class="vrbar">';
    h+='<button class="vrb big" data-vrc="play">נגן</button>';
    h+='<button class="vrb" data-vrc="b1">◀ פריים</button>';
@@ -6116,7 +6126,13 @@ function vrMount(){
   (function(){
    var _v=VR.video, _p=VR.pend;
    var _go=function(){
-    try{ _v.currentTime=_p; VR.t=_p; _v.play().catch(function(){}) }catch(_){}
+    try{
+     _v.currentTime=_p; VR.t=_p;
+     var _pr=_v.play();
+     if(_pr&&_pr.catch) _pr.catch(function(){
+      _v.addEventListener("canplay",function(){ _v.play().catch(function(){}) },{once:true});
+     });
+    }catch(_){}
     if(VR.pend===_p) VR.pend=null;
    };
    if(_v.readyState>0) _go();
@@ -6166,6 +6182,8 @@ function vrMount(){
   }
   var fl=q(".vrfill"); if(fl&&v.duration) fl.style.width=((v.currentTime/v.duration)*100).toFixed(2)+"%";
   var pb=q('[data-vrc="play"]'); if(pb) pb.textContent=v.paused?"נגן":"עצור";
+  var cb=stage.querySelector(".vrcenter");
+  if(cb){ cb.classList.toggle("playing",!v.paused); cb.setAttribute("aria-label",v.paused?"נגן":"עצור") }
   var mt=q('[data-vrc="mtime"]');
   if(mt&&document.activeElement!==mt){
    var au=disp(v.currentTime||0);
