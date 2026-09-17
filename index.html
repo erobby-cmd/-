@@ -427,6 +427,21 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .epnbtn.none i{background:var(--line-2);color:var(--ink-3)}
 .epnbox{max-width:640px;width:100%}
 .epnlist{padding:4px 20px 8px;max-height:46vh;overflow:auto}
+.epnsc{border-top:1px solid var(--line);padding:14px 22px 4px}
+.epnsc h4{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin:0 0 8px;display:flex;align-items:center;gap:7px}
+.epnsc h4 em{font-style:normal;font-size:11px;background:var(--ink);color:var(--bg);border-radius:9px;padding:1px 7px;letter-spacing:0}
+.epnsc h4:not(:first-child){margin-top:16px}
+.epnscl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.epnchip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:8px;background:var(--surface);
+ padding:6px 10px;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink);max-width:100%;text-align:start}
+.epnchip b{font-size:10.5px;font-weight:700;color:var(--ink-3);flex:0 0 auto}
+.epnchip i{font-style:normal;font-size:10.5px;color:var(--ink-3);flex:0 0 auto}
+.epnchip.add{cursor:pointer}
+.epnchip.add u{text-decoration:none;font-weight:700;color:#18603B;font-size:14px;line-height:1}
+.epnchip.add:hover{border-color:#2FA36B;background:rgba(47,163,107,.1)}
+.epnchip.in{background:var(--surface-2)}
+.epnx{border:0;background:transparent;color:var(--ink-3);cursor:pointer;font-size:15px;line-height:1;padding:0 2px}
+.epnx:hover{color:#B3261E}
 .epnfrom{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:600;color:#1B4B8F;background:rgba(27,75,143,.1);border:1px solid rgba(27,75,143,.3);border-radius:6px;padding:2px 7px}
 .epncard.borrowed{opacity:.92;border-inline-start:3px solid rgba(27,75,143,.45)}
 .epnnone{padding:18px 20px;color:var(--ink-3);font-size:13px}
@@ -9533,7 +9548,35 @@ function epnPanel(){
   else if(mine&&!RO) h+='<button class="tinyedit" data-act="epnedit" data-id="'+esc(x.k)+'">ערוך</button>';
   h+='</div><p class="epntxt">'+esc(x.t||"")+'</p></div>';
  });
- h+='</div>';
+  h+='</div>';
+ if(tg.indexOf("l:")===0&&!RO){
+  var _lk=tg.slice(2);
+  var _in=DATA.scenes.filter(function(x){return lineOf(x)===_lk&&x.status!=="dropped"}).sort(byOrd);
+  var _free=DATA.scenes.filter(function(x){return !lineOf(x)&&x.status!=="dropped"})
+    .sort(function(a,b){return ((a.ep||99)-(b.ep||99))||((a.ord||0)-(b.ord||0))});
+  h+='<div class="epnsc">';
+  h+='<h4>\u05e1\u05e6\u05e0\u05d5\u05ea \u05d1\u05dc\u05d9\u05d9\u05df<em>'+_in.length+'</em></h4>';
+  if(_in.length){
+   h+='<div class="epnscl">';
+   _in.forEach(function(x){
+    h+='<span class="epnchip in"><b>'+esc(x.id)+'</b>'+esc(x.title||"")+'<i>\u05e4\u05e8\u05e7 '+(x.ep||"?")+'</i>';
+    h+='<button class="epnx" data-act="epnscdel" data-id="'+esc(x.id)+'" title="\u05d4\u05d5\u05e6\u05d0 \u05de\u05d4\u05dc\u05d9\u05d9\u05df">\u00d7</button></span>';
+   });
+   h+='</div>';
+  }
+  h+='<h4>\u05d4\u05d5\u05e1\u05e3 \u05e1\u05e6\u05e0\u05d4 \u05dc\u05dc\u05d9\u05d9\u05df<em>'+_free.length+'</em></h4>';
+  if(!_free.length) h+='<p class="epnnone">\u05db\u05dc \u05d4\u05e1\u05e6\u05e0\u05d5\u05ea \u05db\u05d1\u05e8 \u05de\u05e9\u05d5\u05d9\u05d9\u05db\u05d5\u05ea \u05dc\u05dc\u05d9\u05d9\u05df \u05db\u05dc\u05e9\u05d4\u05d5</p>';
+  else{
+   h+='<div class="epnscl">';
+   _free.forEach(function(x){
+    var c=charOf(x.char);
+    h+='<button class="epnchip add" data-act="epnscadd" data-id="'+esc(x.id)+'" data-k="'+esc(_lk)+'" title="\u05d4\u05d5\u05e1\u05e3 \u05dc\u05dc\u05d9\u05d9\u05df \u05d4\u05d6\u05d4">';
+    h+='<b>'+esc(x.id)+'</b>'+esc(x.title||"")+'<i>\u05e4\u05e8\u05e7 '+(x.ep||"?")+(c?(" \u00b7 "+esc(c.name)):"")+'</i><u>+</u></button>';
+   });
+   h+='</div>';
+  }
+  h+='</div>';
+ }
  if(!RO){
   h+='<div class="epnform"><div class="grpform" data-form="__epn__">';
   h+='<div class="f"><label>'+(tg.indexOf("l:")===0?"מה אתה חושב על הליין":"מה אתה חושב על הפרק")+'</label><textarea name="t" style="min-height:88px" placeholder="תכתוב כאן. כל מי שנכנס לפלטפורמה יראה את זה בשמך"></textarea></div>';
@@ -10953,7 +10996,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
+  editline:1,saveline:1,delline:1,epnscadd:1,epnscdel:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,matother:1,jourother:1,vidlink:1,matunit:1,jourunit:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
@@ -11365,6 +11408,23 @@ document.addEventListener("click",function(e){
   toast("ההערה נמחקה");
   return}
  if(act==="epnopen"){ state.epNotes=String(id||""); state.epnEdit=""; render(); return}
+ if(act==="epnscadd"){
+  if(RO)return; if(!ensureEdit())return;
+  var _sa=DATA.scenes.filter(function(z){return z.id===id})[0];
+  if(!_sa) return;
+  _sa.line=b.getAttribute("data-k")||"";
+  var _la=lineObj(_sa.line);
+  render();save();
+  toast("\u05d4\u05e1\u05e6\u05e0\u05d4 "+id+" \u05e0\u05db\u05e0\u05e1\u05d4 \u05dc"+((_la&&_la.name)||""));
+  return}
+ if(act==="epnscdel"){
+  if(RO)return; if(!ensureEdit())return;
+  var _sr=DATA.scenes.filter(function(z){return z.id===id})[0];
+  if(!_sr) return;
+  _sr.line="-";
+  render();save();
+  toast("\u05d4\u05e1\u05e6\u05e0\u05d4 "+id+" \u05d9\u05e6\u05d0\u05d4 \u05de\u05d4\u05dc\u05d9\u05d9\u05df");
+  return}
  if(act==="epnclose"){ if(modalKeep(e,b))return; state.epNotes=null; state.epnEdit=""; render(); return}
  if(act==="epnedit"){ state.epnEdit=id; render(); return}
  if(act==="epncancel"){ state.epnEdit=""; render(); return}
