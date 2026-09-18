@@ -427,6 +427,9 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .epnbtn.none i{background:var(--line-2);color:var(--ink-3)}
 .epnbox{max-width:640px;width:100%}
 .epnlist{padding:4px 20px 8px;max-height:46vh;overflow:auto}
+.epnmk{border-color:#2FA36B;color:#18603B;font-weight:700}
+.epnmk:hover{background:#2FA36B;color:#fff;border-color:#2FA36B}
+.epnsc2{border-color:#1B4B8F;color:#1B4B8F;font-weight:700}
 .epnsc{border-top:1px solid var(--line);padding:14px 22px 4px}
 .epnsc h4{font-family:"Heebo",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-3);margin:0 0 8px;display:flex;align-items:center;gap:7px}
 .epnsc h4 em{font-style:normal;font-size:11px;background:var(--ink);color:var(--bg);border-radius:9px;padding:1px 7px;letter-spacing:0}
@@ -9546,6 +9549,11 @@ function epnPanel(){
    h+='<span class="epnfrom">מהליין '+esc((_lo&&_lo.name)||"")+'</span>';
   }
   else if(mine&&!RO) h+='<button class="tinyedit" data-act="epnedit" data-id="'+esc(x.k)+'">ערוך</button>';
+  if(!RO){
+   var _sc=x.sc?DATA.scenes.filter(function(z){return z.id===x.sc})[0]:null;
+   if(_sc) h+='<button class="tinyedit epnsc2" data-act="edit" data-id="'+esc(_sc.id)+'" title="'+esc(_sc.title||"")+'">סצנה '+esc(_sc.id)+'</button>';
+   else h+='<button class="tinyedit epnmk" data-act="epn2sc" data-id="'+esc(x.k)+'" data-k="'+esc(tg)+'" title="הפוך את המחשבה הזו לסצנה ביומן">הוסף סצנה</button>';
+  }
   h+='</div><p class="epntxt">'+esc(x.t||"")+'</p></div>';
  });
   h+='</div>';
@@ -10996,7 +11004,7 @@ document.addEventListener("click",function(e){
   state.viewUser=state.me;state.showUsers=false;render();save();
   toast("הגרסה שלך אופסה למקור");return}
  var MUT={moreideas:1,promote:1,promoteYes:1,cycle:1,del:1,dodel:1,save:1,saveep:1,savemeta:1,savechar:1,delchar:1,addchar:1,
-  editline:1,saveline:1,delline:1,epnscadd:1,epnscdel:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
+  editline:1,saveline:1,delline:1,epnscadd:1,epnscdel:1,epn2sc:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,matother:1,jourother:1,vidlink:1,matunit:1,jourunit:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
  var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
@@ -11408,6 +11416,43 @@ document.addEventListener("click",function(e){
   toast("ההערה נמחקה");
   return}
  if(act==="epnopen"){ state.epNotes=String(id||""); state.epnEdit=""; render(); return}
+ if(act==="epn2sc"){
+  if(RO)return; if(!ensureEdit())return;
+  var _n=EPN().filter(function(z){return z.k===id})[0];
+  if(!_n){ toast("\u05dc\u05d0 \u05de\u05e6\u05d0\u05ea\u05d9 \u05d0\u05ea \u05d4\u05de\u05d7\u05e9\u05d1\u05d4",true); return }
+  if(_n.sc&&DATA.scenes.filter(function(z){return z.id===_n.sc}).length){
+   state.epNotes=null; state.editing=_n.sc; render(); return;
+  }
+  var _tgt=String(b.getAttribute("data-k")||"");
+  var _txt=String(_n.t||"").replace(/\s+/g," ").trim();
+  var _ttl=_txt.length>70?(_txt.slice(0,68).replace(/\s\S*$/,"")+"\u2026"):_txt;
+  var _nid=newSceneId();
+  var _ns={id:_nid,ep:(DATA.eps[0]||{n:1}).n,ord:999,title:_ttl||"\u05e1\u05e6\u05e0\u05d4 \u05d7\u05d3\u05e9\u05d4",
+   status:"todo",char:"",unit:"",line:"",short:(_ttl!==_txt?_txt:""),min:MIN_PER,have:[],need:[],tags:[],
+   note:"\u05de\u05ea\u05d5\u05da \u05de\u05d7\u05e9\u05d1\u05d4 \u05e9\u05dc "+userName(_n.who)};
+  if(_tgt.indexOf("l:")===0) _ns.line=_tgt.slice(2);
+  else if(_tgt.indexOf("c:")===0) _ns.char=_tgt.slice(2);
+  else if(_tgt.indexOf("u:")===0) _ns.unit=_tgt.slice(2);
+  else if(_tgt.indexOf("t:")===0) _ns.tags=[_tgt.slice(2)];
+  else if(_tgt.indexOf("e:")===0) _ns.ep=Number(_tgt.slice(2))||_ns.ep;
+  if(!_ns.char){
+   var _cl=(_tgt.indexOf("l:")===0)?charLineTags:null;
+   if(_tgt.indexOf("l:")===0){
+    var _mine=DATA.scenes.filter(function(z){return lineOf(z)===_tgt.slice(2)&&z.char});
+    var _tal={},_best="",_bn=0;
+    _mine.forEach(function(z){ _tal[z.char]=(_tal[z.char]||0)+1; if(_tal[z.char]>_bn){_bn=_tal[z.char];_best=z.char} });
+    if(_best) _ns.char=_best;
+   }
+  }
+  if(!_ns.char) _ns.char=(DATA.chars[0]||{}).k||"";
+  DATA.scenes.push(_ns);
+  _n.sc=_nid;
+  reindex();
+  state.epNotes=null; state.epnEdit="";
+  state.editing=_nid;
+  render();save();
+  toast("\u05e0\u05d5\u05e6\u05e8\u05d4 \u05e1\u05e6\u05e0\u05d4 "+_nid+", \u05e2\u05e8\u05d5\u05da \u05d5\u05e9\u05de\u05d5\u05e8");
+  return}
  if(act==="epnscadd"){
   if(RO)return; if(!ensureEdit())return;
   var _sa=DATA.scenes.filter(function(z){return z.id===id})[0];
