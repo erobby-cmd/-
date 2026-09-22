@@ -427,6 +427,13 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .epnbtn.none i{background:var(--line-2);color:var(--ink-3)}
 .epnbox{max-width:640px;width:100%}
 .epnlist{padding:4px 20px 8px;max-height:46vh;overflow:auto}
+.neednext{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 18px;
+ background:var(--surface-2);border:1px solid var(--line);border-inline-end:3px solid var(--accent);border-radius:9px;padding:12px 16px}
+.nnx-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nnx-txt b{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;color:var(--ink);line-height:1.25}
+.nnx-txt span{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.nnx-txt em{font-style:normal;font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:600;color:var(--accent)}
+.nnx-btns{display:flex;align-items:center;gap:6px;flex:0 0 auto}
 .epnmk{border-color:#2FA36B;color:#18603B;font-weight:700}
 .epnmk:hover{background:#2FA36B;color:#fff;border-color:#2FA36B}
 .epnsc2{border-color:#1B4B8F;color:#1B4B8F;font-weight:700}
@@ -7153,6 +7160,18 @@ function needView(){
  if(!open.length){
   return h+'<div class="dempty"><b>הכול בקופסה</b><p>אין כרגע אף סצנה שמסומנת לצילום או חלקית.</p></div></section>';
  }
+ (function(){
+  var nx=NEXTUP(), nl=nextLine();
+  if(nl.empty&&!dparts(nx.from)) return;
+  var tgN="n:"+(nx.from||"open");
+  var lab=(nx.label||"ימי הצילום הבאים").trim();
+  var rng=dparts(nx.from)?rangeTxt(nx.from,nx.to):nl.txt;
+  h+='<div class="neednext">';
+  h+='<div class="nnx-txt"><b>'+esc(lab)+'</b><span>'+esc(rng)+'</span><em>'+esc(nl.sub||"")+'</em></div>';
+  h+='<div class="nnx-btns">'+epnBtn(tgN,"מחשבות לקראת ימי הצילום הבאים");
+  if(!RO) h+='<button class="tinyedit" data-act="nextedit">שנה תאריכים</button>';
+  h+='</div></div>';
+ })();
  h+='<div class="dstats">';
  h+='<div class="dstat"><b>'+open.length+'</b><span>סצנות לצלם</span></div>';
  h+='<div class="dstat"><b>'+mins+'</b><span>דקות חסרות</span></div>';
@@ -9503,6 +9522,11 @@ function epnTitle(tg){
  if(tg.indexOf("l:")===0){
   var l=lineObj(tg.slice(2));
   return {h:"מחשבות על הליין "+((l&&l.name)||""), s:(l&&l.what)||""};
+ }
+ if(tg.indexOf("n:")===0){
+  var nx=NEXTUP(), lb=(nx.label||"ימי הצילום הבאים").trim();
+  var rg=dparts(nx.from)?rangeTxt(nx.from,nx.to):tg.slice(2);
+  return {h:"מחשבות ל"+lb, s:rg};
  }
  if(tg.indexOf("c:")===0){
   var c=charOf(tg.slice(2));
