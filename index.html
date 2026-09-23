@@ -427,6 +427,35 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .epnbtn.none i{background:var(--line-2);color:var(--ink-3)}
 .epnbox{max-width:640px;width:100%}
 .epnlist{padding:4px 20px 8px;max-height:46vh;overflow:auto}
+.schwrap{margin:0 0 22px;border:1px solid var(--line);border-radius:11px;background:var(--surface);overflow:hidden}
+.schhead{padding:12px 16px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.schhead h3{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;margin:0;color:var(--ink)}
+.schhead span{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.schtab{border-collapse:collapse;width:100%;min-width:640px}
+.schtab th,.schtab td{border:1px solid var(--line);padding:7px 9px;font-family:"Heebo",sans-serif;font-size:12px;vertical-align:middle}
+.schtab thead th{background:var(--surface-2);font-weight:700;color:var(--ink-2);text-align:center;font-size:11.5px;line-height:1.3}
+.schtab .schw{display:block;font-size:10px;font-weight:600;color:var(--ink-3)}
+.schtab th.c0{text-align:start;min-width:150px;background:var(--surface-2);border-inline-start:3px solid var(--ccol)}
+.schtab th.c0 b{display:block;font-size:12.5px;font-weight:700;color:var(--ink)}
+.schtab th.c0 em{font-style:normal;font-size:10.5px;color:var(--ink-3)}
+.schcell{text-align:center;cursor:pointer;color:var(--ink);min-width:78px}
+.schcell i{font-style:normal;color:var(--line-2);font-size:15px;font-weight:700}
+.schcell:hover{background:var(--surface-2)}
+.schcell:hover i{color:var(--ink-3)}
+.schcell.yes{background:rgba(190,223,196,.45);font-weight:600}
+.schcell.no{background:rgba(243,196,212,.45);color:#8A2B4D}
+.schtab td.tot{text-align:center;background:var(--surface-2);min-width:74px}
+.schtab td.tot b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+.schtab td.tot em{font-style:normal;font-size:10px;color:var(--ink-3)}
+.schedit{padding:0!important;min-width:210px}
+.schbox{display:flex;flex-direction:column;gap:6px;padding:8px}
+.schbox input{width:100%;font-family:"Heebo",sans-serif;font-size:12.5px;padding:6px 8px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface)}
+.schq{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.schqb{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:600;border:1px solid var(--line-2);background:var(--surface);
+ color:var(--ink-2);border-radius:6px;padding:3px 7px;cursor:pointer}
+.schqb:hover{border-color:var(--ink);color:var(--ink)}
+.schq .btn{padding:5px 12px;font-size:12px}
+.schdel{color:#B3261E;border-color:rgba(179,38,30,.4)}
 .neednext{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 18px;
  background:var(--surface-2);border:1px solid var(--line);border-inline-end:3px solid var(--accent);border-radius:9px;padding:12px 16px}
 .nnx-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -3796,7 +3825,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,schCell:"",editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -7149,6 +7178,83 @@ function gapsView(){
  if(shelf.length) h+='<div class="gapsec"><h3>\u05d1\u05d0\u05d7\u05e1\u05d5\u05df<em>'+shelf.length+'</em></h3><p>\u05e1\u05e6\u05e0\u05d5\u05ea \u05e9\u05db\u05ea\u05d1\u05ea \u05d5\u05dc\u05d0 \u05de\u05e7\u05d5\u05e9\u05e8\u05d5\u05ea \u05dc\u05e9\u05d5\u05e8\u05d4 \u05d1\u05d7\u05d5\u05de\u05e8</p><div class="gaplist">'+gapRow("\u05e4\u05ea\u05d7 \u05d0\u05ea \u05d4\u05d0\u05d7\u05e1\u05d5\u05df","","group",null,"shelf")+'</div></div>';
  return h+'</section>';
 }
+function SCHED(){
+ if(!STORE.dues) STORE.dues={list:[]};
+ if(!STORE.dues.sched||typeof STORE.dues.sched!=="object") STORE.dues.sched={};
+ return STORE.dues.sched;
+}
+function schedKey(){ var n=NEXTUP(); return "b:"+(n.from||"open") }
+function schedBlock(){
+ var S=SCHED(), k=schedKey();
+ if(!S[k]||typeof S[k]!=="object") S[k]={};
+ return S[k];
+}
+function schedGet(ck,iso){
+ var b=(SCHED()[schedKey()]||{});
+ return (b[ck]&&b[ck][iso])?String(b[ck][iso]):"";
+}
+function schedSet(ck,iso,v){
+ var b=schedBlock();
+ if(!b[ck]||typeof b[ck]!=="object") b[ck]={};
+ v=String(v||"").replace(/\s+/g," ").trim();
+ if(v) b[ck][iso]=v; else delete b[ck][iso];
+}
+function schedDays(){
+ var n=NEXTUP(), a=dparts(n.from);
+ if(!a) return [];
+ var b=dparts(n.to)||a, out=[], t=a.t, guard=0;
+ if(b.t<a.t) b=a;
+ while(t<=b.t&&guard<31){
+  var d=new Date(t);
+  out.push(d.getFullYear()+"-"+(d.getMonth()<9?"0":"")+(d.getMonth()+1)+"-"+(d.getDate()<10?"0":"")+d.getDate());
+  t+=86400000; guard++;
+ }
+ return out;
+}
+var SCHQUICK=["\u05d1\u05d5\u05e7\u05e8","\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd","\u05e2\u05e8\u05d1","\u05dc\u05d9\u05dc\u05d4","\u05db\u05dc \u05d4\u05d9\u05d5\u05dd","\u05dc\u05d0 \u05d6\u05de\u05d9\u05df"];
+function schCls(v){
+ if(!v) return "";
+ if(/\u05dc\u05d0 \u05d6\u05de\u05d9\u05df|\u05dc\u05d0 \u05d9\u05db\u05d5\u05dc|\u05d1\u05d7\u05d5\u05dc/.test(v)) return " no";
+ return " yes";
+}
+function schedGrid(){
+ var days=schedDays();
+ if(!days.length) return "";
+ var chars=DATA.chars||[];
+ if(!chars.length) return "";
+ var h='<div class="schwrap"><div class="schhead"><h3>\u05dc\u05d5\u05d6 \u05d4\u05e6\u05d9\u05dc\u05d5\u05de\u05d9\u05dd</h3>';
+ h+='<span>\u05de\u05ea\u05d9 \u05db\u05dc \u05d3\u05de\u05d5\u05ea \u05d6\u05de\u05d9\u05e0\u05d4. \u05dc\u05d7\u05e5 \u05e2\u05dc \u05de\u05e9\u05d1\u05e6\u05ea \u05db\u05d3\u05d9 \u05dc\u05de\u05dc\u05d0</span></div>';
+ h+='<div class="tscroll"><table class="schtab"><thead><tr><th class="c0">\u05d3\u05de\u05d5\u05ea</th>';
+ days.forEach(function(iso){
+  var p=dparts(iso);
+  h+='<th><span class="schw">'+esc(HEDAYS[p.w])+'</span>'+p.d+"."+(p.m+1)+'</th>';
+ });
+ h+='<th class="tot">\u05d6\u05de\u05d9\u05e0\u05d5\u05ea</th></tr></thead><tbody>';
+ chars.forEach(function(c){
+  var n=0;
+  h+='<tr style="--ccol:'+esc(c.color||"#455160")+'"><th class="c0"><b>'+esc(c.name)+'</b>'+(c.role?'<em>'+esc(c.role)+'</em>':"")+'</th>';
+  days.forEach(function(iso){
+   var v=schedGet(c.k,iso), ck=c.k+"|"+iso;
+   if(v&&schCls(v)===" yes") n++;
+   if(state.schCell===ck&&!RO){
+    h+='<td class="schedit"><div class="schbox" data-form="__sch__" data-k="'+esc(ck)+'">';
+    h+='<input name="v" value="'+esc(v)+'" autocomplete="off" placeholder="\u05dc\u05de\u05e9\u05dc 10:00 \u05e2\u05d3 14:00">';
+    h+='<div class="schq">';
+    SCHQUICK.forEach(function(q){ h+='<button class="schqb" data-act="schquick" data-k="'+esc(ck)+'" data-v="'+esc(q)+'">'+esc(q)+'</button>' });
+    h+='</div><div class="schq">';
+    h+='<button class="btn" data-act="schsave" data-k="'+esc(ck)+'">\u05e9\u05de\u05d5\u05e8</button>';
+    h+='<button class="tinyedit" data-act="schclose">\u05d1\u05d9\u05d8\u05d5\u05dc</button>';
+    if(v) h+='<button class="tinyedit schdel" data-act="schclr" data-k="'+esc(ck)+'">\u05e0\u05e7\u05d4</button>';
+    h+='</div></div></td>';
+    return;
+   }
+   h+='<td class="schcell'+schCls(v)+'"'+(RO?"":' data-act="schcell" data-k="'+esc(ck)+'"')+'>'+(v?esc(v):'<i>+</i>')+'</td>';
+  });
+  h+='<td class="tot"><b>'+n+'</b><em>'+(n?("\u05de\u05ea\u05d5\u05da "+days.length):"\u05dc\u05d0 \u05e1\u05d5\u05db\u05dd")+'</em></td></tr>';
+ });
+ h+='</tbody></table></div></div>';
+ return h;
+}
 function needView(){
  var mode=state.needMode||"char";
  var open=openScenes();
@@ -7171,6 +7277,7 @@ function needView(){
   h+='<div class="nnx-btns">'+epnBtn(tgN,"מחשבות לקראת ימי הצילום הבאים");
   if(!RO) h+='<button class="tinyedit" data-act="nextedit">שנה תאריכים</button>';
   h+='</div></div>';
+  h+=schedGrid();
  })();
  h+='<div class="dstats">';
  h+='<div class="dstat"><b>'+open.length+'</b><span>סצנות לצלם</span></div>';
@@ -11031,7 +11138,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,epnscadd:1,epnscdel:1,epn2sc:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,matother:1,jourother:1,vidlink:1,matunit:1,jourunit:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
+ var SHARED={schquick:1,schsave:1,schclr:1,addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -11440,6 +11547,27 @@ document.addEventListener("click",function(e){
   toast("ההערה נמחקה");
   return}
  if(act==="epnopen"){ state.epNotes=String(id||""); state.epnEdit=""; render(); return}
+ if(act==="schcell"){ if(RO)return; state.schCell=b.getAttribute("data-k")||""; render(); return}
+ if(act==="schclose"){ state.schCell=""; render(); return}
+ if(act==="schquick"){
+  if(RO)return;
+  var _q=String(b.getAttribute("data-k")||"").split("|");
+  schedSet(_q[0],_q[1],b.getAttribute("data-v")||"");
+  state.schCell=""; render(); save();
+  return}
+ if(act==="schsave"){
+  if(RO)return;
+  var _sk=String(b.getAttribute("data-k")||"").split("|");
+  var _bx=document.querySelector('.schbox[data-k="'+String(b.getAttribute("data-k")||"").replace(/"/g,"")+'"] input[name="v"]');
+  schedSet(_sk[0],_sk[1],_bx?_bx.value:"");
+  state.schCell=""; render(); save();
+  return}
+ if(act==="schclr"){
+  if(RO)return;
+  var _ck=String(b.getAttribute("data-k")||"").split("|");
+  schedSet(_ck[0],_ck[1],"");
+  state.schCell=""; render(); save();
+  return}
  if(act==="epn2sc"){
   if(RO)return; if(!ensureEdit())return;
   var _n=EPN().filter(function(z){return z.k===id})[0];
