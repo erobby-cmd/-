@@ -7313,7 +7313,7 @@ function needView(){
   var rng=dparts(nx.from)?rangeTxt(nx.from,nx.to):nl.txt;
   h+='<div class="neednext">';
   h+='<div class="nnx-txt"><b>'+esc(lab)+'</b><span>'+esc(rng)+'</span><em>'+esc(nl.sub||"")+'</em></div>';
-  h+='<div class="nnx-btns">'+epnBtn(tgN,"מחשבות לקראת ימי הצילום הבאים");
+  h+='<div class="nnx-btns">'+epnBtn(tgN,"תוכנית הצילומים לקראת ימי הצילום הבאים","תוכנית צילומים");
   if(!RO) h+='<button class="tinyedit" data-act="nextedit">שנה תאריכים</button>';
   h+='</div></div>';
   h+=schedGrid();
@@ -9672,7 +9672,7 @@ function epnTitle(tg){
  if(tg.indexOf("n:")===0){
   var nx=NEXTUP(), lb=(nx.label||"ימי הצילום הבאים").trim();
   var rg=dparts(nx.from)?rangeTxt(nx.from,nx.to):tg.slice(2);
-  return {h:"מחשבות ל"+lb, s:rg};
+  return {h:"תוכנית צילומים · "+lb, s:rg};
  }
  if(tg.indexOf("c:")===0){
   var c=charOf(tg.slice(2));
@@ -9688,9 +9688,9 @@ function epnTitle(tg){
  }
  return {h:"מחשבות", s:""};
 }
-function epnBtn(tg,ttl){
+function epnBtn(tg,ttl,lbl){
  var c=epnFor(tg).length;
- return '<button class="tinyedit epnbtn'+(c?"":" none")+'" data-act="epnopen" data-id="'+esc(tg)+'" title="'+esc(ttl||"מחשבות, כל המשתמשים רואים")+'">מחשבות<i>'+c+'</i></button>';
+ return '<button class="tinyedit epnbtn'+(c?"":" none")+'" data-act="epnopen" data-id="'+esc(tg)+'" title="'+esc(ttl||"מחשבות, כל המשתמשים רואים")+'">'+esc(lbl||"מחשבות")+'<i>'+c+'</i></button>';
 }
 function epnPanel(){
  var tg=String(state.epNotes), ti=epnTitle(tg);
@@ -9757,8 +9757,8 @@ function epnPanel(){
  }
  if(!RO){
   h+='<div class="epnform"><div class="grpform" data-form="__epn__">';
-  h+='<div class="f"><label>'+(tg.indexOf("l:")===0?"מה אתה חושב על הליין":"מה אתה חושב על הפרק")+'</label><textarea name="t" style="min-height:88px" placeholder="תכתוב כאן. כל מי שנכנס לפלטפורמה יראה את זה בשמך"></textarea></div>';
-  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="epnadd" data-id="'+esc(tg)+'">הוסף מחשבה</button>';
+  h+='<div class="f"><label>'+(tg.indexOf("n:")===0?"מה צריך לצלם בימים האלה":tg.indexOf("l:")===0?"מה אתה חושב על הליין":"מה אתה חושב על הפרק")+'</label><textarea name="t" style="min-height:88px" placeholder="תכתוב כאן. כל מי שנכנס לפלטפורמה יראה את זה בשמך"></textarea></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="epnadd" data-id="'+esc(tg)+'">'+(tg.indexOf("n:")===0?"הוסף לתוכנית":"הוסף מחשבה")+'</button>';
   h+='<button class="btn ghost" data-act="epnclose">סגור</button></div>';
   h+='</div></div>';
  }
