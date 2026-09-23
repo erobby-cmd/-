@@ -427,6 +427,30 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .epnbtn.none i{background:var(--line-2);color:var(--ink-3)}
 .epnbox{max-width:640px;width:100%}
 .epnlist{padding:4px 20px 8px;max-height:46vh;overflow:auto}
+.planlines{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.planrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 7px;border-radius:7px}
+.planrow:hover{background:var(--surface-2)}
+.planrow.on{background:rgba(190,223,196,.3)}
+.plant{flex:1 1 220px;font-family:"Heebo",sans-serif;font-size:13px;line-height:1.5;color:var(--ink)}
+.pland{display:flex;gap:3px;flex-wrap:wrap;flex:0 0 auto}
+.pdb{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:600;border:1px solid var(--line-2);background:var(--surface);
+ color:var(--ink-3);border-radius:6px;padding:2px 6px;cursor:pointer;min-width:34px}
+.pdb:hover{border-color:var(--ink);color:var(--ink)}
+.pdb.on{background:#2FA36B;border-color:#2FA36B;color:#fff}
+.planwrap{margin:0 0 22px;border:1px solid var(--line);border-radius:11px;background:var(--surface);overflow:hidden}
+.pdays{display:flex;gap:10px;padding:12px 16px;overflow-x:auto}
+.pday{flex:1 1 150px;min-width:150px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);padding:9px 10px}
+.pday.has{background:var(--surface);border-color:var(--line-2)}
+.pday h5{display:flex;align-items:center;gap:6px;margin:0 0 7px;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-3);font-weight:600}
+.pday h5 b{font-size:14px;font-weight:700;color:var(--ink)}
+.pday h5 i{font-style:normal;margin-inline-start:auto;font-size:10.5px;font-weight:700;background:var(--ink);color:var(--bg);border-radius:8px;padding:1px 6px}
+.pdnone{font-family:"Heebo",sans-serif;font-size:11px;color:var(--line-2);margin:0}
+.pditem{display:flex;align-items:flex-start;gap:5px;font-family:"Heebo",sans-serif;font-size:11.5px;line-height:1.4;color:var(--ink);
+ background:var(--surface-2);border-radius:6px;padding:5px 7px;margin-bottom:4px}
+.pday.has .pditem{background:rgba(190,223,196,.28)}
+.pditem span{flex:1 1 auto}
+.pdx{border:0;background:transparent;color:var(--ink-3);cursor:pointer;font-size:13px;line-height:1;padding:0 1px;flex:0 0 auto}
+.pdx:hover{color:#B3261E}
 .schwrap{margin:0 0 22px;border:1px solid var(--line);border-radius:11px;background:var(--surface);overflow:hidden}
 .schhead{padding:12px 16px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
 .schhead h3{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;margin:0;color:var(--ink)}
@@ -7221,6 +7245,55 @@ function schedFilled(ck){
  var n=0; for(var d in m){ if(String(m[d]||"").trim()) n++ }
  return n;
 }
+function planMap(){
+ var b=schedBlock();
+ if(!b.__lp||typeof b.__lp!=="object") b.__lp={};
+ return b.__lp;
+}
+function planGet(lk){
+ var b=(SCHED()[schedKey()]||{});
+ return (b.__lp&&b.__lp[lk])?String(b.__lp[lk]):"";
+}
+function planSet(lk,iso){
+ var m=planMap();
+ if(iso) m[lk]=iso; else delete m[lk];
+}
+function planByDay(){
+ var days=schedDays(), out={}, n=0;
+ days.forEach(function(d){ out[d]=[] });
+ var b=(SCHED()[schedKey()]||{}), lp=b.__lp||{};
+ EPN().forEach(function(x){
+  if(String(epnTgt(x)).indexOf("n:")!==0) return;
+  String(x.t||"").split("\n").forEach(function(ln,i){
+   var t=String(ln).trim(); if(!t) return;
+   var lk=x.k+"#"+i, iso=lp[lk];
+   if(iso&&out[iso]){ out[iso].push({t:t,lk:lk}); n++ }
+  });
+ });
+ out.__n=n;
+ return out;
+}
+function planBoard(){
+ var days=schedDays(); if(!days.length) return "";
+ var by=planByDay();
+ if(!by.__n) return "";
+ var h='<div class="planwrap"><div class="schhead"><h3>\u05dc\u05d5\u05d6 \u05dc\u05e4\u05d9 \u05d9\u05de\u05d9\u05dd</h3>';
+ h+='<span>'+by.__n+' \u05e9\u05d5\u05e8\u05d5\u05ea \u05de\u05ea\u05d5\u05db\u05e0\u05d9\u05ea \u05d4\u05e6\u05d9\u05dc\u05d5\u05de\u05d9\u05dd \u05e9\u05d5\u05d1\u05e6\u05d5 \u05dc\u05ea\u05d0\u05e8\u05d9\u05db\u05d9\u05dd</span></div>';
+ h+='<div class="pdays">';
+ days.forEach(function(iso){
+  var p=dparts(iso), list=by[iso]||[];
+  h+='<div class="pday'+(list.length?" has":"")+'"><h5><b>'+p.d+"."+(p.m+1)+'</b><em>'+esc(HEDAYS[p.w])+'</em><i>'+list.length+'</i></h5>';
+  if(!list.length) h+='<p class="pdnone">\u05e2\u05d5\u05d3 \u05e8\u05d9\u05e7</p>';
+  else list.forEach(function(it){
+   h+='<div class="pditem"><span>'+esc(it.t)+'</span>';
+   if(!RO) h+='<button class="pdx" data-act="planset" data-k="'+esc(it.lk)+'" data-v="" title="\u05d4\u05d5\u05e6\u05d0 \u05de\u05d4\u05ea\u05d0\u05e8\u05d9\u05da">\u00d7</button>';
+   h+='</div>';
+  });
+  h+='</div>';
+ });
+ h+='</div></div>';
+ return h;
+}
 function schedDays(){
  var n=NEXTUP(), a=dparts(n.from);
  if(!a) return [];
@@ -7317,6 +7390,7 @@ function needView(){
   if(!RO) h+='<button class="tinyedit" data-act="nextedit">שנה תאריכים</button>';
   h+='</div></div>';
   h+=schedGrid();
+  h+=planBoard();
  })();
  h+='<div class="dstats">';
  h+='<div class="dstat"><b>'+open.length+'</b><span>סצנות לצלם</span></div>';
@@ -9724,7 +9798,27 @@ function epnPanel(){
    if(_sc) h+='<button class="tinyedit epnsc2" data-act="edit" data-id="'+esc(_sc.id)+'" title="'+esc(_sc.title||"")+'">סצנה '+esc(_sc.id)+'</button>';
    else h+='<button class="tinyedit epnmk" data-act="epn2sc" data-id="'+esc(x.k)+'" data-k="'+esc(tg)+'" title="הפוך את המחשבה הזו לסצנה ביומן">הוסף סצנה</button>';
   }
-  h+='</div><p class="epntxt">'+esc(x.t||"")+'</p></div>';
+  if(tg.indexOf("n:")===0&&!x.__from){
+   var _pd=schedDays();
+   h+='</div><div class="planlines">';
+   String(x.t||"").split("\n").forEach(function(ln,li){
+    var _t=String(ln).trim();
+    if(!_t){ return }
+    var _lk=x.k+"#"+li, _cur=planGet(_lk);
+    h+='<div class="planrow'+(_cur?" on":"")+'"><span class="plant">'+esc(_t)+'</span>';
+    if(!RO&&_pd.length){
+     h+='<span class="pland">';
+     _pd.forEach(function(iso){
+      var pp=dparts(iso);
+      h+='<button class="pdb'+(_cur===iso?" on":"")+'" data-act="planset" data-k="'+esc(_lk)+'" data-v="'+esc(iso)+'" title="'+esc(HEDAYS[pp.w])+'">'+pp.d+"."+(pp.m+1)+'</button>';
+     });
+     h+='</span>';
+    }
+    h+='</div>';
+   });
+   h+='</div></div>';
+  }
+  else h+='</div><p class="epntxt">'+esc(x.t||"")+'</p></div>';
  });
   h+='</div>';
  if(tg.indexOf("l:")===0&&!RO){
@@ -11177,7 +11271,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,epnscadd:1,epnscdel:1,epn2sc:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,matother:1,jourother:1,vidlink:1,matunit:1,jourunit:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={schquick:1,schsave:1,schclr:1,schoff:1,schon:1,schonall:1,schclean:1,addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
+ var SHARED={planset:1,schquick:1,schsave:1,schclr:1,schoff:1,schon:1,schonall:1,schclean:1,addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -11586,6 +11680,12 @@ document.addEventListener("click",function(e){
   toast("ההערה נמחקה");
   return}
  if(act==="epnopen"){ state.epNotes=String(id||""); state.epnEdit=""; render(); return}
+ if(act==="planset"){
+  if(RO)return;
+  var _lk=b.getAttribute("data-k")||"", _v=b.getAttribute("data-v")||"";
+  planSet(_lk,(planGet(_lk)===_v)?"":_v);
+  render(); save();
+  return}
  if(act==="schoff"){
   if(RO)return;
   schedOff()[b.getAttribute("data-k")||""]=1;
