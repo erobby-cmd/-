@@ -431,6 +431,16 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .schhead{padding:12px 16px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
 .schhead h3{font-family:"Heebo",sans-serif;font-size:14px;font-weight:700;margin:0;color:var(--ink)}
 .schhead span{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.schhead{position:relative}
+.schtools{position:absolute;inset-inline-end:16px;top:12px}
+.schoff{border:0;background:transparent;color:var(--line-2);cursor:pointer;font-size:15px;line-height:1;padding:0 3px;float:inline-end}
+.schoff:hover{color:#B3261E}
+.schback{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:10px 16px;border-top:1px solid var(--line);background:var(--surface-2)}
+.schback>span{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.schbk{display:inline-flex;align-items:center;gap:5px;border:1px dashed var(--line-2);background:transparent;border-radius:7px;
+ padding:3px 8px;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-2);cursor:pointer}
+.schbk i{font-style:normal;font-weight:700;color:#18603B}
+.schbk:hover{border-style:solid;border-color:#2FA36B;color:var(--ink)}
 .schtab{border-collapse:collapse;width:100%;min-width:640px}
 .schtab th,.schtab td{border:1px solid var(--line);padding:7px 9px;font-family:"Heebo",sans-serif;font-size:12px;vertical-align:middle}
 .schtab thead th{background:var(--surface-2);font-weight:700;color:var(--ink-2);text-align:center;font-size:11.5px;line-height:1.3}
@@ -7199,6 +7209,18 @@ function schedSet(ck,iso,v){
  v=String(v||"").replace(/\s+/g," ").trim();
  if(v) b[ck][iso]=v; else delete b[ck][iso];
 }
+function schedOff(){
+ var b=schedBlock();
+ if(!b.__off||typeof b.__off!=="object") b.__off={};
+ return b.__off;
+}
+function schedHidden(ck){ var b=(SCHED()[schedKey()]||{}); return !!(b.__off&&b.__off[ck]) }
+function schedFilled(ck){
+ var b=(SCHED()[schedKey()]||{}), m=b[ck];
+ if(!m||typeof m!=="object") return 0;
+ var n=0; for(var d in m){ if(String(m[d]||"").trim()) n++ }
+ return n;
+}
 function schedDays(){
  var n=NEXTUP(), a=dparts(n.from);
  if(!a) return [];
@@ -7223,16 +7245,22 @@ function schedGrid(){
  var chars=DATA.chars||[];
  if(!chars.length) return "";
  var h='<div class="schwrap"><div class="schhead"><h3>\u05dc\u05d5\u05d6 \u05d4\u05e6\u05d9\u05dc\u05d5\u05de\u05d9\u05dd</h3>';
- h+='<span>\u05de\u05ea\u05d9 \u05db\u05dc \u05d3\u05de\u05d5\u05ea \u05d6\u05de\u05d9\u05e0\u05d4. \u05dc\u05d7\u05e5 \u05e2\u05dc \u05de\u05e9\u05d1\u05e6\u05ea \u05db\u05d3\u05d9 \u05dc\u05de\u05dc\u05d0</span></div>';
+ h+='<span>מתי כל דמות זמינה. לחץ על משבצת כדי למלא</span>';
+ h+='<div class="schtools" data-schtools="1"></div></div>';
  h+='<div class="tscroll"><table class="schtab"><thead><tr><th class="c0">\u05d3\u05de\u05d5\u05ea</th>';
  days.forEach(function(iso){
   var p=dparts(iso);
   h+='<th><span class="schw">'+esc(HEDAYS[p.w])+'</span>'+p.d+"."+(p.m+1)+'</th>';
  });
  h+='<th class="tot">\u05d6\u05de\u05d9\u05e0\u05d5\u05ea</th></tr></thead><tbody>';
- chars.forEach(function(c){
+ var hid=chars.filter(function(c){return schedHidden(c.k)});
+ var shown=chars.filter(function(c){return !schedHidden(c.k)});
+ var idle=shown.filter(function(c){return !schedFilled(c.k)});
+ shown.forEach(function(c){
   var n=0;
-  h+='<tr style="--ccol:'+esc(c.color||"#455160")+'"><th class="c0"><b>'+esc(c.name)+'</b>'+(c.role?'<em>'+esc(c.role)+'</em>':"")+'</th>';
+  h+='<tr style="--ccol:'+esc(c.color||"#455160")+'"><th class="c0"><b>'+esc(c.name)+'</b>'+(c.role?'<em>'+esc(c.role)+'</em>':"");
+  if(!RO) h+='<button class="schoff" data-act="schoff" data-k="'+esc(c.k)+'" title="\u05d4\u05e2\u05e3 \u05de\u05d4\u05dc\u05d5\u05d6, \u05dc\u05d0 \u05de\u05e6\u05d5\u05dc\u05dd \u05d1\u05e1\u05d1\u05d1 \u05d4\u05d6\u05d4">\u00d7</button>';
+  h+='</th>';
   days.forEach(function(iso){
    var v=schedGet(c.k,iso), ck=c.k+"|"+iso;
    if(v&&schCls(v)===" yes") n++;
@@ -7252,8 +7280,19 @@ function schedGrid(){
   });
   h+='<td class="tot"><b>'+n+'</b><em>'+(n?("\u05de\u05ea\u05d5\u05da "+days.length):"\u05dc\u05d0 \u05e1\u05d5\u05db\u05dd")+'</em></td></tr>';
  });
- h+='</tbody></table></div></div>';
- return h;
+ h+='</tbody></table></div>';
+ if(hid.length){
+  h+='<div class="schback"><span>\u05d4\u05d5\u05e2\u05e4\u05d5 \u05de\u05d4\u05dc\u05d5\u05d6</span>';
+  hid.forEach(function(c){
+   h+='<button class="schbk" data-act="schon" data-k="'+esc(c.k)+'" title="\u05d4\u05d7\u05d6\u05e8 \u05dc\u05dc\u05d5\u05d6">'+esc(c.name)+'<i>+</i></button>';
+  });
+  if(!RO) h+='<button class="tinyedit" data-act="schonall">\u05d4\u05d7\u05d6\u05e8 \u05d0\u05ea \u05db\u05d5\u05dc\u05dd</button>';
+  h+='</div>';
+ }
+ h+='</div>';
+ var tools="";
+ if(!RO&&idle.length&&shown.length>idle.length) tools='<button class="tinyedit" data-act="schclean" title="\u05de\u05e1\u05ea\u05d9\u05e8 \u05db\u05dc \u05d3\u05de\u05d5\u05ea \u05e9\u05d0\u05d9\u05df \u05dc\u05d4 \u05d0\u05e3 \u05de\u05e9\u05d1\u05e6\u05ea \u05de\u05dc\u05d0\u05d4">\u05d4\u05e2\u05e3 \u05d0\u05ea \u05de\u05d9 \u05e9\u05dc\u05d0 \u05de\u05e6\u05d5\u05dc\u05dd ('+idle.length+')</button>';
+ return h.replace('<div class="schtools" data-schtools="1"></div>','<div class="schtools">'+tools+'</div>');
 }
 function needView(){
  var mode=state.needMode||"char";
@@ -11138,7 +11177,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,epnscadd:1,epnscdel:1,epn2sc:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,matother:1,jourother:1,vidlink:1,matunit:1,jourunit:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={schquick:1,schsave:1,schclr:1,addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
+ var SHARED={schquick:1,schsave:1,schclr:1,schoff:1,schon:1,schonall:1,schclean:1,addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -11547,6 +11586,28 @@ document.addEventListener("click",function(e){
   toast("ההערה נמחקה");
   return}
  if(act==="epnopen"){ state.epNotes=String(id||""); state.epnEdit=""; render(); return}
+ if(act==="schoff"){
+  if(RO)return;
+  schedOff()[b.getAttribute("data-k")||""]=1;
+  state.schCell=""; render(); save();
+  return}
+ if(act==="schon"){
+  if(RO)return;
+  delete schedOff()[b.getAttribute("data-k")||""];
+  render(); save();
+  return}
+ if(act==="schonall"){
+  if(RO)return;
+  var _o=schedOff(); Object.keys(_o).forEach(function(k){delete _o[k]});
+  render(); save();
+  return}
+ if(act==="schclean"){
+  if(RO)return;
+  var _off=schedOff(), _n=0;
+  (DATA.chars||[]).forEach(function(c){ if(!schedHidden(c.k)&&!schedFilled(c.k)){ _off[c.k]=1; _n++ } });
+  state.schCell=""; render(); save();
+  toast(_n+" \u05d3\u05de\u05d5\u05d9\u05d5\u05ea \u05d9\u05e8\u05d3\u05d5 \u05de\u05d4\u05dc\u05d5\u05d6");
+  return}
  if(act==="schcell"){ if(RO)return; state.schCell=b.getAttribute("data-k")||""; render(); return}
  if(act==="schclose"){ state.schCell=""; render(); return}
  if(act==="schquick"){
