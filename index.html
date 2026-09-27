@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
+<meta name="build" content="2026-09-27T14:39:04Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -6049,6 +6050,12 @@ function lexiOf(d,fi){
  }
  return "";
 }
+/* הנגן החיצוני קורא את זמן ההתחלה מהסוף של הכתובת, אחרי הסולמית.
+   הפרמטר r מכריח טעינה מחדש, כדי שהזמן ייקרא גם בלחיצה שנייה.  */
+function lexiSeek(base,sec){
+ var t=Math.max(0,Math.round(Number(sec)||0));
+ return String(base).split(/[?#]/)[0]+"?r="+Date.now()+"#t="+t;
+}
 function lexiNote(d){
  if(!(state.watchPop&&state.watchPop.d===d.k)) return "";
  var x=(d.brk||[])[state.watchPop.i]||{}, r=tcRange(x.tc);
@@ -11616,7 +11623,7 @@ document.addEventListener("click",function(e){
      VR.pend=null;
     }
     var ifr=document.querySelector('.wpopbody .vroom[data-vr="'+id+'"] iframe');
-    if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_prg.a)+"s&autoplay=1" }
+    if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=lexiSeek(bse,_prg.a) }
    },120);
    toast("הסצנה "+(_px.t||"")+" · "+vfmt(_prg.a).slice(0,7));
    return}
@@ -11648,7 +11655,7 @@ document.addEventListener("click",function(e){
    var el=document.querySelector('.matvid')||document.querySelector('.vroom[data-vr="'+id+'"]');
    if(el&&el.scrollIntoView) el.scrollIntoView({block:"center"});
    var ifr=document.querySelector('.vroom[data-vr="'+id+'"] iframe');
-   if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=bse+"?t="+Math.round(_rg.a)+"s&autoplay=1" }
+   if(ifr){ var bse=String(ifr.src).split(/[?#]/)[0]; ifr.src=lexiSeek(bse,_rg.a) }
   },90);
   toast("הקטע "+(_wx.t||"")+" · "+vfmt(_rg.a).slice(0,7));
   return}
@@ -11731,7 +11738,7 @@ document.addEventListener("click",function(e){
    var _if=document.querySelector('.vroom[data-vr="'+_n.day+'"] iframe');
    if(_if){
     var _b=String(_if.src).split(/[?#]/)[0];
-    _if.src=_b+"?t="+Math.max(0,Math.round(VR.t))+"s&autoplay=1";
+    _if.src=lexiSeek(_b,VR.t);
     toast("קופץ ל"+vfmt(VR.t).slice(0,7));
    } else {
     toast("הטיימקוד "+vfmt(VR.t).slice(0,7)+". פתח את הקובץ מהמחשב כדי לקפוץ לשם");
@@ -12732,6 +12739,31 @@ document.addEventListener("scroll",function(e){
   STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}}; STORE.tasks={list:[]};
   projLoading=true;
  }
+})();
+/* ===== גרסה =====
+   כל לינק ישן שנשמר בדפדפן ממשיך להגיש את העותק המקומי. כאן
+   נבדק מול השרת אם יצאה גרסה חדשה, ואם כן הדף נטען מחדש פעם אחת. */
+(function(){
+ try{
+  var mine=((document.querySelector('meta[name="build"]')||{}).content)||"";
+  if(!mine) return;
+  var once="__bld:"+mine;
+  fetch(location.pathname+"?cb="+Date.now(),{cache:"no-store"})
+   .then(function(r){ return r.text() })
+   .then(function(t){
+     var m=/<meta name="build" content="([^"]*)"/.exec(t||"");
+     if(!m||!m[1]||m[1]===mine) return;
+     var seen=""; try{ seen=sessionStorage.getItem(once)||"" }catch(_){}
+     if(seen===m[1]) return;
+     try{ sessionStorage.setItem(once,m[1]) }catch(_){}
+     var w=document.createElement("div");
+     w.style.cssText="position:fixed;inset-inline:0;top:0;z-index:99999;background:#0C6B75;color:#fff;"+
+       "font:600 14px/1.5 Heebo,sans-serif;padding:11px 16px;text-align:center;cursor:pointer";
+     w.textContent="יצאה גרסה חדשה של היומן. לחץ כאן כדי לטעון אותה";
+     w.onclick=function(){ location.replace(location.pathname+(location.search?location.search+"&":"?")+"b="+Date.now()) };
+     document.body.appendChild(w);
+   }).catch(function(){});
+ }catch(_){}
 })();
 loadTheme();
 loadUI();
