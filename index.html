@@ -5171,6 +5171,14 @@ function dayForm(d){
  var h='<div class="grpform" data-form="__day__">';
  h+='<div class="row"><div class="f"><label>תאריך</label><input name="date" type="date" value="'+esc(d.date||"")+'"></div>';
  h+='<div class="f"><label>מיקום</label><input name="loc" value="'+esc(d.loc||"")+'" placeholder="איפה צילמנו"></div></div>';
+ var _dcur = d.dlabel ? d.dlabel : ((d.dnum!==undefined&&d.dnum!==null&&d.dnum!=="") ? String(d.dnum) : "");
+ h+='<div class="f"><label>מספר היום</label><input name="dlabel" value="'+esc(_dcur)+'" placeholder="ריק, והיומן סופר לבד לפי התאריך">'+
+  '<p class="hint">ספרה קובעת מספר קבוע ליום הזה. טקסט קובע תווית. ריק מחזיר אותו לספירה האוטומטית לפי סדר התאריכים</p></div>';
+ h+='<div class="f"><label>לוגינג מקובץ</label>'+
+  '<label class="btn ghost brkpick" for="brkin_'+esc(d.k)+'">טען קובץ פירוק סצנות</label>'+
+  '<input type="file" id="brkin_'+esc(d.k)+'" class="brkin" data-day="'+esc(d.k)+'" accept=".json,application/json" hidden>'+
+  (((d.brk||[]).length)?('<span class="hint">יש כבר '+(d.brk||[]).length+' סצנות ביום הזה'+(d.brsrc?(" · "+esc(d.brsrc)):"")+'. טעינה מחליפה אותן</span>'):'<span class="hint">קובץ json של פירוק סצנות, כמו שמייצרים ליום צילום</span>')+
+  '</div>';
  h+='<div class="f"><label>מי צילם</label><select name="crew">'+CREWS().map(function(c){
   return '<option value="'+esc(c.k)+'"'+(crewOf(d)===c.k?" selected":"")+'>'+esc(c.name)+'</option>'}).join("")+'</select>'+
   '<p class="hint">היום הזה יורד מהמכסה של הצוות שנבחר</p></div>';
@@ -5879,6 +5887,54 @@ function fileStartTC(file){
   });
  }).catch(function(){ return null });
 }
+function brkUpWire(){
+ var ins=document.querySelectorAll(".brkin");
+ for(var i=0;i<ins.length;i++){
+  (function(el){
+   if(el.__w) return;
+   el.__w=1;
+   el.addEventListener("change",function(){
+    var f=el.files&&el.files[0]; if(!f){return}
+    var dk=el.getAttribute("data-day");
+    var rd=new FileReader();
+    rd.onerror=function(){ toast("לא הצלחתי לקרוא את הקובץ",true) };
+    rd.onload=function(){
+     var o=null;
+     try{ o=JSON.parse(String(rd.result||"")) }catch(_){ toast("הקובץ הזה לא json תקין",true); return }
+     var arr=Array.isArray(o)?o:(o&&o.brk);
+     if(!Array.isArray(arr)||!arr.length){ toast("לא מצאתי פירוק סצנות בקובץ",true); return }
+     var dd=DAYS().filter(function(x){return x.k===dk})[0];
+     if(!dd){ toast("לא מצאתי את היום",true); return }
+     dd.brk=arr.map(function(x,i){
+      return {n:Number(x.n)||i+1, t:String(x.t||""), tc:String(x.tc||""), dur:String(x.dur||""),
+              kind:String(x.kind||"other"), sum:String(x.sum||""),
+              good:Array.isArray(x.good)?x.good:[],
+              quotes:Array.isArray(x.quotes)?x.quotes:[],
+              tags:Array.isArray(x.tags)?x.tags:[],
+              vf:Number(x.vf)||0, fsrc:String(x.fsrc||"")};
+     });
+     dd.brk.forEach(function(z,i){ z.n=i+1 });
+     if(!Array.isArray(o)){
+      if(o.brsrc) dd.brsrc=String(o.brsrc);
+      if(o.brdur) dd.brdur=String(o.brdur);
+      if(o.brintro) dd.brintro=String(o.brintro);
+     }
+     var _ni=0;
+     if(!Array.isArray(o) && Array.isArray(o.imgs)){
+      DIMG[dk]=o.imgs.map(function(x){ return Array.isArray(x)?x:[] });
+      DIMGSRC[dk]=String(o.brsrc||"");
+      o.imgs.forEach(function(x){ if(Array.isArray(x)) _ni+=x.length });
+      try{ dimgSave(dk) }catch(_){}
+     }
+     el.value="";
+     render(); save();
+     toast("נטענו "+dd.brk.length+" סצנות"+(_ni?(" ו-"+_ni+" תמונות"):"")+" ל"+dayLabel(dd.date));
+    };
+    rd.readAsText(f,"utf-8");
+   });
+  })(ins[i]);
+ }
+}
 function srtUpWire(){
  var ins=document.querySelectorAll(".srtupin");
  for(var i=0;i<ins.length;i++){
@@ -5975,7 +6031,11 @@ function watchPopView(){
  h+='<div class="mhead"><b>'+esc(x.t||"צפייה")+'</b>';
  h+='<span style="font-weight:500;letter-spacing:0">'+esc(dayLabel(d.date)+(x.tc?"  ·  "+x.tc:""))+'</span>';
  h+='<button data-act="wpopclose" title="סגור">×</button></div>';
- h+='<div class="wpopbody">'+vidRoom(d,true)+'</div>';
+ /* בחלון הצפייה: אם ליום יש קישור לנגן החיצוני ואין לו קובץ דרייב משלו,
+    מציגים את הנגן החיצוני עם זמן ההתחלה של הסצנה */
+ var _useLx=false;
+ try{ _useLx = lexiAny(d) && !driveIdOf(d) }catch(_){}
+ h+='<div class="wpopbody">'+vidRoom(d,!_useLx)+'</div>';
  h+='</div></div>';
  return h;
 }
@@ -5988,6 +6048,14 @@ function lexiOf(d,fi){
   if(fi===0||n<2) return String(d.lexi);
  }
  return "";
+}
+function lexiNote(d){
+ if(!(state.watchPop&&state.watchPop.d===d.k)) return "";
+ var x=(d.brk||[])[state.watchPop.i]||{}, r=tcRange(x.tc);
+ if(!r) return "";
+ return '<div class="vrclk nosub"><span class="vrhint"><b>'+esc(x.t||"")+
+  '</b> מתחילה ב <b dir="ltr">'+esc(vfmt(r.a).slice(0,7))+
+  '</b>. אם הנגן לא קפץ לשם לבד, גלול אל הזמן הזה</span></div>';
 }
 function lexiAny(d){
  if(!d) return false;
@@ -6072,8 +6140,8 @@ function vidRoom(d,noLexi){
   }
  } else {
   if(did){
-   var _lx=LX(fi);
-   if(_lx) h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+   var _lx=LX(fi)||(noLexi?"":lexiOf(d,0));
+   if(_lx) h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>'+lexiNote(d);
    else h+='<div class="vrstage drv"><iframe src="https://drive.google.com/file/d/'+esc(did)+'/preview" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
    if(state.watchPop&&state.watchPop.d===d.k){
     var _wx=(d.brk||[])[state.watchPop.i]||{}, _wr=tcRange(_wx.tc);
@@ -6090,9 +6158,9 @@ function vidRoom(d,noLexi){
     h+='</div>';
    }
   } else {
-   var _lx0=LX(fi);
+   var _lx0=LX(fi)||(noLexi?"":lexiOf(d,0));
    if(_lx0){
-    h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx0)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+    h+='<div class="vrstage drv lexi"><iframe src="'+esc(_lx0)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>'+lexiNote(d);
    } else {
    h+='<div class="vrstage"><div class="vrpick"><b>עוד אין קובץ מחובר ליום הזה</b>';
    h+='<span class="vrhint" style="color:#8A93A0">הדבק למטה את הקישור לקובץ מהדרייב</span>';
@@ -6636,7 +6704,7 @@ function breakBlock(d){
   h+='<span class="brtc" dir="ltr">'+esc(x.tc||"")+'</span>';
   if(x.dur) h+='<span class="brdur">'+esc(x.dur)+'</span>';
   if(x.kind) h+='<span class="brkind">'+esc(bKind(x.kind))+'</span>';
-  if(tcRange(x.tc)&&(driveIdsOf(d)||[]).length) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(d.k)+'" data-i="'+i+'" title="פתח את הקטע הזה בנגן, בדיוק על הטיימקוד">צפה</button>';
+  if(tcRange(x.tc)&&((driveIdsOf(d)||[]).length||lexiAny(d))) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(d.k)+'" data-i="'+i+'" title="פתח את הקטע הזה בנגן, בדיוק על הטיימקוד">צפה</button>';
   if(!RO) h+=toEpBtn(d.k,i);
   h+='</div>';
   var ii=(imgs&&imgs[i])||[];
@@ -6936,7 +7004,7 @@ function matView(){
   if(!RO){
    h+='<button class="tinyedit" data-act="matedit" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'">ערוך</button>';
    if(jsc&&jsc.ep) h+='<span class="epnum" title="'+esc("הסצנה משוייכת לפרק "+jsc.ep+" · "+(jsc.title||""))+'">'+esc(String(jsc.ep))+'</span>';
-   if(tcRange(r.x.tc)&&(driveIdsOf(r.d)||[]).length) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="פתח את הקטע הזה בנגן">צפה</button>';
+   if(tcRange(r.x.tc)&&((driveIdsOf(r.d)||[]).length||lexiAny(r.d))) h+='<button class="tinyedit watch" data-act="matwatch" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="פתח את הקטע הזה בנגן">צפה</button>';
    h+=toEpBtn(r.d.k,_ri,jsc);
    h+='<button class="sdel" data-act="matdel" data-id="'+esc(r.d.k)+'" data-i="'+_ri+'" title="מחק שורה מהרשימה">×</button>';
   }
@@ -10232,6 +10300,7 @@ function saveUI(){
 function paint(h){
  try{ vnFocusWire() }catch(_){}
  try{ setTimeout(srtUpWire,0) }catch(_){}
+ try{ setTimeout(brkUpWire,0) }catch(_){}
  try{ var _t=M().title; if(_t&&document.title!==_t) document.title=_t }catch(_){}
  if(state.adding){
   h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
@@ -12433,6 +12502,10 @@ document.addEventListener("click",function(e){
   DAYS().forEach(function(d){if(d.k===id){
    d.date=fval("__day__","date");
    d.loc=fval("__day__","loc").trim();
+   var _dl=fval("__day__","dlabel").trim();
+   if(!_dl){ delete d.dlabel; delete d.dnum; }
+   else if(/^\d+$/.test(_dl)){ d.dnum=Number(_dl); delete d.dlabel; }
+   else { d.dlabel=_dl; delete d.dnum; }
    d.people=fval("__day__","people").trim();
    d.moments=toArr(fval("__day__","moments"));
    d.note=fval("__day__","note").trim();
