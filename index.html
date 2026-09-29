@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-09-29T00:37:55Z">
+<meta name="build" content="2026-09-29T00:55:04Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -1461,6 +1461,26 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .epngrip:hover{border-color:var(--line)}
 .epngrip:hover i{background:var(--ink-3)}
 .epngrip.drag i{background:var(--accent,#0C6B75)}
+
+.bldwant{margin-bottom:8px}
+.bldwant label{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
+.bldwant label b{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-2)}
+.bldwant label em{font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3)}
+.bldwant textarea{width:100%;font-family:"Assistant",sans-serif;font-size:13px;line-height:1.5;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 9px;resize:vertical}
+.bldwhy{display:block;font-style:normal;font-family:"Heebo",sans-serif;font-size:10px;color:var(--shot,#0C6B75);margin-top:1px}
+.bldchatsec{border-top:1px solid var(--line);padding-top:13px}
+.bldchat{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto;padding:2px 1px;margin-bottom:8px}
+.bldmsg{font-family:"Assistant",sans-serif;font-size:13.5px;line-height:1.6;white-space:pre-wrap;border-radius:10px;padding:7px 11px;max-width:88%}
+.bldmsg.me{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink)}
+.bldmsg.ai{align-self:flex-end;background:var(--shot-soft,#D9EDE2);border:1px solid var(--shot,#1E7A4E);color:var(--ink)}
+.bldmsg.sys{align-self:center;background:transparent;border:1px dashed var(--line-2);color:var(--ink-3);font-size:12px}
+.bldmsg.live{opacity:.92}
+.bldseed{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+.bldseedb{font-family:"Heebo",sans-serif;font-size:11.5px;border:1px dashed var(--line-2);background:transparent;color:var(--ink-2);border-radius:99px;padding:3px 10px;cursor:pointer;text-align:start}
+.bldseedb:hover{border-style:solid;border-color:var(--shot,#0C6B75);color:var(--shot,#0C6B75)}
+.bldask{display:flex;align-items:flex-end;gap:6px}
+.bldask textarea{flex:1 1 auto;font-family:"Assistant",sans-serif;font-size:13.5px;line-height:1.5;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:9px;padding:7px 10px;resize:vertical;min-height:44px}
+.bldask textarea:disabled{opacity:.6}
 </style>
 </head>
 <body>
@@ -3919,7 +3939,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",bldOpen:false,bldChars:[],bldPlan:null,bldName:"",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,schCell:"",editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",bldOpen:false,bldChars:[],bldPlan:null,bldName:"",bldChat:[],bldBusy:false,askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,schCell:"",editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4485,6 +4505,79 @@ function bdCount(b){
  return n;
 }
 
+/* ---- מה אתה רוצה מכל פרק ----
+   טקסט חופשי שנשמר על הפרק. הבונה מחפש את המילים האלה בליינים
+   ובסצנות, ושולח לפרק את מה שמתאים לו.                        */
+var BLDSTOP={"הזה":1,"הזאת":1,"הכי":1,"שלי":1,"שלו":1,"שלה":1,"שלהם":1,"אותו":1,"אותה":1,"יהיה":1,"תהיה":1,"היה":1,"הייתי":1,"משהו":1,"דבר":1,"בגלל":1,"עכשיו":1,"ממש":1,"של":1,"את":1,"על":1,"עם":1,"זה":1,"זאת":1,"יש":1,"לא":1,"אני":1,"אתה":1,"הוא":1,"היא":1,"הם":1,"הן":1,"כל":1,"גם":1,"אבל":1,"כדי":1,"יותר":1,"מאוד":1,"כמו":1,"אחרי":1,"לפני":1,"בין":1,"רוצה":1,"צריך":1,"פרק":1,"פרקים":1,"סצנה":1,"סצנות":1,"להיות":1,"אולי":1,"עוד":1,"כאן":1,"שם":1,"the":1,"and":1,"for":1,"with":1};
+function bldBare(w){
+ /* מוריד ו, ה, ב, ל, מ, כ, ש מתחילת המילה, כדי ששתי צורות של אותה
+    מילה ייחשבו אותו דבר בסינון ובספירה.                        */
+ var x=String(w||""), n=0;
+ while(n<2&&x.length>4&&"והבלמכש".indexOf(x.charAt(0))>-1){ x=x.slice(1); n++ }
+ return x;
+}
+function bldWords(t){
+ var out=[],seen={};
+ String(t||"").toLowerCase().split(/[^\u0590-\u05EAa-z0-9]+/).forEach(function(w){
+  if(w.length<3) return;
+  var b=bldBare(w), c=w.slice(1);
+  if(b.length<3||BLDSTOP[w]||BLDSTOP[b]||BLDSTOP[c]||seen[b]) return;
+  seen[b]=1; out.push(b);
+ });
+ return out;
+}
+function bldHay(k){
+ var o=null; try{ o=lineObj(k) }catch(_){}
+ var t=[(o&&o.name)||k,(o&&o.what)||"",(o&&o.note)||""];
+ bldScenesOfLine(k).forEach(function(s){
+  t.push(s.title||""); t.push(s.short||""); t.push(s.note||"");
+  (s.have||[]).forEach(function(z){t.push(z)});
+  (s.need||[]).forEach(function(z){t.push(z)});
+  (s.tags||[]).forEach(function(z){t.push(z)});
+  var c=null; try{ c=charOf(s.char) }catch(_){}
+  if(c){ t.push(c.name||""); t.push(c.role||"") }
+ });
+ return t.join(" ").toLowerCase();
+}
+/* מילה שמופיעה כמעט בכל הליינים לא אומרת כלום, למשל שם העיר.
+   לכן כל מילה שוקלת לפי כמה ליינים היא נמצאת בהם.             */
+function bldDF(w,keys,hc){
+ hc.__df=hc.__df||{};
+ if(hc.__df[w]!==undefined) return hc.__df[w];
+ var n=0;
+ keys.forEach(function(k){
+  var hay=hc[k]||(hc[k]=bldHay(k));
+  if(hay.indexOf(w)>-1) n++;
+ });
+ hc.__df[w]=n;
+ return n;
+}
+function bldScore(want,k,hc,keys){
+ var ws=bldWords(want); if(!ws.length) return {n:0,hit:[]};
+ keys=keys||[k];
+ var hay=hc[k]||(hc[k]=bldHay(k)), hit=[], sum=0;
+ var cap=Math.max(1,Math.floor(keys.length*0.6));
+ ws.forEach(function(w){
+  if(hay.indexOf(w)<0) return;
+  var df=bldDF(w,keys,hc);
+  if(df>cap) return;
+  hit.push(w); sum+=1/df;
+ });
+ return {n:sum,hit:hit};
+}
+function bldSlots(){
+ return bldEps().map(function(e){
+  return {n:Number(e.n)||0,title:e.title||"",want:String(e.want||""),lines:[],count:0};
+ });
+}
+function bldWantSync(){
+ var a=document.querySelectorAll(".bldwantt");
+ for(var i=0;i<a.length;i++){
+  var n=Number(a[i].getAttribute("data-k"));
+  (DATA.eps||[]).forEach(function(e){ if(Number(e.n)===n) e.want=a[i].value.trim() });
+ }
+}
+
 /* ---- הבונה ---- */
 function bldEps(){
  var e=(DATA.eps||[]).slice().sort(function(a,b){return (Number(a.n)||0)-(Number(b.n)||0)});
@@ -4529,17 +4622,59 @@ function bldNameOf(k){
  var o=null; try{ o=lineObj(k) }catch(_){}
  return (o&&o.name)||k;
 }
-/* כל ליין נשאר שלם ונכנס לפרק הכי ריק, כדי שהעונה תצא מאוזנת */
+/* ליין נשאר שלם. אם נכתב לפרק מה רוצים ממנו, הליין הולך לפרק
+   שהמילים שלו נמצאות בו הכי הרבה. בלי זה, לפרק הכי ריק.       */
 function bldPlan(chars){
- var eps=bldEps(), lines=bldLinesFor(chars);
- var slots=eps.map(function(e){ return {n:Number(e.n)||0, title:e.title||"", lines:[], count:0} });
- lines.forEach(function(L){
-  var n=bldScenesOfLine(L.k).length;
-  if(!n) return;
-  var lightest=slots[0];
-  slots.forEach(function(s){ if(s.count<lightest.count) lightest=s });
-  lightest.lines.push({k:L.k,name:L.name,n:n,mine:L.mine});
-  lightest.count+=n;
+ var lines=bldLinesFor(chars).filter(function(L){ return bldScenesOfLine(L.k).length }),
+     slots=bldSlots(), hc={}, keys=lines.map(function(L){return L.k});
+ var anyWant=false;
+ slots.forEach(function(s){ if(bldWords(s.want).length) anyWant=true });
+ var tot=0;
+ lines.forEach(function(L){ tot+=bldScenesOfLine(L.k).length });
+ /* תקרה רכה, כדי שפרק אחד לא יבלע את העונה */
+ var cap=Math.ceil(tot/Math.max(1,slots.length)*1.7);
+ var want=lines.map(function(L){
+  var rank=[];
+  if(anyWant) slots.forEach(function(s,i){
+   if(!s.want) return;
+   var sc=bldScore(s.want,L.k,hc,keys);
+   if(sc.n>0) rank.push({i:i,n:sc.n,why:sc.hit});
+  });
+  rank.sort(function(a,b){ return b.n-a.n });
+  return {L:L,n:bldScenesOfLine(L.k).length,rank:rank};
+ });
+ /* קודם הליינים שההתאמה שלהם חזקה, כדי שהם יתפסו את המקום */
+ want.sort(function(a,b){
+  var an=(a.rank[0]||{}).n||0, bn=(b.rank[0]||{}).n||0;
+  return bn-an || b.n-a.n;
+ });
+ want.forEach(function(x){
+  var put=null;
+  for(var i=0;i<x.rank.length;i++){
+   var s=slots[x.rank[i].i];
+   if(s.count+x.n<=cap){ put={s:s,why:x.rank[i].why}; break }
+  }
+  if(!put){
+   var lt=slots[0];
+   slots.forEach(function(s){ if(s.count<lt.count) lt=s });
+   put={s:lt,why:(x.rank[0]&&slots[x.rank[0].i]===lt)?x.rank[0].why:[]};
+  }
+  put.s.lines.push({k:x.L.k,name:x.L.name,n:x.n,mine:x.L.mine,why:put.why});
+  put.s.count+=x.n;
+ });
+ /* פרק ריק זה כישלון של ההצעה. מעבירים אליו ליין מהפרק הכי מלא,
+    ומעדיפים ליין שלא נבחר לשם לפי מה שנכתב.                     */
+ slots.forEach(function(e){
+  if(e.lines.length) return;
+  var full=null;
+  slots.forEach(function(s){ if(s.lines.length>1&&(!full||s.count>full.count)) full=s });
+  if(!full) return;
+  var pick=0;
+  full.lines.forEach(function(L,i){ if(!(L.why||[]).length) pick=i });
+  var mv=full.lines.splice(pick,1)[0];
+  full.count-=mv.n;
+  mv.why=[];
+  e.lines.push(mv); e.count+=mv.n;
  });
  return slots;
 }
@@ -4555,7 +4690,7 @@ function bldSwap(si,li,newk){
  var taken=false;
  plan.forEach(function(sl,i){ sl.lines.forEach(function(L,j){ if(L.k===newk&&!(i===si&&j===li)) taken=true }) });
  if(taken) return "dup";
- plan[si].lines[li]={k:newk,name:bldNameOf(newk),n:bldScenesOfLine(newk).length,mine:0};
+ plan[si].lines[li]={k:newk,name:bldNameOf(newk),n:bldScenesOfLine(newk).length,mine:0,why:[]};
  bldRecount(plan);
  return true;
 }
@@ -4610,6 +4745,14 @@ function bldPanel(){
   h+='</div>';
  }
 
+ h+='<div class="bldsec"><h4>מה אתה רוצה מכל '+esc(bwEp())+'<span>לא חובה</span></h4>';
+ h+='<p class="bldnote" style="margin-bottom:9px">תכתוב במילים שלך מה ה'+esc(bwEp())+' צריך להיות ומה אתה מרגיש ממנו. הבונה יחפש את המילים האלה בליינים ובסצנות, וישלח לשם את מה שמתאים.</p>';
+ bldEps().forEach(function(e){
+  h+='<div class="bldwant"><label><b>'+esc(bwEp())+' '+e.n+'</b>'+(e.title?'<em>'+esc(e.title)+'</em>':'')+'</label>';
+  h+='<textarea class="bldwantt" data-k="'+e.n+'" rows="2" placeholder="למשל: זה ה'+esc(bwEp())+' של הלילה, של העייפות, של מה שקורה כשאף אחד לא מסתכל">'+esc(e.want||"")+'</textarea></div>';
+ });
+ h+='</div>';
+
  if(plan){
   var all=bldAllLines();
   h+='<div class="bldsec"><h4>ההצעה</h4>';
@@ -4617,7 +4760,9 @@ function bldPanel(){
    h+='<div class="bldep"><div class="bldeph"><b>'+esc(bwEp())+' '+sl.n+'</b>'+(sl.title?'<em>'+esc(sl.title)+'</em>':'')+'<span>'+sl.count+' סצנות</span></div>';
    if(!sl.lines.length) h+='<span class="bldnone">ריק. אפשר להוריד ליין מפרק אחר והוא יישאר מחוץ ללוח.</span>';
    sl.lines.forEach(function(L,li){
-    h+='<div class="bldline"><span class="bldlname">'+esc(L.name)+'</span><span class="bldln">'+L.n+' סצנות</span>';
+    h+='<div class="bldline"><span class="bldlname">'+esc(L.name)+
+      ((L.why&&L.why.length)?'<em class="bldwhy">'+esc(L.why.slice(0,4).join(", "))+'</em>':'')+
+      '</span><span class="bldln">'+L.n+' סצנות</span>';
     h+='<select class="bldswap" data-k="'+si+':'+li+'"><option value="">החלף ליין</option>';
     all.forEach(function(x){
      if(x.k===L.k) return;
@@ -11812,7 +11957,13 @@ document.addEventListener("click",function(e){
   var _ci=state.bldChars.indexOf(_ck);
   if(_ci>-1) state.bldChars.splice(_ci,1); else state.bldChars.push(_ck);
   state.bldPlan=null;render();return}
+
+ if(act==="bldwantclear"){
+  bldWantSync();
+  (DATA.eps||[]).forEach(function(e){ delete e.want });
+  render();save();toast("מה שכתבת על ה"+bwEps()+" נמחק");return}
  if(act==="bldrun"){
+  bldWantSync();
   if(!(state.bldChars||[]).length){toast("בחר קודם דמויות",true);return}
   state.bldPlan=bldPlan(state.bldChars);
   var _nm=document.querySelector('[name="bldname"]');
@@ -11825,6 +11976,7 @@ document.addEventListener("click",function(e){
   var _p=(b.getAttribute("data-k")||"").split(":");
   bldDrop(Number(_p[0]),Number(_p[1]));render();return}
  if(act==="bldmake"){
+  bldWantSync();
   if(!ensureEdit()){render();return}
   if(!state.bldPlan){toast("אין הצעה לשמור",true);return}
   var _in=document.querySelector('[name="bldname"]');
