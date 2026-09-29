@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-09-29T01:27:47Z">
+<meta name="build" content="2026-09-29T01:33:17Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -5087,6 +5087,15 @@ function cmdRun(raw){
  var t=" "+String(raw||"").replace(/\s+/g," ").trim()+" ";
  if(!t.trim()) return {ok:false,msg:""};
 
+ /* לוח חדש שהוא עותק של הנוכחי, כדי לנסות סידור בלי לאבד */
+ var mNew=/(?:צור|תצור|פתח|תפתח|שכפל|תשכפל)\s+לוח\s*(?:חדש)?\s*(?:בשם|ושמו|בשם:)?\s*(.+?)\s*$/.exec(t.trim());
+ if(mNew){
+  var nm=mNew[1].replace(/^["\u05f4']|["\u05f4']$/g,"").trim();
+  if(!nm) return {ok:false,msg:"תן ללוח שם. למשל: צור לוח בשם גרסה שנייה."};
+  bdAdd(nm);
+  return {ok:true,n:1,msg:"נוצר הלוח "+nm+", עותק של מה שהיה. הלוח הקודם נשאר ואפשר לחזור אליו מהעיגול שלמעלה."};
+ }
+
  /* שאלה, לא פקודה */
  var qEp=cmdNum(t,/מה\s+יש\s+ב?פרק\s*(\d+)/);
  if(qEp!==null){
@@ -5204,7 +5213,8 @@ function cmdBar(){
    ["תעביר מ"+bwEp()+" 2 ל"+bwEp()+" 4 את מה שלא צולם","עם מקור, יעד וסטטוס"],
    ["תעביר את X-82 לראש ה"+bwEp(),"מזיז לתחילת ה"+bwEp()],
    ["תוציא את X-70 מהלוח","יוצא מכל "+bwEp()+", לא נמחק"],
-   ["מה יש ב"+bwEp()+" 3","שאלה, בלי לשנות כלום"]].forEach(function(x){
+   ["מה יש ב"+bwEp()+" 3","שאלה, בלי לשנות כלום"],
+   ["צור לוח בשם גרסה שנייה","עותק של הלוח הנוכחי, לנסות עליו"]].forEach(function(x){
    h+='<button class="cmdex" data-act="cmdfill" data-k="'+esc(x[0])+'"><b>'+esc(x[0])+'</b><em>'+esc(x[1])+'</em></button>';
   });
   h+='</div>';
