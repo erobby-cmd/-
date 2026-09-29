@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-09-29T01:33:17Z">
+<meta name="build" content="2026-09-29T15:04:12Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -11382,9 +11382,14 @@ function rowsOf(){
   if(STORE.users&&STORE.users.length) r[rid("users")]=STORE.users;
   if(STORE.projects&&STORE.projects.length) r["projects"]=STORE.projects;
  }
- r[rid("base")]=STORE.base;
- Object.keys(STORE.layers||{}).forEach(function(k){r[rid("layer:"+k)]=STORE.layers[k]});
- Object.keys(STORE.tr||{}).forEach(function(k){r[rid("tr:"+k)]=STORE.tr[k]});
+ /* לעולם לא לדחוף תוכן לפני שמשיכה אחת הצליחה. בלי זה, פתיחה
+    כשהאחסון לא זמין דוחפת את היומן הריק שמוטבע בקובץ ומוחקת
+    את מה שיש בענן.                                            */
+ if(pulledOnce){
+  r[rid("base")]=STORE.base;
+  Object.keys(STORE.layers||{}).forEach(function(k){r[rid("layer:"+k)]=STORE.layers[k]});
+  Object.keys(STORE.tr||{}).forEach(function(k){r[rid("tr:"+k)]=STORE.tr[k]});
+ }
  if(pulledOnce){
   if(STORE.shifts) r[rid("shifts")]=STORE.shifts;
   if(STORE.feed&&STORE.feed.items) r[rid("feed")]=STORE.feed;
@@ -11480,8 +11485,34 @@ function listLen(v){
  if(v.items&&v.items.length!==undefined) return v.items.length;
  return -1;
 }
+function scCount(v){
+ try{ return (v&&v.scenes&&v.scenes.length!==undefined)?v.scenes.length:-1 }catch(_){ return -1 }
+}
+var SHRINKMSG=0;
 function guardRow(id,val){
  var sid=stripId(id);
+ /* תוכן היומן: אם פתאום נעלמו הרבה סצנות, כמעט תמיד זו תקלה
+    ולא עריכה. חוסמים, מושכים מהענן, ופותחים חלון קצר למי
+    שבאמת התכוון למחוק.                                        */
+ if(sid==="base"||String(sid).indexOf("layer:")===0){
+  if(SHRINKOK[id]) return true;
+  var p0=sent[id];
+  if(p0===undefined) return true;
+  try{
+   var a0=scCount(JSON.parse(p0)), b0=scCount(val);
+   if(a0>=20&&b0>=0&&b0<a0*0.6){
+    lastPull=0;
+    SHRINKOK[id]=1;
+    setTimeout(function(){ delete SHRINKOK[id] },90000);
+    if(Date.now()-SHRINKMSG>20000){
+     SHRINKMSG=Date.now();
+     try{ toast("פתאום חסרות הרבה סצנות בגרסה הזאת, אז לא שמרתי. מושך מהענן את מה שיש שם. אם באמת מחקת אותן, עשה עוד שינוי קטן בדקה הקרובה והשמירה תעבור",true) }catch(_){}
+    }
+    return false;
+   }
+  }catch(_){}
+  return true;
+ }
  if(sid!=="dues"&&sid!=="tasks"&&sid!=="shifts"&&sid!=="epnotes"&&sid!=="vidnotes"&&String(sid).indexOf("chat:")!==0) return true;
  if(SHRINKOK[id]) return true;
  var prev=sent[id];
@@ -13795,6 +13826,31 @@ document.addEventListener("scroll",function(e){
      document.body.appendChild(w);
    }).catch(function(){});
  }catch(_){}
+})();
+/* ===== אזהרת ניתוק =====
+   אם המשיכה הראשונה מהאחסון לא הצליחה, מה שרואים על המסך הוא
+   היומן הריק שמוטבע בקובץ, ולא העבודה האמיתית. בלי אזהרה אפשר
+   לחשוב שהכול נמחק, או גרוע מזה, להתחיל לעבוד על הריק.        */
+(function(){
+ setTimeout(function(){
+  try{
+   if(pulledOnce) return;
+   if(document.getElementById("offbar")) return;
+   var w=document.createElement("div");
+   w.id="offbar";
+   w.style.cssText="position:fixed;inset-inline:0;top:0;z-index:99999;background:#A8102E;color:#fff;"+
+     "font:600 14px/1.5 Heebo,sans-serif;padding:11px 16px;text-align:center;cursor:pointer";
+   w.textContent="אין חיבור לאחסון. מה שמוצג כאן הוא יומן לדוגמה ולא העבודה שלך, ושום שינוי לא יישמר. לחץ כדי לנסות שוב";
+   w.onclick=function(){ location.reload() };
+   document.body.appendChild(w);
+   var iv=setInterval(function(){
+    if(!pulledOnce) return;
+    clearInterval(iv);
+    var e=document.getElementById("offbar");
+    if(e&&e.parentNode) e.parentNode.removeChild(e);
+   },1500);
+  }catch(_){}
+ },9000);
 })();
 loadTheme();
 loadUI();
