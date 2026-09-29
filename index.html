@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-09-29T15:21:33Z">
+<meta name="build" content="2026-09-29T15:28:29Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -11469,6 +11469,7 @@ function takeRows(list,partial){
  list.forEach(function(row){ serverAt[row.id]=row.updated_at });
  var changed=applyRows(list,partial);
  list.forEach(function(row){ sent[row.id]=JSON.stringify(row.data) });
+ if(changed) try{ cacheSave() }catch(_){}
  return changed;
 }
 function paint2(){
@@ -13874,6 +13875,34 @@ document.addEventListener("scroll",function(e){
    }).catch(function(){});
  }catch(_){}
 })();
+/* ===== עותק מקומי =====
+   בלי זה כל רענון מתחיל מהיומן לדוגמה שמוטבע בקובץ, ומחכה לרשת
+   כדי לראות את העבודה האמיתית. עם זה, מה שנראה מיד זה מה שהיה
+   בפעם הקודמת, והרשת רק מרעננת אותו. התמלולים לא נשמרים כאן,
+   הם הגדולים, והם ממילא נמשכים ברקע.                          */
+var CACHEKEY="marhav-eilat-store-v1", cacheT=null, hadCache=false;
+function cacheSave(){
+ clearTimeout(cacheT);
+ cacheT=setTimeout(function(){
+  try{
+   localStorage.setItem(CACHEKEY,JSON.stringify({at:Date.now(),store:{
+    users:STORE.users, base:STORE.base, layers:STORE.layers,
+    shifts:STORE.shifts, dues:STORE.dues, tasks:STORE.tasks,
+    epnotes:STORE.epnotes, vidnotes:STORE.vidnotes, projects:STORE.projects
+   }}));
+  }catch(_){ try{ localStorage.removeItem(CACHEKEY) }catch(__){} }
+ },1200);
+}
+function cacheLoad(){
+ try{
+  var r=localStorage.getItem(CACHEKEY);
+  if(!r) return false;
+  var o=JSON.parse(r);
+  if(!o||!o.store||!o.store.base||!(o.store.base.scenes||[]).length) return false;
+  STORE=normStore(o.store);
+  return true;
+ }catch(_){ return false }
+}
 /* ===== אזהרת ניתוק =====
    אם המשיכה הראשונה מהאחסון לא הצליחה, מה שרואים על המסך הוא
    היומן הריק שמוטבע בקובץ, ולא העבודה האמיתית. בלי אזהרה אפשר
@@ -13885,9 +13914,12 @@ document.addEventListener("scroll",function(e){
    if(document.getElementById("offbar")) return;
    var w=document.createElement("div");
    w.id="offbar";
-   w.style.cssText="position:fixed;inset-inline:0;top:0;z-index:99999;background:#A8102E;color:#fff;"+
-     "font:600 14px/1.5 Heebo,sans-serif;padding:11px 16px;text-align:center;cursor:pointer";
-   w.textContent="אין חיבור לאחסון. מה שמוצג כאן הוא יומן לדוגמה ולא העבודה שלך, ושום שינוי לא יישמר. לחץ כדי לנסות שוב";
+   w.style.cssText="position:fixed;inset-inline:0;top:0;z-index:99999;color:#fff;"+
+     "font:600 14px/1.5 Heebo,sans-serif;padding:11px 16px;text-align:center;cursor:pointer;background:"+
+     (hadCache?"#9A6206":"#A8102E");
+   w.textContent=hadCache
+     ? "האחסון לא עונה כרגע. מוצג העותק המקומי האחרון שלך, ושינויים לא יישמרו עד שהחיבור יחזור. לחץ כדי לנסות שוב"
+     : "אין חיבור לאחסון. מה שמוצג כאן הוא יומן לדוגמה ולא העבודה שלך, ושום שינוי לא יישמר. לחץ כדי לנסות שוב";
    w.onclick=function(){ location.reload() };
    document.body.appendChild(w);
    var iv=setInterval(function(){
@@ -13902,6 +13934,7 @@ document.addEventListener("scroll",function(e){
 loadTheme();
 loadUI();
 loadMe();
+hadCache=cacheLoad();
 if(!state.me&&!RO) state.showUsers=true;
 useView();
 state.writable=true;
