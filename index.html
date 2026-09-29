@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-09-29T15:04:12Z">
+<meta name="build" content="2026-09-29T15:21:33Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -11401,7 +11401,7 @@ function rowsOf(){
  }
  return r;
 }
-function applyRows(list){
+function applyRows(list,partial){
  var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,tk=null,en=null,vn=null,pr=null,seen=false;
  list.forEach(function(row){
   if(row.id==="projects"){pr=row.data;return}
@@ -11426,14 +11426,23 @@ function applyRows(list){
  if(pr) STORE.projects=pr;
  if(!seen)return false;
  if(base)STORE.base=base;
- Object.keys(STORE.layers||{}).forEach(function(k){
-  if(!layers[k]&&sent[rid("layer:"+k)]===undefined) layers[k]=STORE.layers[k];
- });
- Object.keys(STORE.tr||{}).forEach(function(k){
-  if(!tr[k]&&sent[rid("tr:"+k)]===undefined) tr[k]=STORE.tr[k];
- });
- STORE.layers=layers;
- STORE.tr=tr;
+ /* במשיכה במנות רואים רק חלק מהשורות, ולכן ממזגים ולא מחליפים.
+    הניקוי של מה שנמחק בשרת נעשה בסוף, כשכל המנות הגיעו.       */
+ if(partial){
+  STORE.layers=STORE.layers||{};
+  STORE.tr=STORE.tr||{};
+  Object.keys(layers).forEach(function(k){ STORE.layers[k]=layers[k] });
+  Object.keys(tr).forEach(function(k){ STORE.tr[k]=tr[k] });
+ } else {
+  Object.keys(STORE.layers||{}).forEach(function(k){
+   if(!layers[k]&&sent[rid("layer:"+k)]===undefined) layers[k]=STORE.layers[k];
+  });
+  Object.keys(STORE.tr||{}).forEach(function(k){
+   if(!tr[k]&&sent[rid("tr:"+k)]===undefined) tr[k]=STORE.tr[k];
+  });
+  STORE.layers=layers;
+  STORE.tr=tr;
+ }
  if(sh&&sh.list) STORE.shifts=sh;
  if(fd&&fd.items) STORE.feed=fd;
  if(ch) STORE.chat=ch;
@@ -11442,6 +11451,33 @@ function applyRows(list){
  if(en&&en.list) STORE.epnotes=en;
  if(vn&&vn.list) STORE.vidnotes=vn;
  return true;
+}
+/* ===== משיכה במנות =====
+   היומן גדל, ומשיכה אחת של כל השורות ביחד כבר לא מסתיימת.
+   לכן קודם נמשכות השורות שצריך כדי לצייר, base, המשתמשים
+   והשכבה של מי שנכנס, ורק אחר כך כל השאר, מנה אחרי מנה.      */
+function idIn(ids){
+ return "?select=id,data,updated_at&id=in.("+
+   encodeURIComponent(ids.map(function(x){return '"'+x+'"'}).join(","))+")";
+}
+function fetchIds(ids){
+ if(!ids.length) return Promise.resolve([]);
+ return fetch(REST+idIn(ids),{headers:HDR})
+  .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()});
+}
+function takeRows(list,partial){
+ list.forEach(function(row){ serverAt[row.id]=row.updated_at });
+ var changed=applyRows(list,partial);
+ list.forEach(function(row){ sent[row.id]=JSON.stringify(row.data) });
+ return changed;
+}
+function paint2(){
+ useView();
+ resetSnap();
+ var _fx=0; try{_fx=fixAllDupIds()}catch(_){}
+ if(editorOpen()){ pendingRender=true }
+ else { pendingRender=false; render() }
+ if(_fx){ toast("תוקנו "+_fx+" קודים כפולים של סצנות"); save() }
 }
 function pull(initial){
  if(pulling)return Promise.resolve(false);
@@ -11453,28 +11489,39 @@ function pull(initial){
    var incoming=JSON.stringify(meta.map(function(x){return [x.id,x.updated_at]}).sort());
    if(!initial&&incoming===lastPull){pulling=false;netStatus("ok");return meta.length}
    lastPull=incoming;
-   return fetch(REST+qsel("id,data,updated_at"),{headers:HDR})
-    .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
-    .then(function(list){
-     pulling=false;
-     pulledOnce=true;
-     projLoading=false;
-     lastHadBase=list.some(function(row){return row.id===rid("base")});
-     list.forEach(function(row){ serverAt[row.id]=row.updated_at });
-     var changed=applyRows(list);
-     list.forEach(function(row){if(sent[row.id]===undefined)sent[row.id]=JSON.stringify(row.data)});
-     if(changed){
-      list.forEach(function(row){sent[row.id]=JSON.stringify(row.data)});
-      useView();
-      resetSnap();
-      var _fx=0; try{_fx=fixAllDupIds()}catch(_){}
-      if(editorOpen()){ pendingRender=true; }
-      else { pendingRender=false; render(); }
-      if(_fx){ toast("תוקנו "+_fx+" קודים כפולים של סצנות"); save(); }
+   var ids=meta.map(function(x){return x.id});
+   var mine=rid("layer:"+(state.me||"__none__"));
+   var first={}; first[rid("base")]=1; first[rid("users")]=1; first[mine]=1; first["projects"]=1;
+   var core=ids.filter(function(id){ return first[id] });
+   var rest=ids.filter(function(id){ return !first[id] });
+   lastHadBase=ids.indexOf(rid("base"))>-1;
+   return fetchIds(core).then(function(list){
+    pulling=false;
+    pulledOnce=true;
+    projLoading=false;
+    if(takeRows(list,true)) paint2();
+    netStatus("ok");
+    /* השאר נמשך ברקע, ארבע שורות בכל פעם, והמסך מתעדכן תוך כדי */
+    var i=0;
+    var step=function(){
+     if(i>=rest.length){
+      /* רק בסוף מנקים שכבות ותמלולים שכבר לא קיימים בשרת */
+      try{
+       var live={}; ids.forEach(function(x){ live[x]=1 });
+       Object.keys(STORE.layers||{}).forEach(function(k){ if(!live[rid("layer:"+k)]) delete STORE.layers[k] });
+       Object.keys(STORE.tr||{}).forEach(function(k){ if(!live[rid("tr:"+k)]) delete STORE.tr[k] });
+      }catch(_){}
+      return;
      }
-     netStatus("ok");
-     return list.length;
-    });
+     var part=rest.slice(i,i+4); i+=4;
+     fetchIds(part).then(function(rows){
+      if(takeRows(rows,true)&&!editorOpen()) render();
+      setTimeout(step,0);
+     },function(){ setTimeout(step,1200) });
+    };
+    setTimeout(step,0);
+    return ids.length;
+   });
   })
   .catch(function(e){pulling=false;netStatus("err");return -1});
 }
