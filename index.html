@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-09-27T14:39:04Z">
+<meta name="build" content="2026-09-29T00:37:55Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -1402,6 +1402,65 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .toast.bad{background:var(--dropped);color:#fff}
 .ro{max-width:1100px;margin:0 auto;padding:10px 20px;font-family:"Heebo",sans-serif;font-size:13px;color:var(--partial);background:var(--partial-soft);border-bottom:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* לוחות פרקים */
+.bdbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding:7px 9px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface-2,var(--surface))}
+.bdbar .spacer{flex:1 1 auto}
+.bdlbl{font-family:"Heebo",sans-serif;font-size:11px;color:var(--ink-3);letter-spacing:.02em}
+.bdchip{display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:99px;padding:3px 11px;cursor:pointer}
+.bdchip b{font-size:10px;font-weight:600;color:var(--ink-3);background:var(--line-1,rgba(0,0,0,.05));border-radius:99px;padding:0 5px}
+.bdchip:hover{border-color:var(--shot,#0C6B75)}
+.bdchip.on{border-color:var(--shot,#0C6B75);color:var(--shot,#0C6B75);font-weight:600;box-shadow:inset 0 0 0 1px var(--shot,#0C6B75)}
+.bdchip.on b{color:var(--shot,#0C6B75)}
+.bdnew,.bdkill{font-family:"Heebo",sans-serif;font-size:11.5px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);border-radius:8px;padding:3px 10px;cursor:pointer}
+.bdnew:hover{border-color:var(--shot,#0C6B75);color:var(--shot,#0C6B75)}
+.bdkill:hover{border-color:var(--partial,#D9799C);color:var(--partial,#D9799C)}
+.bldbox{max-width:620px;width:94vw}
+.bldwrap{max-height:70vh;overflow:auto;padding:12px 14px}
+.bldnote{font-family:"Heebo",sans-serif;font-size:12px;line-height:1.6;color:var(--ink-3);margin:0 0 12px}
+.bldnone{font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-3)}
+.bldsec{border-top:1px dashed var(--line-2);padding-top:11px;margin-top:11px}
+.bldsec:first-of-type{border:0;padding-top:0;margin-top:0}
+.bldsec h4{font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-2);margin:0 0 8px;display:flex;align-items:center;gap:6px}
+.bldsec h4 span{font-size:10px;color:var(--ink-3);background:var(--line-1,rgba(0,0,0,.05));border-radius:99px;padding:0 6px}
+.bldtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.bldtag{display:inline-flex;align-items:baseline;gap:5px;font-family:"Heebo",sans-serif;font-size:11.5px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:8px;padding:2px 8px}
+.bldtag b{font-size:10px;font-weight:600;color:var(--shot,#0C6B75)}
+.bldtag i{font-size:10px;font-style:normal;color:var(--ink-3)}
+.bldep{border:1px solid var(--line-2);border-radius:9px;padding:8px 10px;margin-bottom:7px}
+.bldeph{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.bldeph b{font-family:"Heebo",sans-serif;font-size:12.5px;color:var(--ink-1)}
+.bldeph em{font-family:"Heebo",sans-serif;font-size:11.5px;font-style:normal;color:var(--ink-2)}
+.bldeph span{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3)}
+.bldline{display:flex;align-items:center;gap:7px;padding:4px 0;border-top:1px dotted var(--line-2)}
+.bldline:first-of-type{border:0}
+.bldlname{font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-1)}
+.bldln{font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3)}
+.bldline select{margin-inline-start:auto;font-family:"Heebo",sans-serif;font-size:11px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:7px;padding:2px 5px;max-width:150px}
+.bldx{border:1px solid var(--line-2);background:transparent;color:var(--ink-3);border-radius:6px;width:20px;height:20px;line-height:1;cursor:pointer;flex:0 0 auto}
+.bldx:hover{border-color:var(--partial,#D9799C);color:var(--partial,#D9799C)}
+.bldfoot{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}
+.bldfoot input{flex:1 1 180px;font-family:"Heebo",sans-serif;font-size:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-1);border-radius:8px;padding:5px 9px}
+@media (max-width:760px){
+ .bldbox{width:96vw}
+ .bldline{flex-wrap:wrap}
+ .bldline select{margin-inline-start:0;max-width:100%}
+}
+
+/* ידית בין שני חלונות הסצנות של הליין */
+.epnbox .epnsc{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.epnbox .epnlist{flex:0 1 auto;max-height:32vh}
+.epnsplit{flex:1 1 auto;min-height:280px;display:flex;flex-direction:column}
+.epnpane{display:flex;flex-direction:column;min-height:46px;overflow:hidden}
+.epnpane.a{flex:var(--fa,.5) 1 0}
+.epnpane.b{flex:var(--fb,.5) 1 0}
+.epnpane h4{flex:0 0 auto}
+.epnpane .epnscl{flex:1 1 auto;min-height:0;overflow:auto;align-content:flex-start;padding-inline-end:4px}
+.epnpane .epnnone{flex:0 0 auto}
+.epngrip{flex:0 0 auto;height:13px;margin:7px 0;cursor:row-resize;display:flex;align-items:center;justify-content:center;border-radius:7px;background:var(--surface-2);border:1px solid transparent;touch-action:none}
+.epngrip i{width:48px;height:3px;border-radius:2px;background:var(--line);display:block}
+.epngrip:hover{border-color:var(--line)}
+.epngrip:hover i{background:var(--ink-3)}
+.epngrip.drag i{background:var(--accent,#0C6B75)}
 </style>
 </head>
 <body>
@@ -3860,7 +3919,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,schCell:"",editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",bldOpen:false,bldChars:[],bldPlan:null,bldName:"",askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,schCell:"",editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4270,6 +4329,7 @@ function render(){
  if(state.group==="board"){
   h+=board();
   h+='</div>';
+  if(state.bldOpen) h+=bldPanel();
   if(state.editing){
    var es=DATA.scenes.filter(function(x){return x.id===state.editing})[0];
    if(es){
@@ -4357,9 +4417,248 @@ function shortOf(s){
  if(s.status==="partial"&&(s.need||[]).length) t=(s.have||[])[0]+". חסר: "+s.need[0];
  return t||"אין עדיין תיאור";
 }
+/* ===== לוחות פרקים =====
+   לוח הוא חלוקה שלמה של הסצנות לפרקים. אפשר להחזיק כמה לוחות זה
+   לצד זה, לעבור ביניהם, ולחזור למקורי בכל רגע. הבונה מייצר לוח
+   חדש מתוך הדמויות שבוחרים והליינים שלהן.                      */
+function bwEp(){ try{ return EPW() }catch(_){ return "פרק" } }
+function bwEps(){ try{ return MODEW[MODEK()].eps }catch(_){ return "פרקים" } }
+
+function BOARDS(){
+ if(!Array.isArray(DATA.boards)) DATA.boards=[];
+ if(!DATA.boards.length){
+  DATA.boards.push({k:"orig",name:"הלוח המקורי",at:Date.now(),map:bdCapture()});
+  DATA.boardCur="orig";
+ }
+ if(!DATA.boardCur||!bdObj(DATA.boardCur)) DATA.boardCur=DATA.boards[0].k;
+ return DATA.boards;
+}
+function bdObj(k){ return (DATA.boards||[]).filter(function(b){return b.k===k})[0]||null }
+function bdCur(){ BOARDS(); return bdObj(DATA.boardCur) }
+function bdCapture(){
+ var m={};
+ (DATA.scenes||[]).forEach(function(s){ m[s.id]={ep:Number(s.ep)||0, ord:Number(s.ord)||0} });
+ return m;
+}
+function bdStore(){ var b=bdCur(); if(b) b.map=bdCapture() }
+/* מעבר בין לוחות: קודם שומרים את המצב הנוכחי בלוח הפעיל, ואז
+   מותחים את המפה של הלוח החדש על הסצנות. סצנה שנוספה אחרי
+   שהלוח נוצר לא מופיעה במפה שלו, והיא נשארת איפה שהיא.       */
+function bdApply(k){
+ var t=bdObj(k); if(!t) return false;
+ bdStore();
+ (DATA.scenes||[]).forEach(function(s){
+  var v=t.map&&t.map[s.id];
+  if(v){ s.ep=Number(v.ep)||0; s.ord=Number(v.ord)||0 }
+ });
+ DATA.boardCur=k;
+ return true;
+}
+function bdAdd(name,map){
+ BOARDS();
+ bdStore();
+ var k="b"+Date.now().toString(36);
+ DATA.boards.push({k:k,name:name||"לוח חדש",at:Date.now(),map:map||bdCapture()});
+ bdApply(k);
+ return k;
+}
+function bdDel(k){
+ if(k==="orig") return false;
+ var was=(DATA.boardCur===k);
+ DATA.boards=(DATA.boards||[]).filter(function(b){return b.k!==k});
+ if(was){
+  /* הלוח שנמחק הוא הפעיל. אסור לשמור את המצב הנוכחי לתוך הלוח
+     הבא, אחרת הוא יאבד את החלוקה שלו. פורשים אותו כמו שהוא.   */
+  var t=DATA.boards[0];
+  DATA.boardCur=t?t.k:null;
+  if(t) (DATA.scenes||[]).forEach(function(s){
+   var v=t.map&&t.map[s.id];
+   if(v){ s.ep=Number(v.ep)||0; s.ord=Number(v.ord)||0 }
+  });
+ }
+ BOARDS();
+ return true;
+}
+function bdCount(b){
+ var n=0, m=(b&&b.map)||{};
+ Object.keys(m).forEach(function(id){ if(Number(m[id].ep)>0) n++ });
+ return n;
+}
+
+/* ---- הבונה ---- */
+function bldEps(){
+ var e=(DATA.eps||[]).slice().sort(function(a,b){return (Number(a.n)||0)-(Number(b.n)||0)});
+ if(!e.length) e=[{n:1,title:""}];
+ return e;
+}
+function bldLineKey(s){
+ var lk=""; try{ lk=lineOf(s) }catch(_){ lk=(s.line&&s.line!=="-")?s.line:"" }
+ return lk||"";
+}
+function bldInChars(s,chars){
+ if(chars.indexOf(s.char)>-1) return true;
+ if(Array.isArray(s.people)&&s.people.some(function(c){return chars.indexOf(c)>-1})) return true;
+ if(Array.isArray(s.chars)&&s.chars.some(function(c){return chars.indexOf(c)>-1})) return true;
+ return false;
+}
+function bldLineStats(chars){
+ var mine={}, all={};
+ (DATA.scenes||[]).forEach(function(s){
+  var lk=bldLineKey(s); if(!lk) return;
+  all[lk]=(all[lk]||0)+1;
+  if(bldInChars(s,chars)) mine[lk]=(mine[lk]||0)+1;
+ });
+ return {mine:mine, all:all};
+}
+function bldLinesFor(chars){
+ var st=bldLineStats(chars);
+ return Object.keys(st.mine).map(function(k){
+  var o=null; try{ o=lineObj(k) }catch(_){}
+  return {k:k, name:(o&&o.name)||k, mine:st.mine[k], all:st.all[k]||0};
+ }).sort(function(a,b){ return b.mine-a.mine || b.all-a.all });
+}
+function bldScenesOfLine(k){
+ return (DATA.scenes||[]).filter(function(s){ return bldLineKey(s)===k })
+  .sort(function(a,b){ return (Number(a.ep)||0)-(Number(b.ep)||0) || (Number(a.ord)||0)-(Number(b.ord)||0) });
+}
+function bldAllLines(){
+ var a=[]; try{ a=LINES()||[] }catch(_){ a=DATA.lines||[] }
+ return a;
+}
+function bldNameOf(k){
+ var o=null; try{ o=lineObj(k) }catch(_){}
+ return (o&&o.name)||k;
+}
+/* כל ליין נשאר שלם ונכנס לפרק הכי ריק, כדי שהעונה תצא מאוזנת */
+function bldPlan(chars){
+ var eps=bldEps(), lines=bldLinesFor(chars);
+ var slots=eps.map(function(e){ return {n:Number(e.n)||0, title:e.title||"", lines:[], count:0} });
+ lines.forEach(function(L){
+  var n=bldScenesOfLine(L.k).length;
+  if(!n) return;
+  var lightest=slots[0];
+  slots.forEach(function(s){ if(s.count<lightest.count) lightest=s });
+  lightest.lines.push({k:L.k,name:L.name,n:n,mine:L.mine});
+  lightest.count+=n;
+ });
+ return slots;
+}
+function bldRecount(plan){
+ (plan||[]).forEach(function(sl){
+  sl.count=0;
+  sl.lines.forEach(function(L){ L.n=bldScenesOfLine(L.k).length; sl.count+=L.n });
+ });
+ return plan;
+}
+function bldSwap(si,li,newk){
+ var plan=state.bldPlan; if(!plan||!plan[si]||!plan[si].lines[li]) return false;
+ var taken=false;
+ plan.forEach(function(sl,i){ sl.lines.forEach(function(L,j){ if(L.k===newk&&!(i===si&&j===li)) taken=true }) });
+ if(taken) return "dup";
+ plan[si].lines[li]={k:newk,name:bldNameOf(newk),n:bldScenesOfLine(newk).length,mine:0};
+ bldRecount(plan);
+ return true;
+}
+function bldDrop(si,li){
+ var plan=state.bldPlan; if(!plan||!plan[si]) return false;
+ plan[si].lines.splice(li,1);
+ bldRecount(plan);
+ return true;
+}
+function bldMap(plan){
+ var m={}, used={};
+ (plan||[]).forEach(function(sl){
+  var ord=0;
+  sl.lines.forEach(function(L){
+   bldScenesOfLine(L.k).forEach(function(s){
+    if(used[s.id]) return;
+    used[s.id]=1; ord++;
+    m[s.id]={ep:sl.n, ord:ord};
+   });
+  });
+ });
+ (DATA.scenes||[]).forEach(function(s){ if(!m[s.id]) m[s.id]={ep:0,ord:999} });
+ return m;
+}
+
+function bldPanel(){
+ var chars=state.bldChars||[];
+ var plan=state.bldPlan||null;
+ var h='<div class="modal" data-act="bldclose"><div class="box bldbox" data-stop="1">';
+ h+='<div class="mhead"><span>בונה '+esc(bwEps())+'</span><button data-act="bldclose" title="סגור">×</button></div>';
+ h+='<div class="bldwrap">';
+ h+='<p class="bldnote">בחר את הדמויות שהעונה הזאת מספרת. המערכת תשלוף את הליינים שלהן, תפרוש אותם על ה'+esc(bwEps())+', ותבנה לוח חדש. הלוח הקיים נשאר ואפשר לחזור אליו תמיד.</p>';
+
+ h+='<div class="bldsec"><h4>דמויות<span>'+chars.length+'</span></h4><div class="dchpick" style="border:0;margin:0;padding:0">';
+ (DATA.chars||[]).forEach(function(c){
+  var on=chars.indexOf(c.k)>-1;
+  h+='<button class="dchopt'+(on?" on":"")+'" data-act="bldchar" data-k="'+esc(c.k)+'" style="--cc:'+esc(c.color||"#455160")+'"><i></i>'+esc(c.name)+(on?" ✓":"")+'</button>';
+ });
+ if(!(DATA.chars||[]).length) h+='<span class="bldnone">אין עדיין דמויות ביומן</span>';
+ h+='</div></div>';
+
+ if(chars.length){
+  var avail=bldLinesFor(chars);
+  h+='<div class="bldsec"><h4>הליינים שנמצאו<span>'+avail.length+'</span></h4>';
+  if(!avail.length) h+='<p class="bldnone">לדמויות שבחרת אין סצנות שמשויכות לליין. שייך סצנות לליינים וחזור לכאן.</p>';
+  else{
+   h+='<div class="bldtags">';
+   avail.forEach(function(L){ h+='<span class="bldtag">'+esc(L.name)+'<b>'+L.mine+' מהדמויות</b><i>'+L.all+' בסך הכל</i></span>' });
+   h+='</div>';
+   h+='<button class="btn" data-act="bldrun">'+(plan?"בנה מחדש":"בנה הצעה")+'</button>';
+  }
+  h+='</div>';
+ }
+
+ if(plan){
+  var all=bldAllLines();
+  h+='<div class="bldsec"><h4>ההצעה</h4>';
+  plan.forEach(function(sl,si){
+   h+='<div class="bldep"><div class="bldeph"><b>'+esc(bwEp())+' '+sl.n+'</b>'+(sl.title?'<em>'+esc(sl.title)+'</em>':'')+'<span>'+sl.count+' סצנות</span></div>';
+   if(!sl.lines.length) h+='<span class="bldnone">ריק. אפשר להוריד ליין מפרק אחר והוא יישאר מחוץ ללוח.</span>';
+   sl.lines.forEach(function(L,li){
+    h+='<div class="bldline"><span class="bldlname">'+esc(L.name)+'</span><span class="bldln">'+L.n+' סצנות</span>';
+    h+='<select class="bldswap" data-k="'+si+':'+li+'"><option value="">החלף ליין</option>';
+    all.forEach(function(x){
+     if(x.k===L.k) return;
+     h+='<option value="'+esc(x.k)+'">'+esc(x.name)+'</option>';
+    });
+    h+='</select>';
+    h+='<button class="bldx" data-act="blddrop" data-k="'+si+':'+li+'" title="הורד את הליין מההצעה">×</button>';
+    h+='</div>';
+   });
+   h+='</div>';
+  });
+  var inn=0; plan.forEach(function(s){ inn+=s.count });
+  var left=(DATA.scenes||[]).length-inn;
+  if(left>0) h+='<p class="bldnote">'+left+' סצנות נשארות מחוץ ללוח הזה, בלי '+esc(bwEp())+'. הן לא נמחקות ואפשר לשבץ אותן ידנית אחר כך.</p>';
+  h+='<div class="bldfoot">';
+  h+='<input name="bldname" placeholder="שם הלוח החדש" value="'+esc(state.bldName||"")+'" autocomplete="off">';
+  h+='<button class="btn" data-act="bldmake">צור לוח חדש</button>';
+  h+='</div></div>';
+ }
+ return h+'</div></div></div>';
+}
+
+function bdBar(){
+ var bs=BOARDS(), cur=bdCur();
+ var h='<div class="bdbar"><span class="bdlbl">לוח '+esc(bwEps())+'</span>';
+ bs.forEach(function(b){
+  var on=(b.k===DATA.boardCur);
+  h+='<button class="bdchip'+(on?" on":"")+'" data-act="bdgo" data-k="'+esc(b.k)+'" title="'+bdCount(b)+' סצנות משובצות">'+esc(b.name)+'<b>'+bdCount(b)+'</b></button>';
+ });
+ if(!RO){
+  h+='<div class="spacer"></div>';
+  h+='<button class="bdnew" data-act="bldopen">בונה '+esc(bwEps())+' לפי דמויות</button>';
+  if(cur&&cur.k!=="orig") h+='<button class="bdkill" data-act="bddel" data-k="'+esc(cur.k)+'">מחק את הלוח הזה</button>';
+ }
+ return h+'</div>';
+}
+
 function board(){
  var mode=state.boardMode||"notes";
- var h='<div class="modes">';
+ var h=bdBar();
+ h+='<div class="modes">';
  [["notes","פתקים"],["list","רשימת עריכה"],["timeline","ציר זמן"]].forEach(function(m){
   h+='<button data-act="bmode" data-k="'+m[0]+'" aria-pressed="'+(mode===m[0])+'">'+esc(m[1])+'</button>';
  });
@@ -9841,6 +10140,57 @@ function epnBtn(tg,ttl,lbl){
  var c=epnFor(tg).length;
  return '<button class="tinyedit epnbtn'+(c?"":" none")+'" data-act="epnopen" data-id="'+esc(tg)+'" title="'+esc(ttl||"מחשבות, כל המשתמשים רואים")+'">'+esc(lbl||"מחשבות")+'<i>'+c+'</i></button>';
 }
+
+/* ---- ידית בין שני חלונות הסצנות של הליין ---- */
+var EPNF=null;
+function epnFrac(){
+ if(EPNF===null){
+  var v=0; try{ v=parseFloat(localStorage.getItem("epnsplit")||"") }catch(_){}
+  EPNF=(v>0.1&&v<0.9)?v:0.5;
+ }
+ return EPNF;
+}
+function epnSplitWire(){
+ var box=document.getElementById("epnsplit");
+ if(!box||box.__wired) return;
+ box.__wired=1;
+ var g=box.querySelector(".epngrip"); if(!g) return;
+ var set=function(f){
+  EPNF=f;
+  box.style.setProperty("--fa",f.toFixed(3));
+  box.style.setProperty("--fb",(1-f).toFixed(3));
+ };
+ var down=function(e){
+  if(e.cancelable) e.preventDefault();
+  var r=box.getBoundingClientRect(), gh=g.offsetHeight+12;
+  var span=Math.max(1,r.height-gh);
+  g.classList.add("drag");
+  document.body.style.userSelect="none";
+  var mv=function(ev){
+   var cy=ev.touches&&ev.touches[0]?ev.touches[0].clientY:ev.clientY;
+   var f=(cy-r.top-gh/2)/span;
+   set(Math.max(.12,Math.min(.88,f)));
+   if(ev.cancelable) ev.preventDefault();
+  };
+  var up=function(){
+   g.classList.remove("drag");
+   document.body.style.userSelect="";
+   document.removeEventListener("mousemove",mv);
+   document.removeEventListener("mouseup",up);
+   document.removeEventListener("touchmove",mv);
+   document.removeEventListener("touchend",up);
+   try{ localStorage.setItem("epnsplit",String(EPNF)) }catch(_){}
+  };
+  document.addEventListener("mousemove",mv);
+  document.addEventListener("mouseup",up);
+  document.addEventListener("touchmove",mv,{passive:false});
+  document.addEventListener("touchend",up);
+ };
+ g.addEventListener("mousedown",down);
+ g.addEventListener("touchstart",down,{passive:false});
+ g.addEventListener("dblclick",function(){ set(.5); try{ localStorage.setItem("epnsplit","0.5") }catch(_){} });
+}
+
 function epnPanel(){
  var tg=String(state.epNotes), ti=epnTitle(tg);
  var list=epnFor(tg);
@@ -9901,8 +10251,11 @@ function epnPanel(){
   var _in=DATA.scenes.filter(function(x){return lineOf(x)===_lk&&x.status!=="dropped"}).sort(byOrd);
   var _free=DATA.scenes.filter(function(x){return !lineOf(x)&&x.status!=="dropped"})
     .sort(function(a,b){return ((a.ep||99)-(b.ep||99))||((a.ord||0)-(b.ord||0))});
-  h+='<div class="epnsc">';
+  var _f=epnFrac();
+  h+='<div class="epnsc"><div class="epnsplit" id="epnsplit" style="--fa:'+_f.toFixed(3)+';--fb:'+(1-_f).toFixed(3)+'">';
+  h+='<div class="epnpane a">';
   h+='<h4>\u05e1\u05e6\u05e0\u05d5\u05ea \u05d1\u05dc\u05d9\u05d9\u05df<em>'+_in.length+'</em></h4>';
+  if(!_in.length) h+='<p class="epnnone">\u05e2\u05d5\u05d3 \u05d0\u05d9\u05df \u05e1\u05e6\u05e0\u05d5\u05ea \u05d1\u05dc\u05d9\u05d9\u05df \u05d4\u05d6\u05d4</p>';
   if(_in.length){
    h+='<div class="epnscl">';
    _in.forEach(function(x){
@@ -9911,6 +10264,9 @@ function epnPanel(){
    });
    h+='</div>';
   }
+  h+='</div>';
+  h+='<div class="epngrip" title="\u05d2\u05e8\u05d5\u05e8 \u05db\u05d3\u05d9 \u05dc\u05d4\u05d2\u05d3\u05d9\u05dc \u05d7\u05dc\u05d5\u05df \u05d0\u05d7\u05d3 \u05e2\u05dc \u05d7\u05e9\u05d1\u05d5\u05df \u05d4\u05e9\u05e0\u05d9. \u05dc\u05d7\u05d9\u05e6\u05d4 \u05db\u05e4\u05d5\u05dc\u05d4 \u05de\u05d7\u05d6\u05d9\u05e8\u05d4 \u05dc\u05d0\u05de\u05e6\u05e2"><i></i></div>';
+  h+='<div class="epnpane b">';
   h+='<h4>\u05d4\u05d5\u05e1\u05e3 \u05e1\u05e6\u05e0\u05d4 \u05dc\u05dc\u05d9\u05d9\u05df<em>'+_free.length+'</em></h4>';
   if(!_free.length) h+='<p class="epnnone">\u05db\u05dc \u05d4\u05e1\u05e6\u05e0\u05d5\u05ea \u05db\u05d1\u05e8 \u05de\u05e9\u05d5\u05d9\u05d9\u05db\u05d5\u05ea \u05dc\u05dc\u05d9\u05d9\u05df \u05db\u05dc\u05e9\u05d4\u05d5</p>';
   else{
@@ -9922,7 +10278,7 @@ function epnPanel(){
    });
    h+='</div>';
   }
-  h+='</div>';
+  h+='</div></div></div>';
  }
  if(!RO){
   h+='<div class="epnform"><div class="grpform" data-form="__epn__">';
@@ -10308,6 +10664,7 @@ function paint(h){
  try{ vnFocusWire() }catch(_){}
  try{ setTimeout(srtUpWire,0) }catch(_){}
  try{ setTimeout(brkUpWire,0) }catch(_){}
+ try{ setTimeout(epnSplitWire,0) }catch(_){}
  try{ var _t=M().title; if(_t&&document.title!==_t) document.title=_t }catch(_){}
  if(state.adding){
   h+='<div class="modal" data-act="closemodal"><div class="box" data-stop="1">';
@@ -11244,6 +11601,14 @@ document.addEventListener("change",function(e){
 });
 document.addEventListener("change",function(e){
  var el=e.target;if(!el||!el.classList)return;
+ if(el.classList.contains("bldswap")){
+  if(!el.value) return;
+  var _sp=(el.getAttribute("data-k")||"").split(":");
+  var _r=bldSwap(Number(_sp[0]),Number(_sp[1]),el.value);
+  if(_r==="dup"){ toast("הליין הזה כבר יושב בהצעה",true); el.value=""; return }
+  render();return;
+ }
+
  if(el.classList.contains("trdaysel")){
   if(!ensureEdit()){render();return}
   snap();
@@ -11424,6 +11789,55 @@ document.addEventListener("click",function(e){
   render();save();
   toast("נוספה סצנה "+nid+" לפרק "+(Number(ix.ep)||1));return}
  if(act==="bmode"){state.boardMode=b.getAttribute("data-k");render();return}
+ if(act==="bdgo"){
+  var _bk=b.getAttribute("data-k")||"";
+  if(_bk===DATA.boardCur){return}
+  if(!ensureEdit()){render();return}
+  if(bdApply(_bk)){ render();save();toast("עברת ל"+((bdObj(_bk)||{}).name||"לוח")) }
+  return}
+ if(act==="bddel"){
+  if(!ensureEdit()){render();return}
+  var _dk=b.getAttribute("data-k")||"";
+  var _dn=(bdObj(_dk)||{}).name||"";
+  if(bdDel(_dk)){ render();save();toast("הלוח "+_dn+" נמחק. הסצנות לא נמחקו") }
+  else toast("את הלוח המקורי אי אפשר למחוק",true);
+  return}
+ if(act==="bldopen"){state.bldOpen=true;state.bldChars=[];state.bldPlan=null;state.bldName="";render();return}
+ if(act==="bldclose"){
+  if(modalKeep(e,b))return;
+  state.bldOpen=false;render();return}
+ if(act==="bldchar"){
+  var _ck=b.getAttribute("data-k")||"";
+  state.bldChars=state.bldChars||[];
+  var _ci=state.bldChars.indexOf(_ck);
+  if(_ci>-1) state.bldChars.splice(_ci,1); else state.bldChars.push(_ck);
+  state.bldPlan=null;render();return}
+ if(act==="bldrun"){
+  if(!(state.bldChars||[]).length){toast("בחר קודם דמויות",true);return}
+  state.bldPlan=bldPlan(state.bldChars);
+  var _nm=document.querySelector('[name="bldname"]');
+  if(_nm) state.bldName=_nm.value;
+  if(!state.bldName){
+   state.bldName=state.bldChars.map(function(k){return (charOf(k)||{}).name||""}).filter(Boolean).slice(0,3).join(" ו");
+  }
+  render();return}
+ if(act==="blddrop"){
+  var _p=(b.getAttribute("data-k")||"").split(":");
+  bldDrop(Number(_p[0]),Number(_p[1]));render();return}
+ if(act==="bldmake"){
+  if(!ensureEdit()){render();return}
+  if(!state.bldPlan){toast("אין הצעה לשמור",true);return}
+  var _in=document.querySelector('[name="bldname"]');
+  var _bn=(_in?_in.value:state.bldName||"").trim();
+  if(!_bn){toast("תן שם ללוח",true);if(_in)_in.focus();return}
+  var _mp=bldMap(state.bldPlan);
+  bdAdd(_bn,_mp);
+  var _cnt=0; Object.keys(_mp).forEach(function(z){ if(Number(_mp[z].ep)>0) _cnt++ });
+  state.bldOpen=false;state.bldPlan=null;state.bldName="";
+  render();save();
+  toast("נוצר הלוח "+_bn+" עם "+_cnt+" סצנות משובצות. הלוח הקודם נשמר");
+  return}
+
  if(act==="nmode"){state.needMode=b.getAttribute("data-k");render();return}
  if(act==="lmode"){state.lineMode=b.getAttribute("data-k");render();saveUI();return}
  if(act==="lby"){state.lineBy=b.getAttribute("data-k");render();saveUI();return}
