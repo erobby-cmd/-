@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-09-29T01:09:07Z">
+<meta name="build" content="2026-09-29T01:18:13Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -1488,6 +1488,16 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .bldpick u{text-decoration:none;font-size:10px;font-weight:700;color:var(--ink-3);flex:0 0 auto}
 .bldpick i{font-style:normal;font-size:10px;color:var(--shot,#0C6B75);margin-inline-start:auto;white-space:nowrap}
 .bldpick .bldx{flex:0 0 auto;width:18px;height:18px;font-size:12px}
+
+.bdchip{position:relative;padding-inline-end:11px}
+.bdx{font-style:normal;font-size:13px;line-height:1;color:var(--ink-3);border-radius:4px;padding:0 3px;margin-inline-start:1px;cursor:pointer}
+.bdx:hover{background:var(--partial,#D9799C);color:#fff}
+.bdchip.ask{display:inline-flex;align-items:center;gap:6px;font-family:"Heebo",sans-serif;font-size:12px;border:1px solid var(--partial,#D9799C);background:var(--surface);color:var(--ink-2);border-radius:99px;padding:3px 11px}
+.bdchip.ask em{font-style:normal;font-size:11px;color:var(--partial,#D9799C);font-weight:600}
+.bdyes,.bdno{font-style:normal;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;border-radius:99px;padding:1px 9px;cursor:pointer;border:1px solid var(--line-2)}
+.bdyes{border-color:var(--partial,#D9799C);color:var(--partial,#D9799C)}
+.bdyes:hover{background:var(--partial,#D9799C);color:#fff}
+.bdno:hover{border-color:var(--ink-3);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -3946,7 +3956,7 @@ function setMe(k){
  state.me=k;state.viewUser=k;
  try{localStorage.setItem(meKey(),k)}catch(_){}
 }
-var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",bldOpen:false,bldChars:[],bldPlan:null,bldName:"",bldChat:[],bldBusy:false,askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,schCell:"",editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
+var state={me:"",viewUser:"",showUsers:false,confirmPromote:false,confirmPull:false,confirmEp:null,editTask:null,brkOpen:"",dChar:"",matOpen:"",matKind:"",matAdd:false,matEdit:"",matCh:"",matKindPick:"",jourCh:"",jourLn:"",mcbOpen:"",brkEp:"",bkOpen:false,bkList:null,bkAsk:"",boardMode:"notes",bdAsk:"",bldOpen:false,bldChars:[],bldPlan:null,bldName:"",bldChat:[],bldBusy:false,askWho:"",askExtra:"",askText:"",newAt:null,editChar:null,editUnit:null,editLine:null,editDay:null,needMode:"char",lineMode:"table",lineBy:"line",mergeSrc:null,crewSet:false,q:"",qFocus:false,chatDraft:"",chatFocus:false,chatTo:"",chatSeenAt:0,feedOpen:false,feedSeenAt:0,theme:"",moreOpen:false,nextOpen:false,projOpen:false,projNew:null,editModal:false,editDue:null,cat:"",catLast:{},trQ:"",trMode:"day",trOpen:"",trLink:"",trSel:null,trBusy:"",trPick:"",trDate:"",legOpen:false,charPanel:"",lsOpen:false,lsSkip:{},lsChat:false,mineText:"",mineTr:null,lineAskWho:"",lineAskExtra:"",shiftSet:false,schCell:"",editShift:null,shiftDate:"",shiftWho:"",confirmDel:null,editMeta:false,editEp:null,epNotes:null,epnEdit:"",vidOpen:"",vidRow:"",watchPop:null,matDays:null,matEps:null,jourOpen:false,vgOpen:"",whoBar:false,vidMode:null,vidFile:null,filter:"all",group:"board",editing:null,adding:false,writable:false};
 var api=null;
 
 function M(){
@@ -4942,16 +4952,24 @@ function bldPanel(){
 }
 
 function bdBar(){
- var bs=BOARDS(), cur=bdCur();
+ var bs=BOARDS();
  var h='<div class="bdbar"><span class="bdlbl">לוח '+esc(bwEps())+'</span>';
  bs.forEach(function(b){
   var on=(b.k===DATA.boardCur);
-  h+='<button class="bdchip'+(on?" on":"")+'" data-act="bdgo" data-k="'+esc(b.k)+'" title="'+bdCount(b)+' סצנות משובצות">'+esc(b.name)+'<b>'+bdCount(b)+'</b></button>';
+  if(state.bdAsk===b.k&&!RO){
+   h+='<span class="bdchip ask">'+esc(b.name)+'<em>למחוק?</em>'+
+      '<i class="bdyes" data-act="bddelyes" data-k="'+esc(b.k)+'">כן</i>'+
+      '<i class="bdno" data-act="bddelno">לא</i></span>';
+   return;
+  }
+  h+='<button class="bdchip'+(on?" on":"")+'" data-act="bdgo" data-k="'+esc(b.k)+'" title="'+bdCount(b)+' סצנות משובצות">'+
+     esc(b.name)+'<b>'+bdCount(b)+'</b>'+
+     ((!RO&&b.k!=="orig")?'<i class="bdx" data-act="bddel" data-k="'+esc(b.k)+'" title="מחק את הלוח הזה">\u00d7</i>':'')+
+     '</button>';
  });
  if(!RO){
   h+='<div class="spacer"></div>';
   h+='<button class="bdnew" data-act="bldopen">בונה '+esc(bwEps())+' לפי דמויות</button>';
-  if(cur&&cur.k!=="orig") h+='<button class="bdkill" data-act="bddel" data-k="'+esc(cur.k)+'">מחק את הלוח הזה</button>';
  }
  return h+'</div>';
 }
@@ -12099,9 +12117,16 @@ document.addEventListener("click",function(e){
  if(act==="bddel"){
   if(!ensureEdit()){render();return}
   var _dk=b.getAttribute("data-k")||"";
-  var _dn=(bdObj(_dk)||{}).name||"";
-  if(bdDel(_dk)){ render();save();toast("הלוח "+_dn+" נמחק. הסצנות לא נמחקו") }
-  else toast("את הלוח המקורי אי אפשר למחוק",true);
+  if(_dk==="orig"){toast("את הלוח המקורי אי אפשר למחוק",true);return}
+  state.bdAsk=_dk;render();return}
+ if(act==="bddelno"){ state.bdAsk=""; render(); return}
+ if(act==="bddelyes"){
+  if(!ensureEdit()){render();return}
+  var _dk2=b.getAttribute("data-k")||"";
+  var _dn=(bdObj(_dk2)||{}).name||"";
+  state.bdAsk="";
+  if(bdDel(_dk2)){ render();save();toast("הלוח "+_dn+" נמחק. הסצנות עצמן לא נמחקו") }
+  else { render();toast("את הלוח המקורי אי אפשר למחוק",true) }
   return}
  if(act==="bldopen"){state.bldOpen=true;state.bldChars=[];state.bldPlan=null;state.bldName="";render();return}
  if(act==="bldclose"){
