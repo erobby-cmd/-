@@ -4259,6 +4259,12 @@ function render(){
   paint(h);
   return;
  }
+ if(state.group==="editideas"){
+  h+=editIdeasView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
  if(state.group==="need"){
   h+=needView();
   h+='</div>';
@@ -5840,6 +5846,137 @@ function ideasView(){
   if(!RO){h+='<button class="btn" data-act="useidea" data-id="'+esc(i.id)+'">הוסף ליומן</button>';
   h+='<button class="btn ghost" data-act="delidea" data-id="'+esc(i.id)+'">מחק</button>';}
   h+='<span class="spacer"></span><span class="tagi'+(i.from==="me"?" mine":"")+'">'+(i.from==="me"?"שלי":"הצעה")+'</span></div></div>';
+ });
+ return h+'</div></section>';
+}
+/* ===== רעיונות לעריכה: מוח העורך ===== */
+var EDKIND={seq:{l:"סיקוונס",c:"#1B4B8F"},ep:{l:"מהלך לפרק",c:"#8A2D8F"},cut:{l:"חיבור",c:"#B0472B"},arc:{l:"קשת עונה",c:"#166F5B"}};
+function edKindOf(s){
+ s=String(s||"").trim();
+ if(/סיקו|seq/i.test(s)) return "seq";
+ if(/פרק|ep/i.test(s)) return "ep";
+ if(/חיבור|מעבר|cut/i.test(s)) return "cut";
+ if(/קשת|עונה|arc/i.test(s)) return "arc";
+ return "seq";
+}
+function edScenesOf(s){
+ return String(s||"").split(/[,،\s]+/).map(function(x){return x.trim().toUpperCase()}).filter(function(x){return /^[A-Z]+-\d+$/.test(x)});
+}
+function editBrief(extra){
+ var o=briefHead();
+ o+="=== מי אתה ===\n";
+ o+="אתה עורך וידאו תיעודי גאון. ערכת סדרות תיעודיות קשות, אתה יודע שהסיפור נכתב בחדר העריכה ולא בצילום, ואתה לא מפחד להגיד שסצנה יפה לא שייכת. אתה קורא את כל החומר כמו ראש של תמנון: כל כפתור ביומן הוא זרוע שמזינה אותך. הסצנות, הליינים של הדמויות, מפת הפרקים, לוג ימי הצילום עם הפירוקים, התמלולים, בנק הרעיונות לצילום, וההצעות שכבר נתת בעבר.\n\n";
+ o+="=== המשימה ===\n";
+ o+="קרא הכל ותציע מהלכי עריכה בארבעה סוגים:\n";
+ o+="1. סיקוונס. רצף של שלוש עד שבע סצנות שעובד כיחידה אחת. מה פותח אותו, מה הסיבוב, ואיפה הוא נחתך.\n";
+ o+="2. מהלך לפרק. איך פרק שלם צריך לזוז לדעתך: סדר, פתיחה, סגירה, מה לזרוק, מה להזיז לפרק אחר.\n";
+ o+="3. חיבור. שתי סצנות שאף אחד לא שם אחת ליד השנייה, והחיבור ביניהן אומר משהו שאף אחת מהן לא אומרת לבד. משפט אחרון שעונה על שאלה מסצנה אחרת, תמונה שמתחרזת, ניגוד חד.\n";
+ o+="4. קשת עונה. ליין או דמות שהעריכה יכולה להציל או לחזק לאורך חמשת הפרקים, ואיך.\n\n";
+ o+="לפני שאתה מציע, תעבור על החומר כעורך ולא כתסריטאי:\n";
+ o+="א. מה הכי חזק בחומר שכבר צולם ועוד לא יושב במקום הנכון.\n";
+ o+="ב. איפה יש משפט בתמלול או רגע בפירוק שיכול להחזיק סצנה שלמה, ובאיזה טיימקוד.\n";
+ o+="ג. איפה הקצב נתקע: שלוש סצנות דיבור ברצף, אותה מחלקה פעמיים, ראיון שמסביר מה שכבר ראינו.\n";
+ o+="ד. איזה דמויות לא נפגשות בעריכה ויכולות להיפגש בחיתוך גם אם לא נפגשו בצילום.\n";
+ o+="ה. מה הפרק האחרון צריך כדי להיסגר, ומה מזה כבר קיים איפשהו בחומר.\n\n";
+ o+="כללים:\n";
+ o+="1. אל תמציא חומר. כל מה שאתה מציע חייב להיות מבוסס על סצנה ביומן, רגע בלוג או שורה בתמלול. תציין מזהה סצנה כמו A-01, או יום וטיימקוד.\n";
+ o+="2. כתוב כמו עורך. קונקרטי: מה נכנס, מה יוצא, באיזה סדר, על איזו מילה חותכים.\n";
+ o+="3. לכל מהלך משפט אחד למה הוא עובד, בלי מליצות.\n";
+ o+="4. אל תחזור על הצעות שכבר מופיעות למטה ברשימת ההצעות הקודמות. תבנה עליהן או תתווכח איתן.\n";
+ o+="5. תפזר: לא חמישה מהלכים על אותה דמות.\n";
+ if(extra) o+="6. מה שחשוב לי: "+extra+"\n";
+ o+="\nפורמט התשובה: קודם חמש שורות, אחת לכל אחת מהבדיקות א עד ה. אחר כך שורה ריקה, ואז המהלכים, שורה אחת לכל מהלך:\n";
+ o+="סוג | כותרת | המהלך עצמו | מזהי סצנות מופרדים בפסיק | מספר פרק | למה זה עובד\n";
+ o+="סוג הוא אחד מאלה: סיקוונס, פרק, חיבור, קשת.\n\n";
+ o+="דוגמה:\n";
+ o+="חיבור | המספריים והדקירה | חותכים מהרגע ששחר מזהה את המספריים בטיילת ישר לסרטון הדקירה בירושלים, בלי ראיון באמצע | X-70, S-01 | 5 | הצופה מבין את הטראומה בלי שאף אחד מסביר אותה\n\n";
+ var prev=DATA.editideas||[];
+ if(prev.length){
+  o+="=== הצעות עריכה שכבר נתת, אל תחזור עליהן ===\n";
+  prev.forEach(function(x){o+="- ["+(EDKIND[x.kind]||EDKIND.seq).l+"] "+x.title+(x.done?" (בוצע)":"")+"\n"});
+  o+="\n";
+ }
+ o+="=== סדר הסצנות במפת הפרקים כרגע ===\n";
+ DATA.eps.forEach(function(e){
+  var a=DATA.scenes.filter(function(x){return (Number(x.ep)||1)===e.n&&x.status!=="dropped"}).sort(function(p,q){return (p.ord||0)-(q.ord||0)});
+  o+="פרק "+e.n+" · "+e.title+": "+(a.length?a.map(function(x){return "["+x.id+"] "+x.title}).join(" > "):"ריק")+"\n";
+ });
+ o+="\n=== פירוק הסצנות של כל יום צילום ===\n";
+ daysSorted().forEach(function(d){
+  var b=d.brk||[];
+  if(!b.length) return;
+  o+="\n"+dayLabel(d.date)+(d.dlabel?" · "+d.dlabel:"")+" · "+(d.brsrc||"")+"\n";
+  b.forEach(function(x){
+   o+="  #"+x.n+" "+x.t+" ["+x.tc+"]"+(x.sum?": "+x.sum:"")+"\n";
+   (x.quotes||[]).forEach(function(q){ if(q&&q.lines&&q.lines.length) o+="    "+(q.who||"")+": "+q.lines.slice(0,3).join(" / ")+"\n" });
+  });
+ });
+ o+="\n";
+ return o+briefContext();
+}
+function parseEditIdeas(txt){
+ var res={made:0};
+ DATA.editideas=DATA.editideas||[];
+ String(txt||"").split("\n").forEach(function(line){
+  var p=line.split("|").map(function(x){return x.trim()});
+  if(p.length<4||!p[1]) return;
+  var k=edKindOf(p[0]);
+  if(!/סיקו|פרק|חיבור|מעבר|קשת|עונה|seq|ep|cut|arc/i.test(p[0])) return;
+  DATA.editideas.unshift({id:"ed"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999),
+   kind:k,title:p[1],move:p[2]||"",scenes:edScenesOf(p[3]||""),ep:Number(p[4])||0,why:p[5]||"",at:Date.now(),done:false,by:state.me||""});
+  res.made++;
+ });
+ return res;
+}
+function editIdeasView(){
+ var h='<section class="grp"><div class="grp-h"><h2>רעיונות לעריכה</h2><span class="role">עורך שקורא הכל ומציע סיקוונסים, מהלכים לפרקים וחיבורים</span></div>';
+ h+='<p class="grp-note">המוח הזה הוא הראש של התמנון. כל כפתור ביומן הוא זרוע שמזינה אותו: הסצנות, מפת הפרקים, הליינים, לוג ימי הצילום עם הפירוקים, התמלולים, בנק הרעיונות לצילום, וגם כל הצעת עריכה שכבר נתן. ככל שהיומן מתמלא, הוא חכם יותר. אפשר לבקש ממני בשיחה "רעיונות לעריכה" ואני אכניס אותם לכאן ישירות, או לבנות כאן בקשה ולהדביק את התשובה.</p>';
+ if(!RO){
+  h+='<div class="ask" data-form="__ed__">';
+  h+='<div class="f"><label>מה חשוב לך שהעורך יחפש</label><textarea name="extra" placeholder="למשל: פתיחה לפרק 4, או חיבורים בין שחר לנועה">'+esc(state.edExtra||"")+'</textarea></div>';
+  h+='<div class="s-foot" style="border:0;padding:0">';
+  h+='<button class="btn" data-act="buildedit">בנה בקשה לעורך</button>';
+  if(state.edText) h+='<button class="btn ghost" data-act="copyedit">העתק</button>';
+  h+='<span class="trhint">'+(state.edText?(state.edText.length.toLocaleString("he-IL")+" תווים"):"")+'</span></div>';
+  if(state.edText) h+='<div class="prompt">'+esc(state.edText)+'</div>';
+  h+='<div class="f" style="margin-top:4px"><label>הדבק כאן את התשובה</label>';
+  h+='<textarea name="ans" style="min-height:110px" placeholder="סוג | כותרת | המהלך | סצנות | פרק | למה זה עובד"></textarea>';
+  h+='<p class="hint">שורה לכל מהלך. הסוג הוא סיקוונס, פרק, חיבור או קשת.</p></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="editapply">הכנס את המהלכים</button></div>';
+  h+='</div>';
+ }
+ var list=DATA.editideas||[], f=state.edFilter||"";
+ h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:14px">';
+ h+='<button class="chip" data-act="edfilter" data-k="" aria-pressed="'+(!f)+'">הכול <span class="n">'+list.length+'</span></button>';
+ Object.keys(EDKIND).forEach(function(k){
+  var n=list.filter(function(x){return x.kind===k}).length;
+  h+='<button class="chip" data-act="edfilter" data-k="'+k+'" aria-pressed="'+(f===k)+'">'+esc(EDKIND[k].l)+'<span class="n">'+n+'</span></button>';
+ });
+ h+='</div>';
+ var shown=list.filter(function(x){return !f||x.kind===f});
+ h+='<div class="ideas">';
+ if(!shown.length) h+='<div class="empty">אין עדיין מהלכי עריכה.</div>';
+ shown.forEach(function(i){
+  var K=EDKIND[i.kind]||EDKIND.seq;
+  h+='<div class="idea"'+(i.done?' style="opacity:.55"':'')+'><div class="ihead" style="background:'+K.c+'">'+esc(K.l);
+  h+='<small>'+(i.ep?'פרק '+i.ep:'כל העונה')+'</small></div>';
+  h+='<div class="ibody"><h4>'+esc(i.title)+'</h4>';
+  if(i.move) h+='<p>'+esc(i.move)+'</p>';
+  if(i.why) h+='<p style="color:var(--ink-3)">'+esc(i.why)+'</p>';
+  if((i.scenes||[]).length){
+   h+='<p style="display:flex;flex-wrap:wrap;gap:5px">';
+   i.scenes.forEach(function(sid){
+    var s=DATA.scenes.filter(function(x){return x.id===sid})[0];
+    h+='<span class="tagi" title="'+esc(s?s.title:"לא נמצא ביומן")+'"'+(s?'':' style="opacity:.5"')+'>'+esc(sid)+(s?' · '+esc(String(s.title).slice(0,26)):'')+'</span>';
+   });
+   h+='</p>';
+  }
+  h+='</div><div class="ifoot">';
+  if(!RO){
+   h+='<button class="btn'+(i.done?' ghost':'')+'" data-act="eddone" data-id="'+esc(i.id)+'">'+(i.done?'החזר לפתוח':'בוצע')+'</button>';
+   h+='<button class="btn ghost" data-act="eddel" data-id="'+esc(i.id)+'">מחק</button>';
+  }
+  h+='<span class="spacer"></span><span class="tagi">'+(i.by==="claude"?"מהשיחה":"הצעה")+'</span></div></div>';
  });
  return h+'</div></section>';
 }
@@ -10050,7 +10187,7 @@ function vgOf(k){
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
+ {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["editideas","רעיונות לעריכה"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
@@ -12401,6 +12538,34 @@ document.addEventListener("click",function(e){
   state.cat=ck;
   state.group=(want&&catHas(ck,want))?want:co.views[0][0];
   render();return}
+ if(act==="buildedit"){
+  state.edExtra=fval("__ed__","extra");
+  state.edText=editBrief((state.edExtra||"").trim());
+  render();toast("הבקשה לעורך מוכנה, "+state.edText.length.toLocaleString("he-IL")+" תווים");return}
+ if(act==="copyedit"){
+  var et=state.edText||"";
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+   navigator.clipboard.writeText(et).then(function(){toast("הבקשה הועתקה. הדבק אותה בצ׳אט")})
+    .catch(function(){toast("לא הצלחתי להעתיק. סמן את הטקסט ידנית",true)});
+  } else toast("סמן את הטקסט והעתק ידנית",true);
+  return}
+ if(act==="editapply"){
+  if(!ensureEdit())return;
+  var ea=fval("__ed__","ans");
+  if(!ea||!ea.trim()){toast("אין מה להדביק",true);return}
+  var er=parseEditIdeas(ea);
+  if(!er.made){toast("לא זיהיתי אף שורה בפורמט הנכון",true);return}
+  state.edText="";render();save();
+  toast("נכנסו "+er.made+" מהלכי עריכה");return}
+ if(act==="edfilter"){state.edFilter=b.getAttribute("data-k")||"";render();return}
+ if(act==="eddone"){
+  if(!ensureEdit())return;
+  (DATA.editideas||[]).forEach(function(x){if(x.id===id)x.done=!x.done});
+  render();save();return}
+ if(act==="eddel"){
+  if(!ensureEdit())return;
+  DATA.editideas=(DATA.editideas||[]).filter(function(x){return x.id!==id});
+  render();save();return}
  if(act==="buildask"){
   state.askWho=fval("__ask__","who");state.askExtra=fval("__ask__","extra");
   var fk=state.askWho||"", lbl="";
