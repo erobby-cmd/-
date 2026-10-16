@@ -4197,6 +4197,7 @@ function render(){
   else if(state.group==="char") addx='<button class="btn" data-act="addchar">הוסף דמות</button>';
   else if(state.group==="unit") addx='<button class="btn" data-act="addunit">הוסף מחלקה</button>';
   else if(state.group==="ideas") addx='<button class="btn ghost" data-act="lsopen">שלוף ליינים</button><button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
+  else if(state.group==="editideas") addx='<button class="btn" data-act="edmine">הוסף מהלך משלי</button>';
   if(SCENEVIEWS[state.group]) addx+='<button class="btn" data-act="add">הוסף סצנה</button>';
   if(addx) h+='<span class="addgrp">'+addx+'</span>';
  } else {
@@ -5942,8 +5943,19 @@ function editIdeasView(){
   h+='<div class="f" style="margin-top:4px"><label>הדבק כאן את התשובה</label>';
   h+='<textarea name="ans" style="min-height:110px" placeholder="סוג | כותרת | המהלך | סצנות | פרק | למה זה עובד"></textarea>';
   h+='<p class="hint">שורה לכל מהלך. הסוג הוא סיקוונס, פרק, חיבור או קשת.</p></div>';
-  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="editapply">הכנס את המהלכים</button></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="editapply">הכנס את המהלכים</button><button class="btn ghost" data-act="edmine">הוסף מהלך משלי</button></div>';
   h+='</div>';
+  if(state.edMine){
+   h+='<div class="ask" data-form="__edm__" style="margin-top:12px">';
+   h+='<div class="row2"><div class="f"><label>סוג</label><select name="kind">'+Object.keys(EDKIND).map(function(k){return '<option value="'+k+'">'+esc(EDKIND[k].l)+'</option>'}).join("")+'</select></div>';
+   h+='<div class="f"><label>פרק</label><select name="ep"><option value="0">כל העונה</option>'+DATA.eps.map(function(e){return '<option value="'+e.n+'">פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select></div></div>';
+   h+='<div class="f"><label>כותרת</label><input name="title" autocomplete="off" placeholder="למשל: המספריים והדקירה"></div>';
+   h+='<div class="f"><label>המהלך</label><textarea name="move" placeholder="מה נכנס, מה יוצא, באיזה סדר, על איזו מילה חותכים"></textarea></div>';
+   h+='<div class="row2"><div class="f"><label>מזהי סצנות</label><input name="scenes" dir="ltr" autocomplete="off" placeholder="A-01, B-03"></div>';
+   h+='<div class="f"><label>למה זה עובד</label><input name="why" autocomplete="off"></div></div>';
+   h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="edmineadd">הוסף</button><button class="btn ghost" data-act="edminecancel">ביטול</button></div>';
+   h+='</div>';
+  }
  }
  var list=DATA.editideas||[], f=state.edFilter||"";
  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:14px">';
@@ -5976,7 +5988,7 @@ function editIdeasView(){
    h+='<button class="btn'+(i.done?' ghost':'')+'" data-act="eddone" data-id="'+esc(i.id)+'">'+(i.done?'החזר לפתוח':'בוצע')+'</button>';
    h+='<button class="btn ghost" data-act="eddel" data-id="'+esc(i.id)+'">מחק</button>';
   }
-  h+='<span class="spacer"></span><span class="tagi">'+(i.by==="claude"?"מהשיחה":"הצעה")+'</span></div></div>';
+  h+='<span class="spacer"></span><span class="tagi'+(i.mine?" mine":"")+'">'+(i.mine?"שלי":(i.by==="claude"?"מהשיחה":"הצעה"))+'</span></div></div>';
  });
  return h+'</div></section>';
 }
@@ -10175,7 +10187,7 @@ function legendStrip(){
 }
 var SCENEVIEWS={board:1,char:1,unit:1,need:1,lines:1};
 var VGROUPS={
- scenes:{name:"סצנות",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"]]}
+ scenes:{name:"סצנות",views:[["char","סצנות לפי דמות"],["unit","סצנות לפי מחלקה"],["ideas","רעיונות לסצנות"],["editideas","רעיונות לעריכה"]]}
 };
 function vgOf(k){
  for(var g in VGROUPS){
@@ -12557,6 +12569,16 @@ document.addEventListener("click",function(e){
   if(!er.made){toast("לא זיהיתי אף שורה בפורמט הנכון",true);return}
   state.edText="";render();save();
   toast("נכנסו "+er.made+" מהלכי עריכה");return}
+ if(act==="edmine"){state.edMine=true;state.group="editideas";render();var _t=document.querySelector('[data-form="__edm__"] [name="title"]');if(_t)try{_t.focus()}catch(_){}return}
+ if(act==="edminecancel"){state.edMine=false;render();return}
+ if(act==="edmineadd"){
+  if(!ensureEdit())return;
+  var mt=fval("__edm__","title").trim();
+  if(!mt){toast("צריך כותרת",true);return}
+  DATA.editideas=DATA.editideas||[];
+  DATA.editideas.unshift({id:"ed"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999),kind:fval("__edm__","kind")||"seq",title:mt,
+   move:fval("__edm__","move").trim(),scenes:edScenesOf(fval("__edm__","scenes")),ep:Number(fval("__edm__","ep"))||0,why:fval("__edm__","why").trim(),at:Date.now(),done:false,by:state.me||"",mine:true});
+  state.edMine=false;render();save();toast("המהלך נוסף");return}
  if(act==="edfilter"){state.edFilter=b.getAttribute("data-k")||"";render();return}
  if(act==="eddone"){
   if(!ensureEdit())return;
