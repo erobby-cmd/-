@@ -1386,6 +1386,8 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .pnote.segmode .nwatch{font-size:9px;padding:2px 4px}
 .pnote.segmode.nomat{background:#8E97A3!important;--cc:#8E97A3}
 .pnote.segmode.nomat .nchar{background:#8E97A3!important}
+.pnote.segmode.nomat.mancol{background:var(--cc)!important}
+.pnote.segmode.nomat.mancol .nchar{background:var(--cc)!important}
 .pnote.rowmode .reddot{top:50%;transform:translateY(-50%);inset-inline-end:11px}
 .pnote.segmode .reddot{top:3px;inset-inline-end:3px;font-size:8.5px;padding:2px 4px}
 .mchip .reddot{position:static;display:inline-block;margin-inline-end:5px;font-size:8.5px;padding:2px 5px;box-shadow:none;vertical-align:1px}
@@ -4095,6 +4097,7 @@ function gapList(ck,gaps){
 }
 function charColor(k){var c=charOf(k);return (c&&c.color)?c.color:"#455160"}
 function sceneColors(s){
+ if(s&&s.color) return [s.color];
  var out=[], seen={};
  function add(k){ if(!k)return; var c=charColor(k); if(seen[c])return; seen[c]=1; out.push(c) }
  add(s.char);
@@ -5348,7 +5351,7 @@ function note(x,extra){
  var ch=charOf(x.char);
  var _ca=colorAttrs(x);
  var _fm=fromMat(x);
- var _mc=_fm?" frommat":((x.status==="shot")?" nomat":"");
+ var _mc=(_fm?" frommat":((x.status==="shot")?" nomat":""))+(x.color?" mancol":"");
  var h='<div class="pnote n-'+x.status+_ca.cls+_mc+(extra?" "+extra:"")+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(x.id)+'" style="'+esc(_ca.style)+'"';
  if(extra==="segmode"){var _sl=lineObj(lineOf(x));
   h+=' title="'+esc(x.id+" · "+x.title+" · "+(ch?ch.name:"")+(_sl?" · "+_sl.name:"")+" · "+STATUS[x.status].l)+'"'+(RO?"":' data-act="edit"');}
@@ -5356,7 +5359,7 @@ function note(x,extra){
  h+='<div class="ntop">'+reddot(x.status);
  if(_fm&&!RO) h+='<button class="nwatch" data-act="watchpop" data-id="'+esc(_fm.d.k)+'" data-i="'+_fm.i+'" title="'+esc("מתוך רשימת הסצנות · "+dayLabel(_fm.d.date)+(_fm.x.tc?" · "+_fm.x.tc:"")+" · פתח נגן כאן על הטיימקוד")+'">'+(extra==="segmode"?"▶":"צפה")+'</button>';
  h+='</div>';
- h+='<div class="nchar" style="background:'+esc(charColor(x.char))+'">'+esc(ch?ch.name:"ללא דמות");
+ h+='<div class="nchar" style="background:'+esc(x.color||charColor(x.char))+'">'+esc(ch?ch.name:"ללא דמות");
  if(ch&&ch.role) h+='<small>'+esc(ch.role)+'</small>';
  h+='</div>';
  if(extra!=="segmode"){
@@ -11253,6 +11256,10 @@ function form(s){
  h+='<div class="f"><label>עוד דמויות בסצנה</label><div class="tagbox">'+DATA.chars.map(function(x){
   return '<label><input type="checkbox" name="sc_'+x.k+'"'+(((n.chars||[]).indexOf(x.k)>-1)?" checked":"")+'><i class="cchip" style="background:'+esc(x.color||"#455160")+'"></i>'+esc(x.name)+'</label>';
  }).join("")+'</div><p class="hint">הדמות המובילה למעלה. כאן מסמנים את מי שעוד נמצא בסצנה איתה</p></div>';
+ var _ncs={}, _nco='<label><input type="radio" name="ncol" value=""'+(n.color?"":" checked")+'><i class="cchip" style="background:'+esc(charColor(n.char))+'"></i>לפי הדמות</label>';
+ DATA.chars.forEach(function(x){ var c=x.color||"#455160"; if(_ncs[c.toLowerCase()]) return; _ncs[c.toLowerCase()]=1;
+  _nco+='<label><input type="radio" name="ncol" value="'+esc(c)+'"'+((n.color&&n.color.toLowerCase()===c.toLowerCase())?" checked":"")+'><i class="cchip" style="background:'+esc(c)+'"></i>'+esc(x.name)+'</label>'; });
+ h+='<div class="f"><label>צבע הפתק</label><div class="tagbox">'+_nco+'</div><p class="hint">בחירה ידנית גוברת על צבע הדמות. "לפי הדמות" מחזיר לצבע האוטומטי</p></div>';
  h+='<div class="f"><label>ליין</label><select name="line"><option value="-"'+((s?lineOf(n):"")?"":" selected")+'>בלי ליין</option>'+LINES().map(function(x){return '<option value="'+x.k+'"'+((s&&lineOf(n)===x.k)?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></div>';
  h+='<div class="row"><div class="f"><label>סטטוס</label><select name="status">'+ORDER.map(function(k){return '<option value="'+k+'"'+(k===n.status?" selected":"")+'>'+STATUS[k].l+'</option>'}).join("")+'</select></div>';
  h+='<div class="f"><label>פרק</label><select name="ep">'+DATA.eps.map(function(e){return '<option value="'+e.n+'"'+(e.n===(n.ep||1)?" selected":"")+'>פרק '+e.n+' · '+esc(e.title)+'</option>'}).join("")+'</select></div></div>';
@@ -11305,6 +11312,8 @@ function readForm(key){
   tags:tagsOf().filter(function(t){var f=el.querySelector('[name="tag_'+t.k+'"]');return f&&f.checked}).map(function(t){return t.k})};
  var _lf=el.querySelector('[name="line"]');
  if(_lf) _o.line=_lf.value;
+ var _nc=el.querySelector('[name="ncol"]:checked');
+ if(_nc) _o.color=_nc.value||"";
  if(el.querySelector('[name^="sc_"]')){
   _o.chars=DATA.chars.filter(function(x){
    var f=el.querySelector('[name="sc_'+x.k+'"]');return f&&f.checked&&x.k!==_o.char;
@@ -13943,14 +13952,14 @@ document.addEventListener("click",function(e){
    if(DATA.scenes.some(function(x){return String(x.id).toUpperCase()===String(d.id).toUpperCase()})) d.id=newSceneId();
    var _autoL="";
    if(!d.line||d.line==="-"){ _autoL=charTopLine(d.char); if(_autoL) d.line=_autoL; }
-   d.ord=999;DATA.scenes.push(d);state.adding=false;
+   if(!d.color)delete d.color;d.ord=999;DATA.scenes.push(d);state.adding=false;
    if(_autoL) setTimeout(function(){toast("הסצנה שויכה אוטומטית לליין "+lineName(_autoL)+". אפשר לשנות בתפריט העבר אל")},420);
   }
   else{
    var clash=DATA.scenes.some(function(x){return x.id!==id&&String(x.id).toUpperCase()===String(d.id).toUpperCase()});
    if(clash){toast("הקוד "+d.id+" כבר תפוס בסצנה אחרת. בחר קוד אחר",true);return}
    var i=-1;DATA.scenes.forEach(function(x,j){if(x.id===id)i=j});
-   if(i>-1){d.ord=DATA.scenes[i].ord;if(DATA.scenes[i].mine)d.mine=true;DATA.scenes[i]=d}
+   if(i>-1){d=Object.assign({},DATA.scenes[i],d);if(!d.color)delete d.color;DATA.scenes[i]=d}
    state.editing=null;state.editModal=false}
   reindex();render();save();return}
 });
