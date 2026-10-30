@@ -11392,7 +11392,9 @@ document.addEventListener("click",function(e){
    STORE.base=blankProject(nn); STORE.layers={}; STORE.tr={};
    STORE.shifts={list:[],people:[userName(state.me)||"אני"],target:0};
    STORE.feed={items:[]}; STORE.chat={}; STORE.dues={list:[],next:{from:"",to:"",label:""}}; STORE.tasks={list:[]};
-   sent={}; lastPull=0; pulledOnce=false;
+   /* פרויקט חדש הוא ריק גם בענן, אז אין מה למשוך. בלי זה השמירה
+      חיכתה למשיכה שלא הגיעה, והפרויקט לא נשמר בכלל. */
+   sent={}; lastPull=0; pulledOnce=true;
    state.projOpen=false; state.viewUser=state.me; state.group="board"; state.cat=""; state.q="";
    useView(); resetSnap(); render(); save();
    state.projNew={k:nk,name:nn};
