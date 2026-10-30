@@ -5366,7 +5366,9 @@ function board(){
   return h+'</div>';
  }
 
- h+='<div class="board '+(mode==="list"?"listmode":"tlmode")+'">';
+ h+=vzBarHtml();
+ var _vzf=VZ[vzIdx()];
+ h+='<div class="board '+(mode==="list"?"listmode":"tlmode")+'"'+(_vzf!==1?' style="zoom:'+_vzf+'"':'')+'>';
  DATA.eps.forEach(function(e){
   var all=epScenes(e.n);
   var vis=all.filter(function(x){return state.filter==="all"||x.status===state.filter});
@@ -6382,8 +6384,12 @@ function evSyncBoard(){
    מחזיקות זום משלהן. בשאר הלשוניות התוכן כולו מוקטן או מוגדל, וכל
    לשונית זוכרת את הגודל שלה בדפדפן הזה.                          */
 var VZ=[.6,.7,.8,.9,1,1.12,1.25,1.4];
-function vzKey(){return "vz:"+(state.group||"")}
+function vzKey(){return "vz:"+(state.group||"")+(state.group==="board"?":"+(state.boardMode||"notes"):"")}
 function vzIdx(){var z=4;try{var v=localStorage.getItem(vzKey());if(v!=null)z=Number(v)}catch(_){}if(isNaN(z)||z<0||z>=VZ.length)z=4;return z}
+function vzBarHtml(){
+ var zi=vzIdx(), n=VZ.length;
+ return '<div class="evzoom vzbar"><span>גודל הפתקים</span><button class="btn ghost" data-act="vzoom" data-d="-1"'+(zi===0?' disabled':'')+' title="הקטן">−</button><span class="evzlvl">'+(zi+1)+' / '+n+'</span><button class="btn ghost" data-act="vzoom" data-d="1"'+(zi===n-1?' disabled':'')+' title="הגדל">+</button>'+(zi!==4?'<button class="lslink" data-act="vzoom" data-d="0">רגיל</button>':'')+'</div>';
+}
 function vzMount(){
  if(RO&&false)return;
  var g=state.group||""; if(g==="board"||g==="events"||(state.q||"").trim()) return;
