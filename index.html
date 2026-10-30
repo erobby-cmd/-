@@ -6378,6 +6378,16 @@ function vzMount(){
  [].slice.call(w.children).forEach(function(c){if(!c.classList.contains("modal")&&!c.classList.contains("toast"))c.style.zoom=f===1?"":String(f)});
  w.insertBefore(bar,w.firstChild);
 }
+/* בכל טעינה ומשיכה מהענן, מי שעורך את הגרסה שלו מיישר את מפת הפרקים
+   לפי מפת האירועים. כך גם שינוי שנעשה בדפדפן אחר או בגרסה ישנה של
+   העמוד עובר למפת הפרקים. אם אין מה לשנות, לא נשמר כלום.          */
+function evAutoSync(){
+ if(RO||!state.me||state.viewUser!==state.me||!STORE.layers||!STORE.layers[state.me]) return false;
+ useView(); if(!(DATA.events||[]).length) return false;
+ var fp=function(){var sh=(DATA.meta&&DATA.meta.shelf)||{};return JSON.stringify((DATA.scenes||[]).map(function(s){return [s.id,s.ep,s.ord,sh[s.id]]}))};
+ var a=fp(); evSyncBoard(); if(fp()===a) return false;
+ if(!editorOpen()) render(); save(); return true;
+}
 function evScAdd(evid,val){
  if(!ensureEdit())return;
  var ex=evList().filter(function(x){return x.id===evid})[0]; if(!ex)return;
@@ -12165,6 +12175,7 @@ function pull(initial){
     pulledOnce=true;
     projLoading=false;
     if(takeRows(list,true)) paint2();
+    try{ evAutoSync() }catch(_){}
     netStatus("ok");
     /* השאר נמשך ברקע, ארבע שורות בכל פעם, והמסך מתעדכן תוך כדי */
     var i=0;
