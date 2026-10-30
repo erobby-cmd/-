@@ -1303,6 +1303,11 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .lslink:hover{color:var(--ink)}
 @media (max-width:640px){.lsgrid{grid-template-columns:1fr}.lsbody{padding:14px}}
 .evchips{flex-wrap:wrap;overflow:visible}.evchips .chip{white-space:nowrap;flex:0 0 auto}
+.evppl{display:flex;flex-wrap:wrap;gap:5px}
+.evch{font-family:"Heebo",sans-serif;font-size:11.5px;font-weight:600;background:var(--surface-2);border:1px solid var(--line-2);border-radius:20px;padding:2px 9px;color:var(--ink)}
+.evchk{display:flex;flex-wrap:wrap;gap:6px 14px}
+.evchk label{display:inline-flex;align-items:center;gap:6px;font-family:"Assistant",sans-serif;font-size:14px;font-weight:500;letter-spacing:0;color:var(--ink);margin:0;cursor:pointer}
+.evchk input{width:auto;margin:0}
 .evboard{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:16px;align-items:start}
 .evep{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px}
 .evep.evok{border-color:var(--accent)}
@@ -1311,7 +1316,7 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .evephead em{font-style:normal;font-size:11.5px;color:var(--ink-3);margin-inline-start:auto}
 .evslot{border:1px dashed var(--line-2);border-radius:10px;padding:14px;color:var(--ink-3);font-size:13.5px;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .evover{font-size:12.5px;color:#8E2B2B;font-weight:700;font-family:"Heebo",sans-serif}
-.evcard .ifoot select{font-size:12.5px;padding:4px 6px;max-width:120px}
+.evcard .ifoot{gap:6px}.evcard .ifoot select{font-size:12.5px;padding:4px 6px;max-width:110px;flex:0 1 auto}.evcard .ifoot .btn{font-size:12px;padding:5px 10px;white-space:nowrap}
 .evunit{display:inline-block;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;border:1px solid;border-radius:4px;padding:1px 7px;margin-bottom:7px}
 .evdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:6px;vertical-align:middle}
 .evuh{font-family:"Heebo",sans-serif;font-size:15px;margin:18px 0 0}.evuh small{color:var(--ink-3);font-weight:500}
@@ -6027,6 +6032,8 @@ function evList(){DATA.events=DATA.events||[];return DATA.events}
 function evUnitColor(k){var i=-1;(DATA.units||[]).forEach(function(u,j){if(u.k===k)i=j});return i<0?"#666":EVPAL[i%EVPAL.length]}
 function evEps(){return (DATA.eps||[]).slice().sort(function(a,b){return (Number(a.n)||0)-(Number(b.n)||0)})}
 function evScenesOf(t){return String(t||"").split(/[\s,،;]+/).map(function(x){return x.trim().toUpperCase()}).filter(function(x){return /^[A-Z]{1,3}-?\d{1,3}$/.test(x)})}
+function evCharName(k){var c=(DATA.chars||[]).filter(function(x){return x.k===k})[0];return c?c.name:k}
+function evSceneChars(s){var a=[];if(s.char)a.push(s.char);try{extraChars(s).forEach(function(k){if(a.indexOf(k)<0)a.push(k)})}catch(_){}return a}
 function evUsedScenes(){var m={};evList().forEach(function(e){(e.scenes||[]).forEach(function(s){m[s]=1})});return m}
 function evCard(e,dim){
  var S=EVSIZE[e.size]||EVSIZE.small, uc=evUnitColor(e.unit);
@@ -6034,6 +6041,11 @@ function evCard(e,dim){
  h+='<div class="ihead" style="background:'+S.c+'">'+esc(S.l)+'<small>'+(e.ep?'פרק '+e.ep:'בבנק, עוד לא שובץ')+'</small></div>';
  h+='<div class="ibody"><span class="evunit" style="color:'+uc+';border-color:'+uc+'">'+esc(unitName(e.unit)||"בלי מחלקה")+'</span>';
  h+='<h4>'+esc(e.title)+'</h4>';
+ if((e.chars||[]).length){
+  h+='<p class="evppl">';
+  e.chars.forEach(function(k){h+='<span class="evch">'+esc(evCharName(k))+'</span>'});
+  h+='</p>';
+ }
  if(e.note) h+='<p>'+esc(e.note)+'</p>';
  if((e.scenes||[]).length){
   h+='<p style="display:flex;flex-wrap:wrap;gap:5px">';
@@ -6062,7 +6074,7 @@ function evSlot(ep,size){
 }
 function evForm(){
  var ed=state.evEdit?evList().filter(function(x){return x.id===state.evEdit})[0]:null;
- var v=ed||{title:"",unit:state.evUnit||((DATA.units[0]||{}).k||""),size:state.evPreSize||"small",ep:state.evPreEp||0,note:"",scenes:[]};
+ var v=ed||{title:"",unit:state.evUnit||((DATA.units[0]||{}).k||""),size:state.evPreSize||"small",ep:state.evPreEp||0,note:"",scenes:[],chars:[]};
  var h='<div class="ask" data-form="__ev__">';
  h+='<div class="f"><label>'+(ed?'עריכת אירוע':'אירוע חדש')+'</label><input name="title" value="'+esc(v.title)+'" placeholder="למשל: מרדף ימי אחרי אופנוע ים בלי רישיון"></div>';
  h+='<div class="row2">';
@@ -6072,12 +6084,18 @@ function evForm(){
  h+='<div class="f"><label>פרק</label><select name="ep"><option value="0">בנק, עוד לא שובץ</option>'+evEps().map(function(p){return '<option value="'+p.n+'"'+(Number(v.ep)===Number(p.n)?' selected':'')+'>פרק '+p.n+(p.title?' · '+esc(p.title):'')+'</option>'}).join("")+'</select></div>';
  h+='<div class="f"><label>סצנות שהאירוע נשען עליהן</label><input name="scenes" value="'+esc((v.scenes||[]).join(", "))+'" placeholder="G-02, A-05"></div>';
  h+='</div>';
+ if((DATA.chars||[]).length){
+  var vc=v.chars||[];
+  h+='<div class="f"><label>דמויות באירוע</label><div class="evchk">';
+  DATA.chars.forEach(function(c){h+='<label><input type="checkbox" name="evc" value="'+esc(c.k)+'"'+(vc.indexOf(c.k)>-1?' checked':'')+'>'+esc(c.name)+'</label>'});
+  h+='</div><p class="hint">אם תשאיר ריק ויש סצנות, הדמויות של הסצנות ישובצו לבד.</p></div>';
+ }
  h+='<div class="f"><label>מה קורה בו, ולמה הוא בגודל הזה</label><textarea name="note">'+esc(v.note||"")+'</textarea></div>';
  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="evsave">'+(ed?'שמור':'הוסף אירוע')+'</button><button class="btn ghost" data-act="evcancel">ביטול</button></div>';
  return h+'</div>';
 }
 function eventsView(){
- var all=evList(), fu=state.evUnit||"", eps=evEps();
+ var all=evList(), fu=state.evUnit||"", fc=state.evChar||"", eps=evEps();
  var h='<section class="grp"><div class="grp-h"><h2>מפת אירועים</h2><span class="role">אירוע גדול אחד ושני אירועים קטנים בכל פרק</span></div>';
  h+='<p class="grp-note">כל האירועים של כל המחלקות במקום אחד. סיור, בילוש, שיטור ימי וכל השאר. כל פרק מקבל אירוע גדול אחד שמחזיק אותו, ושני אירועים קטנים שנושמים סביבו. משבצת ריקה אומרת מה עוד חסר לפרק. אירוע שעוד לא יודעים איפה הוא נכנס יושב בבנק למטה.</p>';
  if(state.evForm&&!RO) h+=evForm();
@@ -6089,6 +6107,15 @@ function eventsView(){
   h+='<button class="chip" data-act="evunit" data-k="'+u.k+'" aria-pressed="'+(fu===u.k)+'" title="גדולים '+nb+', קטנים '+(a.length-nb)+'"><i class="evdot" style="background:'+evUnitColor(u.k)+'"></i>'+esc(u.name)+'<span class="n">'+a.length+'</span></button>';
  });
  h+='</div>';
+ if((DATA.chars||[]).length){
+  h+='<div class="views evchips" style="margin-top:8px">';
+  h+='<button class="chip" data-act="evchar" data-k="" aria-pressed="'+(!fc)+'">כל הדמויות</button>';
+  DATA.chars.forEach(function(c){
+   var n=all.filter(function(e){return (e.chars||[]).indexOf(c.k)>-1}).length;
+   h+='<button class="chip" data-act="evchar" data-k="'+esc(c.k)+'" aria-pressed="'+(fc===c.k)+'">'+esc(c.name)+'<span class="n">'+n+'</span></button>';
+  });
+  h+='</div>';
+ }
  /* לוח העונה */
  var full=0;
  h+='<div class="evboard">';
@@ -6098,7 +6125,7 @@ function eventsView(){
   var ok=big.length===EVQUOTA.big&&small.length===EVQUOTA.small; if(ok) full++;
   h+='<div class="evep'+(ok?' evok':'')+'"><div class="evephead"><b>פרק '+p.n+'</b>'+(p.title?'<span>'+esc(p.title)+'</span>':'');
   h+='<em>גדול '+big.length+'/'+EVQUOTA.big+' · קטנים '+small.length+'/'+EVQUOTA.small+'</em></div>';
-  var dim=function(e){return fu&&e.unit!==fu};
+  var dim=function(e){return (fu&&e.unit!==fu)||(fc&&(e.chars||[]).indexOf(fc)<0)};
   for(var i=0;i<EVQUOTA.big;i++) h+=big[i]?evCard(big[i],dim(big[i])):evSlot(p.n,"big");
   for(var j=0;j<EVQUOTA.small;j++) h+=small[j]?evCard(small[j],dim(small[j])):evSlot(p.n,"small");
   var extra=big.slice(EVQUOTA.big).concat(small.slice(EVQUOTA.small));
@@ -6111,7 +6138,7 @@ function eventsView(){
  h+='</div>';
  if(eps.length) h+='<p class="hint" style="margin-top:10px">'+full+' מתוך '+eps.length+' פרקים עומדים במתודה.</p>';
  /* הבנק */
- var bank=all.filter(function(e){return !Number(e.ep)&&(!fu||e.unit===fu)});
+ var bank=all.filter(function(e){return !Number(e.ep)&&(!fu||e.unit===fu)&&(!fc||(e.chars||[]).indexOf(fc)>-1)});
  h+='<div class="grp-h" style="margin-top:26px"><h2>בנק האירועים</h2><span class="role">'+bank.length+' אירועים שעוד לא שובצו לפרק</span></div>';
  if(!bank.length) h+='<div class="empty">הבנק ריק. אירוע חדש או מועמד מהסצנות נכנס לכאן עד שמשבצים אותו.</div>';
  else{
@@ -6147,6 +6174,7 @@ function eventsView(){
 }
 function evAct(act,b,id){
  if(act==="evunit"){state.evUnit=b.getAttribute("data-k")||"";render();return true}
+ if(act==="evchar"){state.evChar=b.getAttribute("data-k")||"";render();return true}
  if(act==="evcand"){state.evCand=!state.evCand;render();return true}
  if(act==="evadd"||act==="evnew"){
   state.evForm=true;state.evEdit="";
@@ -6159,7 +6187,11 @@ function evAct(act,b,id){
   var tt=fval("__ev__","title").trim();
   if(!tt){toast("צריך שם לאירוע",true);return true}
   var rec={title:tt,unit:fval("__ev__","unit"),size:fval("__ev__","size")==="big"?"big":"small",ep:Number(fval("__ev__","ep"))||0,
-   scenes:evScenesOf(fval("__ev__","scenes")),note:fval("__ev__","note").trim()};
+   scenes:evScenesOf(fval("__ev__","scenes")),note:fval("__ev__","note").trim(),
+   chars:[].slice.call(document.querySelectorAll('[data-form="__ev__"] input[name="evc"]:checked')).map(function(x){return x.value})};
+  if(!rec.chars.length&&rec.scenes.length){
+   rec.scenes.forEach(function(sid){var sc=(DATA.scenes||[]).filter(function(x){return x.id===sid})[0];if(sc)evSceneChars(sc).forEach(function(k){if(rec.chars.indexOf(k)<0)rec.chars.push(k)})});
+  }
   var ed=state.evEdit?evList().filter(function(x){return x.id===state.evEdit})[0]:null;
   if(ed) Object.keys(rec).forEach(function(k){ed[k]=rec[k]});
   else{rec.id="ev"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999);rec.at=Date.now();rec.by=state.me||"";evList().push(rec)}
@@ -6173,7 +6205,7 @@ function evAct(act,b,id){
   var s=(DATA.scenes||[]).filter(function(x){return x.id===id})[0];
   if(!s)return true;
   evList().push({id:"ev"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999),title:s.title,unit:s.unit||"",
-   size:b.getAttribute("data-size")==="big"?"big":"small",ep:0,scenes:[s.id],note:s.short||"",at:Date.now(),by:state.me||""});
+   size:b.getAttribute("data-size")==="big"?"big":"small",ep:0,scenes:[s.id],chars:evSceneChars(s),note:s.short||"",at:Date.now(),by:state.me||""});
   render();save();toast("נכנס לבנק. עכשיו לשבץ אותו לפרק");return true}
  return false;
 }
