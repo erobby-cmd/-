@@ -1458,6 +1458,15 @@ html.modal-open,html.modal-open body{overflow:hidden}
  border:1px solid rgba(27,75,143,.45);background:rgba(255,255,255,.94);color:#1B4B8F;border-radius:5px;padding:3px 6px;flex:0 0 auto}
 .nwatch:hover{background:#1B4B8F;color:#fff;border-color:#1B4B8F}
 .pnote.segmode .nwatch{font-size:9px;padding:2px 4px}
+.pnote.ucol,.pnote.ucol.n-todo,.pnote.ucol.n-partial,.pnote.ucol.n-shot{background:color-mix(in srgb,var(--uc) 30%,#fff);color:#1B1F24}
+.pnote.ucol:not(.segmode)::after{content:"";position:absolute;inset-inline:0;bottom:0;height:5px;background:#5FAE73;border-radius:0 0 3px 3px}
+.pnote.ucol.n-todo:not(.segmode)::after{background:#E07A9B}
+.pnote.ucol.n-partial:not(.segmode)::after{background:#E0A33C}
+.pnote.ucol.n-dropped{opacity:.6}
+.pnote.segmode.ucol,.pnote.segmode.ucol.n-todo,.pnote.segmode.ucol.n-partial,.pnote.segmode.ucol.n-shot{background:var(--uc);color:#fff}
+.bdunits{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-family:"Heebo",sans-serif;font-size:12px;color:var(--ink-2)}
+.bdunits span{display:inline-flex;align-items:center;gap:6px}
+.bdunits i{width:12px;height:12px;border-radius:3px;display:inline-block}
 .pnote.segmode.nomat{background:#8E97A3!important;--cc:#8E97A3}
 .pnote.segmode.nomat .nchar{background:#8E97A3!important}
 .pnote.segmode.nomat.mancol{background:var(--cc)!important}
@@ -5321,11 +5330,12 @@ function board(){
   h+='<button data-act="bmode" data-k="'+m[0]+'" aria-pressed="'+(mode===m[0])+'">'+esc(m[1])+'</button>';
  });
  h+='</div>';
- h+='<div class="legend"><span><i style="background:#BEDFC4"></i>צולם</span>';
- h+='<span><i style="background:#BEDFC4;box-shadow:inset 0 0 0 2px #D9799C"></i>חלקי</span>';
- h+='<span><i style="background:#F3C4D4"></i>עוד לא צולם</span>';
+ h+='<div class="legend"><span><i style="background:#5FAE73"></i>צולם</span>';
+ h+='<span><i style="background:#E0A33C"></i>חלקי</span>';
+ h+='<span><i style="background:#E07A9B"></i>עוד לא צולם</span>';
  h+='<span class="lgkey"><b class="dot-key">לא צולם</b>התווית על כל פתק אומרת אם הסצנה צולמה או לא</span>';
- h+='<span style="color:var(--ink-3)">'+(mode==="notes"?"גרור פתק כדי לסדר, או בחר פרק בתפריט שעל הפתק":mode==="list"?"סדר הצפייה של הפרק. גרור שורה כדי לשנות את הסדר":"כל סצנה היא שתי דקות. הצבע הוא הדמות, הפס למטה הוא הסטטוס")+'</span></div>';
+ h+='<span style="color:var(--ink-3)">'+(mode==="notes"?"גרור פתק כדי לסדר. צבע הפתק הוא המחלקה, הפס למטה הוא הסטטוס":mode==="list"?"סדר הצפייה של הפרק. גרור שורה כדי לשנות את הסדר":"כל סצנה היא שתי דקות. הצבע הוא המחלקה, הפס למטה הוא הסטטוס")+'</span></div>';
+ h+='<div class="bdunits">'+(DATA.units||[]).map(function(u){return '<span><i style="background:'+evUnitColor(u.k)+'"></i>'+esc(u.name)+'</span>'}).join("")+'</div>';
 
  h+=cmdBar();
  if(mode==="notes"){
@@ -5430,11 +5440,17 @@ function fromMat(x){
  if(!(driveIdsOf(r.d)||[]).length) return null;
  return r;
 }
+/* במפת הפרקים כל פתק צבוע בצבע המחלקה שלו, אותם צבעים כמו במפת
+   האירועים. הפס הצבעוני בראש הפתק עדיין אומר מי הדמות, והפס למטה
+   אומר אם צולם.                                                   */
+function noteUnitColor(x){ return x&&x.unit&&unitName(x.unit)?evUnitColor(x.unit):"" }
 function note(x,extra){
  var ch=charOf(x.char);
  var _ca=colorAttrs(x);
  var _fm=fromMat(x);
- var _mc=(_fm?" frommat":((x.status==="shot")?" nomat":""))+(x.color?" mancol":"");
+ var _uc=state.group==="board"?(noteUnitColor(x)||charColor(x.char)):"";
+ var _mc=(_fm?" frommat":((x.status==="shot"&&!_uc)?" nomat":""))+(x.color?" mancol":"")+(_uc?" ucol":"");
+ if(_uc) _ca={cls:_ca.cls,style:_ca.style+";--uc:"+_uc+(extra==="segmode"?";--cc:"+_uc:"")};
  var h='<div class="pnote n-'+x.status+_ca.cls+_mc+(extra?" "+extra:"")+'"'+(RO?"":' draggable="true"')+' data-id="'+esc(x.id)+'" style="'+esc(_ca.style)+'"';
  if(extra==="segmode"){var _sl=lineObj(lineOf(x));
   h+=' title="'+esc(x.id+" · "+x.title+" · "+(ch?ch.name:"")+(_sl?" · "+_sl.name:"")+" · "+STATUS[x.status].l)+'"'+(RO?"":' data-act="edit"');}
