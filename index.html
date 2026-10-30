@@ -6167,7 +6167,7 @@ function evForm(){
 }
 function eventsView(){
  var all=evList(), fu=state.evUnit||"", fc=state.evChar||"", ft=state.evTod||"", eps=evEps();
- var h='<section class="grp"><div class="grp-h"><h2>מפת אירועים</h2><span class="role">אירוע גדול אחד ושני אירועים קטנים בכל פרק</span></div>';
+ var h='<section class="grp"><div class="grp-h"><h2>מפת אירועים</h2><span class="role">אירוע גדול אחד ושני אירועים קטנים בכל פרק</span>'+(RO?'':'<button class="lslink" data-act="evsync" title="מעביר את סצנות האירועים לפרקים שלהם ושם אותן בראש כל פרק">עדכן את מפת הפרקים</button>')+'</div>';
  if(!RO) h+='<datalist id="evscdl">'+(DATA.scenes||[]).slice().sort(function(a,b){return String(a.id).localeCompare(String(b.id))}).map(function(s){return '<option value="'+esc(s.id+' · '+String(s.title||"").slice(0,60))+'"></option>'}).join("")+'</datalist>';
  h+='<p class="grp-note">כל האירועים של כל המחלקות במקום אחד. סיור, בילוש, שיטור ימי וכל השאר. כל פרק מקבל אירוע גדול אחד שמחזיק אותו, ושני אירועים קטנים שנושמים סביבו. משבצת ריקה אומרת מה עוד חסר לפרק. אירוע שעוד לא יודעים איפה הוא נכנס יושב בבנק למטה.</p>';
  if(state.evForm&&!RO) h+=evForm();
@@ -6288,12 +6288,17 @@ function evAct(act,b,id){
   var ed=state.evEdit?evList().filter(function(x){return x.id===state.evEdit})[0]:null;
   if(ed) Object.keys(rec).forEach(function(k){ed[k]=rec[k]});
   else{rec.id="ev"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999);rec.at=Date.now();rec.by=state.me||"";evList().push(rec)}
+  evSyncBoard();
   state.evForm=false;state.evEdit="";render();save();toast(ed?"האירוע עודכן":"האירוע נוסף");return true}
+ if(act==="evsync"){
+  if(!ensureEdit())return true;
+  var mv=evSyncBoard(); render(); save(); toast("מפת הפרקים עודכנה לפי האירועים"+(mv?". "+mv+" סצנות עברו פרק":""));return true}
  if(act==="evscdel"){
   if(!ensureEdit())return true;
   var ex=evList().filter(function(x){return x.id===id})[0]; if(!ex)return true;
   var sd=b.getAttribute("data-sid");
   ex.scenes=(ex.scenes||[]).filter(function(x){return x!==sd});
+  evSyncBoard();
   render();save();toast("הסצנה "+sd+" יצאה מהאירוע. היא עצמה לא נמחקה");return true}
  if(act==="evscadd"){
   var inp=document.querySelector('.evscin[data-id="'+id+'"]');
@@ -6311,6 +6316,32 @@ function evAct(act,b,id){
   render();save();toast("נכנס לבנק. עכשיו לשבץ אותו לפרק");return true}
  return false;
 }
+/* מפת האירועים מנהלת את מפת הפרקים: כל סצנה ששייכת לאירוע עוברת לפרק
+   של האירוע, ובתוך הפרק סצנות האירועים באות ראשונות, לפי סדר האירועים
+   (הגדול ואז הקטנים) ולפי הסדר שלהן בתוך האירוע. שאר הסצנות של הפרק
+   נשארות אחריהן בסדר שהיה להן. סצנה ששייכת לכמה אירועים הולכת לפרק
+   המוקדם מביניהם. אירוע בבנק לא מזיז כלום.                          */
+function evSyncBoard(){
+ var sc=DATA.scenes||[], byId={}; sc.forEach(function(s){byId[s.id]=s});
+ var evs=evList().filter(function(e){return Number(e.ep)>0}).slice().sort(function(a,b){
+  return (Number(a.ep)-Number(b.ep))||((a.size==="big"?0:1)-(b.size==="big"?0:1))||((Number(a.ord)||0)-(Number(b.ord)||0))});
+ var claim={}, order={};
+ evs.forEach(function(e){(e.scenes||[]).forEach(function(id){
+  if(claim[id]||!byId[id]) return;
+  claim[id]=Number(e.ep); (order[e.ep]=order[e.ep]||[]).push(id);
+ })});
+ var moved=0, eps={};
+ Object.keys(claim).forEach(function(id){var s=byId[id];if(Number(s.ep)!==claim[id]){eps[s.ep]=1;s.ep=claim[id];moved++}eps[claim[id]]=1;
+  try{DATA.meta=DATA.meta||{};DATA.meta.shelf=DATA.meta.shelf||{};if(DATA.meta.shelf[id]===1)DATA.meta.shelf[id]=0}catch(_){}});
+ Object.keys(eps).forEach(function(ep){
+  ep=Number(ep); if(!ep) return;
+  var first=order[ep]||[];
+  var rest=sc.filter(function(s){return Number(s.ep)===ep&&first.indexOf(s.id)<0}).sort(function(a,b){return (Number(a.ord)||0)-(Number(b.ord)||0)});
+  first.map(function(id){return byId[id]}).concat(rest).forEach(function(s,i){s.ord=i});
+ });
+ try{bdStore()}catch(_){}
+ return moved;
+}
 function evScAdd(evid,val){
  if(!ensureEdit())return;
  var ex=evList().filter(function(x){return x.id===evid})[0]; if(!ex)return;
@@ -6323,6 +6354,7 @@ function evScAdd(evid,val){
  if(ex.scenes.indexOf(sc.id)>-1){toast(sc.id+" כבר באירוע",true);return}
  ex.scenes.push(sc.id);
  evSceneChars(sc).forEach(function(k){ex.chars=ex.chars||[];if(ex.chars.indexOf(k)<0)ex.chars.push(k)});
+ evSyncBoard();
  render();save();toast(sc.id+" נוספה לאירוע");
  var ni=document.querySelector('.evscin[data-id="'+evid+'"]'); if(ni){try{ni.focus()}catch(_){}}
 }
@@ -6349,6 +6381,7 @@ function evChange(el){
  }
  if(f==="size") e.size=el.value==="big"?"big":"small";
  if(f==="ep") e.ep=Number(el.value)||0;
+ evSyncBoard();
  render();save();
  var nc=document.querySelector('.evcard[data-ev="'+e.id+'"]');
  if(nc){
@@ -6419,6 +6452,7 @@ document.addEventListener("drop",function(e){
   a.ep=Number(tg.el.getAttribute("data-evcol"))||0;
   var g3=evGroup(a.ep,asz,a); g3.push(a); evRenum(a.ep,asz,g3);
  }
+ evSyncBoard();
  render(); save();
  var nc=document.querySelector('.evcard[data-ev="'+a.id+'"]');
  if(nc){nc.classList.add("evflash");setTimeout(function(){try{nc.classList.remove("evflash")}catch(_){}},1400)}
