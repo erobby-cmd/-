@@ -1378,6 +1378,11 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .idea h4{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:17px;margin:0;line-height:1.28;text-wrap:balance}
 .idea p{margin:8px 0 0;font-size:13.8px;color:var(--ink-2);line-height:1.5}
 .idea .ifoot{display:flex;gap:7px;align-items:center;padding:10px 15px 13px;border-top:1px solid var(--line);flex-wrap:wrap}
+.evsc{display:inline-flex;align-items:center;gap:4px}
+.evscx{border:0;background:none;color:inherit;font:inherit;font-size:13px;line-height:1;padding:0 2px;cursor:pointer;opacity:.6}
+.evscx:hover{opacity:1}
+.evscadd{display:flex;gap:6px;align-items:center;margin-top:6px}
+.evscin{flex:1;min-width:0;font:inherit;font-size:12px;padding:4px 7px;border:1px solid var(--line,#ccc);border-radius:5px;background:transparent;color:inherit}
 .idea .tagi{font-family:"Heebo",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:2px 7px}
 .idea .mine{color:var(--partial);border-color:var(--partial)}
 .units{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px;margin-top:18px}
@@ -6109,9 +6114,14 @@ function evCard(e,dim){
   h+='<p style="display:flex;flex-wrap:wrap;gap:5px">';
   e.scenes.forEach(function(sid){
    var s=DATA.scenes.filter(function(x){return x.id===sid})[0];
-   h+='<span class="tagi" title="'+esc(s?s.title:"לא נמצא ביומן")+'"'+(s?'':' style="opacity:.5"')+'>'+esc(sid)+(s?' · '+esc(String(s.title).slice(0,24)):'')+'</span>';
+   h+='<span class="tagi evsc" title="'+esc(s?s.title:"לא נמצא ביומן")+'"'+(s?'':' style="opacity:.5"')+'>'+esc(sid)+(s?' · '+esc(String(s.title).slice(0,24)):'');
+   if(!RO) h+='<button class="evscx" data-act="evscdel" data-id="'+esc(e.id)+'" data-sid="'+esc(sid)+'" title="הוצא את הסצנה מהאירוע">×</button>';
+   h+='</span>';
   });
   h+='</p>';
+ }
+ if(!RO){
+  h+='<div class="evscadd" draggable="false"><input class="evscin" list="evscdl" data-id="'+esc(e.id)+'" placeholder="הוסף סצנה: מזהה או שם" draggable="false"><button class="lslink" data-act="evscadd" data-id="'+esc(e.id)+'">הוסף</button></div>';
  }
  h+='</div>';
  if(!RO){
@@ -6158,6 +6168,7 @@ function evForm(){
 function eventsView(){
  var all=evList(), fu=state.evUnit||"", fc=state.evChar||"", ft=state.evTod||"", eps=evEps();
  var h='<section class="grp"><div class="grp-h"><h2>מפת אירועים</h2><span class="role">אירוע גדול אחד ושני אירועים קטנים בכל פרק</span></div>';
+ if(!RO) h+='<datalist id="evscdl">'+(DATA.scenes||[]).slice().sort(function(a,b){return String(a.id).localeCompare(String(b.id))}).map(function(s){return '<option value="'+esc(s.id+' · '+String(s.title||"").slice(0,60))+'"></option>'}).join("")+'</datalist>';
  h+='<p class="grp-note">כל האירועים של כל המחלקות במקום אחד. סיור, בילוש, שיטור ימי וכל השאר. כל פרק מקבל אירוע גדול אחד שמחזיק אותו, ושני אירועים קטנים שנושמים סביבו. משבצת ריקה אומרת מה עוד חסר לפרק. אירוע שעוד לא יודעים איפה הוא נכנס יושב בבנק למטה.</p>';
  if(state.evForm&&!RO) h+=evForm();
  h+='<div class="views evchips" style="margin-top:14px">';
@@ -6278,6 +6289,15 @@ function evAct(act,b,id){
   if(ed) Object.keys(rec).forEach(function(k){ed[k]=rec[k]});
   else{rec.id="ev"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999);rec.at=Date.now();rec.by=state.me||"";evList().push(rec)}
   state.evForm=false;state.evEdit="";render();save();toast(ed?"האירוע עודכן":"האירוע נוסף");return true}
+ if(act==="evscdel"){
+  if(!ensureEdit())return true;
+  var ex=evList().filter(function(x){return x.id===id})[0]; if(!ex)return true;
+  var sd=b.getAttribute("data-sid");
+  ex.scenes=(ex.scenes||[]).filter(function(x){return x!==sd});
+  render();save();toast("הסצנה "+sd+" יצאה מהאירוע. היא עצמה לא נמחקה");return true}
+ if(act==="evscadd"){
+  var inp=document.querySelector('.evscin[data-id="'+id+'"]');
+  evScAdd(id,inp?inp.value:"");return true}
  if(act==="evdel"){
   if(!ensureEdit())return true;
   DATA.events=evList().filter(function(x){return x.id!==id});
@@ -6291,7 +6311,27 @@ function evAct(act,b,id){
   render();save();toast("נכנס לבנק. עכשיו לשבץ אותו לפרק");return true}
  return false;
 }
+function evScAdd(evid,val){
+ if(!ensureEdit())return;
+ var ex=evList().filter(function(x){return x.id===evid})[0]; if(!ex)return;
+ var v=String(val||"").trim(); if(!v){toast("כתוב מזהה סצנה או חלק מהשם",true);return}
+ var ids=evScenesOf(v.split("·")[0]), sc=null;
+ if(ids.length) sc=(DATA.scenes||[]).filter(function(x){return String(x.id).toUpperCase()===ids[0]})[0];
+ if(!sc){var m=(DATA.scenes||[]).filter(function(x){return String(x.title||"").indexOf(v)>-1});if(m.length===1)sc=m[0];else if(m.length>1){toast("יש "+m.length+" סצנות שמתאימות. בחר אחת מהרשימה",true);return}}
+ if(!sc){toast("לא מצאתי סצנה כזו ביומן",true);return}
+ ex.scenes=ex.scenes||[];
+ if(ex.scenes.indexOf(sc.id)>-1){toast(sc.id+" כבר באירוע",true);return}
+ ex.scenes.push(sc.id);
+ evSceneChars(sc).forEach(function(k){ex.chars=ex.chars||[];if(ex.chars.indexOf(k)<0)ex.chars.push(k)});
+ render();save();toast(sc.id+" נוספה לאירוע");
+ var ni=document.querySelector('.evscin[data-id="'+evid+'"]'); if(ni){try{ni.focus()}catch(_){}}
+}
 function evChange(el){
+ if(el&&el.classList&&el.classList.contains("evscin")){
+  var v=String(el.value||"");
+  if(v.indexOf("·")>-1){evScAdd(el.getAttribute("data-id"),v)}
+  return true;
+ }
  if(!el||!el.classList||!el.classList.contains("evsel")) return false;
  if(!ensureEdit()){render();return true}
  var e=evList().filter(function(x){return x.id===el.getAttribute("data-id")})[0];
@@ -12850,6 +12890,7 @@ function modalKeep(e,b){
 document.addEventListener("keydown",function(e){
  if(e.key!=="Enter") return;
  var el=e.target;
+ if(el&&el.classList&&el.classList.contains("evscin")){e.preventDefault();evScAdd(el.getAttribute("data-id"),el.value);return}
  if(!el||!el.classList||!el.classList.contains("cmdin")) return;
  e.preventDefault();
  var b=document.querySelector('[data-act="cmdrun"]');
