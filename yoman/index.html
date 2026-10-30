@@ -7659,7 +7659,7 @@ function shiftMigrate(){
   var tt=0;
   if(STORE.base&&Number(STORE.base.shiftTarget)>0) tt=Number(STORE.base.shiftTarget);
   Object.keys(STORE.layers||{}).forEach(function(k){ if(!tt&&Number(STORE.layers[k].shiftTarget)>0) tt=Number(STORE.layers[k].shiftTarget) });
-  sh.target=tt||(PROJ?0:150);
+  sh.target=tt||100;
  }
  return sh;
 }
@@ -7669,7 +7669,7 @@ function shiftPeople(){
  if(!sh.people||!sh.people.length) sh.people=[userName(state.me)||"אני"];
  return sh.people;
 }
-function shiftTarget(){ var n=Number(shiftMigrate().target); return n>0?n:150 }
+function shiftTarget(){ var n=Number(shiftMigrate().target); return n>0?n:100 }
 function shiftVal(s){ return (s&&s.half)?0.5:1 }
 function shSum(arr){ var t=0; (arr||[]).forEach(function(x){t+=shiftVal(x)}); return t }
 function shNum(n){
