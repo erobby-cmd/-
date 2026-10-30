@@ -4240,13 +4240,12 @@ function daysSorted(){
 
 /* ===== שעון ימי צילום ===== */
 function CREWS(){
- if(!DATA.crews||!DATA.crews.length) DATA.crews=PROJ?[
-  {k:"us",name:"אנחנו",target:0,color:"#0C6B75"},
+ if(!DATA.crews||!DATA.crews.length) DATA.crews=[
+  {k:"us",name:"צוות א",target:0,color:"#0C6B75"},
   {k:"tal",name:"צוות ב",target:0,color:"#A8791E"}
- ]:[
-  {k:"us",name:"אנחנו",target:25,color:"#0C6B75"},
-  {k:"tal",name:"טל אגסי",target:10,color:"#A8791E"}
  ];
+ /* השם הישן של הצוות הראשון היה ״אנחנו״ */
+ DATA.crews.forEach(function(c){ if(c&&c.name==="אנחנו") c.name="צוות א" });
  return DATA.crews;
 }
 function crewOf(d){
