@@ -1332,6 +1332,7 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .evzoom{display:flex;align-items:center;gap:8px;margin-top:14px;font-family:"Heebo",sans-serif;font-size:13px;color:var(--ink-3)}
 .evzoom .btn{min-width:34px;padding:4px 10px;font-size:16px;line-height:1}
 .evzoom .btn[disabled]{opacity:.35;cursor:default}
+.vzbar{margin:0 0 12px}
 .evzlvl{min-width:38px;text-align:center;color:var(--ink-2);font-weight:700}
 .evboard{font-size:calc(1em * var(--evf,1))}
 .board .pnote h4{font-size:calc(15.5px * var(--bdf,1))}
@@ -6290,6 +6291,11 @@ function evAct(act,b,id){
   else{rec.id="ev"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999);rec.at=Date.now();rec.by=state.me||"";evList().push(rec)}
   evSyncBoard();
   state.evForm=false;state.evEdit="";render();save();toast(ed?"האירוע עודכן":"האירוע נוסף");return true}
+ if(act==="vzoom"){
+  var vd=Number(b.getAttribute("data-d"))||0, vi=vzIdx();
+  vi=vd===0?4:Math.max(0,Math.min(VZ.length-1,vi+vd));
+  try{localStorage.setItem(vzKey(),String(vi))}catch(_){}
+  render(); return true}
  if(act==="evsync"){
   if(!ensureEdit())return true;
   var mv=evSyncBoard(); render(); save(); toast("מפת הפרקים עודכנה לפי האירועים"+(mv?". "+mv+" סצנות עברו פרק":""));return true}
@@ -6341,6 +6347,22 @@ function evSyncBoard(){
  });
  try{bdStore()}catch(_){}
  return moved;
+}
+/* הגדלה והקטנה של הכרטיסים בכל לשונית. מפת הפרקים ומפת האירועים
+   מחזיקות זום משלהן. בשאר הלשוניות התוכן כולו מוקטן או מוגדל, וכל
+   לשונית זוכרת את הגודל שלה בדפדפן הזה.                          */
+var VZ=[.6,.7,.8,.9,1,1.12,1.25,1.4];
+function vzKey(){return "vz:"+(state.group||"")}
+function vzIdx(){var z=4;try{var v=localStorage.getItem(vzKey());if(v!=null)z=Number(v)}catch(_){}if(isNaN(z)||z<0||z>=VZ.length)z=4;return z}
+function vzMount(){
+ if(RO&&false)return;
+ var g=state.group||""; if(g==="board"||g==="events"||(state.q||"").trim()) return;
+ var w=document.querySelector("#root .wrap"); if(!w||!w.children.length) return;
+ var zi=vzIdx(), f=VZ[zi], n=VZ.length;
+ var bar=document.createElement("div"); bar.className="evzoom vzbar";
+ bar.innerHTML='<span>גודל הכרטיסים</span><button class="btn ghost" data-act="vzoom" data-d="-1"'+(zi===0?' disabled':'')+' title="הקטן">−</button><span class="evzlvl">'+(zi+1)+' / '+n+'</span><button class="btn ghost" data-act="vzoom" data-d="1"'+(zi===n-1?' disabled':'')+' title="הגדל">+</button>'+(zi!==4?'<button class="lslink" data-act="vzoom" data-d="0">רגיל</button>':'');
+ [].slice.call(w.children).forEach(function(c){if(!c.classList.contains("modal")&&!c.classList.contains("toast"))c.style.zoom=f===1?"":String(f)});
+ w.insertBefore(bar,w.firstChild);
 }
 function evScAdd(evid,val){
  if(!ensureEdit())return;
@@ -11882,6 +11904,7 @@ function paint(h){
  var tsx=[];
  (function(){var a=document.querySelectorAll(".tscroll");for(var i=0;i<a.length;i++)tsx.push(a[i].scrollLeft)})();
  document.getElementById("root").innerHTML=h;
+ try{ vzMount() }catch(_){}
  var hasModal=!!document.querySelector(".modal");
  document.documentElement.classList.toggle("modal-open",hasModal);
  if(firstPaint){firstPaint=false;y=restoreY||0;x=restoreX||0}
