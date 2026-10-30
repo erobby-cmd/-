@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-10-18T10:01:38Z">
+<meta name="build" content="2026-10-30T16:24:50Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -5711,7 +5711,9 @@ document.addEventListener("dragover",function(e){
  var n=e.target.closest(".pnote");
  if(n&&n!==ins){
   var r=n.getBoundingClientRect();
-  if(e.clientY<r.top+r.height/2) col.insertBefore(ins,n);
+  /* בציר הזמן הפתקים בשורה מימין לשמאל, אז הצד קובע ולא הגובה */
+  var bef=col.classList.contains("tlbar")?(e.clientX>r.left+r.width/2):(e.clientY<r.top+r.height/2);
+  if(bef) col.insertBefore(ins,n);
   else col.insertBefore(ins,n.nextSibling);
  } else if(!ins.parentNode||ins.parentNode!==col) col.appendChild(ins);
 });
@@ -6378,7 +6380,14 @@ function evSyncBoard(){
   first.map(function(id){return byId[id]}).concat(rest).forEach(function(s,i){s.ord=i});
  });
  try{bdStore()}catch(_){}
+ try{DATA.meta=DATA.meta||{};DATA.meta.evFp=evFp()}catch(_){}
  return moved;
+}
+/* טביעת האצבע של מפת האירועים: איזה אירוע בכל פרק, באיזה סדר ועם
+   אילו סצנות. היישור האוטומטי רץ רק כשהיא משתנה, כדי שהזזה ידנית
+   במפת הפרקים לא תחזור למקום הקודם בכל משיכה מהענן.             */
+function evFp(){
+ return JSON.stringify(evList().map(function(e){return [e.id,Number(e.ep)||0,e.size==="big"?1:0,Number(e.ord)||0,(e.scenes||[]).slice()]}).sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0}));
 }
 /* הגדלה והקטנה של הכרטיסים בכל לשונית. מפת הפרקים ומפת האירועים
    מחזיקות זום משלהן. בשאר הלשוניות התוכן כולו מוקטן או מוגדל, וכל
@@ -6406,6 +6415,10 @@ function vzMount(){
 function evAutoSync(){
  if(RO||!state.me||state.viewUser!==state.me||!STORE.layers||!STORE.layers[state.me]) return false;
  useView(); if(!(DATA.events||[]).length) return false;
+ DATA.meta=DATA.meta||{};
+ var efp=evFp();
+ if(DATA.meta.evFp===undefined){ DATA.meta.evFp=efp; save(); return false }
+ if(DATA.meta.evFp===efp) return false;
  var fp=function(){var sh=(DATA.meta&&DATA.meta.shelf)||{};return JSON.stringify((DATA.scenes||[]).map(function(s){return [s.id,s.ep,s.ord,sh[s.id]]}))};
  var a=fp(); evSyncBoard(); if(fp()===a) return false;
  if(!editorOpen()) render(); save(); return true;
