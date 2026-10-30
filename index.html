@@ -1320,6 +1320,8 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .evday .evtod{background:#E8B93E;color:#3A2A00}
 .evnight .evtod{background:#3D4F7C;color:#fff}
 .evdotday{background:#E8B93E}.evdotnight{background:#1E2940}
+@keyframes evfl{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.evcard.evflash{animation:evfl 1.4s ease-out}
 .evboard{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:16px;align-items:start}
 .evep{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px}
 .evep.evok{border-color:var(--accent)}
@@ -6051,10 +6053,10 @@ function evSceneChars(s){var a=[];if(s.char)a.push(s.char);try{extraChars(s).for
 function evUsedScenes(){var m={};evList().forEach(function(e){(e.scenes||[]).forEach(function(s){m[s]=1})});return m}
 function evCard(e,dim){
  var S=EVSIZE[e.size]||EVSIZE.small, uc=evUnitColor(e.unit);
- var h='<div class="idea evcard'+(e.tod?' ev'+e.tod:'')+'"'+(dim?' style="opacity:.35"':'')+'>';
+ var h='<div class="idea evcard'+(e.tod?' ev'+e.tod:'')+'" data-ev="'+esc(e.id)+'"'+(dim?' style="opacity:.35"':'')+'>';
  h+='<div class="ihead" style="background:'+S.c+'">'+esc(S.l)+'<small>'+(e.ep?'פרק '+e.ep:'בבנק, עוד לא שובץ')+'</small></div>';
  h+='<div class="ibody"><span class="evunit" style="color:'+uc+';border-color:'+uc+'">'+esc(unitName(e.unit)||"בלי מחלקה")+'</span>';
- if(e.tod) h+='<span class="evtod">'+(e.tod==="night"?'סצנת לילה':'סצנת יום')+'</span>';
+ h+='<span class="evtod"'+(e.tod?'':' hidden')+'>'+(e.tod==="night"?'סצנת לילה':'סצנת יום')+'</span>';
  h+='<h4>'+esc(e.title)+'</h4>';
  if((e.chars||[]).length){
   h+='<p class="evppl">';
@@ -6241,10 +6243,24 @@ function evChange(el){
  var e=evList().filter(function(x){return x.id===el.getAttribute("data-id")})[0];
  if(!e) return true;
  var f=el.getAttribute("data-f");
+ try{el.blur()}catch(_){}
+ if(f==="tod"){
+  e.tod=(el.value==="day"||el.value==="night")?el.value:"";
+  var c=el.closest(".evcard");
+  if(c){
+   c.classList.remove("evday","evnight"); if(e.tod) c.classList.add("ev"+e.tod);
+   var tg=c.querySelector(".evtod"); if(tg){tg.hidden=!e.tod;tg.textContent=e.tod==="night"?"סצנת לילה":"סצנת יום"}
+  }
+  save(); return true;
+ }
  if(f==="size") e.size=el.value==="big"?"big":"small";
  if(f==="ep") e.ep=Number(el.value)||0;
- if(f==="tod") e.tod=(el.value==="day"||el.value==="night")?el.value:"";
  render();save();
+ var nc=document.querySelector('.evcard[data-ev="'+e.id+'"]');
+ if(nc){
+  nc.classList.add("evflash"); setTimeout(function(){try{nc.classList.remove("evflash")}catch(_){}},1400);
+  var r=nc.getBoundingClientRect(); if(r.top<120||r.bottom>window.innerHeight) try{nc.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}
+ }
  var p=e.ep, n=evList().filter(function(x){return Number(x.ep)===Number(p)&&p&&x.size===e.size}).length;
  if(p&&n>EVQUOTA[e.size]) toast("פרק "+p+" כבר מלא ב"+(e.size==="big"?"אירוע גדול":"אירועים קטנים")+". שים לב למתודה",true);
  return true;
@@ -11687,7 +11703,8 @@ function editorOpen(){
  return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.matEdit||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||state.vidOpen||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||state.confirmEp!==null||
-   !!document.querySelector('[data-form][data-dirty]'));
+   !!document.querySelector('[data-form][data-dirty]')||state.evForm||
+   !!(document.activeElement&&document.activeElement.tagName==="SELECT"));
 }
 var hist=[],future=[],preSnap=null,skipHist=false;
 function snapStr(){try{return JSON.stringify({base:STORE.base,layers:STORE.layers})}catch(_){return null}}
