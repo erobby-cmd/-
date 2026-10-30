@@ -12022,7 +12022,7 @@ var HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"applic
 var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false, pulledOnce=false;
 function qsel(cols){
  if(PROJ) return "?select="+cols+"&or=(id.eq.projects,id.like.p:"+encodeURIComponent(PROJ)+":*)&id=not.like.*dimg:*";
- return "?select="+cols+"&id=not.like.p:*&id=not.like.bk:*&id=not.like.dimg:*";
+ return "?select="+cols+"&id=not.like.p:*&id=not.like.y:*&id=not.like.bk:*&id=not.like.dimg:*";
 }
 var PROJKEY="marhav-eilat-proj-v1", PROJ="";
 function loadProj(){ try{PROJ=localStorage.getItem(PROJKEY)||""}catch(_){PROJ=""} }
@@ -12031,7 +12031,7 @@ function rid(n){ return pfx()+n }
 function stripId(id){
  var p=pfx();
  if(p) return id.indexOf(p)===0?id.slice(p.length):null;
- return id.indexOf("p:")===0?null:id;
+ return (id.indexOf("p:")===0||id.indexOf("y:")===0)?null:id;
 }
 function PROJECTS(){
  if(!STORE.projects||!STORE.projects.length) STORE.projects=[{k:"",name:"מרחב אילת"}];
@@ -12378,7 +12378,7 @@ function bkRun(manual){
  if(bkBusy) return Promise.resolve(false);
  bkBusy=true;
  if(manual) toast("מכין גיבוי בענן...");
- return fetch(REST+"?select=id,data,updated_at&id=not.like.bk:*",{headers:HDR})
+ return fetch(REST+"?select=id,data,updated_at&id=not.like.bk:*&id=not.like.y:*",{headers:HDR})
   .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
   .then(function(rows){
    if(!rows.length) throw new Error("empty");
