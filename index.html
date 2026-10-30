@@ -1329,6 +1329,26 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .evslot.evdrop{border-color:var(--accent);background:rgba(0,0,0,.03);color:var(--ink)}
 .evep.evdrop,.evbank.evdrop{outline:2px dashed var(--accent);outline-offset:3px}
 .evbank{border-radius:12px;padding-bottom:6px}
+.evzoom{display:flex;align-items:center;gap:8px;margin-top:14px;font-family:"Heebo",sans-serif;font-size:13px;color:var(--ink-3)}
+.evzoom .btn{min-width:34px;padding:4px 10px;font-size:16px;line-height:1}
+.evzoom .btn[disabled]{opacity:.35;cursor:default}
+.evzlvl{min-width:38px;text-align:center;color:var(--ink-2);font-weight:700}
+.evboard{font-size:calc(1em * var(--evf,1))}
+.board .pnote h4{font-size:calc(15.5px * var(--bdf,1))}
+.board .pnote p{font-size:calc(12.8px * var(--bdf,1))}
+.board .pnote{padding:calc(11px * var(--bdf,1)) calc(13px * var(--bdf,1)) calc(13px * var(--bdf,1))}
+.bdcompact .pnote p,.bdcompact .pnote .nextra{display:none}
+.bdcompact .pnote h4{margin-top:3px}
+.evboard .idea h4{font-size:calc(17px * var(--evf,1))}
+.evboard .idea p,.evboard .evslot{font-size:calc(13.6px * var(--evf,1))}
+.evboard .idea .ihead{font-size:calc(13.5px * var(--evf,1))}
+.evcompact .idea .ibody>p:not(.evppl),.evcompact .idea .ihead small{display:none}
+.evcompact .idea .ibody{padding:9px 10px}
+.evcompact .idea .ihead{padding:6px 10px}
+.evcompact .idea .ifoot{padding:7px 8px;gap:4px}
+.evcompact .idea .ifoot select{max-width:100%;flex:1 1 100%}
+.evcompact .evslot{padding:9px 10px;flex-wrap:wrap}
+.evcompact .evephead em{flex-basis:100%;margin:0}
 .evboard{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:16px;align-items:start}
 .evep{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px}
 .evep.evok{border-color:var(--accent)}
@@ -5298,7 +5318,9 @@ function board(){
 
  h+=cmdBar();
  if(mode==="notes"){
-  h+='<div class="board">';
+  var bzi=bdZoom(), BZ=BDZ[bzi];
+  h+=zoomBar("bdzoom",bzi,BDZ.length,"גודל הפתקים");
+  h+='<div class="board'+(BZ.c?' bdcompact':'')+'" style="grid-auto-columns:'+(bzi===2?'minmax(236px,1fr)':BZ.w+'px')+';--bdf:'+BZ.f+'">';
   DATA.eps.forEach(function(e){
    var all=epScenes(e.n);
    var vis=all.filter(function(x){return state.filter==="all"||x.status===state.filter});
@@ -6047,6 +6069,18 @@ function editIdeasView(){
 }
 /* ===== מפת אירועים: אירוע גדול אחד ושני אירועים קטנים בכל פרק ===== */
 var EVQUOTA={big:1,small:2};
+var EVZ=[{w:150,f:.78,c:1},{w:200,f:.88,c:1},{w:270,f:1,c:0},{w:360,f:1.08,c:0},{w:480,f:1.18,c:0}];
+var BDZ=[{w:150,f:.8,c:1},{w:190,f:.9,c:1},{w:236,f:1,c:0},{w:310,f:1.12,c:0},{w:410,f:1.25,c:0}];
+function bdZoom(){var z=state.bdZoom;if(z==null){try{var v=localStorage.getItem("bdZoom");z=v==null?2:Number(v)}catch(_){z=2}}z=Number(z);if(isNaN(z)||z<0||z>=BDZ.length)z=2;state.bdZoom=z;return z}
+function zoomBar(act,zi,n,label){
+ var h='<div class="evzoom"><span>'+label+'</span>';
+ h+='<button class="btn ghost" data-act="'+act+'" data-d="-1"'+(zi===0?' disabled':'')+' title="הקטן">−</button>';
+ h+='<span class="evzlvl">'+(zi+1)+' / '+n+'</span>';
+ h+='<button class="btn ghost" data-act="'+act+'" data-d="1"'+(zi===n-1?' disabled':'')+' title="הגדל">+</button>';
+ if(zi!==2) h+='<button class="lslink" data-act="'+act+'" data-d="0">רגיל</button>';
+ return h+'</div>';
+}
+function evZoom(){var z=state.evZoom;if(z==null){try{var v=localStorage.getItem("evZoom");z=v==null?2:Number(v)}catch(_){z=2}}z=Number(z);if(!(z>=0&&z<EVZ.length)||isNaN(z))z=2;state.evZoom=z;return z}
 var EVSIZE={big:{l:"אירוע גדול",c:"#8E2B2B"},small:{l:"אירוע קטן",c:"#B9772E"}};
 var EVTOD={day:{l:"יום"},night:{l:"לילה"}};
 function evTodGuess(s){return /לילה|בלילה|ליל |חצות|מועדון/.test((s.title||"")+" "+(s.short||""))?"night":"day"}
@@ -6150,8 +6184,9 @@ function eventsView(){
  });
  h+='</div>';
  /* לוח העונה */
- var full=0;
- h+='<div class="evboard">';
+ var full=0, zi=evZoom(), Z=EVZ[zi];
+ h+=zoomBar("evzoom",zi,EVZ.length,"גודל הכרטיסים");
+ h+='<div class="evboard'+(Z.c?' evcompact':'')+'" style="grid-template-columns:repeat(auto-fill,minmax('+Z.w+'px,1fr));--evf:'+Z.f+'">';
  eps.forEach(function(p){
   var inEp=all.filter(function(e){return Number(e.ep)===Number(p.n)});
   inEp.sort(function(a,b){return (Number(a.ord)||0)-(Number(b.ord)||0)});
@@ -6210,6 +6245,16 @@ function eventsView(){
 }
 function evAct(act,b,id){
  if(act==="evunit"){state.evUnit=b.getAttribute("data-k")||"";render();return true}
+ if(act==="bdzoom"){
+  var bd2=Number(b.getAttribute("data-d"))||0, bz=bdZoom();
+  bz=bd2===0?2:Math.max(0,Math.min(BDZ.length-1,bz+bd2));
+  state.bdZoom=bz; try{localStorage.setItem("bdZoom",String(bz))}catch(_){}
+  render(); return true}
+ if(act==="evzoom"){
+  var d=Number(b.getAttribute("data-d"))||0, z=evZoom();
+  z=d===0?2:Math.max(0,Math.min(EVZ.length-1,z+d));
+  state.evZoom=z; try{localStorage.setItem("evZoom",String(z))}catch(_){}
+  render(); return true}
  if(act==="evtod"){state.evTod=b.getAttribute("data-k")||"";render();return true}
  if(act==="evchar"){state.evChar=b.getAttribute("data-k")||"";render();return true}
  if(act==="evcand"){state.evCand=!state.evCand;render();return true}
