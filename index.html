@@ -12235,6 +12235,10 @@ function guardRow(id,val){
  return true;
 }
 function pushRows(){
+ /* שמירה אחת בכל רגע. אם שמירה קודמת עוד בדרך, מחכים שתסתיים.
+    שתי שמירות במקביל גרמו לשנייה לחשוב שמישהו אחר עדכן, למשוך
+    את הענן ולמחוק שינוי שעשית שנייה קודם.                      */
+ if(pushing){clearTimeout(pushT);pushT=setTimeout(function(){pushT=null;pushRows()},400);return Promise.resolve()}
  var r=rowsOf(), out=[], blocked=0;
  Object.keys(r).forEach(function(id){
   var j=JSON.stringify(r[id]);
