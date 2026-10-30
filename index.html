@@ -1308,6 +1308,18 @@ mark,.grp mark,.gmain mark,.gcard mark{background:transparent!important;color:va
 .evchk{display:flex;flex-wrap:wrap;gap:6px 14px}
 .evchk label{display:inline-flex;align-items:center;gap:6px;font-family:"Assistant",sans-serif;font-size:14px;font-weight:500;letter-spacing:0;color:var(--ink);margin:0;cursor:pointer}
 .evchk input{width:auto;margin:0}
+.evcard.evday .ibody{background:#FBF1D6}
+.evcard.evday{border-color:#E8C877}
+.evcard.evnight .ibody{background:#1E2940;color:#E6EAF3}
+.evcard.evnight{border-color:#1E2940}
+.evcard.evnight h4{color:#F3F5FA}.evcard.evnight p{color:#C4CCDD}
+.evcard.evnight .evch{background:#2C3954;border-color:#43517A;color:#E6EAF3}
+.evcard.evnight .tagi{color:#9DB8E8;border-color:#9DB8E8}
+.evcard.evnight .evunit{background:#F3F5FA}
+.evtod{display:inline-block;font-family:"Heebo",sans-serif;font-size:11px;font-weight:700;border-radius:4px;padding:1px 7px;margin:0 6px 7px 0}
+.evday .evtod{background:#E8B93E;color:#3A2A00}
+.evnight .evtod{background:#3D4F7C;color:#fff}
+.evdotday{background:#E8B93E}.evdotnight{background:#1E2940}
 .evboard{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:16px;align-items:start}
 .evep{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px}
 .evep.evok{border-color:var(--accent)}
@@ -6027,6 +6039,8 @@ function editIdeasView(){
 /* ===== מפת אירועים: אירוע גדול אחד ושני אירועים קטנים בכל פרק ===== */
 var EVQUOTA={big:1,small:2};
 var EVSIZE={big:{l:"אירוע גדול",c:"#8E2B2B"},small:{l:"אירוע קטן",c:"#B9772E"}};
+var EVTOD={day:{l:"יום"},night:{l:"לילה"}};
+function evTodGuess(s){return /לילה|בלילה|ליל |חצות|מועדון/.test((s.title||"")+" "+(s.short||""))?"night":"day"}
 var EVPAL=["#2F5D7C","#6B4E8B","#2E7D5B","#8A5A2B","#7A2E4F","#3E6E8E","#55702A","#8C3B2E","#40507A","#6E6A2A"];
 function evList(){DATA.events=DATA.events||[];return DATA.events}
 function evUnitColor(k){var i=-1;(DATA.units||[]).forEach(function(u,j){if(u.k===k)i=j});return i<0?"#666":EVPAL[i%EVPAL.length]}
@@ -6037,9 +6051,10 @@ function evSceneChars(s){var a=[];if(s.char)a.push(s.char);try{extraChars(s).for
 function evUsedScenes(){var m={};evList().forEach(function(e){(e.scenes||[]).forEach(function(s){m[s]=1})});return m}
 function evCard(e,dim){
  var S=EVSIZE[e.size]||EVSIZE.small, uc=evUnitColor(e.unit);
- var h='<div class="idea evcard"'+(dim?' style="opacity:.35"':'')+'>';
+ var h='<div class="idea evcard'+(e.tod?' ev'+e.tod:'')+'"'+(dim?' style="opacity:.35"':'')+'>';
  h+='<div class="ihead" style="background:'+S.c+'">'+esc(S.l)+'<small>'+(e.ep?'פרק '+e.ep:'בבנק, עוד לא שובץ')+'</small></div>';
  h+='<div class="ibody"><span class="evunit" style="color:'+uc+';border-color:'+uc+'">'+esc(unitName(e.unit)||"בלי מחלקה")+'</span>';
+ if(e.tod) h+='<span class="evtod">'+(e.tod==="night"?'סצנת לילה':'סצנת יום')+'</span>';
  h+='<h4>'+esc(e.title)+'</h4>';
  if((e.chars||[]).length){
   h+='<p class="evppl">';
@@ -6059,6 +6074,7 @@ function evCard(e,dim){
  if(!RO){
   h+='<div class="ifoot">';
   h+='<select class="evsel" data-f="size" data-id="'+esc(e.id)+'" title="דירוג">'+Object.keys(EVSIZE).map(function(k){return '<option value="'+k+'"'+(e.size===k?' selected':'')+'>'+EVSIZE[k].l+'</option>'}).join("")+'</select>';
+  h+='<select class="evsel" data-f="tod" data-id="'+esc(e.id)+'" title="יום או לילה"><option value=""'+(!e.tod?' selected':'')+'>יום/לילה</option><option value="day"'+(e.tod==="day"?' selected':'')+'>יום</option><option value="night"'+(e.tod==="night"?' selected':'')+'>לילה</option></select>';
   h+='<select class="evsel" data-f="ep" data-id="'+esc(e.id)+'" title="שיבוץ לפרק"><option value="0"'+(!e.ep?' selected':'')+'>בנק</option>'+evEps().map(function(p){return '<option value="'+p.n+'"'+(Number(e.ep)===Number(p.n)?' selected':'')+'>פרק '+p.n+'</option>'}).join("")+'</select>';
   h+='<span class="spacer"></span>';
   h+='<button class="btn ghost" data-act="evedit" data-id="'+esc(e.id)+'">ערוך</button>';
@@ -6074,7 +6090,7 @@ function evSlot(ep,size){
 }
 function evForm(){
  var ed=state.evEdit?evList().filter(function(x){return x.id===state.evEdit})[0]:null;
- var v=ed||{title:"",unit:state.evUnit||((DATA.units[0]||{}).k||""),size:state.evPreSize||"small",ep:state.evPreEp||0,note:"",scenes:[],chars:[]};
+ var v=ed||{title:"",unit:state.evUnit||((DATA.units[0]||{}).k||""),size:state.evPreSize||"small",ep:state.evPreEp||0,note:"",scenes:[],chars:[],tod:""};
  var h='<div class="ask" data-form="__ev__">';
  h+='<div class="f"><label>'+(ed?'עריכת אירוע':'אירוע חדש')+'</label><input name="title" value="'+esc(v.title)+'" placeholder="למשל: מרדף ימי אחרי אופנוע ים בלי רישיון"></div>';
  h+='<div class="row2">';
@@ -6082,6 +6098,8 @@ function evForm(){
  h+='<div class="f"><label>דירוג</label><select name="size">'+Object.keys(EVSIZE).map(function(k){return '<option value="'+k+'"'+(v.size===k?' selected':'')+'>'+EVSIZE[k].l+'</option>'}).join("")+'</select></div>';
  h+='</div><div class="row2">';
  h+='<div class="f"><label>פרק</label><select name="ep"><option value="0">בנק, עוד לא שובץ</option>'+evEps().map(function(p){return '<option value="'+p.n+'"'+(Number(v.ep)===Number(p.n)?' selected':'')+'>פרק '+p.n+(p.title?' · '+esc(p.title):'')+'</option>'}).join("")+'</select></div>';
+ h+='<div class="f"><label>יום או לילה</label><select name="tod"><option value=""'+(!v.tod?' selected':'')+'>עוד לא נקבע</option><option value="day"'+(v.tod==="day"?' selected':'')+'>סצנת יום</option><option value="night"'+(v.tod==="night"?' selected':'')+'>סצנת לילה</option></select></div>';
+ h+='</div><div class="row2">';
  h+='<div class="f"><label>סצנות שהאירוע נשען עליהן</label><input name="scenes" value="'+esc((v.scenes||[]).join(", "))+'" placeholder="G-02, A-05"></div>';
  h+='</div>';
  if((DATA.chars||[]).length){
@@ -6095,7 +6113,7 @@ function evForm(){
  return h+'</div>';
 }
 function eventsView(){
- var all=evList(), fu=state.evUnit||"", fc=state.evChar||"", eps=evEps();
+ var all=evList(), fu=state.evUnit||"", fc=state.evChar||"", ft=state.evTod||"", eps=evEps();
  var h='<section class="grp"><div class="grp-h"><h2>מפת אירועים</h2><span class="role">אירוע גדול אחד ושני אירועים קטנים בכל פרק</span></div>';
  h+='<p class="grp-note">כל האירועים של כל המחלקות במקום אחד. סיור, בילוש, שיטור ימי וכל השאר. כל פרק מקבל אירוע גדול אחד שמחזיק אותו, ושני אירועים קטנים שנושמים סביבו. משבצת ריקה אומרת מה עוד חסר לפרק. אירוע שעוד לא יודעים איפה הוא נכנס יושב בבנק למטה.</p>';
  if(state.evForm&&!RO) h+=evForm();
@@ -6116,6 +6134,12 @@ function eventsView(){
   });
   h+='</div>';
  }
+ h+='<div class="views evchips" style="margin-top:8px">';
+ [["","יום ולילה"],["day","סצנות יום"],["night","סצנות לילה"]].forEach(function(t){
+  var n=t[0]?all.filter(function(e){return e.tod===t[0]}).length:all.length;
+  h+='<button class="chip" data-act="evtod" data-k="'+t[0]+'" aria-pressed="'+(ft===t[0])+'">'+(t[0]?'<i class="evdot evdot'+t[0]+'"></i>':'')+t[1]+'<span class="n">'+n+'</span></button>';
+ });
+ h+='</div>';
  /* לוח העונה */
  var full=0;
  h+='<div class="evboard">';
@@ -6124,8 +6148,9 @@ function eventsView(){
   var big=inEp.filter(function(e){return e.size==="big"}), small=inEp.filter(function(e){return e.size!=="big"});
   var ok=big.length===EVQUOTA.big&&small.length===EVQUOTA.small; if(ok) full++;
   h+='<div class="evep'+(ok?' evok':'')+'"><div class="evephead"><b>פרק '+p.n+'</b>'+(p.title?'<span>'+esc(p.title)+'</span>':'');
-  h+='<em>גדול '+big.length+'/'+EVQUOTA.big+' · קטנים '+small.length+'/'+EVQUOTA.small+'</em></div>';
-  var dim=function(e){return (fu&&e.unit!==fu)||(fc&&(e.chars||[]).indexOf(fc)<0)};
+  var nd=inEp.filter(function(e){return e.tod==="day"}).length, nn=inEp.filter(function(e){return e.tod==="night"}).length;
+  h+='<em>גדול '+big.length+'/'+EVQUOTA.big+' · קטנים '+small.length+'/'+EVQUOTA.small+(nd||nn?' · יום '+nd+' · לילה '+nn:'')+'</em></div>';
+  var dim=function(e){return (fu&&e.unit!==fu)||(fc&&(e.chars||[]).indexOf(fc)<0)||(ft&&e.tod!==ft)};
   for(var i=0;i<EVQUOTA.big;i++) h+=big[i]?evCard(big[i],dim(big[i])):evSlot(p.n,"big");
   for(var j=0;j<EVQUOTA.small;j++) h+=small[j]?evCard(small[j],dim(small[j])):evSlot(p.n,"small");
   var extra=big.slice(EVQUOTA.big).concat(small.slice(EVQUOTA.small));
@@ -6138,7 +6163,7 @@ function eventsView(){
  h+='</div>';
  if(eps.length) h+='<p class="hint" style="margin-top:10px">'+full+' מתוך '+eps.length+' פרקים עומדים במתודה.</p>';
  /* הבנק */
- var bank=all.filter(function(e){return !Number(e.ep)&&(!fu||e.unit===fu)&&(!fc||(e.chars||[]).indexOf(fc)>-1)});
+ var bank=all.filter(function(e){return !Number(e.ep)&&(!fu||e.unit===fu)&&(!fc||(e.chars||[]).indexOf(fc)>-1)&&(!ft||e.tod===ft)});
  h+='<div class="grp-h" style="margin-top:26px"><h2>בנק האירועים</h2><span class="role">'+bank.length+' אירועים שעוד לא שובצו לפרק</span></div>';
  if(!bank.length) h+='<div class="empty">הבנק ריק. אירוע חדש או מועמד מהסצנות נכנס לכאן עד שמשבצים אותו.</div>';
  else{
@@ -6174,6 +6199,7 @@ function eventsView(){
 }
 function evAct(act,b,id){
  if(act==="evunit"){state.evUnit=b.getAttribute("data-k")||"";render();return true}
+ if(act==="evtod"){state.evTod=b.getAttribute("data-k")||"";render();return true}
  if(act==="evchar"){state.evChar=b.getAttribute("data-k")||"";render();return true}
  if(act==="evcand"){state.evCand=!state.evCand;render();return true}
  if(act==="evadd"||act==="evnew"){
@@ -6187,7 +6213,7 @@ function evAct(act,b,id){
   var tt=fval("__ev__","title").trim();
   if(!tt){toast("צריך שם לאירוע",true);return true}
   var rec={title:tt,unit:fval("__ev__","unit"),size:fval("__ev__","size")==="big"?"big":"small",ep:Number(fval("__ev__","ep"))||0,
-   scenes:evScenesOf(fval("__ev__","scenes")),note:fval("__ev__","note").trim(),
+   scenes:evScenesOf(fval("__ev__","scenes")),note:fval("__ev__","note").trim(),tod:(function(t){return t==="day"||t==="night"?t:""})(fval("__ev__","tod")),
    chars:[].slice.call(document.querySelectorAll('[data-form="__ev__"] input[name="evc"]:checked')).map(function(x){return x.value})};
   if(!rec.chars.length&&rec.scenes.length){
    rec.scenes.forEach(function(sid){var sc=(DATA.scenes||[]).filter(function(x){return x.id===sid})[0];if(sc)evSceneChars(sc).forEach(function(k){if(rec.chars.indexOf(k)<0)rec.chars.push(k)})});
@@ -6205,7 +6231,7 @@ function evAct(act,b,id){
   var s=(DATA.scenes||[]).filter(function(x){return x.id===id})[0];
   if(!s)return true;
   evList().push({id:"ev"+Date.now().toString(36)+"_"+Math.floor(Math.random()*9999),title:s.title,unit:s.unit||"",
-   size:b.getAttribute("data-size")==="big"?"big":"small",ep:0,scenes:[s.id],chars:evSceneChars(s),note:s.short||"",at:Date.now(),by:state.me||""});
+   size:b.getAttribute("data-size")==="big"?"big":"small",ep:0,scenes:[s.id],chars:evSceneChars(s),tod:evTodGuess(s),note:s.short||"",at:Date.now(),by:state.me||""});
   render();save();toast("נכנס לבנק. עכשיו לשבץ אותו לפרק");return true}
  return false;
 }
@@ -6217,6 +6243,7 @@ function evChange(el){
  var f=el.getAttribute("data-f");
  if(f==="size") e.size=el.value==="big"?"big":"small";
  if(f==="ep") e.ep=Number(el.value)||0;
+ if(f==="tod") e.tod=(el.value==="day"||el.value==="night")?el.value:"";
  render();save();
  var p=e.ep, n=evList().filter(function(x){return Number(x.ep)===Number(p)&&p&&x.size===e.size}).length;
  if(p&&n>EVQUOTA[e.size]) toast("פרק "+p+" כבר מלא ב"+(e.size==="big"?"אירוע גדול":"אירועים קטנים")+". שים לב למתודה",true);
