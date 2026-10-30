@@ -6337,7 +6337,8 @@ function evAct(act,b,id){
 }
 /* מפת האירועים מנהלת את מפת הפרקים: כל סצנה ששייכת לאירוע עוברת לפרק
    של האירוע, ובתוך הפרק סצנות האירועים באות ראשונות, לפי סדר האירועים
-   (הגדול ואז הקטנים) ולפי הסדר שלהן בתוך האירוע. שאר הסצנות של הפרק
+   (הגדול ואז הקטנים) ולפי הסדר שלהן בתוך האירוע. סצנה של אירוע לעולם
+   לא נשארת באחסון, גם אם היא צולמה ולא הגיעה מרשימת הסצנות. שאר הסצנות של הפרק
    נשארות אחריהן בסדר שהיה להן. סצנה ששייכת לכמה אירועים הולכת לפרק
    המוקדם מביניהם. אירוע בבנק לא מזיז כלום.                          */
 function evSyncBoard(){
@@ -6351,7 +6352,7 @@ function evSyncBoard(){
  })});
  var moved=0, eps={};
  Object.keys(claim).forEach(function(id){var s=byId[id];if(Number(s.ep)!==claim[id]){eps[s.ep]=1;s.ep=claim[id];moved++}eps[claim[id]]=1;
-  try{DATA.meta=DATA.meta||{};DATA.meta.shelf=DATA.meta.shelf||{};if(DATA.meta.shelf[id]===1)DATA.meta.shelf[id]=0}catch(_){}});
+  try{if(onShelf(s)){shelfMap()[id]=0;moved++}}catch(_){}});
  Object.keys(eps).forEach(function(ep){
   ep=Number(ep); if(!ep) return;
   var first=order[ep]||[];
