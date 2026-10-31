@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-10-30T16:24:50Z">
+<meta name="build" content="2026-10-31T11:27:22Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -6123,6 +6123,54 @@ function evScenesOf(t){return String(t||"").split(/[\s,،;]+/).map(function(x){r
 function evCharName(k){var c=(DATA.chars||[]).filter(function(x){return x.k===k})[0];return c?c.name:k}
 function evSceneChars(s){var a=[];if(s.char)a.push(s.char);try{extraChars(s).forEach(function(k){if(a.indexOf(k)<0)a.push(k)})}catch(_){}return a}
 function evUsedScenes(){var m={};evList().forEach(function(e){(e.scenes||[]).forEach(function(s){m[s]=1})});return m}
+/* הבנק מסודר לפי דמויות או לפי מחלקות. לפי דמויות, אירוע עם כמה דמויות
+   מופיע אצל כל אחת מהן. בתחתית כל כרטיס בוחרים פרק, והאירוע יוצא מהבנק. */
+function evBankBy(){var v=state.evBankBy;if(!v){try{v=localStorage.getItem("evBankBy")}catch(_){}}return v==="unit"?"unit":"char"}
+function evBankHtml(bank){
+ var by=evBankBy(), h='<div class="modes matmodes" style="margin-top:6px">';
+ h+='<button data-act="evbankby" data-k="char" aria-pressed="'+(by==="char")+'">לפי דמויות</button>';
+ h+='<button data-act="evbankby" data-k="unit" aria-pressed="'+(by==="unit")+'">לפי מחלקות</button></div>';
+ var srt=function(a){return a.slice().sort(function(x,y){return (x.size==="big"?0:1)-(y.size==="big"?0:1)||String(x.srcd||"").localeCompare(String(y.srcd||""))})};
+ var grp=function(title,dot,a){
+  if(!a.length) return "";
+  var g='<h3 class="evuh">'+(dot?'<i class="evdot" style="background:'+dot+'"></i>':'')+esc(title)+' <small>'+a.length+'</small></h3><div class="ideas" style="margin-top:8px">';
+  srt(a).forEach(function(e){g+=evCard(e,false)});
+  return g+'</div>';
+ };
+ if(by==="unit"){
+  DATA.units.forEach(function(u){h+=grp(u.name,evUnitColor(u.k),bank.filter(function(e){return e.unit===u.k}))});
+  h+=grp("בלי מחלקה","",bank.filter(function(e){return !(DATA.units||[]).some(function(u){return u.k===e.unit})}));
+ } else {
+  (DATA.chars||[]).forEach(function(c){h+=grp(c.name,"",bank.filter(function(e){return (e.chars||[]).indexOf(c.k)>-1}))});
+  h+=grp("בלי דמות","",bank.filter(function(e){return !(e.chars||[]).some(function(k){return (DATA.chars||[]).some(function(c){return c.k===k})})}));
+ }
+ return h;
+}
+/* ייבוא אירועים מהחומר: כל רשומה מצביעה על יום צילום ועל מספרי
+   הסצנות שלו בלוגיינג. האירוע נכנס לבנק עם הטיימקודים בהערה, ורשומה
+   שכבר יובאה לא נכנסת פעם שנייה.                                  */
+function evImport(list){
+ if(!ensureEdit()) return -1;
+ var have={}; evList().forEach(function(e){if(e.src)have[e.src]=1});
+ var used=evUsedScenes(), ids={}; (DATA.scenes||[]).forEach(function(s){ids[s.id]=1});
+ var n=0;
+ (list||[]).forEach(function(r,i){
+  if(!r||!r.src||have[r.src]) return;
+  var d=DAYS().filter(function(z){return z.date===r.d})[0];
+  var lines=[];
+  if(d){
+   (r.ns||[]).forEach(function(k){var x=(d.brk||[]).filter(function(z){return Number(z.n)===Number(k)})[0];if(x)lines.push(k+". "+(x.t||"")+" · "+(x.tc||""))});
+  }
+  var head="מהחומר: "+(d?((dayTag(d.k)?dayTag(d.k)+", ":"")+dayLabel(d.date)):r.d)+(d&&d.brsrc?" · "+d.brsrc:"");
+  var sc=(r.scenes||[]).filter(function(x){return ids[x]&&!used[x]});
+  sc.forEach(function(x){used[x]=1});
+  evList().push({id:"ev"+Date.now().toString(36)+"_"+i+"_"+Math.floor(Math.random()*999),title:r.title,unit:r.unit||"",size:r.size==="big"?"big":"small",ep:0,
+   scenes:sc,chars:(r.chars||[]).slice(),tod:r.tod||"",note:head+(lines.length?"\n"+lines.join("\n"):"")+(r.note?"\n"+r.note:""),src:r.src,srcd:r.d,at:Date.now(),by:state.me||""});
+  have[r.src]=1; n++;
+ });
+ if(n){render();save()}
+ return n;
+}
 function evCard(e,dim){
  var S=EVSIZE[e.size]||EVSIZE.small, uc=evUnitColor(e.unit);
  var h='<div class="idea evcard'+(e.tod?' ev'+e.tod:'')+'" data-ev="'+esc(e.id)+'"'+(RO?'':' draggable="true" title="גרור לפרק אחר או למקום אחר בפרק"')+(dim?' style="opacity:.35"':'')+'>';
@@ -6135,7 +6183,7 @@ function evCard(e,dim){
   e.chars.forEach(function(k){h+='<span class="evch">'+esc(evCharName(k))+'</span>'});
   h+='</p>';
  }
- if(e.note) h+='<p>'+esc(e.note)+'</p>';
+ if(e.note) h+='<p style="white-space:pre-line">'+esc(e.note)+'</p>';
  var nsc=(e.scenes||[]).length, opn=!!(state.evScOpen&&state.evScOpen[e.id]);
  h+='<div class="evdrawer'+(opn?' open':'')+'">';
  h+='<button class="evdrh" data-act="evsctog" data-id="'+esc(e.id)+'" aria-expanded="'+opn+'"><span>רשימת סצנות</span><b>'+nsc+'</b><em>'+(opn?'▾':'◂')+'</em></button>';
@@ -6254,15 +6302,7 @@ function eventsView(){
  var bank=all.filter(function(e){return !Number(e.ep)&&(!fu||e.unit===fu)&&(!fc||(e.chars||[]).indexOf(fc)>-1)&&(!ft||e.tod===ft)});
  h+='<div class="evbank" data-evcol="0"><div class="grp-h" style="margin-top:26px"><h2>בנק האירועים</h2><span class="role">'+bank.length+' אירועים שעוד לא שובצו לפרק</span></div>';
  if(!bank.length) h+='<div class="empty">הבנק ריק. אירוע חדש או מועמד מהסצנות נכנס לכאן עד שמשבצים אותו. אפשר גם לגרור לכאן כרטיס מהלוח.</div>';
- else{
-  DATA.units.forEach(function(u){
-   var a=bank.filter(function(e){return e.unit===u.k}).sort(function(x,y){return (x.size==="big"?0:1)-(y.size==="big"?0:1)});
-   if(!a.length) return;
-   h+='<h3 class="evuh"><i class="evdot" style="background:'+evUnitColor(u.k)+'"></i>'+esc(u.name)+'</h3><div class="ideas" style="margin-top:8px">';
-   a.forEach(function(e){h+=evCard(e,false)});
-   h+='</div>';
-  });
- }
+ else h+=evBankHtml(bank);
  h+='</div>';
  /* מועמדים מהסצנות */
  if(!RO){
@@ -6301,6 +6341,8 @@ function evAct(act,b,id){
  if(act==="evtod"){state.evTod=b.getAttribute("data-k")||"";render();return true}
  if(act==="evchar"){state.evChar=b.getAttribute("data-k")||"";render();return true}
  if(act==="evcand"){state.evCand=!state.evCand;render();return true}
+ if(act==="evbankby"){state.evBankBy=b.getAttribute("data-k")==="unit"?"unit":"char";try{localStorage.setItem("evBankBy",state.evBankBy)}catch(_){}render();return true}
+ if(act==="matevtog"){state.matEvOpen=!state.matEvOpen;render();return true}
  if(act==="evadd"||act==="evnew"){
   state.evForm=true;state.evEdit="";
   state.evPreEp=Number(b.getAttribute("data-ep"))||0;state.evPreSize=b.getAttribute("data-size")||"small";
@@ -7294,7 +7336,7 @@ function fsForget(){
  toast("התיקייה נותקה");
  render();
 }
-try{ window.__EILAT={st:function(){return state},fsPut:fsPut,fsGet:fsGet,fsScan:function(){return fsScan()},fsHas:function(k,i){var d=DAYS().filter(function(z){return z.k===k})[0];return d?fsHas(d,i||0):null}} }catch(_){}
+try{ window.__EILAT={st:function(){return state},fsPut:fsPut,fsGet:fsGet,fsScan:function(){return fsScan()},fsHas:function(k,i){var d=DAYS().filter(function(z){return z.k===k})[0];return d?fsHas(d,i||0):null},evImport:function(l){return evImport(l)}} }catch(_){}
 function fsInit(){
  if(!fsSupported()){ FS.state="nosupport"; return }
  fsGet("names").then(function(n){ if(n&&typeof n==="object") FS.names=n });
@@ -8493,6 +8535,13 @@ function matView(){
  if(!all.length) return h+'<div class="dempty"><b>אין עדיין לוגיינג</b><p>ברגע שייכנס לוגיינג מפורט ליום צילום, כל הסצנות שלו יופיעו כאן ברשימה אחת.</p></div></section>';
  var tot=all.reduce(function(a,r){return a+tcSec(r.x.dur)},0);
  var days={}; all.forEach(function(r){days[r.d.k]=1});
+ var _bank=evList().filter(function(e){return !Number(e.ep)});
+ h+='<button class="matday drawer'+(state.matEvOpen?" open":"")+'" data-act="matevtog" style="--dc:var(--shot);margin-top:12px"><span class="dchev">'+(state.matEvOpen?"▾":"◂")+'</span><b>בנק האירועים</b><em>תקריות ופעילות משטרתית מהחומר, לפי דמויות</em><span class="dmeta">'+_bank.length+' אירועים שעוד לא שובצו לפרק</span></button>';
+ if(state.matEvOpen){
+  h+='<div class="matdrawer evbank" data-evcol="0"><p class="grp-note" style="margin-top:8px">בתחתית כל כרטיס יש בורר פרק. בוחרים פרק, האירוע עובר למפת האירועים ולמפת הפרקים, ויוצא מהבנק.</p>';
+  h+=_bank.length?evBankHtml(_bank):'<div class="empty">הבנק ריק. כל האירועים כבר שובצו לפרקים.</div>';
+  h+='</div>';
+ }
  var byKind={}; all.forEach(function(r){var k=r.x.kind||"other";byKind[k]=(byKind[k]||0)+1});
  h+='<p class="grp-note">הרשימה נבנית לבד מהלוגיינג המפורט של ימי הצילום. כל שורה היא סצנה בחומר הגלם עם הטיימקוד, האורך ומה יש בה. לחיצה על שורה פותחת את התקציר, הרגעים הטובים והציטוטים. הכפתור לסצנה מכניס אותה ליומן כסצנה מלאה.</p>';
  h+='<div class="legend"><span class="injleg"><span class="injdot on"></span>כבר נכנס ליומן</span>';
