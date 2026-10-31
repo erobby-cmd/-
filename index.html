@@ -6429,7 +6429,7 @@ function evSyncBoard(){
    אילו סצנות. היישור האוטומטי רץ רק כשהיא משתנה, כדי שהזזה ידנית
    במפת הפרקים לא תחזור למקום הקודם בכל משיכה מהענן.             */
 function evFp(){
- return JSON.stringify(evList().map(function(e){return [e.id,Number(e.ep)||0,e.size==="big"?1:0,Number(e.ord)||0,(e.scenes||[]).slice()]}).sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0}));
+ return JSON.stringify(evList().filter(function(e){return Number(e.ep)>0}).map(function(e){return [e.id,Number(e.ep)||0,e.size==="big"?1:0,Number(e.ord)||0,(e.scenes||[]).slice()]}).sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0}));
 }
 /* הגדלה והקטנה של הכרטיסים בכל לשונית. מפת הפרקים ומפת האירועים
    מחזיקות זום משלהן. בשאר הלשוניות התוכן כולו מוקטן או מוגדל, וכל
