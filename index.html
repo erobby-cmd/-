@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-11-04T10:27:06Z">
+<meta name="build" content="2026-11-13T08:45:00Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -766,6 +766,17 @@ button.matday.drawer:not(.open):hover{opacity:1}
 .tkrow.edit{display:block;padding:12px 14px}
 .tkedit{margin:0;width:100%}
 .tkrow .tinyedit{flex:0 0 auto;align-self:flex-start;margin-top:1px}
+.pkbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:14px 0 4px}
+.pkh{font-family:"Heebo",sans-serif;font-size:12.5px;font-weight:700;color:var(--ink-2);margin:18px 0 4px;display:flex;gap:8px;align-items:center}
+.pkh em{font-style:normal;font-weight:400;color:var(--ink-3)}
+.pkdatebox{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.pkdatebox label{font-family:"Heebo",sans-serif;font-size:10.5px;color:var(--ink-3)}
+.pkdatebox input{font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink)}
+.pkdatebox input.nodate{border-style:dashed;color:var(--ink-3)}
+.pktype{background:var(--surface-2)}
+.pkchars{display:flex;gap:6px;flex-wrap:wrap}
+.pkchars label{font-family:"Heebo",sans-serif;font-size:12px;border:1px solid var(--line-2);border-radius:99px;padding:2px 9px;cursor:pointer;display:flex;gap:4px;align-items:center}
+.pkchars input{margin:0}
 mark.hly{background:#FFE45C;color:#1A1A1A;border-radius:3px;padding:1px 2px;cursor:pointer;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 mark.hly:hover{background:#FFD400}
 .hlbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
@@ -4285,6 +4296,7 @@ function render(){
   else if(state.group==="unit") addx='<button class="btn" data-act="addunit">הוסף מחלקה</button>';
   else if(state.group==="ideas") addx='<button class="btn ghost" data-act="lsopen">שלוף ליינים</button><button class="btn" data-act="moreideas">הוסף עוד רעיונות</button>';
   else if(state.group==="events") addx='<button class="btn" data-act="evnew">הוסף אירוע</button>';
+  else if(state.group==="pickups") addx='<button class="btn" data-act="pkfocus">הוסף צילום השלמה</button>';
   else if(state.group==="editideas") addx='<button class="btn" data-act="edmine">הוסף מהלך משלי</button>';
   if(SCENEVIEWS[state.group]) addx+='<button class="btn" data-act="add">הוסף סצנה</button>';
   if(addx) h+='<span class="addgrp">'+addx+'</span>';
@@ -4401,6 +4413,12 @@ function render(){
    }
   }
   h+='<div class="toast" id="toast"></div>';
+  paint(h);
+  return;
+ }
+ if(state.group==="pickups"){
+  h+=pickupsView();
+  h+='</div><div class="toast" id="toast"></div>';
   paint(h);
   return;
  }
@@ -10811,8 +10829,8 @@ function vgOf(k){
  return "";
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
- {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["pickups","צילומי השלמה"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
+ {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["pickups","צילומי השלמה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
  {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["editideas","רעיונות לעריכה"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
@@ -11620,6 +11638,153 @@ function epnPanel(){
  }
  return h+'</div></div>';
 }
+/* ===== צילומי השלמה ===== */
+var PKTYPES=[["interview","ראיון"],["scene","סצנה בשטח"],["drive","נסיעה"],["home","בבית"],["event","אירוע"],["court","הקלטת משפט"],["archive","חומרים וארכיון"],["other","אחר"]];
+function PK(){
+ if(!STORE.pickups||!STORE.pickups.list) STORE.pickups={list:[]};
+ return STORE.pickups.list;
+}
+function pkType(k){var a=PKTYPES.filter(function(x){return x[0]===k});return a.length?a[0][1]:"אחר"}
+function pkChecked(form){
+ var out=[];
+ document.querySelectorAll('[data-form="'+form+'"] input[name="pkc"]:checked').forEach(function(i){out.push(i.value)});
+ return out;
+}
+function pkCharFind(){
+ var names=[].slice.call(arguments), out=[];
+ names.forEach(function(nm){
+  var c=DATA.chars.filter(function(x){return String(x.name||"").indexOf(nm)>-1})[0];
+  if(c&&out.indexOf(c.k)<0) out.push(c.k);
+ });
+ return out;
+}
+var pkLastIds=null;
+function pkSeed(ids){
+ if(!ids||RO||pfx()) return;
+ if(ids.indexOf(rid("pickups"))>-1) return;
+ if(STORE.pickups&&STORE.pickups.list&&STORE.pickups.list.length) return;
+ if(!state.me) return;
+ var n=0, mk=function(t,type,chars,note){ n++; return {k:"p"+Date.now()+"_"+n,t:t,type:type,chars:chars,date:"",note:note||"",done:false,at:Date.now()+n,by:userName(state.me)} };
+ STORE.pickups={list:[
+  mk("ראיון עם אלון, המפקד החדש בעיר. ההגעה מירושלים לאילת","interview",pkCharFind("אלון")),
+  mk("סצנה של אלון בשטח","scene",pkCharFind("אלון")),
+  mk("שחר ואשתו עם הילדים בבית","home",pkCharFind("שחר")),
+  mk("עדכון על המצב של אשתו של שחר","interview",pkCharFind("שחר")),
+  mk("שחר בעבודה במשרד","scene",pkCharFind("שחר")),
+  mk("נסיעה של נתי ודולב ביום","drive",pkCharFind("נתי","דולב")),
+  mk("נסיעה של לורן ודולב, יום ולילה","drive",pkCharFind("לורן","דולב")),
+  mk("נסיעה של איתמר ונועה בלילה","drive",pkCharFind("איתמר","נועה")),
+  mk("איתמר רוצה לעזוב את אילת","scene",pkCharFind("איתמר")),
+  mk("אירוע נוער גדול","event",[],"אבי מנוס, מושיקו נבון"),
+  mk("הקלטת משפט של דולב","court",pkCharFind("דולב")),
+  mk("הקלטת משפט של נתי","court",pkCharFind("נתי")),
+  mk("ראיון עם אפרת","interview",pkCharFind("אפרת")),
+  mk("חומרים מהחקירה של הסיפור של נועה והחבר","archive",pkCharFind("נועה")),
+  mk("חומרים מהסיפור של ההימורים","archive",[])
+ ]};
+ if(!editorOpen()) render();
+ save();
+}
+function pkCharsBox(sel){
+ sel=sel||[];
+ return '<div class="pkchars">'+DATA.chars.map(function(c){
+  return '<label><input type="checkbox" name="pkc" value="'+esc(c.k)+'"'+(sel.indexOf(c.k)>-1?" checked":"")+'>'+esc(c.name)+'</label>';
+ }).join("")+'</div>';
+}
+function pkTypeSel(v){
+ return '<select name="type">'+PKTYPES.map(function(p){return '<option value="'+p[0]+'"'+((v||"scene")===p[0]?" selected":"")+'>'+esc(p[1])+'</option>'}).join("")+'</select>';
+}
+function pkForm(x){
+ var h='<div class="grpform tkedit" data-form="__pkedit__">';
+ h+='<div class="f"><label>מה צריך לצלם</label><input name="t" value="'+esc(x.t||"")+'" autocomplete="off"></div>';
+ h+='<div class="row"><div class="f"><label>סוג</label>'+pkTypeSel(x.type)+'</div>';
+ h+='<div class="f"><label>תאריך צילום</label><input name="date" type="date" value="'+esc(x.date||"")+'"></div></div>';
+ h+='<div class="f"><label>מי בצילום</label>'+pkCharsBox(x.chars)+'</div>';
+ h+='<div class="f"><label>פרטים</label><textarea name="note" style="min-height:64px" placeholder="מקום, שעה, מי מצלם, מה חסר בדיוק">'+esc(x.note||"")+'</textarea></div>';
+ h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="pksave" data-id="'+esc(x.k)+'">שמור</button>';
+ h+='<button class="btn ghost" data-act="pkcancel">ביטול</button>';
+ h+='<div class="spacer"></div><button class="btn danger" data-act="pkdel" data-id="'+esc(x.k)+'">מחק</button></div>';
+ return h+'</div>';
+}
+function pkRow(x){
+ if(state.editPk===x.k&&!RO) return '<div class="tkrow edit">'+pkForm(x)+'</div>';
+ var lateX=!x.done&&dparts(x.date)&&daysTo(x.date)<0;
+ var h='<div class="tkrow'+(x.done?" done":"")+(lateX?" late":"")+'">';
+ h+='<button class="tkbox" data-act="pktoggle" data-id="'+esc(x.k)+'" title="'+(x.done?"להחזיר לרשימה":"לסמן שצולם")+'">'+(x.done?"✓":"")+'</button>';
+ h+='<div class="tkmain"><b>'+esc(x.t)+'</b><div class="tktags">';
+ h+='<span class="pktype">'+esc(pkType(x.type))+'</span>';
+ (x.chars||[]).forEach(function(ck){
+  var tc=charOf(ck);
+  if(tc) h+='<span class="dchip sm" style="--cc:'+esc(tc.color||"#455160")+'"><i></i>'+esc(tc.name)+'</span>';
+ });
+ if(x.date) h+='<span'+(lateX?' class="bad"':'')+'>'+esc(dueWhen(x.date))+'</span>';
+ if(x.done&&x.doneBy) h+='<span class="ok">צולם · סימן '+esc(x.doneBy)+'</span>';
+ h+='</div>';
+ if(x.note) h+='<p class="tknote">'+esc(x.note).replace(/\n/g,"<br>")+'</p>';
+ h+='</div>';
+ h+='<div class="pkdatebox"><label>תאריך צילום</label><input type="date" class="pkdate'+(x.date?"":" nodate")+'" data-id="'+esc(x.k)+'" value="'+esc(x.date||"")+'"'+(RO?" disabled":"")+'></div>';
+ if(!RO) h+='<button class="tinyedit" data-act="pkedit" data-id="'+esc(x.k)+'">ערוך</button>';
+ if(!RO) h+='<button class="sdel" data-act="pkdel" data-id="'+esc(x.k)+'" title="מחק">×</button>';
+ return h+'</div>';
+}
+function pickupsView(){
+ var all=PK(), op=all.filter(function(x){return !x.done}), dated=op.filter(function(x){return dparts(x.date)});
+ var by=state.pkBy||"date";
+ var h='<section class="grp"><div class="grp-h"><h2>צילומי השלמה</h2><span class="role">מה עוד חסר לנו מהשטח</span>';
+ h+='<span class="meta">'+op.length+' פתוחים</span></div>';
+ h+='<p class="grp-note">כל מה שעוד צריך לצלם, להקליט או לאסוף. לכל משימה קובעים תאריך צילום ישר מהשורה. לחיצה על העיגול מסמנת שצולם. הרשימה משותפת לכולם, ואפשר להוסיף לה כל הזמן.</p>';
+ if(!RO){
+  h+='<div class="grpform tkform" data-form="__pk__">';
+  h+='<div class="f"><label>מה צריך לצלם</label><input name="t" placeholder="למשל: אלון בבוקר בלשכה, לפני הישיבה" autocomplete="off"></div>';
+  h+='<div class="row"><div class="f"><label>סוג</label>'+pkTypeSel("scene")+'</div>';
+  h+='<div class="f"><label>תאריך צילום</label><input name="date" type="date"></div></div>';
+  h+='<div class="f"><label>מי בצילום</label>'+pkCharsBox([])+'</div>';
+  h+='<div class="f"><label>פרטים</label><input name="note" placeholder="לא חובה" autocomplete="off"></div>';
+  h+='<div class="s-foot" style="border:0;padding:0"><button class="btn" data-act="pkadd">הוסף לרשימה</button></div></div>';
+ }
+ h+='<div class="tkstats">';
+ h+='<div class="dstat"><b>'+op.length+'</b><span>עוד לצלם</span></div>';
+ h+='<div class="dstat"><b>'+dated.length+'</b><span>עם תאריך</span></div>';
+ h+='<div class="dstat"><b>'+(op.length-dated.length)+'</b><span>בלי תאריך</span></div>';
+ h+='<div class="dstat"><b>'+(all.length-op.length)+'</b><span>צולמו</span></div>';
+ h+='</div>';
+ if(!all.length&&pkLastIds&&!STORE.pickups.seeded) setTimeout(function(){ try{pkSeed(pkLastIds)}catch(_){} },0);
+ if(!all.length) return h+'<div class="dempty"><b>הרשימה ריקה</b><p>תכתוב את הצילום הראשון למעלה.</p></div></section>';
+ h+='<div class="pkbar">'+[["date","לפי תאריך"],["type","לפי סוג"],["char","לפי דמות"]].map(function(o){return '<button class="chip" data-act="pkby" data-k="'+o[0]+'" aria-pressed="'+(by===o[0])+'">'+o[1]+'</button>'}).join("")+'</div>';
+ var byDate=function(a,b){
+  var pa=dparts(a.date),pb=dparts(b.date);
+  if(pa&&pb) return pa.t-pb.t;
+  if(pa) return -1; if(pb) return 1;
+  return (a.at||0)-(b.at||0);
+ };
+ var groups=[];
+ if(by==="type"){
+  PKTYPES.forEach(function(p){ var l=op.filter(function(x){return (x.type||"other")===p[0]}); if(l.length) groups.push([p[1],l]) });
+ } else if(by==="char"){
+  DATA.chars.forEach(function(c){ var l=op.filter(function(x){return (x.chars||[]).indexOf(c.k)>-1}); if(l.length) groups.push([c.name,l]) });
+  var nol=op.filter(function(x){return !(x.chars||[]).some(function(k){return charOf(k)})});
+  if(nol.length) groups.push(["בלי דמות",nol]);
+ } else {
+  var dmap={}, dkeys=[];
+  dated.slice().sort(byDate).forEach(function(x){ if(!dmap[x.date]){dmap[x.date]=[];dkeys.push(x.date)} dmap[x.date].push(x) });
+  dkeys.forEach(function(d){ groups.push([dayLabel(d)+" · "+dueWhen(d),dmap[d]]) });
+  var und=op.filter(function(x){return !dparts(x.date)});
+  if(und.length) groups.push(["עוד לא נקבע תאריך",und]);
+ }
+ groups.forEach(function(g){
+  h+='<div class="pkh">'+esc(g[0])+'<em>'+g[1].length+'</em></div><div class="tklist">';
+  g[1].slice().sort(byDate).forEach(function(x){ h+=pkRow(x) });
+  h+='</div>';
+ });
+ var dn=all.filter(function(x){return x.done}).sort(function(a,b){return (b.doneAt||0)-(a.doneAt||0)});
+ if(dn.length){
+  h+='<div class="pkh">צולמו<em>'+dn.length+'</em></div><div class="tklist">';
+  dn.forEach(function(x){ h+=pkRow(x) });
+  h+='</div>';
+ }
+ return h+'</section>';
+}
+
 /* ===== משימות לביצוע ===== */
 function TASKS(){
  if(!STORE.tasks||!STORE.tasks.list) STORE.tasks={list:[]};
@@ -11817,6 +11982,7 @@ function vbtn(k,label){
  var extra="";
  if(k==="chat"){ var cu=chatUnread(); if(cu) extra='<span class="vn">'+cu+'</span>' }
  if(k==="tasks"){ var to=0; try{to=taskOpen().length}catch(_){} if(to) extra='<span class="vn">'+to+'</span>' }
+ if(k==="pickups"){ var po=0; try{po=PK().filter(function(x){return !x.done}).length}catch(_){} if(po) extra='<span class="vn">'+po+'</span>' }
  if(k==="dues"){ var dn=0; try{dn=DUES().filter(function(x){return x.status!=="sent"}).length}catch(_){} if(dn) extra='<span class="vn">'+dn+'</span>' }
  return '<button data-act="group" data-k="'+k+'" aria-pressed="'+(state.group===k)+'">'+esc(label)+extra+'</button>';
 }
@@ -12043,7 +12209,7 @@ function paint(h){
 }
 var pendingRender=false;
 function editorOpen(){
- return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.matEdit||state.editShift||state.lsOpen||
+ return !!(state.editing||state.adding||state.newAt||state.editChar||state.editUnit||state.editLine||state.editDay||state.editDue||state.editMeta||state.nextOpen||state.projOpen||state.projNew||state.bkOpen||state.trLink||state.editTask||state.editPk||state.matEdit||state.editShift||state.lsOpen||
    state.shiftSet||state.crewSet||state.vidOpen||(state.chatDraft||"").trim()||
    (state.mergeSrc!==null&&state.mergeSrc!==undefined)||state.editEp!==null||state.confirmEp!==null||
    !!document.querySelector('[data-form][data-dirty]')||state.evForm||
@@ -12167,13 +12333,14 @@ function rowsOf(){
   Object.keys(STORE.chat||{}).forEach(function(k){ if(STORE.chat[k]&&STORE.chat[k].items) r[rid("chat:"+k)]=STORE.chat[k] });
   if(STORE.dues) r[rid("dues")]=STORE.dues;
   if(STORE.tasks) r[rid("tasks")]=STORE.tasks;
+  if(STORE.pickups) r[rid("pickups")]=STORE.pickups;
   if(STORE.epnotes) r[rid("epnotes")]=STORE.epnotes;
   if(STORE.vidnotes) r[rid("vidnotes")]=STORE.vidnotes;
  }
  return r;
 }
 function applyRows(list,partial){
- var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,tk=null,en=null,vn=null,pr=null,seen=false;
+ var users=null,base=null,layers={},tr={},sh=null,fd=null,ch=null,du=null,tk=null,pk=null,en=null,vn=null,pr=null,seen=false;
  list.forEach(function(row){
   if(row.id==="projects"){pr=row.data;return}
   var sid=stripId(row.id);
@@ -12183,6 +12350,7 @@ function applyRows(list,partial){
   else if(sid==="feed")fd=row.data;
   else if(sid==="dues")du=row.data;
   else if(sid==="tasks")tk=row.data;
+  else if(sid==="pickups")pk=row.data;
   else if(sid==="epnotes")en=row.data;
   else if(sid==="vidnotes")vn=row.data;
   else if(sid.indexOf("dimg:")===0) return;
@@ -12219,6 +12387,7 @@ function applyRows(list,partial){
  if(ch) STORE.chat=ch;
  if(du&&(du.list||du.next)){ du.list=du.list||[]; STORE.dues=du; }
  if(tk&&tk.list) STORE.tasks=tk;
+ if(pk&&pk.list) STORE.pickups=pk;
  if(en&&en.list) STORE.epnotes=en;
  if(vn&&vn.list) STORE.vidnotes=vn;
  return true;
@@ -12284,6 +12453,7 @@ function pull(initial){
        Object.keys(STORE.layers||{}).forEach(function(k){ if(!live[rid("layer:"+k)]) delete STORE.layers[k] });
        Object.keys(STORE.tr||{}).forEach(function(k){ if(!live[rid("tr:"+k)]) delete STORE.tr[k] });
       }catch(_){}
+      try{ pkLastIds=ids; pkSeed(ids) }catch(_){}
       return;
      }
      var part=rest.slice(i,i+4); i+=4;
@@ -12333,7 +12503,7 @@ function guardRow(id,val){
   }catch(_){}
   return true;
  }
- if(sid!=="dues"&&sid!=="tasks"&&sid!=="shifts"&&sid!=="epnotes"&&sid!=="vidnotes"&&String(sid).indexOf("chat:")!==0) return true;
+ if(sid!=="dues"&&sid!=="tasks"&&sid!=="pickups"&&sid!=="shifts"&&sid!=="epnotes"&&sid!=="vidnotes"&&String(sid).indexOf("chat:")!==0) return true;
  if(SHRINKOK[id]) return true;
  var prev=sent[id];
  if(prev===undefined) return true;
@@ -12959,6 +13129,15 @@ function save(){
 }
 document.addEventListener("change",function(e){
  if(evChange(e.target))return;
+ if(e.target&&e.target.classList&&e.target.classList.contains("pkdate")){
+  if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);render();return}
+  if(!state.me){state.showUsers=true;render();return}
+  var _pid=e.target.getAttribute("data-id"), _po=PK().filter(function(x){return x.k===_pid})[0];
+  if(!_po)return;
+  _po.date=e.target.value||"";
+  render();save();toast(_po.date?"נקבע תאריך צילום, "+dayLabel(_po.date):"התאריך הוסר");
+  return;
+ }
  if(e.target&&e.target.classList&&e.target.classList.contains("minetr")){
   state.mineTr=state.mineTr||{};
   state.mineTr[e.target.getAttribute("data-id")]=e.target.checked;
@@ -13148,7 +13327,7 @@ document.addEventListener("click",function(e){
   editline:1,saveline:1,delline:1,epnscadd:1,epnscdel:1,epn2sc:1,addline:1,editday:1,saveday:1,delday:1,addday:1,daycrew:1,dchtog:1,savecrews:1,mgapply:1,mineapply:1,ideasapply:1,linebuild:1,lsadd:1,
   saveunit:1,delunit:1,addunit:1,add:1,newshot:1,newtodo:1,newat:1,useidea:1,delidea:1,addidea:1,
   edit:1,editep:1,addep:1,delepYes:1,brk2sc:1,matsave:1,matdel:1,matsetkind:1,matchar:1,matup:1,matdown:1,mateditsave:1,scup:1,scdown:1,jourchar:1,jourline:1,matother:1,jourother:1,vidlink:1,matunit:1,jourunit:1,editmeta:1,editchar:1,editunit:1,askdel:1,gapdone:1};
- var SHARED={planset:1,schquick:1,schsave:1,schclr:1,schoff:1,schon:1,schonall:1,schclean:1,addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
+ var SHARED={planset:1,schquick:1,schsave:1,schclr:1,schoff:1,schon:1,schonall:1,schclean:1,addshift:1,delshift:1,savesset:1,editshift:1,saveshift:1,cancelshift:1,adddue:1,savedue:1,deldue:1,duecycle:1,addtask:1,tktoggle:1,deltask:1,edittask:1,savetask:1,canceltask:1,pkadd:1,pktoggle:1,pkdel:1,pkedit:1,pksave:1,pkcancel:1,nextsave:1,nextclear:1,trpaste:1,trdel:1,trlinksave:1,trlinkclear:1,hladd:1,hldrop:1,hlclear:1,trtoday:1,epnadd:1,epnsave:1,epndel:1,vnadd:1,vndel:1,projnew:1};
  if(SHARED[act]){
   if(RO){toast("זה עותק צפייה. אי אפשר לערוך כאן",true);return}
   if(!state.me){state.showUsers=true;render();return}
@@ -13953,6 +14132,37 @@ document.addEventListener("click",function(e){
   state.nextOpen=false;render();save();return}
  if(act==="moremenu"){state.moreOpen=!state.moreOpen;render();return}
  if(act==="qclear"){state.q="";state.qFocus=false;render();return}
+ if(act==="pkfocus"){var _pi=document.querySelector('[data-form="__pk__"] input[name="t"]');if(_pi){_pi.focus();_pi.scrollIntoView({block:"center",behavior:"smooth"})}return}
+ if(act==="pkby"){state.pkBy=b.getAttribute("data-k")||"date";render();return}
+ if(act==="pkadd"){
+  var pt=fval("__pk__","t").trim();
+  if(!pt){toast("תכתוב מה צריך לצלם",true);return}
+  PK().push({k:"p"+Date.now()+"_"+Math.floor(Math.random()*999),t:pt,
+   type:fval("__pk__","type")||"other", chars:pkChecked("__pk__"),
+   date:fval("__pk__","date"), note:fval("__pk__","note").trim(),
+   done:false, at:Date.now(), by:userName(state.me)});
+  render();save();toast("נוסף לצילומי ההשלמה");return}
+ if(act==="pkedit"){state.editPk=id;render();return}
+ if(act==="pkcancel"){state.editPk=null;render();return}
+ if(act==="pksave"){
+  var pe=PK().filter(function(x){return x.k===id})[0];
+  if(!pe){state.editPk=null;render();return}
+  var pnt=fval("__pkedit__","t").trim();
+  if(!pnt){toast("צריך לכתוב מה מצלמים",true);return}
+  pe.t=pnt; pe.type=fval("__pkedit__","type")||"other"; pe.chars=pkChecked("__pkedit__");
+  pe.date=fval("__pkedit__","date"); pe.note=fval("__pkedit__","note").trim();
+  state.editPk=null;render();save();toast("עודכן");return}
+ if(act==="pktoggle"){
+  var px=PK().filter(function(x){return x.k===id})[0];
+  if(!px)return;
+  px.done=!px.done;
+  if(px.done){ px.doneAt=Date.now(); px.doneBy=userName(state.me); if(!px.date) px.date=todayISO() } else { px.doneAt=0; px.doneBy="" }
+  render();save();toast(px.done?"סומן שצולם":"חזר לרשימה");return}
+ if(act==="pkdel"){
+  try{bkTouch(true)}catch(_){}
+  SHRINKOK[rid("pickups")]=1; setTimeout(function(){delete SHRINKOK[rid("pickups")]},4000);
+  STORE.pickups.list=PK().filter(function(x){return x.k!==id});
+  state.editPk=null;render();save();toast("נמחק");return}
  if(act==="addtask"){
   var tt=fval("__task__","t").trim();
   if(!tt){toast("תכתוב מה צריך לעשות",true);return}
@@ -14704,7 +14914,7 @@ function cacheSave(){
   try{
    localStorage.setItem(CACHEKEY,JSON.stringify({at:Date.now(),store:{
     users:STORE.users, base:STORE.base, layers:STORE.layers,
-    shifts:STORE.shifts, dues:STORE.dues, tasks:STORE.tasks,
+    shifts:STORE.shifts, dues:STORE.dues, tasks:STORE.tasks, pickups:STORE.pickups,
     epnotes:STORE.epnotes, vidnotes:STORE.vidnotes, projects:STORE.projects
    }}));
   }catch(_){ try{ localStorage.removeItem(CACHEKEY) }catch(__){} }
