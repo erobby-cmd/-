@@ -11661,11 +11661,12 @@ function pkCharFind(){
 var pkLastIds=null;
 function pkSeed(ids){
  if(!ids||RO||pfx()) return;
+ if(STORE.pickups&&STORE.pickups.seeded) return;
  if(ids.indexOf(rid("pickups"))>-1) return;
  if(STORE.pickups&&STORE.pickups.list&&STORE.pickups.list.length) return;
  if(!state.me) return;
  var n=0, mk=function(t,type,chars,note){ n++; return {k:"p"+Date.now()+"_"+n,t:t,type:type,chars:chars,date:"",note:note||"",done:false,at:Date.now()+n,by:userName(state.me)} };
- STORE.pickups={list:[
+ STORE.pickups={seeded:true,list:[
   mk("ראיון עם אלון, המפקד החדש בעיר. ההגעה מירושלים לאילת","interview",pkCharFind("אלון")),
   mk("סצנה של אלון בשטח","scene",pkCharFind("אלון")),
   mk("שחר ואשתו עם הילדים בבית","home",pkCharFind("שחר")),
