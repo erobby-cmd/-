@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0C6B75">
-<meta name="build" content="2026-11-13T08:45:00Z">
+<meta name="build" content="2026-11-13T08:50:00Z">
 <title>יומן עבודה מרחב אילת - הפקה, תוכן, עריכה</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&family=Heebo:wght@400;500;700&display=swap">
 <style id="app-style">
@@ -9095,7 +9095,7 @@ function needView(){
  var open=openScenes();
  var mins=open.reduce(function(a,s){return a+(Number(s.min)||0)},0);
  var partial=open.filter(function(s){return s.status==="partial"}).length;
- var h='<section class="grp"><div class="grp-h"><h2>צריך לצלם</h2><span class="role">כל מה שעוד לא בקופסה</span>';
+ var h='<section class="grp"><div class="grp-h"><h2>צילומים</h2><span class="role">כל מה שעוד לא בקופסה</span>';
  h+='<span class="meta">'+open.length+' סצנות</span></div>';
  h+='<p class="grp-note">הרשימה הפתוחה של הסדרה. כל סצנה שסומנה לצילום או חלקית, עם מה שחסר בה כדי לסגור אותה. אפשר להסתכל על זה לפי דמות, לפי ליין או לפי פרק, תלוי איך אתה מתכנן את יום הצילום הבא.</p>';
  if(!open.length){
@@ -10829,7 +10829,7 @@ function vgOf(k){
  return "";
 }
 var CATS=[
- {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צריך לצלם"],["pickups","צילומי השלמה"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
+ {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צילומים"],["pickups","צילומי השלמה"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["pickups","צילומי השלמה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
  {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["editideas","רעיונות לעריכה"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
