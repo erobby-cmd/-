@@ -4366,6 +4366,13 @@ function render(){
   paint(h);
   return;
  }
+ if(state.group==="editor"){
+  h+=editorAiView();
+  h+='</div><div class="toast" id="toast"></div>';
+  paint(h);
+  if(window.EditorPanel) window.EditorPanel.ping(function(ok,n){ var d=document.getElementById("eai-dot"),t=document.getElementById("eai-st"); if(d) d.style.background=ok?"#2e9b57":"#c0392b"; if(t) t.textContent=ok?("מחובר ומוכן. "+n+" קליפים בספרייה"):"השירות כבוי. הפעל את האייקון EditorTwin AI בדוק"; });
+  return;
+ }
  if(state.group==="editideas"){
   h+=editIdeasView();
   h+='</div><div class="toast" id="toast"></div>';
@@ -6053,6 +6060,17 @@ function parseEditIdeas(txt){
   res.made++;
  });
  return res;
+}
+function editorAiView(){
+ var ex=["תבנה לי פתיחה של פרק 1 מרגעים אנושיים של השוטרים","תמצא לי את כל הרגעים של שחר ונועה ותבנה סצנה","תבנה לי 90 שניות על המתח בין המפקד לשוטרים הצעירים","תחתוך לי חיבור בין שני ימי צילום על אותה דמות"];
+ var h='<section class="grp eai"><style>.eai-hero{margin-top:18px;border:2px solid var(--accent);border-radius:16px;padding:26px 28px;background:linear-gradient(135deg,var(--surface),var(--bg));box-shadow:0 8px 26px rgba(0,0,0,.08)}.eai-hero h2{margin:0 0 6px;font-size:30px}.eai-hero p{margin:6px 0;max-width:68ch;color:var(--ink-2)}.eai-go{margin-top:14px;font:800 18px Heebo,sans-serif;padding:14px 30px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink,#fff);cursor:pointer}.eai-st{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px}.eai-dot{width:11px;height:11px;border-radius:50%;background:#999;display:inline-block}.eai-ex{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.eai-ex button{border:1px solid var(--line,#bbb);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font:600 13.5px Heebo,sans-serif}.eai-ex button:hover{border-color:var(--accent)}</style>';
+ h+='<div class="eai-hero"><h2>🎬 עורך AI</h2>';
+ h+='<p>עורך דוקו שמכיר את כל ימי הצילום, התמלולים והסגנון שלך. נותנים לו הנחיה, והוא בונה סיקוונס, מסביר את המהלך, ומוציא AAF לאביד יחד עם תרגום עברי נקי.</p>';
+ h+='<p>הוא לומד מהאסמבלים שלך ושל גבי, ומהעריכה החיה שלך באביד.</p>';
+ h+='<button class="eai-go" data-act="eai-open">פתח את העורך</button>';
+ h+='<div class="eai-st"><span class="eai-dot" id="eai-dot"></span><span id="eai-st">בודק חיבור...</span></div>';
+ h+='<div class="eai-ex">'+ex.map(function(t){return '<button data-act="eai-ask" data-q="'+esc(t)+'">'+esc(t)+'</button>'}).join("")+'</div></div></section>';
+ return h;
 }
 function editIdeasView(){
  var h='<section class="grp"><div class="grp-h"><h2>רעיונות לעריכה</h2><span class="role">עורך שקורא הכל ומציע סיקוונסים, מהלכים לפרקים וחיבורים</span></div>';
@@ -10831,7 +10849,7 @@ function vgOf(k){
 var CATS=[
  {k:"prod",name:"הפקה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["need","צילומים"],["pickups","צילומי השלמה"],["tasks","משימות לביצוע"],["dclock","שעון ימי צילום"],["shifts","שעון משמרות"]]},
  {k:"story",name:"תוכן",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["pickups","צילומי השלמה"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["shelf","אחסון"],["g:scenes","סצנות"]]},
- {k:"post",name:"עריכה",views:[["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["editideas","רעיונות לעריכה"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
+ {k:"post",name:"עריכה",views:[["editor","🎬 עורך AI"],["days","לוג ימי צילום"],["mat","רשימת הסצנות"],["lines","מפת הליינים"],["board","מפת הפרקים"],["events","מפת אירועים"],["editideas","רעיונות לעריכה"],["shelf","אחסון"],["shifts","שעון משמרות"],["g:scenes","סצנות"]]},
  {k:"tr",name:"תמלולים",views:[["tr","תמלולים"]]},
  {k:"dues",name:"לוח הגשות",hide:1,views:[["dues","לוח הגשות"]]},
  {k:"chat",name:"צ׳אט",views:[["chat","צ׳אט"]]}
@@ -13379,6 +13397,8 @@ document.addEventListener("click",function(e){
   state.cat=ck;
   state.group=(want&&catHas(ck,want))?want:co.views[0][0];
   render();return}
+ if(act==="eai-open"){ if(window.EditorPanel) window.EditorPanel.open(""); return }
+ if(act==="eai-ask"){ if(window.EditorPanel) window.EditorPanel.open(b.getAttribute("data-q")||""); return }
  if(act==="buildedit"){
   state.edExtra=fval("__ed__","extra");
   state.edText=editBrief((state.edExtra||"").trim());

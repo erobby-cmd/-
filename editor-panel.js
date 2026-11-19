@@ -151,6 +151,10 @@ function doSend(){
 }
 
 fab.onclick=function(){ S.open=true; draw(); ping(); ta.focus(); };
+window.EditorPanel={
+  open:function(q){ S.open=true; draw(); ping(); if(q){ ta.value=q; } ta.focus(); },
+  ping:function(cb){ api("/health").then(function(j){ cb(!!j.ok,j.clips||0); }).catch(function(){ cb(false,0); }); }
+};
 x.onclick=function(){ S.open=false; draw(); };
 send.onclick=doSend;
 ta.addEventListener("keydown",function(e){ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); doSend(); } });
