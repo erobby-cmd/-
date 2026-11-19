@@ -6943,15 +6943,15 @@ function cueBase(d,fi,raw){
  return Math.min(fileBase(d,fi),Math.max(0,fileEnd(d,fi)-span));
 }
 var SRTMAP={
- "Day01 group.mp4":"day01.srt",
- "Day02_for_editor_2.5GB.mov":"day02.srt",
- "Day03_for_editor_TC_2.5GB.mov":"day03.srt",
- "Day04_for_editor_TC_2.5GB.mov":"day04.srt",
- "Day05_for_editor_TC_2.5GB.mov":"day05.srt",
- "Day6.mov":"day06.srt",
- "Day7.mov":"day07.srt",
- "Day8.mov":"day08.srt",
- "Day09-200826_With Hanan.Exported.01.mp4":"day09.srt"
+ "Day01 group.mp4":"subs/day01.srt",
+ "Day02_for_editor_2.5GB.mov":"subs/day02.srt",
+ "Day03_for_editor_TC_2.5GB.mov":"subs/day03.srt",
+ "Day04_for_editor_TC_2.5GB.mov":"subs/day04.srt",
+ "Day05_for_editor_TC_2.5GB.mov":"subs/day05.srt",
+ "Day6.mov":"subs/day06.srt",
+ "Day7.mov":"subs/day07.srt",
+ "Day8.mov":"subs/day08.srt",
+ "Day09-200826_With Hanan.Exported.01.mp4":"subs/day09.srt"
 };
 var SRTRAW={}, srtBusy={};
 var SRTDB={}, srtDbBusy={};
@@ -6986,7 +6986,7 @@ function srtDbDel(dk,fi){
 function srtUrlOf(d,fi){
  var ids=driveIdsOf(d)||[], nm=driveNameOf(ids[fi]||"");
  if(nm&&SRTMAP[nm]) return SRTMAP[nm];
- if(d&&d.srt) return d.srt;
+ if(d&&d.srt) return /^day\d+\.srt$/.test(d.srt)?"subs/"+d.srt:d.srt;
  return "";
 }
 function srtCues(d,fi){
