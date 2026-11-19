@@ -13397,8 +13397,8 @@ document.addEventListener("click",function(e){
   state.cat=ck;
   state.group=(want&&catHas(ck,want))?want:co.views[0][0];
   render();return}
- if(act==="eai-open"){ if(window.EditorPanel) window.EditorPanel.open(""); return }
- if(act==="eai-ask"){ if(window.EditorPanel) window.EditorPanel.open(b.getAttribute("data-q")||""); return }
+ if(act==="eai-open"){ if(window.EditorPanel) window.EditorPanel.open(""); else { var _f=document.querySelector(".et-fab"); if(_f) _f.click(); } return }
+ if(act==="eai-ask"){ if(window.EditorPanel) window.EditorPanel.open(b.getAttribute("data-q")||""); else { var _f2=document.querySelector(".et-fab"); if(_f2) _f2.click(); var _t=document.querySelector("[class*=et-] textarea"); if(_t) _t.value=b.getAttribute("data-q")||""; } return }
  if(act==="buildedit"){
   state.edExtra=fval("__ed__","extra");
   state.edText=editBrief((state.edExtra||"").trim());
@@ -15023,6 +15023,6 @@ pull(true).then(function(n){
 })();
 </script>
 
-<script src="editor-panel.js" defer></script>
+<script src="editor-panel.js?v=3" defer></script>
 </body>
 </html>
