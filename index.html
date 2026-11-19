@@ -12245,7 +12245,26 @@ function redo(){
 }
 var SNAPDATE="";
 
-var SB_URL="https://auhzumbvgjmwggurgkzn.supabase.co", SB_KEY="sb_publishable_FcWBT2i9cIU-JIuVWfoQRg_DRV99Scn", GATE="";
+/* ===== שכבת תאימות לשרת D1: כל כתיבה נשלחת שורה לבקשה, כטקסט JSON גולמי, כדי שהשרת לא יפענח כלום (10ms מעבד בתוכנית החינמית) ===== */
+(function(){
+ var _f=window.fetch.bind(window);
+ window.fetch=function(u,o){
+  if(o&&o.method==="POST"&&typeof u==="string"&&u.indexOf("/rest/v1/docs")>-1&&typeof o.body==="string"){
+   var rows=JSON.parse(o.body); if(!Array.isArray(rows)) rows=[rows];
+   var base=u.split("?")[0], hdr=Object.assign({},o.headers); delete hdr["Prefer"];
+   var i=0;
+   var next=function(){
+    if(i>=rows.length) return Promise.resolve(new Response(null,{status:201}));
+    var r=rows[i++];
+    return _f(base+"?id=eq."+encodeURIComponent(r.id),{method:"PUT",headers:Object.assign({},hdr,{"X-Updated-At":r.updated_at||new Date().toISOString()}),body:JSON.stringify(r.data)})
+     .then(function(res){ return res.ok?next():res });
+   };
+   return next();
+  }
+  return _f(u,o);
+ };
+})();
+var SB_URL="https://yoman-api.yudale.workers.dev", SB_KEY="fb19a071b6ebe711372dca955a49b8ea11169eb10ee02b13", GATE="";
 var REST=SB_URL.replace(/\/+$/,"")+"/rest/v1/docs";
 var HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
 var sent={}, netState="idle", pollT=null, lastPull=0, pulling=false, pulledOnce=false;
