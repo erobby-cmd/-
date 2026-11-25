@@ -1,4 +1,5 @@
 import { config } from "./config.js";
+import { estimateDevBuySol } from "./launch.js";
 import { handlePost } from "./pipeline.js";
 import { store } from "./state.js";
 import { fetchNewPosts } from "./x.js";
@@ -19,6 +20,7 @@ async function tick() {
 }
 
 console.log(`Elon coin bot | DRY_RUN=${config.dryRun} | poll every ${config.pollSeconds}s`);
+console.log(`Keeping ${config.devBuyPercent}% of every coin ≈ ${estimateDevBuySol().toFixed(2)} SOL per launch`);
 for (;;) {
   try {
     await tick();

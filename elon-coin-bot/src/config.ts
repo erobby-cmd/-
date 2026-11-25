@@ -29,8 +29,9 @@ export const config = {
   dryRun: bool(process.env.DRY_RUN, true),
   rpcUrl: process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com",
   walletSecret: process.env.WALLET_PRIVATE_KEY, // base58
-  devBuySol: Number(process.env.DEV_BUY_SOL ?? 0.01),
+  // Share of each coin's 1B supply the bot buys for you at launch (pump.fun max is ~79%)
+  devBuyPercent: Number(process.env.DEV_BUY_PERCENT ?? 10),
   slippage: Number(process.env.SLIPPAGE ?? 10),
   priorityFee: Number(process.env.PRIORITY_FEE ?? 0.0005),
-  maxSolPerDay: Number(process.env.MAX_SOL_PER_DAY ?? 0.5),
+  maxSolPerDay: Number(process.env.MAX_SOL_PER_DAY ?? 10),
 };

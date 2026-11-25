@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { analyzePost } from "./analyze.js";
 import { config } from "./config.js";
 import { coinImage } from "./image.js";
-import { launchCoin } from "./launch.js";
+import { estimateDevBuySol, launchCoin } from "./launch.js";
 import { store } from "./state.js";
 import { announce, type Post } from "./x.js";
 
@@ -21,7 +21,7 @@ export async function handlePost(post: Post) {
     .slice(0, config.maxCoinsPerPost);
 
   for (const coin of picks) {
-    const cost = config.devBuySol + 0.03; // dev buy + fees, rough
+    const cost = estimateDevBuySol() + 0.03; // dev buy + network/creation fees, rough
     if (!config.dryRun && store.spentToday() + cost > config.maxSolPerDay) {
       console.warn(`  daily SOL limit reached, skipping ${coin.word}`);
       break;
