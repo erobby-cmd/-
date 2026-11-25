@@ -3,6 +3,7 @@ import { analyzePost } from "./analyze.js";
 import { config } from "./config.js";
 import { coinImage } from "./image.js";
 import { estimateDevBuySol, launchCoin } from "./launch.js";
+import { pictureFor, type Picture } from "./picture.js";
 import { store } from "./state.js";
 import { announce, type Post } from "./x.js";
 
@@ -20,6 +21,12 @@ export async function handlePost(post: Post) {
     .sort((a, b) => b.importance - a.importance)
     .slice(0, config.maxCoinsPerPost);
 
+  let picture: Picture | undefined;
+  if (picks.length) {
+    picture = await pictureFor(post);
+    console.log(`  picture: ${picture.source}`);
+  }
+
   for (const coin of picks) {
     const cost = estimateDevBuySol() + 0.03; // dev buy + network/creation fees, rough
     if (!config.dryRun && store.spentToday() + cost > config.maxSolPerDay) {
@@ -27,7 +34,7 @@ export async function handlePost(post: Post) {
       break;
     }
     const ticker = coin.ticker.replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, 10) || "ELON";
-    const image = coinImage(coin.word, ticker);
+    const image = coinImage(coin.word, ticker, picture);
     fs.mkdirSync("out", { recursive: true });
     fs.writeFileSync(`out/${ticker}-${post.id}.png`, image);
 

@@ -7,6 +7,8 @@ export interface Post {
   id: string;
   text: string;
   url: string;
+  createdAt?: string;
+  photoUrl?: string; // first photo (or video thumbnail) attached to the post
 }
 
 /** New original posts (no replies, no reposts) since the last seen id, oldest first. */
@@ -15,15 +17,23 @@ export async function fetchNewPosts(sinceId?: string): Promise<Post[]> {
     since_id: sinceId,
     max_results: sinceId ? 20 : 5,
     exclude: ["replies", "retweets"],
-    "tweet.fields": ["created_at", "note_tweet"],
+    "tweet.fields": ["created_at", "note_tweet", "attachments"],
+    expansions: ["attachments.media_keys"],
+    "media.fields": ["type", "url", "preview_image_url"],
   });
+  const media = new Map((res.data.includes?.media ?? []).map((m) => [m.media_key, m]));
   const tweets = res.data.data ?? [];
   return tweets
-    .map((t) => ({
-      id: t.id,
-      text: (t as { note_tweet?: { text: string } }).note_tweet?.text ?? t.text,
-      url: `https://x.com/elonmusk/status/${t.id}`,
-    }))
+    .map((t) => {
+      const first = (t.attachments?.media_keys ?? []).map((k) => media.get(k)).find(Boolean);
+      return {
+        id: t.id,
+        text: (t as { note_tweet?: { text: string } }).note_tweet?.text ?? t.text,
+        url: `https://x.com/elonmusk/status/${t.id}`,
+        createdAt: t.created_at,
+        photoUrl: first?.type === "photo" ? first.url : first?.preview_image_url,
+      };
+    })
     .reverse();
 }
 
