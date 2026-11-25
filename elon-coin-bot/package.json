@@ -1,0 +1,29 @@
+{
+  "name": "elon-coin-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Watches Elon Musk's X posts and launches a Solana coin for every important word",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "test-post": "tsx src/try.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@solana/web3.js": "^1.98.4",
+    "bs58": "^6.0.0",
+    "dotenv": "^18.0.10",
+    "twitter-api-v2": "^1.31.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.10",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
